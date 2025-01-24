@@ -1,0 +1,5 @@
+.. ### NCS shortcuts
+
+.. |NCS| replace:: nRF Connect SDK
+.. |VSC| replace:: Visual Studio Code
+.. |nRFVSC| replace:: nRF Connect for VS Code extension

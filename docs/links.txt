@@ -1,0 +1,11 @@
+.. ### This page lists links used in the NCS door lock reference applications docs.
+
+
+.. ### Source: github.com
+
+       TBA
+
+.. ### Source: docs.nordicsemi.com
+       Requires manual update to align it with the NCS version.
+
+       TBA
