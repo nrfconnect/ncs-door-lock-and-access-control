@@ -1,2 +1,2 @@
-# ncs-aliro-app
-NCS manifest repo for the Aliro reference application
+# ncs-door-lock-app
+NCS manifest repo for the door lock reference application
