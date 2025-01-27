@@ -1,0 +1,15 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menu "Zephyr"
+source "Kconfig.zephyr"
+endmenu
+
+module = NCS_NFC_READER_SAMPLE
+module-str = NCS_NFC_READER_SAMPLE
+module-dep = LOG
+module-help = Enables application log messages.
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"

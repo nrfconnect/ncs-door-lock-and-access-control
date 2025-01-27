@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig NFC_DRIVER_STM
+	bool "ST25R series device driver"
+
+if NFC_DRIVER_STM
+
+rsource "Kconfig.shield"
+
+config ST25R3911_DRV
+	bool "NFC ST25R3911 driver"
+	default y if X_NUCLEO_NFC05A1
+	select SPI
+
+module = NFC
+module-str = NFC_DRV
+module-dep = LOG
+module-help = Enables driver log messages.
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+
+endif # NFC_DRIVER_STM

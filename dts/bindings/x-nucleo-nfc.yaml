@@ -1,0 +1,29 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+description: |
+    STMicroelectronics ST25R NFC readers
+
+compatible: "x-nucleo-nfc"
+
+include: spi-device.yaml
+
+properties:
+    irq-gpios:
+      type: phandle-array
+      required: true
+
+    led-nfca-gpios:
+      type: phandle-array
+      required: false
+
+    led-nfcb-gpios:
+      type: phandle-array
+      required: false
+
+    led-nfcf-gpios:
+      type: phandle-array
+      required: false

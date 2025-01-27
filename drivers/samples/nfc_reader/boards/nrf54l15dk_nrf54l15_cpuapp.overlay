@@ -5,7 +5,7 @@
  */
 
 /{
-	/* For convenience disable buttons for now to avoid collision with interrupt and SCK pins for NFC tag reader. */
+	/* Disable buttons to avoid collision with interrupt and SCK pins for NFC tag reader. */
 	/delete-node/ buttons;
 
 	aliases {
@@ -13,23 +13,6 @@
 		/delete-property/ sw1;
 		/delete-property/ sw2;
 		/delete-property/ sw3;
-	};
-};
-
-&spi21 {
-	compatible = "nordic,nrf-spim";
-	status = "okay";
-	cs-gpios = <&gpio2 8 GPIO_ACTIVE_LOW>;
-
-	pinctrl-0 = <&spi21_default>;
-	pinctrl-1 = <&spi21_sleep>;
-	pinctrl-names = "default", "sleep";
-	st25r3911b@0 {
-		compatible = "st,st25r3911b";
-		reg = <0>;
-		spi-max-frequency = <DT_FREQ_M(4)>;
-		irq-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
-		led-nfca-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
 	};
 };
 
@@ -52,10 +35,38 @@
 	};
 };
 
+&spi21 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	cs-gpios = <&gpio2 8 GPIO_ACTIVE_LOW>;
+
+	pinctrl-0 = <&spi21_default>;
+	pinctrl-1 = <&spi21_sleep>;
+	pinctrl-names = "default", "sleep";
+	nucleo_nfc@0 {
+		compatible = "x-nucleo-nfc";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(4)>;
+		irq-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+	};
+};
+
 / {
 	nfc_power_switch: nfc_power_switch {
 		status = "okay";
 		compatible = "nfc-power-control";
 		gpios = <&gpio2 6 ( GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN )>;
 	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
 };
