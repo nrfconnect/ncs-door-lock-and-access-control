@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+description: GPIO pin to switch a NFC tag on or off
+
+compatible: "nfc-power-control"
+
+include: base.yaml
+
+properties:
+  gpios:
+    type: phandle-array
+    required: true
+    description: |
+      The GPIO connected to the gate driver for the MOSFET on the PCA64176.

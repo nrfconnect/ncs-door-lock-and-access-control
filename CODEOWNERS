@@ -1,0 +1,13 @@
+# CODEOWNERS for auto-review assigning in GitHub
+# https://help.github.com/en/articles/about-code-owners#codeowners-syntax
+
+/app                                      @markaj-nordic @MarGasiorek
+/nfc_driver                               @markaj-nordic @MarGasiorek
+/zephyr                                   @markaj-nordic @MarGasiorek
+/.clang-format                            @markaj-nordic @MarGasiorek
+/.gitignore                               @markaj-nordic @MarGasiorek
+/CMakeLists.txt                           @markaj-nordic @MarGasiorek
+/CODEOWNERS                               @markaj-nordic
+/Kconfig                                  @markaj-nordic @MarGasiorek
+/README.md                                @markaj-nordic @MarGasiorek
+/west.yml                                 @markaj-nordic @MarGasiorek

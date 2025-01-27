@@ -1,0 +1,13 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+name: ncs-door-lock-app
+build:
+  kconfig: Kconfig
+  cmake: .
+  settings:
+    board_root: .
+    dts_root: .

@@ -5,10 +5,10 @@
 #
 
 cmake_minimum_required(VERSION 3.20.0)
-
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(door-lock-app)
 
-FILE(GLOB app_sources src/*.cpp)
+project(ncs-nfc-reader-sample)
 
-target_sources(app PRIVATE ${app_sources})
+target_sources(app PRIVATE
+    src/main.c
+)
