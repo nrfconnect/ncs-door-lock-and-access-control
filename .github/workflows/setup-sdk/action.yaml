@@ -1,0 +1,94 @@
+# This action configures NCS-SDK to allow NCS Aliro building and testing
+# NCS OS requirements are described in:
+#   https://docs.nordicsemi.com/bundle/ncs-latest/page/zephyr/develop/getting_started/index.html#getting-started
+
+name: NCS Setup
+description: "Configure environment to build and test NCS-Aliro project"
+
+inputs:
+  toolchain_manager_version:
+    required: true
+  nrf_util_url:
+    required: true
+  ncs_sdk_version:
+    required: true
+  apt_packages_id:
+    required: true
+    default: 1.0
+  ssh_private_key:
+    required: false
+    description: If west manifest refers to a repository by SSH this must be provided
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set Project Parent Path
+      run: |
+        echo "WORKSPACE_PARENT=$(dirname ${{ github.workspace }})" >> $GITHUB_ENV
+        echo "WORKSPACE_NAME=$(basename ${{ github.workspace }})" >> $GITHUB_ENV
+      shell: bash
+    
+    # If west manifest file contains project url-base which uses SSH this step must be performed.
+    #   1. Create a pair of SSH keys at any location: 'ssh-keygen -t rsa -f gh_action_key'. !!! Use '-f' option to avoid overwriting your default ssh keys !!!
+    #   2. Provide content of generated gh_action_key.pub key to GitHub project: https://github.com/settings/keys -> "SSH and GPG keys"
+    #   3. Provide content of private key 'gh_action_key' as a Secret Variable with name 'SSH_PRIVATE_KEY' under desired repository: https://github.com/<project>/<repository>/settings/secrets/actions
+    - uses: webfactory/ssh-agent@v0.9.0
+      # Run this step only if ssh_private_key was provided on input of this composite action
+      if: ${{ inputs.ssh_private_key != '' }}
+      with:
+        ssh-private-key: ${{ inputs.ssh_private_key }}
+
+    - name: Install APT packages
+      run: |
+        sudo apt install -y gcc-multilib g++-multilib
+      shell: bash
+
+    - name: Cache nrfutil, toolchain-manager
+      id: nrf-cache
+      if: always()
+      uses: actions/cache@v4.2.0
+      with:
+        path: |
+          /home/runner/.local/bin/nrfutil
+          /home/runner/.nrfutil
+          /home/runner/ncs
+        key: nrfutil-ncs-${{ inputs.nrf_util_url }} NCS_SDK_VERSION=${{ inputs.ncs_sdk_version }} TOOLCHAIN_MANAGER_VERSION=${{ inputs.toolchain_manager_version }}
+
+    - name: Cache west workspace
+      id: west-cache
+      if: always()
+      uses: actions/cache@v4.2.0
+      with:
+        # Exclude repository directory itself with '!' expression.
+        # Beware of a bug: https://github.com/actions/toolkit/issues/713 (solution is to use '*' appropriately in path to be included)
+        path: |
+          ${{ env.WORKSPACE_PARENT }}/*
+          !${{ env.WORKSPACE_PARENT }}/${{ env.WORKSPACE_NAME }}
+        # Any change in west.yml will force to run 'west init' step again, new cache will be created
+        key: ${{ runner.os }}-west-${{ hashFiles(format('{0}/west.yml', github.workspace)) }}
+
+    - name: Install nrfutil, toolchain-manager
+      if: steps.nrf-cache.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p $HOME/.local/bin
+        wget -nv ${{ inputs.nrf_util_url }} -O $HOME/.local/bin/nrfutil && chmod +x $HOME/.local/bin/nrfutil
+        nrfutil install toolchain-manager=${{ inputs.toolchain_manager_version }} && chmod +777 $HOME/.nrfutil
+        nrfutil toolchain-manager install --ncs-version ${{ inputs.ncs_sdk_version }}
+      shell: bash
+
+    - name: West init, west update
+      if: steps.west-cache.outputs.cache-hit != 'true'
+      run: |
+        nrfutil toolchain-manager launch west init -- -l --mf west.yml
+        nrfutil toolchain-manager launch west update -- --narrow -o=--depth=1
+      shell: bash
+
+    - name: West update on cache hit
+      if: steps.west-cache.outputs.cache-hit == 'true'
+      run: |
+        nrfutil toolchain-manager launch west update -- --narrow -o=--depth=1
+      shell: bash
