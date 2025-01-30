@@ -9,12 +9,25 @@ menuconfig NFC_DRIVER_STM
 
 if NFC_DRIVER_STM
 
-rsource "Kconfig.shield"
+rsource "Kconfig.defconfig"
+
+choice
+	prompt "Select ST25R driver"
+	default ST25R200_DRV
 
 config ST25R3911_DRV
 	bool "NFC ST25R3911 driver"
-	default y if X_NUCLEO_NFC05A1
-	select SPI
+
+config ST25R3916_DRV
+	bool "NFC ST25R3916 driver"
+
+config ST25R3916B_DRV
+	bool "NFC ST25R3916B driver"
+
+config ST25R200_DRV
+	bool "NFC ST25R200/ST25R100 driver"
+
+endchoice
 
 module = NFC
 module-str = NFC_DRV
