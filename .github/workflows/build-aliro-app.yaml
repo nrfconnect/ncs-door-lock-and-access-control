@@ -1,0 +1,20 @@
+name: Build Aliro Application
+
+on:
+  workflow_dispatch:
+    inputs:
+      ssh_p_key:
+        required: true
+        description: SSH private key (!! DO NOT use your real keys !!, generate SSH keys specifically for this purpose)
+        type: string
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    build:
+      uses: nrfconnect/ncs-aliro/.github/workflows/build-aliro.yaml@13ba52a35b5d124660f159984052d4db5b3d32e7
+      with:
+        aliro_app_folder: app
+        ssh_p_key: ${{ inputs.ssh_p_key || secrets.PRIVATE_SSH_KEY }}
+      secrets: inherit
