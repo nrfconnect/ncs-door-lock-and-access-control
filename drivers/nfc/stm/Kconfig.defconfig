@@ -4,8 +4,5 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-config X_NUCLEO_NFC05A1
-	def_bool $(shields_list_contains, x_nucleo_nfc05a1)
-
 config SPI
 	default y
