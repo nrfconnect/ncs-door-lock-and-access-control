@@ -3,9 +3,45 @@
 
 .. ### Source: github.com
 
-       TBA
+.. _`ncs-door-lock-app`: https://github.com/nrfconnect/ncs-door-lock-app
+.. _`ncs-aliro`: https://github.com/nrfconnect/ncs-aliro
+.. _`Aliro Certification Tool`: https://github.com/csa-access-control/aliro-certification-tool
+.. _`test harness hardware requirements`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#requirements
 
 .. ### Source: docs.nordicsemi.com
        Requires manual update to align it with the NCS version.
 
-       TBA
+.. ### ========================= nRF Connect SDK - v2.9.0 =========================
+
+.. _`Installing the nRF Connect SDK`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/installation/install_ncs.html
+.. _`Get the nRF Connect SDK code`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/installation/install_ncs.html#get_the_nrf_connect_sdk_code
+
+.. _`West`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/dev_model_and_contributions/code_base.html#ncs-west-intro
+
+.. _`nRF54L15 DK`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/boards/nordic/nrf54l15dk/doc/index.html#nrf54l15dk-nrf54l15
+.. _`nrf54l15dk`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/app_dev/device_guides/nrf54l/index.html
+
+.. _`Testing and optimization`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/test_and_optimize.html
+
+.. #### Development-Tools
+
+.. _`nRF Connect Board Configurator`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/index.html
+.. _`Installing Board Configurator app`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/installing.html
+.. _`Updating the board configuration`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/updating.html
+
+.. ### Boards and IC documentation links
+
+.. _`X-NUCLEO-NFC09A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc09a1.html
+.. _`ST25R100`: https://www.st.com/en/nfc/st25r100.html
+.. _`X-NUCLEO-NFC08A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc08a1.html
+.. _`ST25R3916B`: https://www.st.com/en/nfc/st25r3916b.html
+.. _`X-NUCLEO-NFC05A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc05a1.html
+.. _`ST25R3911B`: https://www.st.com/en/nfc/st25r3911b.html
+
+.. _`OM27160B1EVK`: https://www.nxp.com/part/OM27160B1EVK
+.. _`OM27160A1EVK`: https://www.nxp.com/part/OM27160A1EVK
+.. _`LBUA0VG2BP-EVK-P`: https://www.murata.com/en-eu/products/connectivitymodule/ultra-wide-band/nxp/type2bp
+
+.. ### External links
+
+.. _`Connectivity Standards Alliance`: https://csa-iot.org/

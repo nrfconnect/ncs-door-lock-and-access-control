@@ -3,4 +3,7 @@
 Integration with other add-ons
 ##############################
 
-Placeholder for other addons description.
+Aliro stack
+-----------
+
+
