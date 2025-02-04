@@ -1,5 +1,8 @@
 .. ### NCS shortcuts
 
+.. |APP_NAME| replace:: NCS door lock application
 .. |NCS| replace:: nRF Connect SDK
 .. |VSC| replace:: Visual Studio Code
 .. |nRFVSC| replace:: nRF Connect for VS Code extension
+.. |app_hwfc_enabled| replace:: This application has Hardware Flow Control mechanism enabled by default in serial communication.
+   When enabled, it allows devices to manage transmission by informing each other about their current state, and ensures more reliable connection in high-speed communication scenarios.
