@@ -1,25 +1,19 @@
 .. _index:
 
 Door lock reference application for the |NCS|
-=============================================
+#############################################
 
-Aliro is the new industry-standard access credential and communication protocol, offering a secured,
-convenient, and consistent experience when using smartphones, wearables, or other smart digital user 
-devices to unlock doors and openings.
+Aliro is the new industry-standard access control and communication protocol, offering a secure, convenient, and consistent experience for users using smartphones, wearables, or other smart digital devices to unlock doors and openings.
 
-The Aliro boasts several key features that distinguish it from existing access protocols:
+Aliro features several key features that distinguish it from existing access protocols:
 
-* Interoperability and compatibility between access readers, such as electronic locks and
-  access control readers and user devices, such as smartphone and werables. Standardized solution enables
-  manufacturer-independent devices and readers to work together without sacrificing security.
-* Flexibility - is not dictated how your digital door lock or access control reader will connect
-  to the rest of your ecosystem.
-* Multiple transport protocols such as Near Field Communication (NFC) which is mandatory, Bluetooth® Low-Energy (BLE) or
-  BLE with Ultra-Wideband (UWB).
+* Interoperability and compatibility - Ensures seamless interaction between access readers, such as electronic locks and access control readers, and user devices like smartphone and wearables.
+  The standardized solution allows manufacturer-independent devices and readers to work together without compromising security.
+* Flexibility - Does not dictate how your digital door lock or access control reader connects to the rest of your ecosystem.
+* Protocol support - Supports various transport protocols, including mandatory Near Field Communication (NFC), Bluetooth® LE or Bluetooth LE with Ultra-Wideband (UWB).
 
   .. note::
-     In the current implementation of the Aliro stack, only mandatory NFC is supported.
-
+     In the current implementation, the Aliro stack supports only the mandatory NFC protocol.
 
 .. toctree::
    :maxdepth: 1
