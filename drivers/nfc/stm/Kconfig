@@ -10,6 +10,7 @@ menuconfig NFC_DRIVER_STM
 if NFC_DRIVER_STM
 
 rsource "Kconfig.defconfig"
+rsource "Kconfig.rfal"
 
 choice
 	prompt "Select ST25R driver"
