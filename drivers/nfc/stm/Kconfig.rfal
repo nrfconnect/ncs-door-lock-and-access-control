@@ -1,0 +1,155 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config RFAL_FEATURE_LISTEN_MODE
+    bool "Enable Listen Mode"
+    help
+        Enable or disable RFAL support for Listen Mode.
+
+config RFAL_FEATURE_WAKEUP_MODE
+    bool "Enable Wake-Up Mode"
+    help
+        Enable or disable RFAL support for the Wake-Up mode.
+
+config RFAL_FEATURE_LOWPOWER_MODE
+    bool "Enable Low Power Mode"
+    help
+        Enable or disable RFAL support for the Low Power mode.
+
+config RFAL_FEATURE_NFCA
+    bool "Enable NFC-A (ISO14443A)"
+    help
+        Enable or disable RFAL support for NFC-A (ISO14443A).
+
+config RFAL_FEATURE_NFCB
+    bool "Enable NFC-B (ISO14443B)"
+    help
+        Enable or disable RFAL support for NFC-B (ISO14443B).
+
+config RFAL_FEATURE_NFCF
+    bool "Enable NFC-F (FeliCa)"
+    help
+        Enable or disable RFAL support for NFC-F (FeliCa).
+
+config RFAL_FEATURE_NFCV
+    bool "Enable NFC-V (ISO15693)"
+    help
+        Enable or disable RFAL support for NFC-V (ISO15693).
+
+config RFAL_FEATURE_T1T
+    bool "Enable T1T (Topaz)"
+    help
+        Enable or disable RFAL support for T1T (Topaz).
+
+config RFAL_FEATURE_T2T
+    bool "Enable T2T"
+    help
+        Enable or disable RFAL support for T2T.
+
+config RFAL_FEATURE_T4T
+    bool "Enable T4T"
+    help
+        Enable or disable RFAL support for T4T.
+
+config RFAL_FEATURE_ST25TB
+    bool "Enable ST25TB"
+    help
+        Enable or disable RFAL support for ST25TB.
+
+config RFAL_FEATURE_ST25xV
+    bool "Enable ST25TV/ST25DV"
+    depends on RFAL_FEATURE_NFCV
+    help
+        Enable or disable RFAL support for ST25TV/ST25DV.
+
+config RFAL_FEATURE_DYNAMIC_ANALOG_CONFIG
+    bool "Enable Dynamic Analog Configuration"
+    help
+        Enable or disable dynamic updates of analog configuration
+
+config RFAL_FEATURE_DPO
+    bool "Enable Dynamic Power Output"
+    help
+        Enable or disable RFAL Dynamic Power Output support.
+
+config RFAL_FEATURE_ISO_DEP
+    bool "Enable ISO-DEP (ISO14443-4)"
+    help
+        Enable or disable RFAL support for ISO-DEP (ISO14443-4).
+
+config RFAL_FEATURE_ISO_DEP_POLL
+    bool "Enable ISO-DEP Poller mode (PCD)"
+    depends on RFAL_FEATURE_ISO_DEP
+    default y   # there must be select at least one mode: Poller and/or listener
+    help
+        Enable or disable RFAL support for Poller mode (PCD) ISO-DEP (ISO14443-4).
+
+config RFAL_FEATURE_ISO_DEP_LISTEN
+    bool "Enable ISO-DEP Listen mode (PICC)"
+    depends on RFAL_FEATURE_ISO_DEP
+    help
+        Enable or disable RFAL support for Listen mode (PICC) ISO-DEP (ISO14443-4).
+
+config RFAL_FEATURE_ISO_DEP_IBLOCK_MAX_LEN
+    int "ISO-DEP I-Block max length"
+    depends on RFAL_FEATURE_ISO_DEP
+    range 16 4096
+    default 256
+    help
+        Set the ISO-DEP I-Block max length. Use values as defined by rfalIsoDepFSx.
+
+config RFAL_FEATURE_NFC_DEP
+    bool "Enable NFC-DEP (NFCIP1/P2P)"
+    help
+        Enable or disable RFAL support for NFC-DEP (NFCIP1/P2P).
+
+choice RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_CHOICE
+    bool "NFC-DEP Block/Payload length"
+    depends on RFAL_FEATURE_NFC_DEP
+    default RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_254
+
+config RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_254
+    bool "NFC-DEP Block/Payload length equal to 254 bytes"
+
+config RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_192
+    bool "NFC-DEP Block/Payload length equal to 192 bytes"
+
+config RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_128
+    bool "NFC-DEP Block/Payload length equal to 128 bytes"
+
+config RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_64
+    bool "NFC-DEP Block/Payload length equal to 64 bytes"
+
+endchoice
+
+config RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN
+    int
+    default 254 if RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_254
+    default 192 if RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_192
+    default 128 if RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_128
+    default 64 if RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN_64
+
+config RFAL_FEATURE_NFC_RF_BUF_LEN
+    int "RF buffer length used by RFAL NFC layer"
+	default 258
+    help
+        Set the RF buffer length used by RFAL NFC layer.
+
+config RFAL_FEATURE_ISO_DEP_APDU_MAX_LEN
+    int "ISO-DEP APDU max length"
+    depends on RFAL_FEATURE_ISO_DEP
+    range RFAL_FEATURE_ISO_DEP_IBLOCK_MAX_LEN 8192
+    default 512
+    help
+        Set the ISO-DEP APDU max length. Please use multiples of I-Block max length.
+
+config RFAL_FEATURE_NFC_DEP_PDU_MAX_LEN
+    int "NFC-DEP PDU max length"
+    depends on RFAL_FEATURE_NFC_DEP
+    range 0 RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN
+    default 512
+    help
+        Set the NFC-DEP PDU max length. This is the maximum length of Protocol Data Unit that can be exchanged.
