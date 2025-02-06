@@ -25,11 +25,12 @@
 
 .. #### Development-Tools
 
-.. _`nRF Connect Board Configurator`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/index.html
+.. _`Board Configurator app`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/index.html
 .. _`Installing Board Configurator app`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/installing.html
 .. _`Updating the board configuration`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/updating.html
+.. _`Serial Terminal app`: https://docs.nordicsemi.com/bundle/nrf-connect-serial-terminal/page/index.html
 
-.. ### Boards and IC documentation links
+.. ### External: boards and IC documentation links
 
 .. _`X-NUCLEO-NFC09A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc09a1.html
 .. _`ST25R100`: https://www.st.com/en/nfc/st25r100.html
