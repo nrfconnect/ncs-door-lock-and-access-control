@@ -16,6 +16,8 @@
 .. _`Installing the nRF Connect SDK`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/installation/install_ncs.html
 .. _`Get the nRF Connect SDK code`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/installation/install_ncs.html#get_the_nrf_connect_sdk_code
 
+.. _`Platform Security Architecture (PSA)`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/libraries/security/nrf_security/doc/configuration.html#psa_crypto_support
+
 .. _`West`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/dev_model_and_contributions/code_base.html#ncs-west-intro
 
 .. _`nRF54L15 DK`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/boards/nordic/nrf54l15dk/doc/index.html#nrf54l15dk-nrf54l15

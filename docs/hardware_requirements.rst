@@ -3,7 +3,7 @@
 Hardware requirements
 #####################
 
-To run and test the NCS door lock, you must have the required hardware.
+To run and test the |APP_NAME|, you must have the required hardware.
 
 .. _hw_requirements_development_kit:
 
