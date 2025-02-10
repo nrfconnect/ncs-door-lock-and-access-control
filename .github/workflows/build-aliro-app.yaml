@@ -2,6 +2,9 @@ name: Build Aliro App
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '.github/**'
     branches:
       - main
   workflow_dispatch:
