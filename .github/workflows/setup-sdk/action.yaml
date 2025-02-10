@@ -44,6 +44,7 @@ runs:
 
     - name: Install APT packages
       run: |
+        sudo apt update
         sudo apt install -y gcc-multilib g++-multilib
       shell: bash
 
