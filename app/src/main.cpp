@@ -24,6 +24,7 @@
 
 #include <zephyr/logging/log.h>
 
+
 LOG_MODULE_REGISTER(aliro_app, CONFIG_NCS_ALIRO_LOG_LEVEL);
 
 // TODO: Find better place for these
