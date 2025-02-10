@@ -20,7 +20,7 @@ Aliro features several key features that distinguish it from existing access pro
    :glob:
    :caption: Subpages:
 
-   aliro_architecture.rst
+   door_lock_app_arch.rst
    other_addons.rst
    hardware_requirements.rst
    software_requirements.rst
