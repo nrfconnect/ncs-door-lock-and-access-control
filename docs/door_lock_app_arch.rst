@@ -9,8 +9,8 @@ The |APP_NAME| architecture is presented on the following diagram:
 
 .. _arch_overview:
 
-.. figure:: /images/door_lock_app_arch.png
-   :scale: 70%
+.. figure:: /images/door_lock_app_arch.svg
+   :scale: 100%
    :alt: Door lock application architecture.
 
    |APP_NAME| architecture overview.
