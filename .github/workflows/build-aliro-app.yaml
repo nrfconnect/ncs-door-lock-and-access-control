@@ -4,7 +4,10 @@ on:
   pull_request:
     paths-ignore:
       - 'docs/**'
-      - '.github/**'
+      - '**/README.md'
+      - 'LICENSE'
+      - 'CODEOWNERS'
+      - '.gitignore'
     branches:
       - main
   workflow_dispatch:
