@@ -1,0 +1,72 @@
+/*
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/{
+	/* Disable buttons to avoid collision with interrupt and SCK pins for NFC tag reader. */
+	/delete-node/ buttons;
+
+	aliases {
+		/delete-property/ sw0;
+		/delete-property/ sw1;
+		/delete-property/ sw2;
+		/delete-property/ sw3;
+	};
+};
+
+&pinctrl {
+	spi21_default: spi21_default {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 1, 13)>,
+			        <NRF_PSEL(SPIM_MOSI, 1, 11)>,
+			        <NRF_PSEL(SPIM_MISO, 1, 12)>;
+		};
+	};
+
+	spi21_sleep: spi21_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 1, 13)>,
+			        <NRF_PSEL(SPIM_MOSI, 1, 11)>,
+			        <NRF_PSEL(SPIM_MISO, 1, 12)>;
+			low-power-enable;
+		};
+	};
+};
+
+&spi21 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	cs-gpios = <&gpio2 8 GPIO_ACTIVE_LOW>;
+
+	pinctrl-0 = <&spi21_default>;
+	pinctrl-1 = <&spi21_sleep>;
+	pinctrl-names = "default", "sleep";
+	nucleo_nfc@0 {
+		compatible = "x-nucleo-nfc";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(4)>;
+		irq-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+/ {
+	nfc_power_switch: nfc_power_switch {
+		status = "okay";
+		compatible = "nfc-power-control";
+		gpios = <&gpio2 6 ( GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN )>;
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
