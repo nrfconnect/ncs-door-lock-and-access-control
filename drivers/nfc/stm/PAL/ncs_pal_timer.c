@@ -5,26 +5,86 @@
  */
 
 #include <zephyr/kernel.h>
+#include <zephyr/sys/__assert.h>
 
+#include "ncs_pal_isr.h"
 #include "ncs_pal_timer.h"
+
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(pal_timer, CONFIG_NFC_LOG_LEVEL);
+
+extern struct k_sem irq_sem;
+
+typedef struct {
+	struct k_timer timer;
+	bool in_use;
+} ncs_pal_timer_t;
+
+static ncs_pal_timer_t timers[CONFIG_PAL_MAX_TIMERS_NUM];
 
 uint32_t ncs_pal_get_sys_tick()
 {
-	// FIXME: This is only lower 32-bit value of system uptime.
 	return k_uptime_get_32();
 }
 
-uint32_t ncs_pal_timer_create(uint16_t time)
+static void timer_expiry_callback(struct k_timer *timer)
 {
-	return (k_uptime_get_32() + time);
+	k_sem_give(&irq_sem);
 }
 
-bool ncs_pal_timer_is_expired(uint32_t timer)
+void ncs_pal_timers_init()
 {
-	return (k_uptime_get_32() >= timer);
+	int timer_id = 0;
+	for (timer_id = 0; timer_id < CONFIG_PAL_MAX_TIMERS_NUM; timer_id++) {
+		k_timer_init(&timers[timer_id].timer, timer_expiry_callback, NULL);
+		timers[timer_id].in_use = false;
+	}
+	LOG_DBG("%d timers initialized", timer_id + 1);
 }
 
-void ncs_pal_delay(uint16_t tOut)
+int ncs_pal_timer_create(uint16_t time_ms)
 {
-	k_sleep(K_MSEC(tOut));
+	int timer_id = 0;
+	for (timer_id = 0; timer_id < CONFIG_PAL_MAX_TIMERS_NUM; timer_id++) {
+		if (!timers[timer_id].in_use) {
+			k_timer_start(&timers[timer_id].timer, K_MSEC(time_ms), K_NO_WAIT);
+			timers[timer_id].in_use = true;
+			// Timer ID must be greater than 0, so we add 1 to the ID.
+			return timer_id + 1;
+		}
+	}
+	__ASSERT(false, "No available timers, please change PAL_MAX_TIMERS_NUM config.");
+	// The 0 value is reserved for RFAL (the timer is disabled).
+	return 0;
+}
+
+bool ncs_pal_timer_is_expired(uint32_t timer_id)
+{
+	if (timer_id < 1 || timer_id > CONFIG_PAL_MAX_TIMERS_NUM) {
+		LOG_DBG("Invalid timer ID %d", timer_id);
+		return true;
+	}
+
+	if (k_timer_remaining_ticks(&timers[timer_id - 1].timer) == 0) {
+		return true;
+	}
+	return false;
+}
+
+void ncs_pal_timer_destroy(int timer_id)
+{
+	if (timer_id < 1 || timer_id > CONFIG_PAL_MAX_TIMERS_NUM) {
+		LOG_DBG("Invalid timer ID %d", timer_id);
+		return;
+	}
+
+	if (timers[timer_id - 1].in_use) {
+		k_timer_stop(&timers[timer_id - 1].timer);
+		timers[timer_id - 1].in_use = false;
+	}
+}
+
+void ncs_pal_delay(uint16_t delay_ms)
+{
+	k_sleep(K_MSEC(delay_ms));
 }

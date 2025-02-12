@@ -10,8 +10,8 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/smf.h>
 
+#include <rfal_ncs_pal.h>
 #include <rfal_nfc.h>
-#include <rfal_platform.h>
 #include <rfal_utils.h>
 
 LOG_MODULE_REGISTER(app, CONFIG_NCS_NFC_READER_SAMPLE_LOG_LEVEL);
@@ -48,22 +48,6 @@ static const struct smf_state nfc_hsm[] = {
 	[S_IDLE] = SMF_CREATE_STATE(idle_entry, idle_run, NULL, NULL, NULL),
 	[S_DISCOVERY] = SMF_CREATE_STATE(discovery_entry, discovery_run, discovery_exit, NULL, NULL),
 };
-
-static bool pal_init(void)
-{
-	int err = ncs_pal_spi_init();
-	if (err) {
-		LOG_ERR("NFC PAL spi init failed %d", err);
-		return false;
-	}
-
-	err = ncs_pal_pwr_pin_set();
-	if (err) {
-		LOG_ERR("NFC PAL gpio init failed %d", err);
-		return false;
-	}
-	return true;
-}
 
 static ReturnCode rfal_nfc_init(void)
 {
@@ -194,7 +178,7 @@ static void nfc_worker_fn(void *unused1, void *unused2, void *unused3)
 
 	LOG_INF("NCS NFC reader sample application");
 
-	if (!pal_init()) {
+	if (rfal_ncs_pal_init()) {
 		LOG_ERR("NFC PAL init failed");
 		return;
 	}

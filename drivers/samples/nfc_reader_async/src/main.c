@@ -9,8 +9,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
+#include <rfal_ncs_pal.h>
 #include <rfal_nfc.h>
-#include <rfal_platform.h>
 #include <rfal_nfc_config.h>
 #include <rfal_utils.h>
 
@@ -73,22 +73,6 @@ static void notify_cb(rfalNfcState state)
 	}
 }
 
-static bool pal_init(void)
-{
-	int err = ncs_pal_spi_init();
-	if (err) {
-		LOG_ERR("NFC PAL spi init failed %d", err);
-		return false;
-	}
-
-	err = ncs_pal_pwr_pin_set();
-	if (err) {
-		LOG_ERR("NFC PAL gpio init failed %d", err);
-		return false;
-	}
-	return true;
-}
-
 static ReturnCode rfal_nfc_init(void)
 {
 	ReturnCode rc = rfalNfcInitialize();
@@ -119,7 +103,7 @@ static void nfc_worker_fn(void *unused1, void *unused2, void *unused3)
 
 	LOG_INF("NCS NFC reader sample application");
 
-	if (!pal_init()) {
+	if (rfal_ncs_pal_init()) {
 		LOG_ERR("NFC PAL init failed");
 		return;
 	}
