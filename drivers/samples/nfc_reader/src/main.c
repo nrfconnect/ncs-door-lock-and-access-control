@@ -10,15 +10,11 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/smf.h>
 
-#include <rfal_utils.h>
 #include <rfal_nfc.h>
 #include <rfal_platform.h>
+#include <rfal_utils.h>
 
 LOG_MODULE_REGISTER(app, CONFIG_NCS_NFC_READER_SAMPLE_LOG_LEVEL);
-
-// TODO: Move to Kconfig.
-#define WORKER_THREAD_STACK_SIZE 1024
-#define WORKER_THREAD_PRIORITY	 10
 
 // NFC states
 enum nfc_state {
@@ -50,8 +46,7 @@ static struct smf_ctx hsm_ctx;
 static const struct smf_state nfc_hsm[] = {
 	[S_NO_INIT] = SMF_CREATE_STATE(no_init_entry, no_init_run, NULL, NULL, NULL),
 	[S_IDLE] = SMF_CREATE_STATE(idle_entry, idle_run, NULL, NULL, NULL),
-	[S_DISCOVERY] =
-		SMF_CREATE_STATE(discovery_entry, discovery_run, discovery_exit, NULL, NULL),
+	[S_DISCOVERY] = SMF_CREATE_STATE(discovery_entry, discovery_run, discovery_exit, NULL, NULL),
 };
 
 static bool pal_init(void)
@@ -115,7 +110,7 @@ static void idle_run(void *o)
 	ReturnCode rc = RFAL_ERR_NONE;
 
 	if (rfalNfcGetState() > RFAL_NFC_STATE_IDLE) {
-		rc = rfalNfcDeactivate(false);
+		rc = rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_IDLE);
 		if (rc) {
 			LOG_ERR("RFAL: NFC deactivation failed, return code: %d", rc);
 			return;
@@ -213,9 +208,9 @@ static void nfc_worker_fn(void *unused1, void *unused2, void *unused3)
 		if (ret) {
 			break;
 		}
-		k_sem_take(&irq_sem, K_MSEC(10));
+		k_sem_take(&irq_sem, K_MSEC(CONFIG_WORKER_POOL_TIMEOUT_MS));
 	}
 }
 
-K_THREAD_DEFINE(nfc_worker_thread, WORKER_THREAD_STACK_SIZE, nfc_worker_fn, NULL, NULL, NULL,
-		WORKER_THREAD_PRIORITY, 0, 0);
+K_THREAD_DEFINE(nfc_worker_thread, CONFIG_WORKER_THREAD_STACK_SIZE, nfc_worker_fn, NULL, NULL, NULL,
+		CONFIG_WORKER_THREAD_PRIORITY, 0, 0);
