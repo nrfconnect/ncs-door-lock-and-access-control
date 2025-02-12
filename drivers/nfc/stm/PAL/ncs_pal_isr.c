@@ -13,7 +13,7 @@ LOG_MODULE_REGISTER(pal_isr, CONFIG_NFC_LOG_LEVEL);
 
 // TODO: Move to Kconfig
 #define ISR_THREAD_STACK_SIZE 1024
-#define ISR_THREAD_PRIORITY 0
+#define ISR_THREAD_PRIORITY -1
 
 extern struct k_sem irq_sem;
 
