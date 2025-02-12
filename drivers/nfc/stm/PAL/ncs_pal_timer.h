@@ -11,33 +11,49 @@
 extern "C" {
 #endif
 
-#define timerIsRunning(t) (!ncs_pal_timer_is_expired(t))
+/**
+ * @brief Initializes the PAL timers.
+ */
+void ncs_pal_timers_init();
 
 /**
- * @brief Get system ticks.
+ * @brief Get current system uptime, in milliseconds.
  *
- * @return System uptime.
+ * @return System uptime in miliseconds.
  */
 uint32_t ncs_pal_get_sys_tick();
 
 /**
- * @brief Get sum of system ticks with the `time` value.
+ * @brief Starts a timer with the specified time duration.
  *
- * @return Sum of system ticks with the `time` value.
+ * @param time_ms the time duration in milliseconds.
+ *
+ * @return Timer identifier (greather than 0) or 0 if no timer is available.
  */
-uint32_t ncs_pal_timer_create(uint16_t time);
+int ncs_pal_timer_create(uint16_t time_ms);
 
 /**
- * @brief Verify if time elapsed.
+ * @brief Stops timer with given identifier.
  *
- * @return True when time elapsed, false otherwise.
+ * @param timer_id the timer identifier.
  */
-bool ncs_pal_timer_is_expired(uint32_t timer);
+void ncs_pal_timer_destroy(int timer_id);
 
 /**
- * @brief Set delay.
+ * @brief Checks if the given timer is expired.
+ *
+ * @param timer_id the  timer identifier.
+ *
+ * @return True when the timer expired, false otherwise.
  */
-void ncs_pal_delay(uint16_t time);
+bool ncs_pal_timer_is_expired(uint32_t timer_id);
+
+/**
+ * @brief Set delay in milliseconds.
+ *
+ * @param delay_ms the delay in milliseconds.
+ */
+void ncs_pal_delay(uint16_t delay_ms);
 
 #ifdef __cplusplus
 }

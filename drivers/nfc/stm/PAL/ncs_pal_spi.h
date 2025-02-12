@@ -7,6 +7,8 @@
 #ifndef NCS_PAL_SPI_H_
 #define NCS_PAL_SPI_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

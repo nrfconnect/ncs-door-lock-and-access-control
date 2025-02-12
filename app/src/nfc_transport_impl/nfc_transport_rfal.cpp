@@ -5,6 +5,7 @@
  */
 
 #include "nfc_transport_rfal.h"
+#include <rfal_ncs_pal.h>
 #include <rfal_nfc_config.h>
 
 #include <zephyr/logging/log.h>
@@ -202,15 +203,9 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 {
 	NfcDriver::mCallbacks = callbacks;
 
-	int err = ncs_pal_spi_init();
+	int err = rfal_ncs_pal_init();
 	if (err) {
-		LOG_ERR("RFAL: NFC PAL spi init failed %d", err);
-		return ALIRO_ERROR_INTERNAL;
-	}
-
-	err = ncs_pal_pwr_pin_set();
-	if (err) {
-		LOG_ERR("RFAL: NFC PAL gpio init failed %d", err);
+		LOG_ERR("RFAL: NFC PAL init failed %d", err);
 		return ALIRO_ERROR_INTERNAL;
 	}
 
