@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+rsource "Kconfig.rfal.defconfig"
+
 config RFAL_WORKER_THREAD_STACK_SIZE
 	int "Stack size of the thread that the RFAL worker lives in"
 	default 4096
