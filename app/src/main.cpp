@@ -227,6 +227,25 @@ static AliroError Auth1Recv(uint8_t *rawData, size_t dataLen)
 	return ALIRO_NO_ERROR;
 }
 
+static void PrintReaderGroupIdentifier()
+{
+#ifdef CONFIG_NCS_ALIRO_FIXED_READER_GROUP_ID
+
+	using ReaderId = Aliro::ReaderIdentifier;
+	LOG_HEXDUMP_INF(ReaderId::kFixedReaderId.data(), ReaderId::kFixedReaderId.size(), "Reader Identifier:");
+
+	// Printf is used for output formatting - reader group ID can be printed on one line.
+	printf("Provision the Test Harness with the following Reader Group Identifier:\n");
+	// First 16 bytes of the Reader Identifier constitute the Reader Group Identifier
+	auto end = ReaderId::kFixedReaderId.begin() + ReaderId::kFixedReaderId.size() / 2;
+	for (auto it = ReaderId::kFixedReaderId.begin(); it != end; ++it) {
+		printf("%02x", *it);
+	}
+	printf("\n\n");
+
+#endif
+}
+
 int main()
 {
 	LOG_INF("                                                                        \r\n"
@@ -265,6 +284,8 @@ int main()
 		    LOG_ERR("Cannot initialize key storage."));
 	/* Initialize NFC component. */
 	VerifyOrDie(Aliro::NfcTpAliroInit(&apCb) == ALIRO_NO_ERROR, LOG_ERR("Cannot initialize NFC component."));
+
+	PrintReaderGroupIdentifier();
 
 	return 0;
 }
