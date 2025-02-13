@@ -5,6 +5,7 @@
 #
 
 add_subdirectory(PAL)
+add_subdirectory(nfc_configs)
 
 set(ST_RFAL_DIR RFAL)
 set(ST_RFAL_SRC_DIR ${ST_RFAL_DIR}/source)

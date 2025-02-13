@@ -5,6 +5,7 @@
  */
 
 #include "nfc_transport_rfal.h"
+#include <rfal_nfc_config.h>
 
 #include <zephyr/logging/log.h>
 
@@ -82,11 +83,11 @@ ReturnCode NfcTransportRfal::RfalNfcInit()
 
 	// Set default discovery parameters.
 	rfalNfcDefaultDiscParams(&mNfcConfig);
+	// Set wake-up configuration.
+	rfalNfcWakeupConfig(&mNfcConfig);
 	// Set only NFC-A technology Flag.
 	mNfcConfig.techs2Find |= RFAL_NFC_POLL_TECH_A;
-#ifdef CONFIG_RFAL_FEATURE_WAKEUP_MODE
-	mNfcConfig.wakeupEnabled = true;
-#endif // CONFIG_RFAL_FEATURE_WAKEUP_MODE
+
 	mNfcConfig.notifyCb = [](rfalNfcState state) { Instance().RfalNotifyCallback(state); };
 
 	return err;

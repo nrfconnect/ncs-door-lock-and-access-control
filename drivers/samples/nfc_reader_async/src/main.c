@@ -11,6 +11,7 @@
 
 #include <rfal_nfc.h>
 #include <rfal_platform.h>
+#include <rfal_nfc_config.h>
 #include <rfal_utils.h>
 
 LOG_MODULE_REGISTER(app, CONFIG_NCS_NFC_READER_SAMPLE_LOG_LEVEL);
@@ -88,45 +89,6 @@ static bool pal_init(void)
 	return true;
 }
 
-void set_wakeup_configuration(rfalNfcDiscoverParam *conf)
-{
-	conf->wakeupEnabled = true;
-
-// Application Note: AN5993 - Card approach only: system needs to be woken-up and perform transaction via NFC
-// upon a listener arrival.
-#ifdef CONFIG_ST25R200_DRV
-
-	conf->wakeupConfigDefault = false;
-	conf->wakeupConfig = (rfalWakeUpConfig){
-		.period = RFAL_WUM_PERIOD_620MS,
-		.irqTout = false,
-		.skipCal = false,
-		.skipReCal = false,
-		.delCal = true,
-		.delRef = true,
-		.autoAvg = true,
-		.measFil = RFAL_WUM_MEAS_FIL_SLOW,
-		.measDur = RFAL_WUM_MEAS_DUR_44_28,
-
-		.I.enabled = true,
-		.Q.enabled = true,
-
-		.I.delta = 2U,
-		.I.reference = RFAL_WUM_REFERENCE_AUTO,
-		.I.threshold = ((uint8_t)RFAL_WUM_TRE_ABOVE),
-		.I.aaWeight = RFAL_WUM_AA_WEIGHT_32,
-		.I.aaInclMeas = true,
-
-		.Q.delta = 4U,
-		.Q.reference = RFAL_WUM_REFERENCE_AUTO,
-		.Q.threshold = ((uint8_t)RFAL_WUM_TRE_BELOW),
-		.Q.aaWeight = RFAL_WUM_AA_WEIGHT_32,
-		.Q.aaInclMeas = true,
-	};
-
-#endif // CONFIG_ST25R200_DRV
-}
-
 static ReturnCode rfal_nfc_init(void)
 {
 	ReturnCode rc = rfalNfcInitialize();
@@ -139,7 +101,7 @@ static ReturnCode rfal_nfc_init(void)
 	// Set default discovery parameters.
 	rfalNfcDefaultDiscParams(&nfc_conf);
 	// Set wake-up configuration.
-	set_wakeup_configuration(&nfc_conf);
+	rfalNfcWakeupConfig(&nfc_conf);
 	// Set only NFC-A technology Flag.
 	nfc_conf.techs2Find |= RFAL_NFC_POLL_TECH_A;
 	nfc_conf.notifyCb = notify_cb;
