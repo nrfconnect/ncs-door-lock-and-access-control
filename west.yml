@@ -20,5 +20,5 @@ manifest:
     - name: aliro
       remote: ncs-ssh
       repo-path: ncs-aliro
-      revision: main
+      revision: ae7bd05af9239ecddcfcedba5247d877fc6f9cee
       import: false
