@@ -26,5 +26,6 @@ Aliro features several key features that distinguish it from existing access pro
    software_requirements.rst
    building_and_running.rst
    testing.rst
+   troubleshooting.rst
    release_notes.rst
    known_issues.rst
