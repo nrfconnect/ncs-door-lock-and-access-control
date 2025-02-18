@@ -81,3 +81,4 @@ make html
 ```
 
 The output is stored in the ``build`` folder.
+
