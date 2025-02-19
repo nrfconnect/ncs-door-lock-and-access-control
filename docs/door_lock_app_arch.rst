@@ -4,8 +4,7 @@
 #######################
 
 The |APP_NAME| runs on the nRF54L15 SoC and utilizes the Aliro stack for access protocol and communication with user device over Near Field Communication (NFC) or Bluetooth® LE.
-
-The |APP_NAME| architecture is presented on the following diagram:
+See the following diagram for an architecture overview:
 
 .. _arch_overview:
 

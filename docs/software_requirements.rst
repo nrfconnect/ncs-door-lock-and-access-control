@@ -15,20 +15,72 @@ Before you start working with the application, you must have the following:
 * Installed the |NCS| development environment and |NCS| toolchain
 * Access to the `ncs-aliro`_ private repository
 
-Complete `Installing the nRF Connect SDK`_.
-In the `Get the nRF Connect SDK code`_ subsection, step 4, run the following command instead:
+Prepare the environment:
 
-.. code-block:: bash
+1. From the `Installing the nRF Connect SDK`_ page, complete the following steps: updating operating system, installing prerequisities, and installing the |NCS| toolchain.
 
-   west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr main door-lock-workspace
-   cd door-lock-workspace
+   .. note::
 
-.. note::
-   |VSC| does not support private add-ons.
-   You must use command line instructions to clone the repository.
+      |VSC| does not support private add-ons.
+      You must use command-line to clone the repository.
 
-This command will clone the `ncs-door-lock-app`_ add-on manifest repository into :file:`door-lock-workspace`.
-Once executed, complete the remaining steps.
+#. Once completed, open the repository and locate the :file:`ncs` directory.
+   By default, this is one level up from the location where you installed the toolchain.
+   This directory will hold all |NCS| repositories.
+
+#. Start the toolchain environment for your operating system using the following command:
+
+   .. code-block:: console
+
+      nrfutil toolchain-manager launch --shell
+
+#. Initialize west:
+
+   .. code-block:: console
+
+      west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr main door-lock-workspace
+      cd door-lock-workspace
+
+   This command will clone the `ncs-door-lock-app`_ add-on manifest repository into :file:`door-lock-workspace`.
+
+#. Enter the following command to clone the project repository:
+
+   .. code-block:: console
+
+      west update
+
+   Depending on your connection, this might take some time.
+
+#. Export a `Zephyr CMake package`_.
+   This allows CMake to automatically load the boilerplate code required for building |NCS| applications:
+
+   .. code-block:: console
+
+      west zephyr-export
+
+   With the default location to install the toolchain, your directory structure now looks similar to this:
+
+   .. code-block:: none
+
+      ncs
+      ├─── toolchains
+      │  └─── <toolchain-installation>
+      └─── <door-lock-workspace>
+         ├─── .west
+         ├─── aliro
+         ├─── bootloader
+         ├─── modules
+         ├─── ncs-door-lock-app
+         ├─── nrf
+         ├─── nrfxlib
+         ├─── zephyr
+         └─── ...
+
+   In this simplified structure preview, *<toolchain-installation>* corresponds to the toolchain version and *<west-workspace>* corresponds to the SDK version name.
+
+#. Complete `setting up the command-line build environment`_.
+
+Once you have completed all the steps, the development environment should be correctly configured.
 
 Aliro Certification Tool
 ************************

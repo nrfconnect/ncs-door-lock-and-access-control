@@ -3,7 +3,7 @@
 Building and running
 ####################
 
-In the :file:`door-lock-workspace` the |APP_NAME| is placed in the :file:`ncs-door-lock-app` directory.
+In the :file:`door-lock-workspace`, the |APP_NAME| is placed in the :file:`ncs-door-lock-app` directory.
 To build and run the application on the `nRF54L15 DK`_, complete the following steps:
 
 1. Connect the nRF54L15 DK to your computer using the **DEBUGGER** port on the DK.
