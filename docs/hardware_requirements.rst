@@ -44,10 +44,10 @@ See the recommended configuration for VDD (nPM VOUT1):
 
 .. _hw_requirements_nfc_reader:
 
-Near Field Communication (NFC) reader
-*************************************
+Near Field Communication reader
+*******************************
 
-To start working with the application, you must have at least one NFC reader.
+To start working with the application, you must have at least one Near Field Communication (NFC) reader.
 The application supports the following NFC readers and their corresponding development expansion boards:
 
 +-------------------+---------------------------------+

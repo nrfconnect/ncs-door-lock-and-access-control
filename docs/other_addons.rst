@@ -17,11 +17,11 @@ Dependencies between these modules and their specific revisions are managed thro
 Aliro add-ons
 *************
 
-|APP_NAME| utilizes the Aliro stack add-on to implement the Aliro protocol.
+The |APP_NAME| utilizes the Aliro stack add-on to implement the Aliro protocol.
 The Aliro stack is included as a private module, which means it has restricted access.
 Additionally, it must be configured as a Zephyr module.
 
-See the following diagram for deployment of software components used by |APP_NAME|:
+See the following diagram for deployment of software components used by the |APP_NAME|:
 
 .. figure:: /images/aliro-add-ons.svg
    :scale: 100%
