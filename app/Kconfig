@@ -6,6 +6,10 @@
 
 rsource "src/nfc_transport_impl/Kconfig"
 
+if NCS_ALIRO_LIB
+    rsource "../lib/aliro/Kconfig.aliro.defconfig"
+endif
+
 menu "Zephyr"
 source "Kconfig.zephyr"
 endmenu

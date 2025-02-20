@@ -16,3 +16,14 @@ add_subdirectory(src/nfc_transport_impl)
 target_sources(app PRIVATE
     ${app_sources}
 )
+
+if (CONFIG_NCS_ALIRO_LIB)
+
+    set(ALIRO_LIB ${ZEPHYR_NCS_DOOR_LOCK_APP_MODULE_DIR}/lib/aliro)
+
+    zephyr_link_libraries(${ALIRO_LIB}/bin/libaliro.a)
+    zephyr_include_directories(${ALIRO_LIB}/include)
+    zephyr_include_directories(${ALIRO_LIB}/interfaces)
+    zephyr_include_directories(${ALIRO_LIB}/interfaces/crypto/backend_crypto_psa)
+
+endif()
