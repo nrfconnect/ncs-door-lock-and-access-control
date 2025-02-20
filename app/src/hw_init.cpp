@@ -10,10 +10,11 @@
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
 
-#include "utils.h"
+#include "util/utils.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(hw_init, CONFIG_NCS_ALIRO_LOG_LEVEL);
+
+LOG_MODULE_REGISTER(hw_init, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 
 static const struct gpio_dt_spec sNfcPowerSwitch = GPIO_DT_SPEC_GET(DT_NODELABEL(nfc_power_switch), gpios);
 
