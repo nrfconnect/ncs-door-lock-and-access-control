@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "aliro_isodep.h"
-#include "aliro_nfc_driver.h"
+#include "transport_nfc/driver/interface/aliro_nfc_driver.h"
+#include "transport_nfc/isodep/interface/aliro_isodep.h"
 
 extern "C" {
 #include <rfal_nfc.h>

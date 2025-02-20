@@ -9,3 +9,9 @@ rsource "src/nfc_transport_impl/Kconfig"
 menu "Zephyr"
 source "Kconfig.zephyr"
 endmenu
+
+module = NCS_DOOR_LOCK_APP
+module-str = NCS_DOOR_LOCK_APP
+module-dep = LOG
+module-help = Enables nRF Connect SDK Door Lock Application log messages.
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
