@@ -197,7 +197,7 @@ static AliroError Auth1Recv(uint8_t *rawData, size_t dataLen)
 
 static void PrintReaderGroupIdentifier()
 {
-#ifdef CONFIG_NCS_ALIRO_FIXED_READER_GROUP_ID
+#ifdef CONFIG_ALIRO_PRINT_READER_GROUP_ID
 
 	using ReaderId = Aliro::ReaderIdentifier;
 	LOG_HEXDUMP_INF(ReaderId::Instance().Get().Data(), ReaderId::Instance().Get().Size(), "Reader Identifier:");

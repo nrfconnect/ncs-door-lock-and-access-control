@@ -11,6 +11,8 @@ manifest:
       # does not allow for password authentication anymore.
     - name: ncs-ssh
       url-base: git@github.com:nrfconnect
+  group-filter:
+    - -aliro
   projects:
     - name: nrf
       remote: ncs
@@ -20,5 +22,7 @@ manifest:
     - name: aliro
       remote: ncs-ssh
       repo-path: ncs-aliro
-      revision: 3d24d01e2c3fbb99346330886286bebab3b13d55
+      revision: 0c6e18d5f901ccdb4a2bc47281bf6b4ce7e6f3b1
+      groups:
+        - aliro
       import: false
