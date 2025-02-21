@@ -3,6 +3,9 @@
 Door lock reference application for the |NCS|
 #############################################
 
+.. note::
+  |EXPERIMENTAL_NOTE|
+
 Aliro is the new industry-standard access control and communication protocol, offering a secure, convenient, and consistent experience for users using smartphones, wearables, or other smart digital devices to unlock doors and openings.
 
 Aliro features several key features that distinguish it from existing access protocols:
