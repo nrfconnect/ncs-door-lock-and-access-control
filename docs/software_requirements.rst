@@ -67,7 +67,6 @@ Prepare the environment:
       │  └─── <toolchain-installation>
       └─── <door-lock-workspace>
          ├─── .west
-         ├─── aliro
          ├─── bootloader
          ├─── modules
          ├─── ncs-door-lock-app

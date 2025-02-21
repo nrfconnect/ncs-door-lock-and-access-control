@@ -28,6 +28,7 @@
 .. _`nrf54l15dk`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/app_dev/device_guides/nrf54l/index.html
 
 .. _`Testing and optimization`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/test_and_optimize.html
+.. _`Software maturity`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/releases_and_maturity/software_maturity.html
 
 .. #### Development-Tools
 
