@@ -16,6 +16,7 @@
 #include "protocol_versions/protocol_version_arbiter.h"
 #include "protocol_versions/supported_versions.h"
 #include "reader_identifier/reader_identifier.h"
+#include "storage/storage.h"
 #include "transport_protocol/control_flow_command.h"
 #include "transport_protocol/select_response.h"
 #include "transport_protocol/transport_protocol_nfc.h"
@@ -26,6 +27,27 @@
 LOG_MODULE_REGISTER(door_lock_app, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 
 using namespace Aliro;
+
+constexpr uint8_t kAccessAsciiArtString[] = { " █████╗  ██████╗ ██████╗███████╗███████╗ \r\n"
+					      "██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝\r\n"
+					      "███████║██║     ██║     █████╗  ███████╗\r\n"
+					      "██╔══██║██║     ██║     ██╔══╝  ╚════██║\r\n"
+					      "██║  ██║╚██████╗╚██████╗███████╗███████║\r\n"
+					      "╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝\r\n" };
+
+constexpr uint8_t kDeniedAsciiArtString[] = { "██████╗ ███████╗███╗   ██╗██╗███████╗██████╗ \r\n"
+					      "██╔══██╗██╔════╝████╗  ██║██║██╔════╝██╔══██╗\r\n"
+					      "██║  ██║█████╗  ██╔██╗ ██║██║█████╗  ██║  ██║\r\n"
+					      "██║  ██║██╔══╝  ██║╚██╗██║██║██╔══╝  ██║  ██║\r\n"
+					      "██████╔╝███████╗██║ ╚████║██║███████╗██████╔╝\r\n"
+					      "╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚══════╝╚═════╝ \r\n" };
+
+constexpr uint8_t kGrantedAsciiArtString[] = { " ██████╗ ██████╗  █████╗ ███╗   ██╗████████╗███████╗██████╗ \r\n"
+					       "██╔════╝ ██╔══██╗██╔══██╗████╗  ██║╚══██╔══╝██╔════╝██╔══██╗\r\n"
+					       "██║  ███╗██████╔╝███████║██╔██╗ ██║   ██║   █████╗  ██║  ██║\r\n"
+					       "██║   ██║██╔══██╗██╔══██║██║╚██╗██║   ██║   ██╔══╝  ██║  ██║\r\n"
+					       "╚██████╔╝██║  ██║██║  ██║██║ ╚████║   ██║   ███████╗██████╔╝\r\n"
+					       " ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═════╝ \r\n" };
 
 static AliroError SelectCommandRecv(uint8_t *rawData, size_t dataLen)
 {
@@ -175,10 +197,6 @@ static AliroError Auth1Recv(uint8_t *rawData, size_t dataLen)
 	userDeviceAuthentication.SetReaderEPubKX(CryptoKeyCache::Instance().mReaderEphemeralKey.GetXCoordinate());
 	userDeviceAuthentication.SetTransactionId(AccessProtocolCrypto::Instance().GetTransactionIdentifier());
 
-	auto materialToVerify = userDeviceAuthentication.Serialize();
-
-	// TODO: Add signature verification
-
 	/* Only one of below can be present in the AUTH1 response. */
 	if (keySlot && !publicKey) {
 		LOG_INF("AUTH1 response: Key slot received");
@@ -190,8 +208,19 @@ static AliroError Auth1Recv(uint8_t *rawData, size_t dataLen)
 		return ALIRO_ERROR_INTERNAL;
 	}
 
+	auto materialToVerify = userDeviceAuthentication.Serialize();
+
 	LOG_HEXDUMP_INF(materialToVerify.Data(), materialToVerify.Size(), "User device authentication data:");
 	LOG_HEXDUMP_INF(signature.Data(), signature.Size(), "AUTH1 response: received UserDevice signature:");
+
+	LOG_INF("Verify signature");
+	printf("\n%s", kAccessAsciiArtString);
+	if (!CryptoInstance().VerifySignature(materialToVerify.Begin(), materialToVerify.Size(), signature.ToArray())) {
+		printf("\n%s", kGrantedAsciiArtString);
+	} else {
+		printf("\n%s", kDeniedAsciiArtString);
+	}
+	printf("\n");
 
 	AccessProtocolCrypto::Instance().FinishSession();
 	return ALIRO_NO_ERROR;
@@ -201,7 +230,7 @@ static void PrintReaderGroupIdentifier()
 {
 #ifdef CONFIG_ALIRO_PRINT_READER_GROUP_ID
 
-	using ReaderId = Aliro::ReaderIdentifier;
+	using ReaderId = ReaderIdentifier;
 	LOG_HEXDUMP_INF(ReaderId::Instance().Get().Data(), ReaderId::Instance().Get().Size(), "Reader Identifier:");
 
 	// Printf is used for output formatting - reader group ID can be printed on one line.
@@ -214,6 +243,43 @@ static void PrintReaderGroupIdentifier()
 	printf("\n\n");
 
 #endif
+}
+
+static void StorageInit()
+{
+	/* Load user device public key from storage. */
+	EccP256PublicKey userDevicePublicKey{};
+	int erc = KeyValueStorage::Instance().Get(kStorageKeyNameAccessCredentialPublicKey, userDevicePublicKey.data(),
+						  userDevicePublicKey.size());
+	if (!erc) {
+		VerifyOrDie(CryptoKeyStorage::Instance().SetAccessCredentialPublicKey(PublicKey(
+				    userDevicePublicKey.data(), userDevicePublicKey.size())) == ALIRO_NO_ERROR,
+			    LOG_ERR("Cannot set public key."));
+		LOG_INF("User device public key set");
+	} else if (erc == -ENODATA) {
+		LOG_INF("No User device public key available");
+	} else {
+		LOG_ERR("Cannot get user device public key, error code: %d", erc);
+	}
+
+	/* Load reader identifier. */
+	ReaderIdentifier::GroupIdentifier groupIdentifier{};
+	ReaderIdentifier::SubIdentifier subIdentifier{};
+	erc = KeyValueStorage::Instance().Get(kStorageKeyNameGroupId, groupIdentifier);
+	if (erc == -ENODATA) {
+		LOG_INF("No group identifier available");
+	} else {
+		LOG_ERR("Cannot get group identifier, error code: %d", erc);
+	}
+
+	erc = KeyValueStorage::Instance().Get(kStorageKeyNameGroupSubId, subIdentifier);
+	if (erc) {
+		LOG_INF("No group sub identifier available");
+	} else {
+		LOG_ERR("Cannot get group sub identifier, error code: %d", erc);
+	}
+
+	ReaderIdentifier::Instance().Init(groupIdentifier, subIdentifier);
 }
 
 int main()
@@ -251,6 +317,10 @@ int main()
 	/* Initialize crypto components. */
 	VerifyOrDie(CryptoInstance().Init() == ALIRO_NO_ERROR, LOG_ERR("Cannot initialize crypto engine."));
 	VerifyOrDie(CryptoKeyStorage::Instance().Init() == ALIRO_NO_ERROR, LOG_ERR("Cannot initialize key storage."));
+
+	/* Initialize storage and load data. */
+	StorageInit();
+
 	/* Initialize NFC component. */
 	VerifyOrDie(NfcTpAliroInit(&apCb) == ALIRO_NO_ERROR, LOG_ERR("Cannot initialize NFC component."));
 

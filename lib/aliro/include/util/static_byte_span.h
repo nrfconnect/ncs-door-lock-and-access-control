@@ -20,6 +20,7 @@ template <Capacity C> class StaticByteSpan {
 
 public:
 	StaticByteSpan() : mCurrentDataLength(0) {};
+	StaticByteSpan(const std::array<Byte, C> &array) : mData(array), mCurrentDataLength(array.size()) {};
 
 	StaticByteSpan(const_pointer data, size_t dataLength)
 	{
@@ -75,7 +76,7 @@ public:
 	 * NOTE: When index is out of bounds the value is unknown - it is illegal to set index out of bounds.
 	 * The Size() must be checked by User prior to indexing the container.
 	 */
-	const Byte operator[](size_t index) const { return mData[index]; }
+	Byte operator[](size_t index) const { return mData[index]; }
 
 	// When it is possible, appends the copy of value to the end of current position in container.
 	void Append(const Byte &value)
@@ -101,7 +102,14 @@ public:
 		return ALIRO_NO_ERROR;
 	}
 
+	/**
+	 * Returns a copy of the data as a std::array.
+	 *
+	 * @return The copy of the data as the std::array.
+	 */
+	std::array<Byte, C> ToArray() const { return mData; }
+
 private:
-	std::array<Byte, C> mData;
+	std::array<Byte, C> mData{};
 	size_t mCurrentDataLength{};
 };

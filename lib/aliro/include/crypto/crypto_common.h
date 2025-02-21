@@ -23,6 +23,7 @@ namespace Aliro {
 static constexpr Size kEccP256PrivateKeyLength = 32;
 
 // Public key prefix
+static constexpr Byte kEccP256PublicKeyPrefix = 0x04;
 static constexpr Size kEccP256PublicKeyPrefixLength = 1;
 // x and y coordinates both have the same length
 static constexpr Size kEccP256PublicKeyCoordinateLength = 32;
@@ -37,7 +38,7 @@ static constexpr Size kEccP256SignatureLength = 2 * kEccP256PrivateKeyLength;
 static constexpr Size kAuthenticationTagLength = 16;
 static constexpr Size kDeviceCounterLength = 4;
 // IV <= 0x0000000000000001 || device_counter (unsigned big endian, 4 bytes) - spec 8.3.1.6
-static constexpr Size kNonceLength = (sizeof(uint64_t) + (kDeviceCounterLength));
+static constexpr Size kNonceLength = (sizeof(uint64_t) + kDeviceCounterLength);
 
 using PublicKey = StaticByteSpan<kEccP256PublicKeyLength>;
 using PublicKeyXcoordinate = StaticByteSpan<kEccP256PublicKeyCoordinateXLength>;
