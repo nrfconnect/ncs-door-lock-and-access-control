@@ -222,13 +222,6 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 		return ALIRO_ERROR_INTERNAL;
 	}
 
-	k_work_init_delayable(&mRecoverWork, [](k_work *workItem) {
-		auto status = Instance().TagDetect(DetectType::REQA);
-		if (status != ALIRO_NO_ERROR) {
-			VerifyAndCall(Instance().NfcDriver::mCallbacks.mOnError, status);
-		}
-	});
-
 	k_timer_init(
 		&mRxTimer,
 		[](k_timer *) {
@@ -298,8 +291,7 @@ AliroError NfcTransportRfal::_StartAnticollision()
 
 AliroError NfcTransportRfal::_RecoverPolling(uint32_t delayMs, DetectType, bool)
 {
-	k_work_reschedule(&mRecoverWork, K_MSEC(delayMs));
-
+	// RFAL automatically recovers to the polling state
 	return ALIRO_NO_ERROR;
 }
 
