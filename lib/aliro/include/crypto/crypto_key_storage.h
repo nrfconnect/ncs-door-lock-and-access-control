@@ -91,11 +91,31 @@ public:
 	uint32_t GetReaderPrivateKeyId() const;
 
 	/**
+	 * @brief Sets a public key in a secure storage key slot.
+	 * The function additionally stores the public key X coordinate in member variable for future use.
+	 *
+	 * @param accessCredentialPublicKey input public key.
+	 *
+	 * @return ALIRO_NO_ERROR when the key was stored with successfully, an error code otherwise.
+	 */
+	AliroError SetAccessCredentialPublicKey(const PublicKey &accessCredentialPublicKey);
+
+	/**
 	 * @brief Returns public key ID slot where LTK public key is stored.
 	 *
 	 * @return The public key ID.
 	 */
-	uint32_t GetReaderPublicKeyId() const;
+	uint32_t GetAccessCredentialPublicKeyId() const;
+
+	/**
+	 * @brief Returns a X coordinate extracted from reader's LTK public key.
+	 *
+	 * @return The public key X coordinate.
+	 */
+	const StaticByteSpan<kEccP256PublicKeyCoordinateXLength> &GetAccessCredentialPublicKeyXCoordinate() const
+	{
+		return mAccessCredentialPublicKey.GetXCoordinate();
+	}
 
 private:
 	/**
@@ -126,6 +146,7 @@ private:
 
 	uint32_t mPrivateKeyId{};
 	EccPublicKey mPublicKey{};
+	EccPublicKey mAccessCredentialPublicKey{};
 };
 
 } // namespace Aliro
