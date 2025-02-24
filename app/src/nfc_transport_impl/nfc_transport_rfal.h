@@ -67,6 +67,7 @@ private:
 
 	k_timer mRxTimer{};
 	k_timer mIdleTimer{};
+	bool mTimeout{ false };
 
 	static constexpr uint32_t sRxTimerTimeoutMs{ CONFIG_RFAL_RX_TIMEOUT_MS };
 	static constexpr uint32_t sIdleTimerTimeoutMs{ CONFIG_RFAL_IDLE_TIMEOUT_MS };
