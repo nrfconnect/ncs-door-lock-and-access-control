@@ -14,6 +14,7 @@ FILE(GLOB app_sources src/*.cpp)
 add_subdirectory(src/nfc_transport_impl)
 add_subdirectory(src/storage)
 add_subdirectory(src/cli)
+add_subdirectory(src/app_callbacks)
 
 target_sources(app PRIVATE
     ${app_sources}
