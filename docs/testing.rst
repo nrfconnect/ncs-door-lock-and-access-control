@@ -65,15 +65,64 @@ In case you do not have access to `Aliro Certification Tool`_ repository, see th
     XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ...
 
-#. Open your project's JSON configuration and locate the ``dut_reader_public_key`` and ``dut_reader_group_identifier`` fields.
+#. Open your project's JSON configuration and locate the ``dut_reader_public_key``, ``th_access_credential_public_key``, ``dut_reader_group_identifier``, and ``dut_reader_group_sub_identifier`` fields.
 
-#. Input the 65-byte long Reader public key and the 16-byte long reader group identifier that you retrieved earlier.
+   .. figure:: /images/th_config.png
+      :scale: 70%
+      :alt: Test harness project configuration.
 
-.. figure:: /images/th_config.png
-   :scale: 70%
-   :alt: Test harness project configuration.
+      Test harness project configuration.
 
-   Test harness project configuration.
+#. Set up the test harness by inputting the 65-byte long Reader public key into the ``dut_reader_public_key`` field.
+
+#. Install the 16-byte long Reader group identifier and reader group sub-identifier in the Reader device.
+   Both values can be provided to the DUT using the following ``dl install`` shell commands:
+
+   .. code-block:: console
+
+      uart:~$ dl install group_id <16-byte reader_group_identifier in hex without 0x>
+      uart:~$ dl install group_sub_id <16-byte reader_group_sub_identifier in hex without 0x>
+
+   For example:
+
+   .. code-block:: console
+
+      uart:~$ dl install group_id 00113344667799AA00113344667799AA
+      uart:~$ dl install group_sub_id 113344667799AA00113344667799AA00
+
+   Executing the same commands without specifying values will return the stored value.
+   For example:
+
+   .. code-block:: console
+
+      uart:~$ dl install group_id
+      00000000: 00 11 33 44 66 77 99 aa  00 11 33 44 66 77 99 aa |..3Dfw.. ..3Dfw..|
+
+   Alternatively, you can set the Reader group identifier retrieved from DUT in the test harness project configuration, next to the ``dut_reader_group_identifier`` field.
+
+#. Set the ``th_access_credential_public_key`` in the DUT using the following ``dl provisioning`` shell command:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning AC_key <65-byte public key in hex in hex without 0x>
+
+   For example:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning AC_key 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa
+
+   Executing the same command without specifying the public key will return the stored value.
+   For example:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning AC_key
+      00000000: 04 74 2d f7 36 d0 fc 9b  e9 78 c4 5b 00 e8 fd f7 |.t-.6... .x.[....|
+      00000010: ce a6 84 ea 10 5a e5 74  c1 50 5a 2c 24 ab 61 98 |.....Z.t .PZ,$.a.|
+      00000020: e3 12 5b 7f 1b 7e 1d 13  4c 55 ec e6 96 81 ba 8e |..[..~.. LU......|
+      00000030: cc 18 a3 83 6d c5 19 9c  75 9f 31 e8 cc f1 7e 3e |....m... u.1...~>|
+      00000040: fa                                               |.                |
 
 .. _testing_verification:
 
@@ -143,3 +192,49 @@ Complete the following steps for the required tests:
                :alt: Example of the advanced test results.
 
                Example of the advanced test results.
+
+            After test execution is complete, you can check DUT logs to verify the communication and data exchange between the Reader and the test harness.
+            The logs will provide detailed information about the test execution and authorization process (signature verification).
+            When all installation and provisioning data provided in :ref:`testing_environment_configuration` are correct then you will see the following output in the DUT serial console:
+
+            .. code-block:: console
+
+               I: Verify signature
+
+                █████╗  ██████╗ ██████╗███████╗███████╗
+               ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝
+               ███████║██║     ██║     █████╗  ███████╗
+               ██╔══██║██║     ██║     ██╔══╝  ╚════██║
+               ██║  ██║╚██████╗╚██████╗███████╗███████║
+               ╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝
+
+               ██████╗ ██████╗  █████╗ ███╗   ██╗████████╗███████╗██████╗
+               ██╔════╝ ██╔══██╗██╔══██╗████╗  ██║╚══██╔══╝██╔════╝██╔══██╗
+               ██║  ███╗██████╔╝███████║██╔██╗ ██║   ██║   █████╗  ██║  ██║
+               ██║   ██║██╔══██╗██╔══██║██║╚██╗██║   ██║   ██╔══╝  ██║  ██║
+               ╚██████╔╝██║  ██║██║  ██║██║ ╚████║   ██║   ███████╗██████╔╝
+               ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═════╝
+
+               D: Communication finished
+
+            When the provided access credential public key is incorrect the following output will be displayed:
+
+            .. code-block:: console
+
+               I: Verify signature
+
+                █████╗  ██████╗ ██████╗███████╗███████╗
+               ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝
+               ███████║██║     ██║     █████╗  ███████╗
+               ██╔══██║██║     ██║     ██╔══╝  ╚════██║
+               ██║  ██║╚██████╗╚██████╗███████╗███████║
+               ╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝
+
+               ██████╗ ███████╗███╗   ██╗██╗███████╗██████╗
+               ██╔══██╗██╔════╝████╗  ██║██║██╔════╝██╔══██╗
+               ██║  ██║█████╗  ██╔██╗ ██║██║█████╗  ██║  ██║
+               ██║  ██║██╔══╝  ██║╚██╗██║██║██╔══╝  ██║  ██║
+               ██████╔╝███████╗██║ ╚████║██║███████╗██████╔╝
+               ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚══════╝╚═════╝
+
+               D: Communication finished
