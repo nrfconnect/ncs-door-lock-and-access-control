@@ -20,6 +20,10 @@ extern "C" struct k_sem irq_sem;
 void NfcTransportRfal::Run()
 {
 	while (true) {
+		if (mTimeout) {
+			VerifyAndCall(Instance().NfcDriver::mCallbacks.mOnError, ALIRO_TIMEOUT);
+			mTimeout = false;
+		}
 		rfalNfcWorker();
 		k_sem_take(&irq_sem, K_MSEC(CONFIG_RFAL_NFC_WORKER_TIMEOUT_MS));
 	}
@@ -60,8 +64,8 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 		LOG_DBG("RFAL: Data exchange state");
 		break;
 	case RFAL_NFC_STATE_DATAEXCHANGE_DONE:
-		CaptureRxData();
 		k_timer_stop(&mRxTimer);
+		CaptureRxData();
 		k_timer_start(&mIdleTimer, K_MSEC(sIdleTimerTimeoutMs), K_NO_WAIT);
 		break;
 	case RFAL_NFC_STATE_DEACTIVATION:
@@ -226,6 +230,7 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 		&mRxTimer,
 		[](k_timer *) {
 			LOG_DBG("RFAL: RX timer expired");
+			Instance().mTimeout = true;
 			Instance().DeselectTag();
 		},
 		nullptr);
