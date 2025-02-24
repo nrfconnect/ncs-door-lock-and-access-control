@@ -1,0 +1,11 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+module = NCS_DOOR_LOCK_APP_STORAGE
+module-str = NCS_DOOR_LOCK_APP_STORAGE
+module-dep = LOG
+module-help = Enables nRF Connect SDK Door Lock Application storage log messages.
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"

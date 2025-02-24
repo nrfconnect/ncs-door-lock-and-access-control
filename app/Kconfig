@@ -5,6 +5,7 @@
 #
 
 rsource "src/nfc_transport_impl/Kconfig"
+rsource "src/storage/Kconfig"
 
 if NCS_ALIRO_LIB
     rsource "../lib/aliro/Kconfig.aliro.defconfig"

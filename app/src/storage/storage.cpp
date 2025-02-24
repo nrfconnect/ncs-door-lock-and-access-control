@@ -11,7 +11,8 @@
 #include <zephyr/init.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/settings/settings.h>
-LOG_MODULE_REGISTER(door_lock_storage, CONFIG_NCS_ALIRO_LOG_LEVEL);
+
+LOG_MODULE_REGISTER(door_lock_storage, CONFIG_NCS_DOOR_LOCK_APP_STORAGE_LOG_LEVEL);
 
 struct LoadItemParam {
 	uint8_t *buf;
