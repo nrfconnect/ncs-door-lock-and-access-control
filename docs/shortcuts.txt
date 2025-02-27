@@ -1,6 +1,6 @@
 .. ### NCS shortcuts
 
-.. |APP_NAME| replace:: nRF Connect door lock reference application
+.. |APP_NAME| replace:: nRF Door Lock Reference Application
 .. |NCS| replace:: nRF Connect SDK
 .. |VSC| replace:: Visual Studio Code
 .. |nRFVSC| replace:: nRF Connect for VS Code extension

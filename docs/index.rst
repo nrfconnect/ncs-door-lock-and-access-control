@@ -1,7 +1,7 @@
 .. _index:
 
-Door lock reference application for the |NCS|
-#############################################
+|app_name| for the |NCS|
+########################
 
 .. note::
   |EXPERIMENTAL_NOTE|
