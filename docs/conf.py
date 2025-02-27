@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Door lock reference application for the nRF Connect SDK'
+project = 'nRF Door Lock Reference Application'
 copyright = '2025, Nordic Semiconductor'
 author = 'Nordic Semiconductor'
 
