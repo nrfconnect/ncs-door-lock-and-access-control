@@ -123,7 +123,6 @@ AliroError AliroErrorHandlerClb(AliroNfcErrorStatusCode statusCode)
 {
 	if (statusCode == AliroNfcErrorStatusCode::kAliroNfcGenericError) {
 		LOG_ERR("Generic error");
-		LOG_INF("Finishing secure session");
 		AccessProtocolCrypto::Instance().FinishSession();
 		return ALIRO_ERROR_INTERNAL;
 	} else {

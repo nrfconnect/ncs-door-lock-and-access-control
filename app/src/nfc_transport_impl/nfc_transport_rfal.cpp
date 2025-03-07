@@ -21,9 +21,15 @@ extern "C" struct k_sem irq_sem;
 void NfcTransportRfal::Run()
 {
 	while (true) {
-		if (mTimeout) {
-			VerifyAndCall(Instance().NfcDriver::mCallbacks.mOnError, ALIRO_TIMEOUT);
-			mTimeout = false;
+		if (mRxTimeout || mIdleTimeout) {
+			if (mRxTimeout) {
+				VerifyAndCall(Instance().NfcDriver::mCallbacks.mOnError, ALIRO_TIMEOUT);
+				mRxTimeout = false;
+			}
+			if (mIdleTimeout) {
+				mIdleTimeout = false;
+			}
+			RecoverPolling();
 		}
 		rfalNfcWorker();
 		k_sem_take(&irq_sem, K_MSEC(CONFIG_RFAL_NFC_WORKER_TIMEOUT_MS));
@@ -74,7 +80,7 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 		break;
 	case RFAL_NFC_STATE_ACTIVATED:
 		LOG_DBG("RFAL: Activated state");
-		SelectActiveTag();
+		SelectTag();
 		break;
 	default:
 		break;
@@ -98,7 +104,7 @@ ReturnCode NfcTransportRfal::RfalNfcInit()
 	return err;
 }
 
-void NfcTransportRfal::SelectActiveTag()
+void NfcTransportRfal::SelectTag()
 {
 	rfalNfcDevice *nfcDevice;
 	rfalNfcGetActiveDevice(&nfcDevice);
@@ -142,6 +148,14 @@ void NfcTransportRfal::CaptureRxData()
 		      0);
 }
 
+void NfcTransportRfal::RecoverPolling()
+{
+	if (rfalNfcIsDevActivated(rfalNfcGetState())) {
+		ReturnCode err = rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_SLEEP);
+		VerifyOrReturn(err == RFAL_ERR_NONE, LOG_ERR("RFAL: Deactivation failed, return code: %d", err));
+	}
+}
+
 /*
 ******************************************************************************
 * IsoDep interface implementation
@@ -176,12 +190,6 @@ AliroError NfcTransportRfal::_ReportTimeout()
 {
 	// No special handling needed with RFAL
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
-}
-
-AliroError NfcTransportRfal::_DeselectTag()
-{
-	ReturnCode err = rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_SLEEP);
-	return err ? ALIRO_INVALID_STATE : ALIRO_NO_ERROR;
 }
 
 /* Implementation of the generic IsoDep instance getter. */
@@ -225,8 +233,7 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 		&mRxTimer,
 		[](k_timer *) {
 			LOG_DBG("RFAL: RX timer expired");
-			Instance().mTimeout = true;
-			Instance().DeselectTag();
+			Instance().mRxTimeout = true;
 		},
 		nullptr);
 
@@ -234,7 +241,7 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 		&mIdleTimer,
 		[](k_timer *) {
 			LOG_DBG("RFAL: Idle timer expired");
-			Instance().DeselectTag();
+			Instance().mIdleTimeout = true;
 		},
 		nullptr);
 
@@ -257,7 +264,7 @@ AliroError NfcTransportRfal::_Send(NfcTransport::Data data, uint32_t maximumFram
 	return ALIRO_ERROR_INTERNAL;
 }
 
-AliroError NfcTransportRfal::_FieldOn()
+AliroError NfcTransportRfal::_NfcOn()
 {
 	// The RF field is turned right after the STR25 boots
 	// The only thing that must be done is to activate the reader
@@ -271,28 +278,10 @@ AliroError NfcTransportRfal::_FieldOn()
 	return ALIRO_NO_ERROR;
 }
 
-AliroError NfcTransportRfal::_FieldOff()
+AliroError NfcTransportRfal::_NfcOff()
 {
 	// RFAL handles this internally and knows when the field can be off
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
-}
-
-AliroError NfcTransportRfal::_TagDetect(DetectType)
-{
-	// Deactivate and return to wakeup mode
-	return Instance().DeselectTag();
-}
-
-AliroError NfcTransportRfal::_StartAnticollision()
-{
-	// Anticollision not required for if we support only a single tag at a time
-	return ALIRO_ERROR_NOT_IMPLEMENTED;
-}
-
-AliroError NfcTransportRfal::_RecoverPolling(uint32_t delayMs, DetectType, bool)
-{
-	// RFAL automatically recovers to the polling state
-	return ALIRO_NO_ERROR;
 }
 
 /* Implementation of the generic NfcDriver instance getter. */

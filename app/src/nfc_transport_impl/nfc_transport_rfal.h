@@ -34,16 +34,12 @@ private:
 	AliroError _PrepareRats();
 	AliroError _HandleReceivedData(NfcTransport::Data data, int transferError);
 	AliroError _ReportTimeout();
-	AliroError _DeselectTag();
 
 	// NfcDriver interface
 	AliroError _Init(NfcDriver::Callbacks callbacks);
 	AliroError _Send(NfcTransport::Data data, uint32_t maximumFrameDelayTime);
-	AliroError _FieldOn();
-	AliroError _FieldOff();
-	AliroError _TagDetect(DetectType type);
-	AliroError _StartAnticollision();
-	AliroError _RecoverPolling(uint32_t delayMs, DetectType type, bool tagSleep);
+	AliroError _NfcOn();
+	AliroError _NfcOff();
 
 	static NfcTransportRfal &Instance()
 	{
@@ -55,7 +51,8 @@ private:
 	void Run();
 	void RfalNotifyCallback(rfalNfcState state);
 	void CaptureRxData();
-	void SelectActiveTag();
+	void SelectTag();
+	void RecoverPolling();
 
 	rfalNfcDiscoverParam mNfcConfig{};
 	k_thread mThread{};
@@ -67,7 +64,8 @@ private:
 
 	k_timer mRxTimer{};
 	k_timer mIdleTimer{};
-	bool mTimeout{ false };
+	bool mRxTimeout{ false };
+	bool mIdleTimeout{ false };
 
 	static constexpr uint32_t sRxTimerTimeoutMs{ CONFIG_RFAL_RX_TIMEOUT_MS };
 	static constexpr uint32_t sIdleTimerTimeoutMs{ CONFIG_RFAL_IDLE_TIMEOUT_MS };

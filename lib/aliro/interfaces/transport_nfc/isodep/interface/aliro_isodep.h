@@ -49,8 +49,6 @@ public:
 		void (*mOnRxDataAvailable)(NfcTransport::Data){ nullptr };
 		/** Called when a tag is selected. */
 		void (*mOnTagSelected)(SelectStatus){ nullptr };
-		/** Called when a tag is deselected. */
-		void (*mOnTagDeselected)(){ nullptr };
 		/** Called on each error occurrence. */
 		void (*mOnError)(AliroError){ nullptr };
 	};
@@ -93,12 +91,6 @@ public:
 	 * @return AliroError status of the operation.
 	 */
 	AliroError ReportTimeout();
-
-	/**
-	 * @brief Deactivates the current tag by sending DESELECT command.
-	 * @return AliroError status of the operation.
-	 */
-	AliroError DeselectTag();
 
 protected:
 	IsoDep() = default;
