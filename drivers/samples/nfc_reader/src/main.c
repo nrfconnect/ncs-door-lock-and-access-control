@@ -15,6 +15,8 @@
 #include <rfal_nfc.h>
 #include <rfal_utils.h>
 
+#include "ncs_pal_nfc_worker.h"
+
 LOG_MODULE_REGISTER(app, CONFIG_NCS_NFC_READER_SAMPLE_LOG_LEVEL);
 
 // NFC states
@@ -167,22 +169,9 @@ static void discovery_exit(void *o)
 	k_sleep(K_MSEC(500));
 }
 
-static void nfc_worker_fn(void *unused1, void *unused2, void *unused3)
+static void nfc_worker_fn(void *, void *, void *)
 {
-	ARG_UNUSED(unused1);
-	ARG_UNUSED(unused2);
-	ARG_UNUSED(unused3);
-
 	int32_t ret;
-
-	LOG_INF("NCS NFC reader sample application");
-
-	if (rfal_ncs_pal_init()) {
-		LOG_ERR("NFC PAL init failed");
-		return;
-	}
-
-	smf_set_initial(&hsm_ctx, &nfc_hsm[S_NO_INIT]);
 
 	while (true) {
 		rfalNfcWorker();
@@ -195,5 +184,17 @@ static void nfc_worker_fn(void *unused1, void *unused2, void *unused3)
 	}
 }
 
-K_THREAD_DEFINE(nfc_worker_thread, CONFIG_WORKER_THREAD_STACK_SIZE, nfc_worker_fn, NULL, NULL, NULL,
-		CONFIG_WORKER_THREAD_PRIORITY, 0, 0);
+int main()
+{
+	LOG_INF("NCS NFC reader sample application");
+
+	if (rfal_ncs_pal_init()) {
+		LOG_ERR("NFC PAL init failed");
+		return -1;
+	}
+
+	smf_set_initial(&hsm_ctx, &nfc_hsm[S_NO_INIT]);
+
+	ncs_pal_nfc_worker_start(nfc_worker_fn);
+	return 0;
+}

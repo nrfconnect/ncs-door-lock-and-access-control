@@ -6,14 +6,6 @@
 
 rsource "Kconfig.rfal.defconfig"
 
-config RFAL_WORKER_THREAD_STACK_SIZE
-	int "Stack size of the thread that the RFAL worker lives in"
-	default 4096
-
-config RFAL_WORKER_THREAD_PRIORITY
-	int "Priority of the thread that the RFAL worker lives in"
-	default 0
-
 config RFAL_RX_TIMEOUT_MS
 	int "RFAL RX timeout in ms"
 	default 500
