@@ -5,6 +5,7 @@
  */
 
 #include "ncs_pal_gpio.h"
+#include "ncs_pal_semaphore.h"
 
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
@@ -12,8 +13,6 @@
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(pal_gpio, CONFIG_NFC_LOG_LEVEL);
-
-K_SEM_DEFINE(irq_sem, 0, 1);
 
 static const struct gpio_dt_spec irq_gpio = GPIO_DT_SPEC_GET(DT_INST(0, x_nucleo_nfc), irq_gpios);
 
@@ -28,7 +27,7 @@ static void irq_pin_cb(const struct device *gpiob, struct gpio_callback *cb, uin
 	ARG_UNUSED(cb);
 	ARG_UNUSED(pins);
 
-	k_sem_give(&irq_sem);
+	ncs_pal_give_semaphore();
 }
 
 // TODO: The function should be moved to the nRF54L style shield.

@@ -5,6 +5,7 @@
  */
 
 #include "nfc_transport_rfal.h"
+#include "ncs_pal_semaphore.h"
 #include <rfal_ncs_pal.h>
 #include <rfal_nfc_config.h>
 
@@ -15,8 +16,6 @@ LOG_MODULE_REGISTER(nfc_st_rfal_impl, CONFIG_NCS_ALIRO_RFAL_LOG_LEVEL);
 namespace Aliro {
 
 K_THREAD_STACK_DEFINE(mStack, CONFIG_RFAL_WORKER_THREAD_STACK_SIZE);
-
-extern "C" struct k_sem irq_sem;
 
 void NfcTransportRfal::Run()
 {
@@ -32,7 +31,7 @@ void NfcTransportRfal::Run()
 			RecoverPolling();
 		}
 		rfalNfcWorker();
-		k_sem_take(&irq_sem, K_MSEC(CONFIG_RFAL_NFC_WORKER_TIMEOUT_MS));
+		ncs_pal_take_semaphore(K_MSEC(CONFIG_RFAL_NFC_WORKER_TIMEOUT_MS));
 	}
 }
 

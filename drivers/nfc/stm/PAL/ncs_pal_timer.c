@@ -7,13 +7,11 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/__assert.h>
 
-#include "ncs_pal_isr.h"
+#include "ncs_pal_semaphore.h"
 #include "ncs_pal_timer.h"
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(pal_timer, CONFIG_NFC_LOG_LEVEL);
-
-extern struct k_sem irq_sem;
 
 typedef struct {
 	struct k_timer timer;
@@ -29,7 +27,7 @@ uint32_t ncs_pal_get_sys_tick()
 
 static void timer_expiry_callback(struct k_timer *timer)
 {
-	k_sem_give(&irq_sem);
+	ncs_pal_give_semaphore();
 }
 
 void ncs_pal_timers_init()
