@@ -9,14 +9,13 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
+#include "ncs_pal_semaphore.h"
 #include <rfal_ncs_pal.h>
 #include <rfal_nfc.h>
 #include <rfal_nfc_config.h>
 #include <rfal_utils.h>
 
 LOG_MODULE_REGISTER(app, CONFIG_NCS_NFC_READER_SAMPLE_LOG_LEVEL);
-
-extern struct k_sem irq_sem;
 
 // NFC reader configuration
 static rfalNfcDiscoverParam nfc_conf;
@@ -115,7 +114,7 @@ static void nfc_worker_fn(void *unused1, void *unused2, void *unused3)
 
 	while (true) {
 		rfalNfcWorker();
-		k_sem_take(&irq_sem, K_MSEC(CONFIG_WORKER_POOL_TIMEOUT_MS));
+		ncs_pal_take_semaphore(K_MSEC(CONFIG_WORKER_POOL_TIMEOUT_MS));
 	}
 }
 

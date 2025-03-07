@@ -5,6 +5,7 @@
  */
 
 #include "ncs_pal_isr.h"
+#include "ncs_pal_semaphore.h"
 
 #include <zephyr/kernel.h>
 
@@ -14,8 +15,6 @@ LOG_MODULE_REGISTER(pal_isr, CONFIG_NFC_LOG_LEVEL);
 // TODO: Move to Kconfig
 #define ISR_THREAD_STACK_SIZE 1024
 #define ISR_THREAD_PRIORITY -1
-
-extern struct k_sem irq_sem;
 
 static nfc_isr_cb nfc_isr_callback = NULL;
 
@@ -31,8 +30,7 @@ static void nfc_isr_poll_fn(void *unused1, void *unused2, void *unused3)
 	ARG_UNUSED(unused3);
 
 	while (true) {
-		k_sem_take(&irq_sem, K_FOREVER);
-
+		ncs_pal_take_semaphore(K_FOREVER);
 		LOG_DBG("NFC ISR");
 
 		if (nfc_isr_callback) {
