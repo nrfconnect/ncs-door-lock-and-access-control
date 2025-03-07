@@ -12,10 +12,6 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(pal_isr, CONFIG_NFC_LOG_LEVEL);
 
-// TODO: Move to Kconfig
-#define ISR_THREAD_STACK_SIZE 1024
-#define ISR_THREAD_PRIORITY -1
-
 static nfc_isr_cb nfc_isr_callback = NULL;
 
 void ncs_pal_isr_cb_set(nfc_isr_cb cb)
@@ -39,5 +35,5 @@ static void nfc_isr_poll_fn(void *unused1, void *unused2, void *unused3)
 	}
 }
 
-K_THREAD_DEFINE(nfc_isr_poll_thread, ISR_THREAD_STACK_SIZE, nfc_isr_poll_fn, NULL, NULL, NULL, ISR_THREAD_PRIORITY, 0,
-		0);
+K_THREAD_DEFINE(nfc_isr_poll_thread, CONFIG_RFAL_ISR_THREAD_STACK_SIZE, nfc_isr_poll_fn, NULL, NULL, NULL,
+		CONFIG_RFAL_ISR_THREAD_PRIORITY, 0, 0);

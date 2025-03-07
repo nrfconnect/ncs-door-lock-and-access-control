@@ -9,6 +9,8 @@
 #include <rfal_ncs_pal.h>
 #include <rfal_nfc_config.h>
 
+#include "ncs_pal_nfc_worker.h"
+
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(nfc_st_rfal_impl, CONFIG_NCS_ALIRO_RFAL_LOG_LEVEL);
@@ -216,10 +218,7 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 		return ALIRO_ERROR_INTERNAL;
 	}
 
-	k_tid_t thread = k_thread_create(
-		&mThread, mStack, CONFIG_RFAL_WORKER_THREAD_STACK_SIZE,
-		[](void *, void *, void *) { return Instance().Run(); }, nullptr, nullptr, nullptr,
-		K_PRIO_PREEMPT(CONFIG_RFAL_WORKER_THREAD_PRIORITY), 0, K_NO_WAIT);
+	k_tid_t thread = ncs_pal_nfc_worker_start([](void *, void *, void *) -> void { return Instance().Run(); });
 
 	VerifyOrReturnStatus(thread, ALIRO_INVALID_STATE, LOG_ERR("RFAL: Cannot spawn the NFC driver thread"));
 

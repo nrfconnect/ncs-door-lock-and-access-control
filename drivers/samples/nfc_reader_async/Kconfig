@@ -8,14 +8,6 @@ menu "Zephyr"
 source "Kconfig.zephyr"
 endmenu
 
-config WORKER_THREAD_STACK_SIZE
-    int "Stack size for NFC worker therad"
-    default 1024
-
-config WORKER_THREAD_PRIORITY
-    int "Priority for NFC worker therad"
-    default 10
-
 config WORKER_POOL_TIMEOUT_MS
     int
     default 30
