@@ -47,6 +47,7 @@ extern "C" {
 #include "ncs_pal_timer.h"
 #include "ncs_pal_gpio.h"
 #include "ncs_pal_isr.h"
+#include "ncs_pal_critical_section.h"
 
 #include "rfal_platform_config.h"
 
@@ -81,8 +82,8 @@ extern "C" {
 * GLOBAL MACROS
 ******************************************************************************
 */
-#define platformProtectST25RComm()                                                              /*!< Protect unique access to ST25R communication channel - IRQ disable on single thread environment (MCU) ; Mutex lock on a multi thread environment      */
-#define platformUnprotectST25RComm()                                                            /*!< Unprotect unique access to ST25R communication channel - IRQ enable on a single thread environment (MCU) ; Mutex unlock on a multi thread environment */
+#define platformProtectST25RComm()                    ncs_pal_critical_section_start()                        /*!< Protect unique access to ST25R communication channel - IRQ disable on single thread environment (MCU) ; Mutex lock on a multi thread environment      */
+#define platformUnprotectST25RComm()                  ncs_pal_critical_section_stop()                      /*!< Unprotect unique access to ST25R communication channel - IRQ enable on a single thread environment (MCU) ; Mutex unlock on a multi thread environment */
 
 #define platformProtectST25RIrqStatus()               platformProtectST25RComm()                    /*!< Protect unique access to IRQ status var - IRQ disable on single thread environment (MCU) ; Mutex lock on a multi thread environment */
 #define platformUnprotectST25RIrqStatus()             platformUnprotectST25RComm()                  /*!< Unprotect the IRQ status var - IRQ enable on a single thread environment (MCU) ; Mutex unlock on a multi thread environment         */
