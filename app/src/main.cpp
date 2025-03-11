@@ -14,6 +14,7 @@
 
 LOG_MODULE_REGISTER(door_lock_app, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 
+
 using namespace Aliro;
 
 static void StorageInit()
