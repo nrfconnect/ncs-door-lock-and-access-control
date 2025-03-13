@@ -9,6 +9,25 @@ rsource "drivers/Kconfig"
 config NCS_ALIRO_LIB
 	bool "Use Aliro Stack library"
 	default y
+	# required by Aliro CLI
+	imply FLASH
+	imply FLASH_MAP
+	imply NVS
+	imply SETTINGS
+	imply REBOOT
+	imply SHELL
+
+if NCS_ALIRO_LIB
+
+choice NVS_LOG_LEVEL_CHOICE
+	default NVS_LOG_LEVEL_ERR
+endchoice
+
+choice SETTINGS_LOG_LEVEL_CHOICE
+	default SETTINGS_LOG_LEVEL_ERR
+endchoice
+
+endif
 
 config ALIRO_PRINT_READER_GROUP_ID
 	bool "Print reader group ID that should be provisioned into the User Device"

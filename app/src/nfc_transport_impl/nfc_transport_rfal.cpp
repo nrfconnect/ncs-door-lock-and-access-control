@@ -9,6 +9,7 @@
 #include <rfal_ncs_pal.h>
 #include <rfal_nfc_config.h>
 
+#include "aliro/utils.h"
 #include "ncs_pal_nfc_worker.h"
 
 #include <zephyr/logging/log.h>
