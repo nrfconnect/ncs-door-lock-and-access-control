@@ -8,7 +8,7 @@
 
 #include "nfc_driver_config.h"
 
-#include "errors.h"
+#include "aliro/errors.h"
 #include "transport_nfc/data.h"
 
 namespace Aliro {

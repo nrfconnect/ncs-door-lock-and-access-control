@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#include <stdlib.h>
+#include "aliro/utils.h"
+
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
-
-#include "util/utils.h"
-
 #include <zephyr/logging/log.h>
+
+#include <stdlib.h>
 
 LOG_MODULE_REGISTER(hw_init, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 

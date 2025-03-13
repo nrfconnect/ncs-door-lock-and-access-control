@@ -10,7 +10,7 @@
 
 #include "transport_nfc/data.h"
 
-#include "errors.h"
+#include "aliro/errors.h"
 
 namespace Aliro {
 

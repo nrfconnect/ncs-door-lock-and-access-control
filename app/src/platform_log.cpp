@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#include "platform/platform_log.h"
+#include "logger/platform_log.h"
 
 #include <zephyr/logging/log.h>
 
