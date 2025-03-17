@@ -40,7 +40,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR if the stack was started successfully, an error code otherwise.
 	 */
-	AliroError Start();
+	AliroError Start() const;
 
 private:
 	Access::Callbacks mCallbacks;

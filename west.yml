@@ -7,22 +7,9 @@ manifest:
   remotes:
     - name: ncs
       url-base: https://github.com/nrfconnect
-      # Needed for fetching private repositories as Git
-      # does not allow for password authentication anymore.
-    - name: ncs-ssh
-      url-base: git@github.com:nrfconnect
-  group-filter:
-    - -aliro
   projects:
     - name: nrf
       remote: ncs
       repo-path: sdk-nrf
-      revision: main
+      revision: v2.9.0
       import: true
-    - name: aliro
-      remote: ncs-ssh
-      repo-path: ncs-aliro
-      revision: main
-      groups:
-        - aliro
-      import: false

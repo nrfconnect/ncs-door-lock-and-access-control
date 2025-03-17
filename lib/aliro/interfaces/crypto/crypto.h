@@ -178,6 +178,18 @@ public:
 				  uint32_t keyId, const Nonce &nonce, Byte *cipherText, AuthenticationTag &authTag);
 
 	/**
+	 * Encrypt data payload.
+	 *
+	 * @param plainTxt input raw paylod to encrypt.
+	 * @param plainTxtLength input size of the payload.
+	 * @param keyId input identifier of the key to use for encryption.
+	 * @param cipherText output encrypted paylod.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error status otherwise.
+	 */
+	AliroError EncryptPayload(const Byte *plainTxt, size_t plainTxtLength, uint32_t keyId, Byte *cipherText);
+
+	/**
 	 * Authenticated decryption (AEAD) data payload.
 	 *
 	 * @param keyId input identifier of the key to use for decryption.
@@ -217,6 +229,21 @@ public:
 		return DecryptPayload(keyId, cipherText, cipherTextLength, nullptr, 0U, nonce, plainText,
 				      plainTextLength);
 	}
+
+	/**
+	 * @brief Provisions a symmetric key for cryptographic operations.
+	 *
+	 * This function stores a symmetric key in a secure location for future use.
+	 *
+	 * @param key pointer to the symmetric key data.
+	 * @param keyLength length of the symmetric key in bytes.
+	 * @param keyId identifier for the key to be provisioned. This ID is used
+	 *                   to reference the key in subsequent operations.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error status otherwise.
+	 */
+	AliroError ProvisionSymmetricKey(const uint8_t *key, size_t keyLength, uint32_t keyId,
+					 bool isPersistent = false);
 
 protected:
 	Crypto() = default;

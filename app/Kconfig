@@ -5,7 +5,6 @@
 #
 
 rsource "src/nfc_transport_impl/Kconfig"
-
 rsource "../lib/aliro/Kconfig.aliro.defconfig"
 
 menu "Zephyr"
