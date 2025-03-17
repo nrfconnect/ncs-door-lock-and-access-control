@@ -12,18 +12,18 @@ compatible: "x-nucleo-nfc"
 include: spi-device.yaml
 
 properties:
-    irq-gpios:
-      type: phandle-array
-      required: true
+  irq-gpios:
+    type: phandle-array
+    required: true
 
-    led-nfca-gpios:
-      type: phandle-array
-      required: false
+  led-nfca-gpios:
+    type: phandle-array
+    required: false
 
-    led-nfcb-gpios:
-      type: phandle-array
-      required: false
+  led-nfcb-gpios:
+    type: phandle-array
+    required: false
 
-    led-nfcf-gpios:
-      type: phandle-array
-      required: false
+  led-nfcf-gpios:
+    type: phandle-array
+    required: false

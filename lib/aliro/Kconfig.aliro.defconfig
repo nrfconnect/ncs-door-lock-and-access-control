@@ -59,3 +59,35 @@ config PSA_WANT_ALG_GCM
 # APDU library
 config NFC_T4T_APDU
 	default y
+
+# required by Aliro persistent storage 
+config FLASH
+	default y
+
+config FLASH_MAP
+	default y
+
+config NVS
+	default y
+
+config SETTINGS
+	default y
+
+# required by Aliro CLI 
+config REBOOT
+	default y
+
+config SHELL
+	default y
+
+config BT_DEVICE_NAME
+	default "AliroDL"
+
+config BT
+	default y
+
+config BT_PERIPHERAL
+	default y
+
+config BT_SMP
+	default y
