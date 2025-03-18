@@ -1,0 +1,89 @@
+# TODO: https://github.com/zephyrproject-rtos/zephyr/blob/main/.github/workflows/compliance.yml
+name: Zephyr Compliance Checks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  code-compliance:
+    name: Zephyr compliance
+    runs-on: ubuntu-22.04
+    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:v2.9.0
+    defaults:
+      run:
+        # Bash shell is needed to set toolchain related environment variables in docker container
+        # It is a workaround for GitHub Actions limitation https://github.com/actions/runner/issues/1964
+        shell: bash
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install -y libmagic-dev libffi7
+        shell: bash
+
+      - name: Set up workspace directory
+        run: |
+          echo "WEST_WORKSPACE=$(cd .. && pwd)" >> $GITHUB_ENV
+
+      - name: Cache west modules
+        id: cache-west
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ env.WEST_WORKSPACE }}/bootloader
+            ${{ env.WEST_WORKSPACE }}/modules
+            ${{ env.WEST_WORKSPACE }}/nrf
+            ${{ env.WEST_WORKSPACE }}/nrfxlib
+            ${{ env.WEST_WORKSPACE }}/test
+            ${{ env.WEST_WORKSPACE }}/tools
+            ${{ env.WEST_WORKSPACE }}/zephyr
+          key: ${{ runner.os }}-west-${{ hashFiles('west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-west
+
+      - name: Prepare west project
+        run: |
+          west init -l
+          west update -o=--depth=1 -n
+
+      - name: Install compliance python dependencies
+        run: pip install -r zephyr/scripts/requirements-compliance.txt
+        working-directory: ${{ github.workspace }}/..
+
+      - name: Rebase onto the target branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Mark the repository as safe
+          git config --global --add safe.directory "$(pwd)"
+
+          git config --global user.email "action@github.com"
+          git config --global user.name "Action Github"
+          git remote -v
+
+          # Ensure there's no merge commits in the PR
+          [[ "$(git rev-list --merges --count origin/${BASE_REF}..)" == "0" ]] || \
+          (echo "::error ::Merge commits not allowed, rebase instead";false)
+          git rebase origin/${BASE_REF}
+          git clean -f -d
+
+      - name: Check for PR description
+        if: ${{ github.event.pull_request.body == '' }}
+        continue-on-error: true
+        id: pr_description
+        run: |
+          echo "Pull request description cannot be empty."
+          exit 1
+
+      - name: Run compliance checks
+        run: ${{ env.WEST_WORKSPACE }}/zephyr/scripts/ci/check_compliance.py -m yamllint -m clangformat -m gitlint -c origin/${{ github.base_ref }}..
