@@ -4,7 +4,6 @@
 .. ### Source: github.com
 
 .. _`ncs-door-lock-app`: https://github.com/nrfconnect/ncs-door-lock-app
-.. _`ncs-aliro`: https://github.com/nrfconnect/ncs-aliro
 .. _`Aliro Certification Tool`: https://github.com/csa-access-control/aliro-certification-tool
 .. _`test harness hardware requirements`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#requirements
 .. _`test harness usage instructions`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#usage-instructions

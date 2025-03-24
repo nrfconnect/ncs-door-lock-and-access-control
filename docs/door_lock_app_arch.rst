@@ -20,7 +20,7 @@ The Aliro stack implements the Access Protocol logic, Aliro-specific cryptograph
 The interfaces layer is a bridge connecting the Aliro stack to the Zephyr OS modules through specific backends that implement the following components required by the Aliro: crypto, NFC and, ultra wideband (UWB).
 This layer additionally allows to utilize other, custom backends for the crypto, NFC and UWB components by implementing the provided API.
 By default, the |APP_NAME| uses backends shown in the :ref:`architecture overview <arch_overview>`.
-Both the Aliro stack and the interfaces layers are part of a separate :ref:`add-on <other_addons>` repository.
+Both the Aliro stack and the interfaces layers are placed in the :file:`lib/aliro` directory.
 
 The RF Abstraction Layer (NFC RFAL) handles communication with the STMicroelectronics :ref:`NFC integrated circuit (IC) <hw_requirements_nfc_reader>`.
 This layer contains drivers, platform abstraction layer (PAL) and the NFC protocol stack, covering evrything from physical characteristic to the application layer.

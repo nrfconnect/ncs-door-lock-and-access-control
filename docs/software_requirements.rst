@@ -10,10 +10,7 @@ This page summarizes the requirements for setting up and working with the |app_n
 |NCS|
 *****
 
-Before you start working with the application, you must have the following:
-
-* Installed the |NCS| development environment and |NCS| toolchain
-* Access to the `ncs-aliro`_ private repository
+Before you start working with the application, you must have installed the |NCS| development environment and |NCS| toolchain.
 
 Prepare the environment:
 
