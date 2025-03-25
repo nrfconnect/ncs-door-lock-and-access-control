@@ -17,7 +17,8 @@ Dependencies between these modules and their specific revisions are managed thro
 Aliro add-ons
 *************
 
-The |APP_NAME| includes a binary library of the Aliro stack. The binary is built from the Aliro add-on, which is a private module with restricted access.
+The |APP_NAME| includes a binary library of the Aliro stack.
+The binary is built from the Aliro add-on, which is a private module with restricted access.
 
 See the following diagram for deployment of software components used by the |APP_NAME|:
 
