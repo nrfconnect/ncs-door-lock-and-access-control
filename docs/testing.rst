@@ -39,27 +39,11 @@ In case you do not have access to `Aliro Certification Tool`_ repository, see th
 
    .. code-block:: console
 
-    I: Reader long term public key:
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX                      |x
-    Provision the Test Harness with the following byte string:
+    Provision the Test Harness with the following Reader Public Key:
     XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ...
 
    .. code-block:: console
-
-    I: Reader Identifier:
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
-    I: XX XX XX XX XX XX XX XX |xxxxxxxx
 
     Provision the Test Harness with the following Reader Group Identifier:
     XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -199,42 +183,16 @@ Complete the following steps for the required tests:
 
             .. code-block:: console
 
-               I: Verify signature
-
-                █████╗  ██████╗ ██████╗███████╗███████╗
-               ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝
-               ███████║██║     ██║     █████╗  ███████╗
-               ██╔══██║██║     ██║     ██╔══╝  ╚════██║
-               ██║  ██║╚██████╗╚██████╗███████╗███████║
-               ╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝
-
-               ██████╗ ██████╗  █████╗ ███╗   ██╗████████╗███████╗██████╗
-               ██╔════╝ ██╔══██╗██╔══██╗████╗  ██║╚══██╔══╝██╔════╝██╔══██╗
-               ██║  ███╗██████╔╝███████║██╔██╗ ██║   ██║   █████╗  ██║  ██║
-               ██║   ██║██╔══██╗██╔══██║██║╚██╗██║   ██║   ██╔══╝  ██║  ██║
-               ╚██████╔╝██║  ██║██║  ██║██║ ╚████║   ██║   ███████╗██████╔╝
-               ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═════╝
-
-               D: Communication finished
+               [00:00:39.678,248] <inf> Verify signature
+               [00:00:39.679,533] <inf> door_lock_app: ACCESS GRANTED
+               [00:00:39.679,704] <dbg> Finishing secure session
+               [00:00:39.679,724] <dbg> Communication finished
 
             When the provided access credential public key is incorrect the following output will be displayed:
 
             .. code-block:: console
 
-               I: Verify signature
-
-                █████╗  ██████╗ ██████╗███████╗███████╗
-               ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝
-               ███████║██║     ██║     █████╗  ███████╗
-               ██╔══██║██║     ██║     ██╔══╝  ╚════██║
-               ██║  ██║╚██████╗╚██████╗███████╗███████║
-               ╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝
-
-               ██████╗ ███████╗███╗   ██╗██╗███████╗██████╗
-               ██╔══██╗██╔════╝████╗  ██║██║██╔════╝██╔══██╗
-               ██║  ██║█████╗  ██╔██╗ ██║██║█████╗  ██║  ██║
-               ██║  ██║██╔══╝  ██║╚██╗██║██║██╔══╝  ██║  ██║
-               ██████╔╝███████╗██║ ╚████║██║███████╗██████╔╝
-               ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚══════╝╚═════╝
-
-               D: Communication finished
+               [00:00:20.383,849] <inf> Verify signature
+               [00:00:20.384,034] <inf> door_lock_app: ACCESS DENIED
+               [00:00:20.384,199] <dbg> Finishing secure session
+               [00:00:20.384,219] <dbg> Communication finished

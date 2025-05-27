@@ -17,10 +17,20 @@ target_sources(app PRIVATE
     ${app_sources}
 )
 
-set(ALIRO_LIB ${ZEPHYR_NCS_DOOR_LOCK_APP_MODULE_DIR}/lib/aliro/bin)
 set(PUBLIC_API ${ZEPHYR_NCS_DOOR_LOCK_APP_MODULE_DIR}/lib/aliro)
 
-zephyr_link_libraries(${ALIRO_LIB}/libaliro.a)
+if(CONFIG_SOC_SERIES_NRF52X)
+    set(ALIRO_LIB_PATH ${ZEPHYR_NCS_DOOR_LOCK_APP_MODULE_DIR}/lib/aliro/bin/cortex-m4)
+elseif(CONFIG_SOC_SERIES_NRF54LX OR CONFIG_SOC_SERIES_NRF53X)
+    set(ALIRO_LIB_PATH ${ZEPHYR_NCS_DOOR_LOCK_APP_MODULE_DIR}/lib/aliro/bin/cortex-m33)
+endif()
+
+add_library(aliro_stack STATIC IMPORTED GLOBAL)
+
+set_target_properties(aliro_stack PROPERTIES IMPORTED_LOCATION ${ALIRO_LIB_PATH}/libaliro.a)
+
+target_link_libraries(app PRIVATE aliro_stack)
+target_link_libraries(aliro_stack INTERFACE zephyr_interface)
 
 zephyr_include_directories(${PUBLIC_API}/include)
 zephyr_include_directories(${PUBLIC_API}/interfaces)

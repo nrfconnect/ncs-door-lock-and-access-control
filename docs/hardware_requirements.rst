@@ -23,11 +23,19 @@ The application supports the following development kit (DK):
      - PCA10156
      - `nrf54l15dk`_
      - ``nrf54l15dk/nrf54l15/cpuapp``
+   * - `nRF5340 DK`_
+     - PCA10095
+     - `nrf5340dk`_
+     - ``nrf5340dk/nrf5340/cpuapp``
+   * - `nRF52840 DK`_
+     - PCA10056
+     - `nrf52840dk`_
+     - ``nrf52840dk/nrf52840``
 
 .. _hw_requirements_vddio_configuration:
 
-Configuring VDDIO voltage
-=========================
+Configuring VDDIO voltage on the nRF54L15 DK
+============================================
 
 The nRF54L15 DK operates at default voltage level of 1.8V.
 Some expansion boards, especially Arduino-style boards, require higher voltage to operate properly.
@@ -65,7 +73,7 @@ The application supports the following NFC readers and their corresponding devel
    The `X-NUCLEO-NFC09A1`_ board requires a minimum of 2.7V to operate.
    Because of that, you must adjust the GPIO voltage for the `nRF54L15 DK`_ as outlined in the :ref:`hw_requirements_vddio_configuration` section.
 
-The DK does not have Arduino-compatible header, therefore, you must connect your board using wires.
+The `nRF54L15 DK`_ does not have Arduino-compatible header, therefore, you must connect your board using wires.
 To connect the NFC reader expansion board to the `nRF54L15 DK`_, refer to the following pin mapping.
 The pinout is applicable for each of the supported NFC reader expansion boards:
 
@@ -94,6 +102,8 @@ The pinout is applicable for each of the supported NFC reader expansion boards:
    :alt: Expansion board connection to the nRF54L15 DK.
 
    X-NUCLEO expansion board connection to the nRF54L15 DK.
+
+When using the `nRF5340 DK`_ or `nRF52840 DK`_, you can connect the NFC reader expansion board directly using the Arduino-compatible header available on the DK.
 
 .. _hw_requirements_test_harness:
 

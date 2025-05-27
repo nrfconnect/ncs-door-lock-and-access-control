@@ -50,6 +50,9 @@ config PSA_WANT_KEY_TYPE_HMAC
 config PSA_WANT_KEY_TYPE_AES
 	default y
 
+config PSA_WANT_ALG_ECB_NO_PADDING
+	default y
+
 config PSA_WANT_GENERATE_RANDOM
 	default y
 
@@ -91,3 +94,45 @@ config BT_PERIPHERAL
 
 config BT_SMP
 	default y
+
+config BT_USER_PHY_UPDATE
+	default y
+
+config BT_BUF_ACL_RX_SIZE
+	default 251
+
+config BT_BUF_ACL_TX_SIZE
+	default 251
+
+config BT_L2CAP_TX_MTU
+	default 247
+
+config BT_GATT_DYNAMIC_DB
+	default y
+
+config BT_GATT_ENFORCE_SUBSCRIPTION
+	default y
+
+config BT_GATT_SERVICE_CHANGED
+	default y
+
+config BT_L2CAP_DYNAMIC_CHANNEL
+	default y
+
+config EVENTS
+	default y
+
+config SMF
+	default y
+
+config SMF_ANCESTOR_SUPPORT
+	default y
+
+config SMF_INITIAL_TRANSITION
+	default y
+
+config NRF_SECURITY
+	default y
+
+config BT_CTLR_TX_PWR_DYNAMIC_CONTROL
+	default y if !SOC_NRF5340_CPUAPP

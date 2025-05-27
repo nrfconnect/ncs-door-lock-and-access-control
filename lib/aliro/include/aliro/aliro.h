@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
@@ -41,6 +41,18 @@ public:
 	 * @return ALIRO_NO_ERROR if the stack was started successfully, an error code otherwise.
 	 */
 	AliroError Start() const;
+
+	/**
+	 * @brief Temporary method for processing the access decision result.
+	 *
+	 * Called by the state machine when access verification is complete.
+	 * Triggers the appropriate user callback based on the access status.
+	 *
+	 * @param status The access decision result (Granted/Denied).
+	 *
+	 * @note This function finally should be replaced by appropriate application callback.
+	 */
+	void AccessDecision(Access::Status status) const;
 
 private:
 	Access::Callbacks mCallbacks;

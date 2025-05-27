@@ -1,16 +1,14 @@
 /*
  * Copyright (c) 2025 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
 
 #include "aliro/errors.h"
 
-namespace Aliro {
-
-namespace Access {
+namespace Aliro::Access {
 
 /**
  * @brief Access status.
@@ -40,6 +38,4 @@ struct Callbacks {
 	void (*mOnError)(AliroError error){ nullptr };
 };
 
-} // namespace Access
-
-} // namespace Aliro
+} // namespace Aliro::Access
