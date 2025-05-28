@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
@@ -239,11 +239,21 @@ public:
 	 * @param keyLength length of the symmetric key in bytes.
 	 * @param keyId identifier for the key to be provisioned. This ID is used
 	 *                   to reference the key in subsequent operations.
+	 * @param isPersistent flag indicating whether the key should be persistent or temporary.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError ProvisionSymmetricKey(const uint8_t *key, size_t keyLength, uint32_t keyId,
+	AliroError ProvisionSymmetricKey(const uint8_t *key, size_t keyLength, uint32_t &keyId,
 					 bool isPersistent = false);
+
+	/**
+	 * @brief Checks if a key ID exists (key is provisioned).
+	 *
+	 * @param keyId The key ID to check.
+	 *
+	 * @return ALIRO_NO_ERROR if the key available, a error code otherwise.
+	 */
+	AliroError IsKeyValid(uint32_t keyId);
 
 protected:
 	Crypto() = default;

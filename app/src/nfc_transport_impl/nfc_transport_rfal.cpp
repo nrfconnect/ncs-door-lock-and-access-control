@@ -23,14 +23,8 @@ K_THREAD_STACK_DEFINE(mStack, CONFIG_RFAL_WORKER_THREAD_STACK_SIZE);
 void NfcTransportRfal::Run()
 {
 	while (true) {
-		if (mRxTimeout || mIdleTimeout) {
-			if (mRxTimeout) {
-				VerifyAndCall(Instance().NfcDriver::mCallbacks.mOnError, ALIRO_TIMEOUT);
-				mRxTimeout = false;
-			}
-			if (mIdleTimeout) {
-				mIdleTimeout = false;
-			}
+		if (mIdleTimeout) {
+			mIdleTimeout = false;
 			RecoverPolling();
 		}
 		rfalNfcWorker();
@@ -73,7 +67,6 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 		LOG_DBG("RFAL: Data exchange state");
 		break;
 	case RFAL_NFC_STATE_DATAEXCHANGE_DONE:
-		k_timer_stop(&mRxTimer);
 		CaptureRxData();
 		k_timer_start(&mIdleTimer, K_MSEC(sIdleTimerTimeoutMs), K_NO_WAIT);
 		break;
@@ -106,7 +99,7 @@ ReturnCode NfcTransportRfal::RfalNfcInit()
 	return err;
 }
 
-void NfcTransportRfal::SelectTag()
+void NfcTransportRfal::SelectTag() const
 {
 	rfalNfcDevice *nfcDevice;
 	rfalNfcGetActiveDevice(&nfcDevice);
@@ -150,7 +143,7 @@ void NfcTransportRfal::CaptureRxData()
 		      0);
 }
 
-void NfcTransportRfal::RecoverPolling()
+void NfcTransportRfal::RecoverPolling() const
 {
 	if (rfalNfcIsDevActivated(rfalNfcGetState())) {
 		ReturnCode err = rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_SLEEP);
@@ -169,26 +162,26 @@ AliroError NfcTransportRfal::_Init(IsoDep::Callbacks callbacks)
 	return ALIRO_NO_ERROR;
 }
 
-AliroError NfcTransportRfal::_PrepareData(NfcTransport::Data data)
+AliroError NfcTransportRfal::_PrepareData([[maybe_unused]] Data data) const
 {
 	// ISO-DEP layer is implemented internally in the RFAL, no need for special data handling
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-AliroError NfcTransportRfal::_PrepareRats()
+AliroError NfcTransportRfal::_PrepareRats() const
 {
 	// RATS is sent by the driver internally as an activation procedure, so we can presume the tag is fully selected
 	// a this point
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-AliroError NfcTransportRfal::_HandleReceivedData(NfcTransport::Data data, int transferError)
+AliroError NfcTransportRfal::_HandleReceivedData([[maybe_unused]] Data data, [[maybe_unused]] int transferError) const
 {
 	// No specific processing needed, all ISO-DEP specific data handling happens in driver's internals
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-AliroError NfcTransportRfal::_ReportTimeout()
+AliroError NfcTransportRfal::_ReportTimeout() const
 {
 	// No special handling needed with RFAL
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
@@ -219,7 +212,7 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 		return ALIRO_ERROR_INTERNAL;
 	}
 
-	k_tid_t thread = ncs_pal_nfc_worker_start([](void *, void *, void *) -> void { return Instance().Run(); });
+	const k_tid_t thread = ncs_pal_nfc_worker_start([](void *, void *, void *) { Instance().Run(); });
 
 	VerifyOrReturnStatus(thread, ALIRO_INVALID_STATE, LOG_ERR("RFAL: Cannot spawn the NFC driver thread"));
 
@@ -227,14 +220,6 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 		LOG_ERR("RFAL: Init failed");
 		return ALIRO_ERROR_INTERNAL;
 	}
-
-	k_timer_init(
-		&mRxTimer,
-		[](k_timer *) {
-			LOG_DBG("RFAL: RX timer expired");
-			Instance().mRxTimeout = true;
-		},
-		nullptr);
 
 	k_timer_init(
 		&mIdleTimer,
@@ -247,7 +232,7 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 	return ALIRO_NO_ERROR;
 }
 
-AliroError NfcTransportRfal::_Send(NfcTransport::Data data, uint32_t maximumFrameDelayTime)
+AliroError NfcTransportRfal::_Send(Data data, [[maybe_unused]] uint32_t maximumFrameDelayTime)
 {
 	k_timer_stop(&mIdleTimer);
 
@@ -256,14 +241,13 @@ AliroError NfcTransportRfal::_Send(NfcTransport::Data data, uint32_t maximumFram
 	// use RFAL_FWT_NONE as FWT because the driver with ISO-DEP enabled will ignore it anyway
 	ReturnCode err = rfalNfcDataExchangeStart(data.mData, data.mLength, &mRxData, &mRcvLen, RFAL_FWT_NONE);
 	if (!err) {
-		k_timer_start(&mRxTimer, K_MSEC(sRxTimerTimeoutMs), K_NO_WAIT);
 		return ALIRO_NO_ERROR;
 	}
 
 	return ALIRO_ERROR_INTERNAL;
 }
 
-AliroError NfcTransportRfal::_NfcOn()
+AliroError NfcTransportRfal::_NfcOn() const
 {
 	// The RF field is turned right after the STR25 boots
 	// The only thing that must be done is to activate the reader
@@ -277,7 +261,7 @@ AliroError NfcTransportRfal::_NfcOn()
 	return ALIRO_NO_ERROR;
 }
 
-AliroError NfcTransportRfal::_NfcOff()
+AliroError NfcTransportRfal::_NfcOff() const
 {
 	// RFAL handles this internally and knows when the field can be off
 	return ALIRO_ERROR_NOT_IMPLEMENTED;

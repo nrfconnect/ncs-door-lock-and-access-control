@@ -1,12 +1,13 @@
 sample:
-  description: NFC reader sample application
-  name: ncs-nfc-reader-sample
+  description: Door lock sample application
+  name: ncs-door-lock-sample
 common:
   sysbuild: true
   build_only: true
   platform_allow: &platforms
     - nrf54l15dk/nrf54l15/cpuapp
     - nrf52840dk/nrf52840
+    - nrf5340dk/nrf5340/cpuapp
   integration_platforms: *platforms
 tests:
-  app.nfc_reader: {}
+  app.nfc_door_lock: {}

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
@@ -9,7 +9,7 @@
 #include "nfc_driver_config.h"
 
 #include "aliro/errors.h"
-#include "transport_nfc/data.h"
+#include "transport/data.h"
 
 namespace Aliro {
 
@@ -32,11 +32,9 @@ public:
 	 */
 	struct Callbacks {
 		/** Called when data is received (RX). */
-		void (*mOnDataReceived)(NfcTransport::Data, int transferError){ nullptr };
+		void (*mOnDataReceived)(Data, int transferError){ nullptr };
 		/** Called when Tag4 is detected, anticollision is completed and ISO-DEP protocol can be activated. */
 		void (*mOnTagDetected)(){ nullptr };
-		/** Called when data is successfully sent. */
-		void (*mOnSendSuccess)(){ nullptr };
 		/** Called on each error occurrence. */
 		void (*mOnError)(AliroError){ nullptr };
 		/** Called on timeout, indicating if the system is in sleep. */
@@ -56,7 +54,7 @@ public:
 	 * @param maximumFrameDelayTime Maximum frame delay time allowed for the transmission.
 	 * @return AliroError status of the operation.
 	 */
-	AliroError Send(NfcTransport::Data data, uint32_t maximumFrameDelayTime);
+	AliroError Send(Data data, uint32_t maximumFrameDelayTime);
 
 	/**
 	 * @brief Enables the NFC.
