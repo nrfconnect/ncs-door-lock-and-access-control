@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
@@ -38,8 +38,9 @@ protected:
 	AliroError _DecryptPayload(psa_key_id_t keyId, const Byte *cipherText, size_t cipherTextLength,
 				   const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
 				   Byte *plainText, size_t &plainTextLength);
-	AliroError _ProvisionSymmetricKey(const uint8_t *key, size_t keyLength, psa_key_id_t keyId,
+	AliroError _ProvisionSymmetricKey(const uint8_t *key, size_t keyLength, psa_key_id_t &keyId,
 					  bool isPersistent = false);
+	AliroError _IsKeyValid(psa_key_id_t keyId) const;
 };
 
 } /* namespace Aliro */

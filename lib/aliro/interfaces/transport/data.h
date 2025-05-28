@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
@@ -11,15 +11,11 @@
 
 namespace Aliro {
 
-namespace NfcTransport {
-
 using Byte = uint8_t;
 
 struct Data {
 	Byte *mData{ nullptr };
 	size_t mLength{ 0 };
 };
-
-} // namespace NfcTransport
 
 } // namespace Aliro

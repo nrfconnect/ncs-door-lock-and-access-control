@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "transport_nfc/driver/interface/aliro_nfc_driver.h"
-#include "transport_nfc/isodep/interface/aliro_isodep.h"
+#include "transport/nfc/driver/interface/aliro_nfc_driver.h"
+#include "transport/nfc/isodep/interface/aliro_isodep.h"
 
 extern "C" {
 #include <rfal_nfc.h>
@@ -30,16 +30,16 @@ private:
 
 	// IsoDep interface
 	AliroError _Init(IsoDep::Callbacks callbacks);
-	AliroError _PrepareData(NfcTransport::Data data);
-	AliroError _PrepareRats();
-	AliroError _HandleReceivedData(NfcTransport::Data data, int transferError);
-	AliroError _ReportTimeout();
+	AliroError _PrepareData(Data data) const;
+	AliroError _PrepareRats() const;
+	AliroError _HandleReceivedData(Data data, int transferError) const;
+	AliroError _ReportTimeout() const;
 
 	// NfcDriver interface
 	AliroError _Init(NfcDriver::Callbacks callbacks);
-	AliroError _Send(NfcTransport::Data data, uint32_t maximumFrameDelayTime);
-	AliroError _NfcOn();
-	AliroError _NfcOff();
+	AliroError _Send(Data data, uint32_t maximumFrameDelayTime);
+	AliroError _NfcOn() const;
+	AliroError _NfcOff() const;
 
 	static NfcTransportRfal &Instance()
 	{
@@ -51,23 +51,20 @@ private:
 	void Run();
 	void RfalNotifyCallback(rfalNfcState state);
 	void CaptureRxData();
-	void SelectTag();
-	void RecoverPolling();
+	void SelectTag() const;
+	void RecoverPolling() const;
 
 	rfalNfcDiscoverParam mNfcConfig{};
 	k_thread mThread{};
 	bool mMultiSel{ false };
 
-	std::array<NfcTransport::Byte, CONFIG_RFAL_FEATURE_ISO_DEP_APDU_MAX_LEN> mRxBuffer{};
+	std::array<Byte, CONFIG_RFAL_FEATURE_ISO_DEP_APDU_MAX_LEN> mRxBuffer{};
 	uint8_t *mRxData{};
 	uint16_t *mRcvLen{};
 
-	k_timer mRxTimer{};
 	k_timer mIdleTimer{};
-	bool mRxTimeout{ false };
 	bool mIdleTimeout{ false };
 
-	static constexpr uint32_t sRxTimerTimeoutMs{ CONFIG_RFAL_RX_TIMEOUT_MS };
 	static constexpr uint32_t sIdleTimerTimeoutMs{ CONFIG_RFAL_IDLE_TIMEOUT_MS };
 };
 

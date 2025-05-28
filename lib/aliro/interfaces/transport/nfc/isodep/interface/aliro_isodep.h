@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 2024 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
 
 #include "isodep_config.h"
 
-#include "transport_nfc/data.h"
+#include "transport/data.h"
 
 #include "aliro/errors.h"
 
@@ -44,9 +44,9 @@ public:
 	 */
 	struct Callbacks {
 		/** Called when TX data is ready to be sent over the transport medium. */
-		void (*mOnTxDataReady)(NfcTransport::Data, uint32_t maxFrameDelayTime){ nullptr };
+		void (*mOnTxDataReady)(Data, uint32_t maxFrameDelayTime){ nullptr };
 		/** Called when new processed data (RX) is available for reading. */
-		void (*mOnRxDataAvailable)(NfcTransport::Data){ nullptr };
+		void (*mOnRxDataAvailable)(Data){ nullptr };
 		/** Called when a tag is selected. */
 		void (*mOnTagSelected)(SelectStatus){ nullptr };
 		/** Called on each error occurrence. */
@@ -66,7 +66,7 @@ public:
 	 * @param data Data to be prepared.
 	 * @return AliroError status of the operation.
 	 */
-	AliroError PrepareData(NfcTransport::Data data);
+	AliroError PrepareData(Data data);
 
 	/**
 	 * @brief Prepares the RATS (Request for Answer To Select) command payload. Once data is ready to be sent,
@@ -83,7 +83,7 @@ public:
 	 * @param transferError Error status of the data transfer.
 	 * @return AliroError status of the operation.
 	 */
-	AliroError HandleReceivedData(NfcTransport::Data data, int transferError);
+	AliroError HandleReceivedData(Data data, int transferError);
 
 	/**
 	 * @brief Reports a timeout event. This function is supposed to be called to notify the ISO-DEP layer about the

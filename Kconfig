@@ -6,13 +6,5 @@
 
 rsource "drivers/Kconfig"
 
-choice NVS_LOG_LEVEL_CHOICE
-	default NVS_LOG_LEVEL_ERR
-endchoice
-
-choice SETTINGS_LOG_LEVEL_CHOICE
-	default SETTINGS_LOG_LEVEL_ERR
-endchoice
-
 config ALIRO_PRINT_READER_GROUP_ID
 	bool "Print reader group ID that should be provisioned into the User Device"

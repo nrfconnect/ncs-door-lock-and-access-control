@@ -17,18 +17,7 @@ LOG_MODULE_REGISTER(door_lock_app, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 
 int main()
 {
-	LOG_INF("                                                                        \r\n"
-		"                                          @@@   @@@@                    \r\n"
-		"    @@@@@@@@@@@@                          @@@                           \r\n"
-		"  @@@@@      @@@@@              @@@@   @@ @@@    @@      @@     @@@@    \r\n"
-		" @@@@          @@@@          @@@@  @@@@@@ @@@    @@   @@@@@  @@@   @@@@ \r\n"
-		"@@@@     @@      @@@        @@@       @@@ @@@    @@  @@@   @@@       @@@\r\n"
-		"@@@     @@@@@    @@@       @@@        @@@ @@@    @@  @@    @@@        @@\r\n"
-		"@@@   @@@@@@@@   @@@       @@@        @@@ @@@    @@  @@    @@@        @@\r\n"
-		" @@@    @@@@    @@@@        @@@      @@@@ @@@    @@  @@     @@       @@@\r\n"
-		"  @@@   @@@@   @@@@           @@@@@@@@@@@  @@@@@ @@  @@      @@@@@@@@@  \r\n"
-		"   @@@@ @@@@ @@@@                                                       \r\n"
-		"     @@ @@@@ @@                                                         \r\n");
+	LOG_INF("Starting nRF Door Lock Reference Application for the nRF Connect SDK");
 
 	AliroError ec = Aliro::AliroStack::Instance().Init(
 		{ .mOnAccessAttempt =

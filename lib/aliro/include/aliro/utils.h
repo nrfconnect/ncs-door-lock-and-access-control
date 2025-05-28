@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
@@ -166,7 +166,7 @@ inline bool IsBufferEmpty(const uint8_t *data, size_t length)
 /**
  * @brief Calculates the bit count based on the input bytes count.
  */
-constexpr inline uint32_t BitsCount(uint8_t lengthInBytes)
+constexpr uint32_t BitsCount(uint8_t lengthInBytes)
 {
 	return (lengthInBytes << 3);
 }
@@ -180,5 +180,5 @@ constexpr inline uint32_t BitsCount(uint8_t lengthInBytes)
  */
 inline uint16_t BigEndianArrayToHostUint16(const uint8_t data[2])
 {
-	return ((uint16_t)data[0] << 8) | data[1];
+	return static_cast<uint16_t>((static_cast<uint16_t>(data[0]) << 8) | static_cast<uint16_t>(data[1]));
 }

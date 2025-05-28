@@ -26,6 +26,12 @@
 .. _`nRF54L15 DK`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/boards/nordic/nrf54l15dk/doc/index.html#nrf54l15dk-nrf54l15
 .. _`nrf54l15dk`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/app_dev/device_guides/nrf54l/index.html
 
+.. _`nRF5340 DK`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/boards/nordic/nrf5340dk/doc/index.html
+.. _`nrf5340dk`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/app_dev/device_guides/nrf53/index.html
+
+.. _`nRF52840 DK`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/boards/nordic/nrf52840dk/doc/index.html
+.. _`nrf52840dk`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/app_dev/device_guides/nrf52/index.html
+
 .. _`Testing and optimization`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/test_and_optimize.html
 .. _`Software maturity`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/releases_and_maturity/software_maturity.html
 

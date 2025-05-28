@@ -50,6 +50,9 @@ config PSA_WANT_KEY_TYPE_HMAC
 config PSA_WANT_KEY_TYPE_AES
 	default y
 
+config PSA_WANT_ALG_ECB_NO_PADDING
+	default y
+
 config PSA_WANT_GENERATE_RANDOM
 	default y
 
@@ -80,14 +83,25 @@ config REBOOT
 config SHELL
 	default y
 
-config BT_DEVICE_NAME
-	default "AliroDL"
-
-config BT
+config EVENTS
 	default y
 
-config BT_PERIPHERAL
+config SMF
 	default y
 
-config BT_SMP
+config SMF_ANCESTOR_SUPPORT
 	default y
+
+config SMF_INITIAL_TRANSITION
+	default y
+
+config NRF_SECURITY
+	default y
+
+choice NVS_LOG_LEVEL_CHOICE
+	default NVS_LOG_LEVEL_ERR
+endchoice
+
+choice SETTINGS_LOG_LEVEL_CHOICE
+	default SETTINGS_LOG_LEVEL_ERR
+endchoice

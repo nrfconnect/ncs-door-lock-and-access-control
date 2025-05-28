@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 #pragma once
@@ -35,10 +35,10 @@ public:
 	constexpr AliroError(AliroErrorCode code) : mCode(code) {}
 
 	/* Converting constructors. */
-	bool operator==(AliroErrorCode code) { return code == mCode; }
-	bool operator==(AliroError other) { return other.mCode == mCode; }
+	bool operator==(AliroErrorCode code) const { return code == mCode; }
+	bool operator==(AliroError other) const { return other.mCode == mCode; }
 
-	operator AliroErrorCode() { return mCode; }
+	operator AliroErrorCode() const { return mCode; }
 
 	/**
 	 * @brief Convert to undelying integer representation.
@@ -48,7 +48,7 @@ public:
 	 *
 	 * @return Underlying integer number error code
 	 */
-	int ToInt() { return static_cast<int>(mCode); }
+	int ToInt() const { return static_cast<int>(mCode); }
 
 	/**
 	 * @brief Convert to string.
@@ -57,7 +57,7 @@ public:
 	 *
 	 * @return Corresponding string error message
 	 */
-	const char *ToString();
+	const char *ToString() const;
 
 	/**
 	 * @brief Convert from integer error code.

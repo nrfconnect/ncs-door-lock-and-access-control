@@ -10,6 +10,29 @@
 
 #include <stdarg.h>
 
+LOG_MODULE_REGISTER(platform, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+
+void AliroPlatformLogHexdump(AliroLogLevel logLevel, const void *data, size_t size, const char *str)
+{
+	switch (logLevel) {
+	case ALIRO_LOG_LEVEL_ERROR:
+		LOG_HEXDUMP_ERR(data, size, str);
+		break;
+	case ALIRO_LOG_LEVEL_WARN:
+		LOG_HEXDUMP_WRN(data, size, str);
+		break;
+	case ALIRO_LOG_LEVEL_INFO:
+		LOG_HEXDUMP_INF(data, size, str);
+		break;
+	case ALIRO_LOG_LEVEL_DEBUG:
+		LOG_HEXDUMP_DBG(data, size, str);
+		break;
+	case ALIRO_LOG_LEVEL_NONE:
+	default:
+		break;
+	}
+}
+
 void AliroPlatformLog(AliroLogLevel logLevel, const char *logFormat, ...)
 {
 #if defined(CONFIG_LOG) && !defined(CONFIG_LOG_MODE_MINIMAL)
