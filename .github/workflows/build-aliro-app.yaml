@@ -37,14 +37,16 @@ env:
   ncs_sdk_version: v2.8.0
   aliro_app_folder: app
 
-jobs:  
+jobs:
   build:
-    name: Build    
-    runs-on: ubuntu-22.04
+    name: Build
+    runs-on:
+      - runs-on=${{ github.run_id }}
+      - runner=4cpu-linux-x64
 
-    steps: 
+    steps:
       - name: Checkout repository
-        uses: actions/checkout@v4     
+        uses: actions/checkout@v4
 
       - name: Setup sdk
         id: setup-sdk
