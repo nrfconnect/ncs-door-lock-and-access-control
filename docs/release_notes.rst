@@ -5,13 +5,46 @@ Release notes
 
 This page outlines changes introduced with each release of the |APP_NAME|.
 
+v0.2.0
+******
+
+.. note::
+  |EXPERIMENTAL_NOTE|
+
+Changelog
+=========
+
+The following updates were introduced in this release.
+
+* Added:
+
+  * Experimental support for the following development platforms:
+
+    * `nRF52840 DK`_
+    * `nRF5340 DK`_
+
+  * A platform logger implementation.
+  * Integrated a new NFC transport interface.
+  * Integrated simplified Aliro stack API.
+
+* Changed:
+
+  * Improved the implementation the following components in RFAL platform abstraction layer:
+
+    * Timers
+    * Semaphores
+    * Threading
+
 v0.1.0
 ******
 
 .. note::
   |EXPERIMENTAL_NOTE|
 
-See the following section for the list of implemented features.
+Changelog
+=========
+
+The following updates were introduced in this release.
 
 * Added experimental support for the following:
 

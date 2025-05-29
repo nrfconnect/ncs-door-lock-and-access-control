@@ -10,6 +10,8 @@
 .. _`running test scripts`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#c---creating-a-test-run-running-test-scripts
 .. _`Setting up the command-line build environment`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/installation/install_ncs.html#set_up_the_command-line_build_environment
 .. _`Zephyr CMake package`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/build/zephyr_cmake_package.html#cmake-pkg
+.. _`Test Harness issue #191`: https://github.com/csa-access-control/aliro-certification-tool/issues/191
+
 
 .. ### Source: docs.nordicsemi.com
        Requires manual update to align it with the NCS version.
