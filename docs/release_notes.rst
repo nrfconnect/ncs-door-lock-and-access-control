@@ -24,12 +24,10 @@ The following updates were introduced in this release.
     * `nRF5340 DK`_
 
   * A platform logger implementation.
-  * Integrated a new NFC transport interface.
-  * Integrated simplified Aliro stack API.
+  * A new NFC transport interface integration.
+  * Simplified Aliro stack API integration.
 
-* Changed:
-
-  * Improved the implementation the following components in RFAL platform abstraction layer:
+* Improved the implementation of the following components in the RFAL platform abstraction layer:
 
     * Timers
     * Semaphores
@@ -41,10 +39,7 @@ v0.1.0
 .. note::
   |EXPERIMENTAL_NOTE|
 
-Changelog
-=========
-
-The following updates were introduced in this release.
+See the following section for the list of implemented features.
 
 * Added experimental support for the following:
 

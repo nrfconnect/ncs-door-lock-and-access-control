@@ -15,6 +15,8 @@
 LOG_MODULE_REGISTER(pal_gpio, CONFIG_NFC_LOG_LEVEL);
 
 static const struct gpio_dt_spec irq_gpio = GPIO_DT_SPEC_GET(DT_INST(0, x_nucleo_nfc), irq_gpios);
+// The reset GPIO is optional, so we use GPIO_DT_SPEC_GET_OR to avoid errors if it is not defined.
+static const struct gpio_dt_spec reset_gpio = GPIO_DT_SPEC_GET_OR(DT_INST(0, x_nucleo_nfc), reset_gpios, { 0 });
 
 // TODO: This should be moved to the nRF54L style shield.
 #ifdef CONFIG_BOARD_NRF54L15DK
@@ -51,16 +53,30 @@ int ncs_pal_pwr_pin_set()
 int ncs_pal_gpio_init(void)
 {
 	static struct gpio_callback gpio_cb;
+	int err = 0;
 
 	LOG_DBG("GPIO init");
 
-	if (!device_is_ready(irq_gpio.port)) {
+	if (reset_gpio.port) {
+		if (!gpio_is_ready_dt(&reset_gpio)) {
+			LOG_ERR("Reset GPIO device not ready");
+			return -ENODEV;
+		}
+
+		/* Configure reset pin */
+		err = gpio_pin_configure_dt(&reset_gpio, GPIO_OUTPUT_LOW);
+		if (err) {
+			return err;
+		}
+	}
+
+	if (!gpio_is_ready_dt(&irq_gpio)) {
 		LOG_ERR("IRQ GPIO device not ready");
 		return -ENODEV;
 	}
 
 	/* Configure IRQ pin */
-	int err = gpio_pin_configure_dt(&irq_gpio, GPIO_INPUT);
+	err = gpio_pin_configure_dt(&irq_gpio, GPIO_INPUT);
 	if (err) {
 		return err;
 	}

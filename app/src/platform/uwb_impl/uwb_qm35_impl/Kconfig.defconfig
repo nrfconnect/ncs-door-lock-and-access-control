@@ -1,0 +1,13 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config UART_NRFX_UARTE_LEGACY_SHIM
+	bool
+	default n
+
+config QOSAL_MAX_MUTEX
+	int
+	default 8
