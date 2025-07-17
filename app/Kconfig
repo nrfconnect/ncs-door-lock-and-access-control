@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-rsource "src/nfc_transport_impl/Kconfig"
+rsource "src/platform/Kconfig"
 rsource "../lib/aliro/Kconfig.defconfig"
 
 menu "Zephyr"

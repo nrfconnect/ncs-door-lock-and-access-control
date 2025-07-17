@@ -1,0 +1,12 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+rsource "access_decision_indicator/Kconfig"
+rsource "nfc_transport_impl/Kconfig"
+
+if ALIRO_BLE_TP
+rsource "uwb_impl/Kconfig"
+endif # ALIRO_BLE_TP
