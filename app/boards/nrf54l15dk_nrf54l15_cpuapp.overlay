@@ -57,6 +57,12 @@
 		compatible = "nfc-power-control";
 		gpios = <&gpio2 6 ( GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN )>;
 	};
+
+	access_decision_indicator: access_decision_indicator{
+		status = "okay";
+		compatible = "access-decision-indicator";
+		gpios = <&gpio2 10 GPIO_ACTIVE_HIGH>;
+	};
 };
 
 &gpio0 {

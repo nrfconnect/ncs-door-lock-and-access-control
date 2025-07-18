@@ -9,7 +9,7 @@
 #include "nfc_driver_config.h"
 
 #include "aliro/errors.h"
-#include "transport/data.h"
+#include "aliro/types.h"
 
 namespace Aliro {
 
@@ -67,6 +67,12 @@ public:
 	 * @return AliroError status of the operation.
 	 */
 	AliroError NfcOff();
+
+	/**
+	 * @brief Restarts the NFC polling.
+	 * @return AliroError status of the operation.
+	 */
+	AliroError RestartPolling();
 
 protected:
 	NfcDriver() = default;
