@@ -8,7 +8,23 @@
 
 #include "access.h"
 
+#include <cstddef>
+
 namespace Aliro {
+
+struct AliroConfig {
+	/**
+	 * @brief Enable NFC transport.
+	 */
+	bool mEnableNfc{ true };
+
+#ifdef CONFIG_ALIRO_BLE_TP
+	/**
+	 * @brief The maximum number of BLE sessions.
+	 */
+	size_t mMaxBleSessions{ 1 };
+#endif
+};
 
 /**
  * @brief Aliro stack.
@@ -29,11 +45,12 @@ public:
 	/**
 	 * @brief Initializes the Aliro stack.
 	 *
-	 * @param callbacks The user access callbacks.
+	 * @param callbacks The Access callbacks.
+	 * @param config The Aliro configuration.
 	 *
 	 * @return ALIRO_NO_ERROR if the stack was initialized successfully, an error code otherwise.
 	 */
-	AliroError Init(Access::Callbacks callbacks);
+	AliroError Init(const Access::Callbacks &callbacks, const AliroConfig &config);
 
 	/**
 	 * @brief Starts the Aliro stack.
@@ -41,6 +58,13 @@ public:
 	 * @return ALIRO_NO_ERROR if the stack was started successfully, an error code otherwise.
 	 */
 	AliroError Start() const;
+
+	/**
+	 * @brief Gets the Aliro configuration.
+	 *
+	 * @return The Aliro configuration.
+	 */
+	const AliroConfig &GetConfig() const { return mConfig; }
 
 	/**
 	 * @brief Temporary method for processing the access decision result.
@@ -56,6 +80,7 @@ public:
 
 private:
 	Access::Callbacks mCallbacks;
+	AliroConfig mConfig;
 };
 
 } // namespace Aliro
