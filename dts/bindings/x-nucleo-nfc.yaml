@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2025 Nordic Semiconductor ASA
 #
-# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
 #
 
 description: |
@@ -15,6 +15,10 @@ properties:
   irq-gpios:
     type: phandle-array
     required: true
+
+  reset-gpios:
+    type: phandle-array
+    required: false
 
   led-nfca-gpios:
     type: phandle-array

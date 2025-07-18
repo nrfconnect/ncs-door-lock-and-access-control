@@ -5,3 +5,4 @@
 #
 
 add_subdirectory(drivers)
+add_subdirectory_ifdef(CONFIG_NCS_ALIRO lib/aliro)
