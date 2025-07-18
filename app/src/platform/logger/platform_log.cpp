@@ -10,7 +10,7 @@
 
 #include <stdarg.h>
 
-LOG_MODULE_REGISTER(platform, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(platform, CONFIG_NCS_ALIRO_LOG_LEVEL_VALUE);
 
 void _AliroPlatformLogHexdump(uint8_t platformLogLevel, const void *data, size_t size, const char *str)
 {
