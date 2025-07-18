@@ -1,0 +1,17 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config ACCESS_DECISION_INDICATOR
+	bool "Enable access decision indicator"
+
+config RESET_ACCESS_DECISION_INDICATOR_STATE_DELAY_MS
+	int "Access decision indicator reset state delay (ms)"
+	depends on ACCESS_DECISION_INDICATOR
+	default 1000
+	help
+		Specifies how long (in milliseconds) the access indicator (e.g. LED) remains active before automatically
+		resetting to its default state. This is useful to provide a visual indication of the access decision made
+		by a Aliro Access Manager (e.g. LED indication).

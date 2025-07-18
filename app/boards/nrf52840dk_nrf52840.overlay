@@ -34,8 +34,9 @@
 	nucleo_nfc@0 {
 		compatible = "x-nucleo-nfc";
 		reg = <0>;
-		spi-max-frequency = <4000000>;
+		spi-max-frequency = <DT_FREQ_M(4)>;
 		irq-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 10 (GPIO_ACTIVE_LOW | GPIO_PULL_DOWN)>;
 	};
 };
 
@@ -55,5 +56,13 @@
 	psa_rng: psa-rng {
 		compatible = "zephyr,psa-crypto-rng";
 		status = "okay";
+	};
+};
+
+/ {
+	access_decision_indicator: access_decision_indicator{
+		status = "okay";
+		compatible = "access-decision-indicator";
+		gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
 	};
 };
