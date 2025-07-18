@@ -8,9 +8,8 @@
 
 #include "isodep_config.h"
 
-#include "transport/data.h"
-
 #include "aliro/errors.h"
+#include "aliro/types.h"
 
 namespace Aliro {
 
