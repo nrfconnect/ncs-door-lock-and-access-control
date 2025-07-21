@@ -1,0 +1,15 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+description: |
+  This binding allows to assign a GPIO to indicate access granted decision.
+
+compatible: "access-decision-indicator"
+
+properties:
+  gpios:
+    type: phandle-array
+    required: true
