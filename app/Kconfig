@@ -4,8 +4,7 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-rsource "src/nfc_transport_impl/Kconfig"
-rsource "../lib/aliro/Kconfig.defconfig"
+rsource "src/platform/Kconfig"
 
 menu "Zephyr"
 source "Kconfig.zephyr"
@@ -16,3 +15,25 @@ module-str = NCS_DOOR_LOCK_APP
 module-dep = LOG
 module-help = Enables nRF Connect SDK Door Lock Application log messages.
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+
+choice ACCESS_MANAGER_IMPLEMENTATION
+	prompt "Access Manager implementation"
+	default ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
+
+	config ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
+		bool "Access Manager default implementation"
+		help
+		  Uses the default implementation of the Access Manager
+		  provided by the Door Lock Reference Application.
+
+	config ACCESS_MANAGER_IMPLEMENTATION_CUSTOM
+		bool "Access Manager custom implementation"
+		help
+		  Uses a custom implementation of the Access Manager.
+		  This implementation is based on provided template
+		  that can be tailored to specific requirements.
+endchoice
+
+if ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
+rsource "src/access_manager_impl_default/Kconfig"
+endif

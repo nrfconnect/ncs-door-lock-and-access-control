@@ -10,17 +10,31 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <zephyr/logging/log.h>
 
-/**
- * Log levels.
- */
-typedef enum AliroLogLevel {
-	ALIRO_LOG_LEVEL_NONE = 0,
-	ALIRO_LOG_LEVEL_ERROR = 1,
-	ALIRO_LOG_LEVEL_WARN = 2,
-	ALIRO_LOG_LEVEL_INFO = 3,
-	ALIRO_LOG_LEVEL_DEBUG = 4,
-} AliroLogLevel;
+#define _ALIRO_LOG(level, ...)                                                                                         \
+	do {                                                                                                           \
+		if (level <= CONFIG_NCS_ALIRO_LOG_LEVEL_VALUE) {                                                       \
+			_AliroPlatformLog(level, __VA_ARGS__);                                                         \
+		}                                                                                                      \
+	} while (0)
+
+#define _ALIRO_LOG_HEXDUMP(level, data, size, str)                                                                     \
+	do {                                                                                                           \
+		if (level <= CONFIG_NCS_ALIRO_LOG_LEVEL_VALUE) {                                                       \
+			_AliroPlatformLogHexdump(level, data, size, str);                                              \
+		}                                                                                                      \
+	} while (0)
+
+#define ALIRO_LOG_ERR(...) _ALIRO_LOG(LOG_LEVEL_ERR, __VA_ARGS__)
+#define ALIRO_LOG_WRN(...) _ALIRO_LOG(LOG_LEVEL_WRN, __VA_ARGS__)
+#define ALIRO_LOG_INF(...) _ALIRO_LOG(LOG_LEVEL_INF, __VA_ARGS__)
+#define ALIRO_LOG_DBG(...) _ALIRO_LOG(LOG_LEVEL_DBG, __VA_ARGS__)
+
+#define ALIRO_LOG_HEXDUMP_ERR(data, size, str) _ALIRO_LOG_HEXDUMP(LOG_LEVEL_ERR, data, size, str)
+#define ALIRO_LOG_HEXDUMP_WRN(data, size, str) _ALIRO_LOG_HEXDUMP(LOG_LEVEL_WRN, data, size, str)
+#define ALIRO_LOG_HEXDUMP_INF(data, size, str) _ALIRO_LOG_HEXDUMP(LOG_LEVEL_INF, data, size, str)
+#define ALIRO_LOG_HEXDUMP_DBG(data, size, str) _ALIRO_LOG_HEXDUMP(LOG_LEVEL_DBG, data, size, str)
 
 /**
  * @brief Writes a log message with the specified log level.
@@ -30,7 +44,7 @@ typedef enum AliroLogLevel {
  * @param[in]  logFormat  a pointer to the format string.
  * @param[in]  ...        arguments for the format specification.
  */
-void AliroPlatformLog(AliroLogLevel logLevel, const char *logFormat, ...);
+void _AliroPlatformLog(uint8_t platformLogLevel, const char *logFormat, ...);
 
 /**
  * @brief Logs binary data in hexadecimal format with the specified log level.
@@ -41,6 +55,6 @@ void AliroPlatformLog(AliroLogLevel logLevel, const char *logFormat, ...);
  * @param[in] size     size of the data in bytes.
  * @param[in] str      description string to prefix the hexdump.
  */
-void AliroPlatformLogHexdump(AliroLogLevel logLevel, const void *data, size_t size, const char *str);
+void _AliroPlatformLogHexdump(uint8_t platformLogLevel, const void *data, size_t size, const char *str);
 
 #endif // ALIRO_PLATFORM_LOG_H_

@@ -6,20 +6,23 @@
 
 #pragma once
 
+#include <zephyr/kernel.h>
+#include <zephyr/sys/__assert.h>
+
+#include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <type_traits>
 
-#include <zephyr/sys/__assert.h>
-
 // clang-format off
 /**
  *  @def VerifyOrReturnStatus(expr, value, ...)
  *
  *  @brief
- *    Returns a specified status code if expression evaluates to false
+ *    Returns a specified status code if expression evaluates to false.
  *
  *  @param[in]  expr        A Boolean expression to be evaluated.
  *  @param[in]  value       A value to return if @a expr is false.
@@ -35,7 +38,7 @@
 	} while (false)
 
 /**
- *  @brief Aliases for VerifyOrReturnStatus()
+ *  @brief Aliases for VerifyOrReturnStatus().
  */
 #define VerifyOrReturnValue(expr, value, ...)  VerifyOrReturnStatus(expr, value, ##__VA_ARGS__)
 #define VerifyOrReturnFalse(expr, ...)  VerifyOrReturnStatus(expr, false, ##__VA_ARGS__)
@@ -45,7 +48,7 @@
  *  @def VerifyOrReturn(expr, ...)
  *
  *  @brief
- *    Returns from the function if expression evaluates to false
+ *    Returns from the function if expression evaluates to false.
  *
  *  @param[in]  expr        A Boolean expression to be evaluated.
  *  @param[in]  ...         Statements to execute before returning. Optional. Good for logging.
@@ -63,7 +66,7 @@
  *  @def VerifyOrExit(expr, value, ...)
  *
  *  @brief
- *    Goes to exit if expression evaluates to false
+ *    Goes to exit if expression evaluates to false.
  *
  *  @param[in]  expr        A Boolean expression to be evaluated.
  *  @param[in]  ...         Statements to execute before exiting. Optional. Good for logging.
@@ -80,7 +83,7 @@
  *  @def VerifyAndExit(expr, value, ...)
  *
  *  @brief
- *    Goes to exit if expression evaluates to true
+ *    Goes to exit if expression evaluates to true.
  *
  *  @param[in]  expr        A Boolean expression to be evaluated.
  *  @param[in]  ...         Statements to execute before exiting. Optional. Good for logging.
@@ -116,7 +119,7 @@
  *  @def VerifyOrDie(expr, value, ...)
  *
  *  @brief
- *    Goes to exit if expression evaluates to false
+ *    Goes to exit if expression evaluates to false.
  *
  *  @param[in]  expr        A Boolean expression to be evaluated.
  */
@@ -156,7 +159,7 @@ template <class T> constexpr std::underlying_type_t<T> ToUnderlying(T e)
 }
 
 /**
- * @brief Checks if buffer is empty
+ * @brief Checks if buffer is empty.
  */
 inline bool IsBufferEmpty(const uint8_t *data, size_t length)
 {
@@ -172,13 +175,50 @@ constexpr uint32_t BitsCount(uint8_t lengthInBytes)
 }
 
 /**
- * @brief Converts two bytes coded in big-endian to the host endianness.
+ * @brief Check if a std::array is default initialized (all zeros).
  *
- * @param data [input] a buffer containing data to be converted.
+ * @param arr The array to check
  *
- * @return 16-bit integer in host endianess.
+ * @return true if the array is default initialized, false otherwise
  */
-inline uint16_t BigEndianArrayToHostUint16(const uint8_t data[2])
+template <typename T, size_t N> bool IsArrayDefaultInitialized(const std::array<T, N> &arr)
 {
-	return static_cast<uint16_t>((static_cast<uint16_t>(data[0]) << 8) | static_cast<uint16_t>(data[1]));
+	return std::all_of(arr.begin(), arr.end(), [](T x) { return x == T{}; });
 }
+
+/**
+ * @brief Custom type trait to detect std::array
+ *
+ * @tparam T The type to check
+ *
+ * @return true if the type is a std::array, false otherwise
+ */
+template <typename T> struct IsStdArrayType : std::false_type {};
+template <typename T, std::size_t N> struct IsStdArrayType<std::array<T, N>> : std::true_type {};
+template <typename T> constexpr bool IsStdArray = IsStdArrayType<T>::value;
+
+struct MutexGuard {
+	/**
+	 * @brief Constructor for MutexGuard.
+	 * Locks the mutex when the MutexGuard object is created.
+	 *
+	 * @param mutex Pointer to the mutex to lock.
+	 */
+	explicit MutexGuard(k_mutex &mutex) noexcept;
+
+	/**
+	 * @brief Destructor for MutexGuard.
+	 *
+	 * Unlocks the mutex when the MutexGuard object is destroyed.
+	 */
+	~MutexGuard() noexcept;
+
+	// Disable copy and move constructors and assignment operators.
+	MutexGuard(const MutexGuard &) = delete;
+	MutexGuard(MutexGuard &&) = delete;
+	MutexGuard &operator=(const MutexGuard &) = delete;
+	MutexGuard &operator=(MutexGuard &&) = delete;
+
+private:
+	k_mutex *const mMutex{ nullptr };
+};

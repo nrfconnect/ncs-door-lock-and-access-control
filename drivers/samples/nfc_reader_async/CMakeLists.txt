@@ -9,6 +9,4 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(ncs-nfc-reader-async-sample)
 
-target_sources(app PRIVATE
-    src/main.c
-)
+target_sources(app PRIVATE src/main.c)

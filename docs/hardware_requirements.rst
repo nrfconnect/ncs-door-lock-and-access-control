@@ -3,6 +3,10 @@
 Hardware requirements
 #####################
 
+.. contents::
+   :local:
+   :depth: 2
+
 To run and test the |APP_NAME|, you must have the required hardware.
 
 .. _hw_requirements_development_kit:
@@ -104,6 +108,35 @@ The pinout is applicable for each of the supported NFC reader expansion boards:
    X-NUCLEO expansion board connection to the nRF54L15 DK.
 
 When using the `nRF5340 DK`_ or `nRF52840 DK`_, you can connect the NFC reader expansion board directly using the Arduino-compatible header available on the DK.
+
+.. _hw_requirements_uwb_reader:
+
+Ultra wideband (UWB) module
+***************************
+
+The application supports the following UWB modules:
+
++-------------------+----------------------------------+
+| UWB module        | UWB module expansion board       |
++===================+==================================+
+| `QM35825`_        | Qorvo Arduino Interface Board    |
++-------------------+----------------------------------+
+
+With the Qorvo Arduino Interface Board, you can use the UWB module with the `nRF5340 DK`_ without requiring any additional hardware, as it connects directly to the Arduino header of the DK.
+
+.. note::
+   The QM35825 SoC requires Aliro-specific firmware to work with the Aliro access protocol.
+   To obtain this firmware, contact your local Qorvo support team.
+
+.. warning::
+
+   You cannot use the `QM35825`_ UWB module and the Qorvo Arduino Interface Board simultaneously with the X-NUCLEO board on the same SPI bus.
+   When both devices are connected to the same SPI bus, the X-NUCLEO board cannot be initialized properly and the application will crash.
+   For test purposes, you can connect the `QM35825`_ module directly to the Arduino header of the `nRF5340 DK`_ using the Qorvo Arduino Interface Board.
+   You must also enable the ``CONFIG_DISABLE_ALIRO_NFC_TP`` Kconfig option in the application's configuration.
+
+   Additionally, you can use the ``uwb_qm35`` snippet to build the application with the UWB module enabled and the NFC reader disabled.
+   All necessary DTS configurations are applied by the snippet.
 
 .. _hw_requirements_test_harness:
 

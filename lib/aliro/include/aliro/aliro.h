@@ -6,15 +6,44 @@
 
 #pragma once
 
-#include "access.h"
+#include "aliro/errors.h"
+#include <cstddef>
 
 namespace Aliro {
+
+struct AliroConfig {
+	/**
+	 * @brief Enable NFC transport.
+	 */
+	bool mEnableNfc{ true };
+
+#ifdef CONFIG_ALIRO_BLE_TP
+	/**
+	 * @brief The maximum number of BLE sessions.
+	 */
+	size_t mMaxBleSessions{ 1 };
+#endif
+};
 
 /**
  * @brief Aliro stack.
  */
 class AliroStack {
 public:
+	/**
+	 * @brief Aliro stack callbacks.
+	 */
+	struct Callbacks {
+		/**
+		 * @brief Callback for errors.
+		 *
+		 * This callback is called when an error occurs.
+		 *
+		 * @param error The error that occurred.
+		 */
+		void (*mOnError)(AliroError error){ nullptr };
+	};
+
 	/**
 	 * @brief Gets the instance of the Aliro stack.
 	 *
@@ -29,11 +58,12 @@ public:
 	/**
 	 * @brief Initializes the Aliro stack.
 	 *
-	 * @param callbacks The user access callbacks.
+	 * @param callbacks The Access callbacks.
+	 * @param config The Aliro configuration.
 	 *
 	 * @return ALIRO_NO_ERROR if the stack was initialized successfully, an error code otherwise.
 	 */
-	AliroError Init(Access::Callbacks callbacks);
+	AliroError Init(const Callbacks &callbacks, const AliroConfig &config);
 
 	/**
 	 * @brief Starts the Aliro stack.
@@ -43,19 +73,15 @@ public:
 	AliroError Start() const;
 
 	/**
-	 * @brief Temporary method for processing the access decision result.
+	 * @brief Gets the Aliro configuration.
 	 *
-	 * Called by the state machine when access verification is complete.
-	 * Triggers the appropriate user callback based on the access status.
-	 *
-	 * @param status The access decision result (Granted/Denied).
-	 *
-	 * @note This function finally should be replaced by appropriate application callback.
+	 * @return The Aliro configuration.
 	 */
-	void AccessDecision(Access::Status status) const;
+	const AliroConfig &GetConfig() const { return mConfig; }
 
 private:
-	Access::Callbacks mCallbacks;
+	Callbacks mCallbacks{};
+	AliroConfig mConfig;
 };
 
 } // namespace Aliro
