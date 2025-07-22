@@ -23,8 +23,6 @@ menuconfig NCS_ALIRO
 
 if NCS_ALIRO
 
-rsource "lib/aliro/interfaces/logger/Kconfig"
-
 config ALIRO_BLE_TP
 	bool "Aliro BLE transport"
 	help
