@@ -5,3 +5,7 @@
 #
 
 zephyr_include_directories(.)
+
+file(GLOB uwb_src CONFIGURE_DEPENDS *.cpp)
+
+zephyr_library_sources(${uwb_src})

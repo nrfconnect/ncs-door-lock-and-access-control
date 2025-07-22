@@ -7,7 +7,7 @@
    :local:
    :depth: 2
 
-The |APP_NAME| runs on the Nordic Semiconductor's :ref:`supported SoCs <hw_requirements>` and utilizes the Aliro stack for access protocol and communication with user device over Near Field Communication (NFC) or Bluetooth® LE.
+The |APP_NAME| runs on the Nordic Semiconductor's :ref:`supported SoCs <hw_requirements>` and utilizes the Aliro stack for access protocol and communication with a User Device over Near Field Communication (NFC) or Bluetooth® LE.
 See the following diagram for an architecture overview:
 
 .. _arch_overview:
@@ -20,7 +20,7 @@ See the following diagram for an architecture overview:
 
 The |APP_NAME| is build using the :ref:`nRF Connect SDK <sdk_set_up>`, which includes the Zephyr RTOS with all necessary modules.
 
-The Aliro stack implements the Access Protocol logic, Aliro-specific cryptographic primitives, and communication with the user device.
+The Aliro stack implements the Access Protocol logic, Aliro-specific cryptographic primitives, and communication with the User Device.
 The interfaces layer is a bridge connecting the Aliro stack to the Zephyr OS modules through specific backends that implement the following components required by the Aliro: crypto, NFC and, ultra wideband (UWB).
 This layer additionally allows to utilize other, custom backends for the crypto, NFC and UWB components by implementing the provided API.
 By default, the |APP_NAME| uses backends shown in the :ref:`architecture overview <arch_overview>`.
