@@ -3,6 +3,10 @@
 Building and running
 ####################
 
+.. contents::
+   :local:
+   :depth: 2
+
 In the :file:`door-lock-workspace`, the |APP_NAME| is placed in the :file:`ncs-door-lock-app` directory.
 To build and run the application on one of the :ref:`supported development kits (DKs) <hw_requirements>`, complete the following steps:
 
@@ -43,6 +47,15 @@ To build and run the application on one of the :ref:`supported development kits 
       .. code-block:: bash
 
          west build -p -b nrf52840dk/nrf52840 app -- -DCONFIG_ST25R3911_DRV=y
+
+#. Optionally, if you are using the `QM35825`_ UWB module with the Qorvo Arduino Interface Board, you can execute the following command to build the application specifically for this setup:
+   
+   .. code-block:: bash
+   
+      west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35
+
+   .. note::
+      The snippet's configuration disables the NFC reader to enable the use of the UWB module with the Qorvo Arduino Interface Board.
 
 #. Once you have built the application, run the following command to flash it:
 

@@ -4,10 +4,8 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-file(GLOB_RECURSE NFC_CONFIGS_SOURCES ./*.c)
+file(GLOB_RECURSE NFC_CONFIGS_SOURCES CONFIGURE_DEPENDS ./*.c)
 
 zephyr_include_directories(.)
 
-zephyr_library_sources(
-    ${NFC_CONFIGS_SOURCES}
-)
+zephyr_library_sources(${NFC_CONFIGS_SOURCES})

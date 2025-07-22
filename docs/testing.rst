@@ -3,6 +3,10 @@
 Testing and troubleshooting
 ###########################
 
+.. contents::
+   :local:
+   :depth: 2
+
 This page will guide you through the testing instructions for the |app_name|.
 
 .. _testing_environment:
@@ -12,7 +16,7 @@ Test environment
 
 Test environment consists of two major components:
 
-* The `nRF54L15 DK`_, which serves as the Reader in the door lock component.
+* The Nordic Semiconductor’s :ref:`development kit (DK) <hw_requirements>`, which serves as the Reader in the door lock component.
   It must be attached to an NFC card reader expansion board.
 * The Aliro Test Harness, which acts as the user device and simulates unlocking of the door lock.
 
@@ -114,14 +118,63 @@ Verification and testing process
 ********************************
 
 Perform tests to ensure your devices are functioning correctly.
-You can see the full list of available test on the `Aliro Certification Tool`_ repository.
-Note, that NFC Reader tests start with the ``RD`` prefix.
-This means that the Test Harness device will be operating as Aliro user device.
+You can see the full list of available tests in the `Aliro Certification Tool`_ repository.
+From the :guilabel:`Test Suites` list, choose the tests with the `Reader` in the name, for example, :guilabel:`BLE Reader`.
+This will allow you to test the Bluetooth LE transport.
 
-For verification, execute the following tests:
+.. figure:: /images/th_test_cases.png
+   :scale: 70%
+   :alt: Test suites list.
 
-1. RD-NFC-CONTROLFLOW-2.0 test, which allows you to verify if the communication between the Reader and the user device terminates correctly when sending the ``CONTROL_FLOW`` command.
-2. RD-NFC-STDTXN-2.0 test, which allows you to verify if the Reader properly implements the Aliro authentication protocol.
+   Test suites list.
+
+Thanks to this, the Test Harness device will be operating as the Aliro user device and communicate with the Reader device.
+
+For verification, execute the following tests, based on the `Aliro Certification Test Tool for GTE#2`_ tag:
+
+.. tabs::
+
+   .. tab:: NFC Reader
+
+            +-----------------------------------------------------------+-----------------------------------------------------------+
+            | Test case                                                 | Description                                               |
+            +===========================================================+===========================================================+
+            | NFC_RDR_STANDARD_NO_CERT                                  | Verify conformance of Reader UT in AUTH1 command.         |
+            +-----------------------------------------------------------+-----------------------------------------------------------+
+            | NFC_RDR_NEG_AUTH0_EXTRA_TAG                               | Verify conformance of Reader UT in AUTH1 command.         |
+            +-----------------------------------------------------------+-----------------------------------------------------------+
+            | NFC_RDR_NEG_AUTH1_EXTRA_TAG                               | Verify conformance of Reader UT in AUTH1 command.         |
+            +-----------------------------------------------------------+-----------------------------------------------------------+
+            | NFC_RDR_NEG_AUTH0_WRONG_VALUE                             | Verify conformance of Reader UT in AUTH1 command.         |
+            +-----------------------------------------------------------+-----------------------------------------------------------+
+            | NFC_RDR_NEG_SEL_RSP_NO_COMMON_EXPEDITED_PROTOCOL_VERSION  | Verify conformance of Reader UT in SELECT command.        |
+            +-----------------------------------------------------------+-----------------------------------------------------------+
+            | NFC_RDR_EXCHANGE_RDR_DESCRIPTOR_TAG                       | Verify conformance of Reader UT.                          |
+            +-----------------------------------------------------------+-----------------------------------------------------------+
+
+   .. tab:: Bluetooth LE
+
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | Test case                                                 | Description                                                              |
+            +===========================================================+==========================================================================+
+            | TH BLEUWB_RDR_EXPEDITED_STANDARD_PHASE                    | Verify conformance of Reader UT in standard phase expedited transaction. |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | TH BLEUWB_RDR_RANGING_SUSPEND                             | Verify conformance of Reader UT in ranging suspend functionality.        |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | TH BLEUWB_RDR_NEG_FAILED_L2CAP                            | Verify conformance of Reader UT in L2CAP connection failure handling.    |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | TH BLEUWB_RDR_NEG_FAILED_SPSM_L2CAP                       | Verify conformance of Reader UT in SPSM L2CAP failure handling.          |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | TH BLEUWB_RDR_NEG_TIMEOUT_BEFORE_AUTH0                    | Verify conformance of Reader UT in timeout handling before AUTH0.        |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | TH BLEUWB_RDR_TIMEOUT_EXTENSION                           | Verify conformance of Reader UT in timeout extension handling.           |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | TH BLEUWB_RDR_NEG_M2_MISMATCH_PARAMETER                   | Verify conformance of Reader UT in M2 parameter mismatch handling.       |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | TH BLEUWB_RDR_NEG_M4_MISMATCH_PARAMETER                   | Verify conformance of Reader UT in M4 parameter mismatch handling.       |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | TH BLEUWB_RDR_ADVERTISEMENT_FORMAT                        | Verify conformance of Reader UT in advertisement format.                 |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
 
 Running the test
 ================
@@ -129,38 +182,47 @@ Running the test
 Complete the following steps for the required tests:
 
 #. Navigate to the project you created in the Test Harness web interface and click :guilabel:`Go To Test-Run`.
+
 #. Click on :guilabel:`Add New Test`.
-#. In the test suites, select :guilabel:`NFC Reader` and under the :guilabel:`Test Cases` section check the box of the test you wish to run.
+
+#. In the test suites, select either :guilabel:`NFC Reader` or :guilabel:`BLE Reader` and under the :guilabel:`Test Cases` section check the box of the test you wish to run.
+
 #. Choose the operator and click :guilabel:`Start`.
-#. Position the Reader and Test Harness hardware close to each other, and align them to ensure optimal NFC communication.
-#. A notification will appear asking you to set the Reader DUT in the NFC polling mode and to place the devices next to each other for automatic detection.
-   Select :guilabel:`Ok` and click :guilabel:`Submit`.
-#. Depending on the test you executed, you should see the following results:
+
+#. Complete the test:
 
    .. tabs::
 
-      .. tab:: RD-NFC-CONTROLFLOW-2.0
+      .. tab:: NFC
 
-            .. figure:: /images/control_flow_test_selection.png
-               :scale: 50%
-               :alt: Tests selection view.
+         a. Position the Reader and Test Harness hardware close to each other, and align them to ensure optimal NFC communication.
+         #. A notification will appear asking you to set the Reader DUT in the appropriate mode and to place the devices next to each other for automatic NFC detection.
+            Select :guilabel:`Ok` and click :guilabel:`Submit`.
 
-               Tests selection view.
+      .. tab:: Bluetooth LE
 
-            The Reader device selects the Test Harness user device, which then terminates the communication and expects the ``CONTROL_FLOW`` command from the Reader in response. 
+         a. Ensure the Reader is advertising and ready to accept Bluetooth LE connections from the Test Harness.
+            You should see a notification requesting Bluetooth LE visibility for automatic detection.
+         #. Confirm that the Reader is advertising by checking the DUT console for logs indicating that advertising has started.
 
-            In the DUT's serial console, you will see logs that indicate the state of the operation and the data payloads transmitted and received by the Reader.
-            If the results show as ``passed``, you will see the following output in the Test Harness web interface:
+            .. code-block:: console
 
-            .. figure:: /images/test_results_control_flow.png
-               :scale: 50%
-               :alt: Basic test results view.
+               <dbg> L2CAP server registered with PSM: 0x0080
 
-               Basic test results view.
+         #. Select :guilabel:`Ok` and click :guilabel:`Submit`.
+            Restarting the Murata device, if prompted, is optional.
 
-      .. tab:: RD-NFC-STDTXN-2.0
+            .. note::
+               At the start of each Bluetooth LE test, the firmware is uploaded to the Murata device, which may take some time.
+               The Murata module (`LBUA0VG2BP-EVK-P`_) is used by the Test Harness to establish and handle Bluetooth LE communication with the device under test.
 
-            .. figure:: /images/stdtxn_test_selection.png
+#. Depending on the test you executed, you should see results similar to the following examples:
+
+   .. tabs::
+
+      .. tab:: NFC_RDR_STANDARD_NO_CERT
+
+            .. figure:: /images/NFC_RDR_STANDARD_NO_CERT_selection.png
                :scale: 50%
                :alt: Tests selection view.
 
@@ -171,7 +233,7 @@ Complete the following steps for the required tests:
             In the DUT's serial console, you will see logs that indicate the state of the operation and the data payloads transmitted and received by the Reader.
             If the results show as ``passed``, you will see the following output in the Test Harness web interface:
 
-            .. figure:: /images/test_results_stdtxn.png
+            .. figure:: /images/test_results_NFC_RDR_STANDARD_NO_CERT.png
                :scale: 50%
                :alt: Example of the advanced test results.
 
@@ -183,16 +245,45 @@ Complete the following steps for the required tests:
 
             .. code-block:: console
 
-               [00:00:39.678,248] <inf> Verify signature
-               [00:00:39.679,533] <inf> door_lock_app: ACCESS GRANTED
-               [00:00:39.679,704] <dbg> Finishing secure session
-               [00:00:39.679,724] <dbg> Communication finished
+               <inf> door_lock_app: ACCESS GRANTED
+
+            .. note::
+               When access is granted, the device also signals this event by turning on a dedicated LED. For details, see the :ref:`access decision indicator <access_decision_indicator>` section.
 
             When the provided access credential public key is incorrect the following output will be displayed:
 
             .. code-block:: console
 
-               [00:00:20.383,849] <inf> Verify signature
-               [00:00:20.384,034] <inf> door_lock_app: ACCESS DENIED
-               [00:00:20.384,199] <dbg> Finishing secure session
-               [00:00:20.384,219] <dbg> Communication finished
+               <inf> door_lock_app: ACCESS DENIED
+
+      .. tab:: BLEUWB_RDR_EXPEDITED_STANDARD_PHASE
+
+            .. figure:: /images/BLEUWB_RDR_EXPEDITED_STANDARD_PHASE_selection.png
+               :scale: 50%
+               :alt: Tests selection view.
+
+               Tests selection view.
+
+            The Reader device will advertise over Bluetooth LE and the Test Harness will connect as a Bluetooth LE central device, initiating the Aliro Access Protocol commands exchange over Bluetooth LE.
+
+            In the DUT's serial console, you will see logs that indicate the state of the Bluetooth LE connection, protocol execution, and the data payloads transmitted and received by the Reader.
+            Additionally, the UWB connection will be configured and established.
+            If the results show as ``passed``, you will see the following output in the Test Harness web interface:
+
+            .. figure:: /images/test_results_BLEUWB_RDR_EXPEDITED_STANDARD_PHASE.png
+               :scale: 50%
+               :alt: Basic test results view.
+
+               Basic test results view.
+
+
+Additional CLI commands
+=======================
+
+To check the revision of the Aliro library on your device, run the following command in the device shell:
+
+.. code-block:: console
+
+   uart:~$ dl info
+   Aliro version: v0.2.0-22-g7da4b2e
+   NFC reader: ST25R100

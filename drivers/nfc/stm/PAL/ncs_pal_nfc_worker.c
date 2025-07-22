@@ -10,6 +10,13 @@ struct k_thread pal_nfc_thread;
 
 k_tid_t ncs_pal_nfc_worker_start(thread_func_t thread_func)
 {
-	return k_thread_create(&pal_nfc_thread, pal_nfc_stack, CONFIG_RFAL_WORKER_THREAD_STACK_SIZE, thread_func, NULL,
-			       NULL, NULL, K_PRIO_PREEMPT(CONFIG_RFAL_WORKER_THREAD_PRIORITY), 0, K_NO_WAIT);
+	const k_tid_t thread =
+		k_thread_create(&pal_nfc_thread, pal_nfc_stack, CONFIG_RFAL_WORKER_THREAD_STACK_SIZE, thread_func, NULL,
+				NULL, NULL, K_PRIO_PREEMPT(CONFIG_RFAL_WORKER_THREAD_PRIORITY), 0, K_NO_WAIT);
+
+	if (thread) {
+		k_thread_name_set(thread, "PAL Worker");
+	}
+
+	return thread;
 }
