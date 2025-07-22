@@ -33,28 +33,16 @@ public:
 		return sInstance;
 	}
 
-	AliroError _Init([[maybe_unused]] const Callbacks &) const { return ALIRO_ERROR_NOT_IMPLEMENTED; }
-	AliroError _Deinit() const { return ALIRO_ERROR_NOT_IMPLEMENTED; }
-	void
-	_BleTimeSync() const { /* No operation for dummy implementation; override in derived classes if needed. */ };
-
-	AliroError _HandleBleMessage([[maybe_unused]] const uint8_t *, [[maybe_unused]] size_t) const
-	{
-		return ALIRO_ERROR_NOT_IMPLEMENTED;
-	}
-
+	AliroError _Init([[maybe_unused]] const Callbacks &);
+	AliroError _Deinit();
+	void _BleTimeSync() const;
+	AliroError _HandleBleMessage([[maybe_unused]] const uint8_t *, [[maybe_unused]] size_t);
 	AliroError _ConfigureRangingSession([[maybe_unused]] SessionIdentifier,
-					    [[maybe_unused]] const CryptoTypes::Ursk &,
-					    [[maybe_unused]] const void *) const
-	{
-		return ALIRO_ERROR_NOT_IMPLEMENTED;
-	}
-
-	AliroError _InitiateRangingSession() const { return ALIRO_ERROR_NOT_IMPLEMENTED; }
-
-	AliroError _TerminateRangingSession() const { return ALIRO_ERROR_NOT_IMPLEMENTED; }
-	AliroError _SuspendRangingSession() const { return ALIRO_ERROR_NOT_IMPLEMENTED; }
-	AliroError _ResumeRangingSession() const { return ALIRO_ERROR_NOT_IMPLEMENTED; }
+					    [[maybe_unused]] const CryptoTypes::Ursk &, [[maybe_unused]] void *);
+	AliroError _InitiateRangingSession();
+	AliroError _TerminateRangingSession();
+	AliroError _SuspendRangingSession();
+	AliroError _ResumeRangingSession();
 
 	// Delete copy and move constructors and assignment operators.
 	UltraWideBandImpl(const UltraWideBandImpl &) = delete;

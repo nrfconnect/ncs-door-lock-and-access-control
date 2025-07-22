@@ -72,7 +72,7 @@ See the following section for the list of implemented features.
   * Transport Protocol over Near Field Communication (NFC) transport.
   * Trusted Framework implementation with the |NCS| PSA API as a cryptography backend.
   * The nRF54L15 hardware platform.
-  * STM NFC Reader transceivers: ST25R200, ST25R3911, ST25R3916, ST25R3916B, ST25R200.
+  * STM NFC reader transceivers: ST25R200, ST25R3911, ST25R3916, ST25R3916B, ST25R200.
   * ST Microelectronics R/F Abstraction Layer driver with Zephyr Platform Abstraction Layer integration.
   * |APP_NAME| that leverages Aliro stack and supports CLI-based provisioning of the Access Credential public key, the reader's group identifier, and the group sub-identifier.
   * Sample applications that uses RFAL driver.

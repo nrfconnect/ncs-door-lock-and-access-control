@@ -18,7 +18,7 @@ Test environment consists of two major components:
 
 * The Nordic Semiconductor’s :ref:`development kit (DK) <hw_requirements>`, which serves as the Reader in the door lock component.
   It must be attached to an NFC card reader expansion board.
-* The Aliro Test Harness, which acts as the user device and simulates unlocking of the door lock.
+* The Aliro Test Harness, which acts as the User Device and simulates unlocking of the door lock.
 
 See the :ref:`hw_requirements` page for more details.
 
@@ -128,7 +128,7 @@ This will allow you to test the Bluetooth LE transport.
 
    Test suites list.
 
-Thanks to this, the Test Harness device will be operating as the Aliro user device and communicate with the Reader device.
+Thanks to this, the Test Harness device will be operating as the Aliro User Device and communicate with the Reader device.
 
 For verification, execute the following tests, based on the `Aliro Certification Test Tool for GTE#2`_ tag:
 
@@ -228,7 +228,7 @@ Complete the following steps for the required tests:
 
                Tests selection view.
 
-            The Reader device will select the Test Harness user device and initiate the Aliro Access Protocol commands exchange.
+            The Reader device will select the Test Harness User Device and initiate the Aliro Access Protocol commands exchange.
 
             In the DUT's serial console, you will see logs that indicate the state of the operation and the data payloads transmitted and received by the Reader.
             If the results show as ``passed``, you will see the following output in the Test Harness web interface:
