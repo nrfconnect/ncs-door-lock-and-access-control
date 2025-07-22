@@ -7,7 +7,6 @@
 #pragma once
 
 #include "aliro/errors.h"
-#include "aliro/types.h"
 
 #include <cstddef>
 
@@ -22,8 +21,6 @@ namespace Aliro::Uwb {
  */
 template <typename IfaceImpl> class UltraWideBand {
 public:
-	using SessionIdentifier = uint32_t;
-
 	/**
 	 * @struct Callbacks
 	 * @brief Struct containing callback functions for UWB events.
@@ -32,27 +29,10 @@ public:
 	 * such as transmitting BLE messages and receiving ranging data.
 	 */
 	struct Callbacks {
-		/**
-		 * @brief Callback to transmit a BLE message.
-		 *
-		 * This callback is invoked when the UWB module needs to send a BLE message
-		 * as part of the Aliro protocol flow. The message must conform to the format
-		 * specified in Table 11-10 of the Aliro specification, and the payload must stay
-		 * unencrypted.
-		 *
-		 * @param userData User-defined context data.
-		 * @param data Pointer to the formatted BLE message data.
-		 * @param length Size of the message data in bytes.
-		 */
-		void (*mTransmitBleMessage)(void *userData, const uint8_t *data, size_t length){ nullptr };
-		/**
-		 * @brief Callback to receive ranging data.
-		 *
-		 * This callback is invoked when the UWB module receives ranging data.
-		 *
-		 * @param uwbData Ultra Wide Band ranging data.
-		 */
-		void (*mRangingData)(const UwbRangingData &uwbData){ nullptr };
+		/** Called to transmit a raw (unencrypted) BLE message. */
+		void (*mTransmitBleMessage)(const uint8_t *data, size_t length){ nullptr };
+		/** Called when ranging data is received. */
+		void (*mRangingData)(const uint8_t *data, size_t length){ nullptr };
 	};
 
 	/**
@@ -66,7 +46,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, or an error code on failure.
 	 */
-	AliroError Init(const Callbacks &callbacks) { return Impl()->_Init(callbacks); }
+	AliroError Init(Callbacks callbacks) { return Impl()->_Init(callbacks); }
 
 	/**
 	 * @brief Deinitializes the UltraWideBand module.
@@ -92,16 +72,14 @@ public:
 	/**
 	 * @brief Transmits deserialized and decrypted Aliro BLE messages to the UWB module.
 	 *
-	 * This method sends the UWB Ranging Service and Notifications (with ID == Ranging) to the UWB module.
-	 * The message conform to the format specified in Table 11-10 of the Aliro specification, and the payload is
-	 * decrypted.
+	 * This method sends the UWB Ranging Service and Notifications (with ID = Ranging) to the UWB module.
 	 *
 	 * @param data Pointer to data to be transmitted.
 	 * @param length Length of the data in bytes.
 	 *
 	 * @return ALIRO_NO_ERROR if the transmission was successful, an error code otherwise.
 	 */
-	AliroError HandleBleMessage(const uint8_t *data, size_t length)
+	AliroError HandleBleMessage(const uint8_t *data, size_t length) const
 	{
 		return Impl()->_HandleBleMessage(data, length);
 	}
@@ -111,16 +89,14 @@ public:
 	 *
 	 * This method sets up the ranging session using the provided URSK (UWB Ranging Secret Key).
 	 *
-	 * @param sessionId The session identifier for the ranging session (Chapter 11.7.2.1.3 in the Aliro spec.).
-	 * @param ursk Reference to the URSK.
-	 * @param sessionUserData Pointer to user data.
+	 * @param ursk Pointer to the URSK.
+	 * @param urskLen Length of the URSK in bytes.
 	 *
 	 * @return ALIRO_NO_ERROR on success, or an error code on failure.
 	 */
-	AliroError ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
-					   void *sessionUserData)
+	AliroError ConfigureRangingSession(const uint8_t *ursk, size_t urskLen)
 	{
-		return Impl()->_ConfigureRangingSession(sessionId, ursk, sessionUserData);
+		return Impl()->_ConfigureRangingSession(ursk, urskLen);
 	}
 
 	/**

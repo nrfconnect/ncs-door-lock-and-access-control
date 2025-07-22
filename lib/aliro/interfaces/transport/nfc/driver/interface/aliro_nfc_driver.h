@@ -9,7 +9,7 @@
 #include "nfc_driver_config.h"
 
 #include "aliro/errors.h"
-#include "aliro/types.h"
+#include "transport/data.h"
 
 namespace Aliro {
 

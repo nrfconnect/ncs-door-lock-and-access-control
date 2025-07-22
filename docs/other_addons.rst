@@ -3,10 +3,6 @@
 Software components deployment
 ##############################
 
-.. contents::
-   :local:
-   :depth: 2
-
 This page details the deployment of the |APP_NAME| and its dependencies.
 
 Overview
@@ -31,6 +27,3 @@ See the following diagram for deployment of software components used by the |APP
    :alt: Aliro add-ons deployment
 
    Aliro add-ons deployment
-
-The Aliro UWB adapter is not yet available as an add-on repository.
-However, the UWB adapter library is included as part of |APP_NAME| and can be found in the :file:`lib/qm35_uwb` directory.

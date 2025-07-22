@@ -6,7 +6,7 @@
 
 zephyr_include_directories(.)
 
-if(CONFIG_QM35_UWB_ALIRO_ZEPHYR OR CONFIG_QM35_UWB_LIB)
+if(CONFIG_QM35_UWB_ZEPHYR)
   add_subdirectory(uwb_qm35_impl)
 else()
   add_subdirectory(uwb_dummy_impl)

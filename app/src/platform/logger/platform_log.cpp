@@ -10,35 +10,51 @@
 
 #include <stdarg.h>
 
-LOG_MODULE_REGISTER(platform, CONFIG_NCS_ALIRO_LOG_LEVEL_VALUE);
+LOG_MODULE_REGISTER(platform, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 
-void _AliroPlatformLogHexdump(uint8_t platformLogLevel, const void *data, size_t size, const char *str)
+void AliroPlatformLogHexdump(AliroLogLevel logLevel, const void *data, size_t size, const char *str)
 {
-	switch (platformLogLevel) {
-	case LOG_LEVEL_ERR:
+	switch (logLevel) {
+	case ALIRO_LOG_LEVEL_ERROR:
 		LOG_HEXDUMP_ERR(data, size, str);
 		break;
-	case LOG_LEVEL_WRN:
+	case ALIRO_LOG_LEVEL_WARN:
 		LOG_HEXDUMP_WRN(data, size, str);
 		break;
-	case LOG_LEVEL_INF:
+	case ALIRO_LOG_LEVEL_INFO:
 		LOG_HEXDUMP_INF(data, size, str);
 		break;
-	case LOG_LEVEL_DBG:
+	case ALIRO_LOG_LEVEL_DEBUG:
 		LOG_HEXDUMP_DBG(data, size, str);
 		break;
-	case LOG_LEVEL_NONE:
+	case ALIRO_LOG_LEVEL_NONE:
 	default:
 		break;
 	}
 }
 
-void _AliroPlatformLog(uint8_t platformLogLevel, const char *logFormat, ...)
+void AliroPlatformLog(AliroLogLevel logLevel, const char *logFormat, ...)
 {
 #if defined(CONFIG_LOG) && !defined(CONFIG_LOG_MODE_MINIMAL)
 
-	if (platformLogLevel > CONFIG_NCS_ALIRO_LOG_LEVEL_VALUE) {
-		return;
+	uint8_t platformLogLevel{ LOG_LEVEL_NONE };
+
+	switch (logLevel) {
+	case ALIRO_LOG_LEVEL_ERROR:
+		platformLogLevel = LOG_LEVEL_ERR;
+		break;
+	case ALIRO_LOG_LEVEL_WARN:
+		platformLogLevel = LOG_LEVEL_WRN;
+		break;
+	case ALIRO_LOG_LEVEL_INFO:
+		platformLogLevel = LOG_LEVEL_INF;
+		break;
+	case ALIRO_LOG_LEVEL_DEBUG:
+		platformLogLevel = LOG_LEVEL_DBG;
+		break;
+	case ALIRO_LOG_LEVEL_NONE:
+	default:
+		platformLogLevel = LOG_LEVEL_NONE;
 	}
 
 	va_list paramList;
@@ -48,7 +64,7 @@ void _AliroPlatformLog(uint8_t platformLogLevel, const char *logFormat, ...)
 
 #else // defined(CONFIG_LOG) && !defined(CONFIG_LOG_MODE_MINIMAL)
 
-	ARG_UNUSED(platformLogLevel);
+	ARG_UNUSED(logLevel);
 	ARG_UNUSED(logFormat);
 
 #endif // defined(CONFIG_LOG) && !defined(CONFIG_LOG_MODE_MINIMAL)

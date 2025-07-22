@@ -4,4 +4,10 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-add_subdirectory(drivers)
+config UART_NRFX_UARTE_LEGACY_SHIM
+	bool
+	default n
+
+config Q_ALIRO_UWB_ADAPTER
+	bool
+	default y

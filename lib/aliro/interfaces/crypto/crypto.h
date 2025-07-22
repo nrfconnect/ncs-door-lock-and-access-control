@@ -175,40 +175,39 @@ public:
 	/**
 	 * Encrypt data payload.
 	 *
-	 * @param keyId input identifier of the key to use for encryption.
 	 * @param plainTxt input raw paylod to encrypt.
 	 * @param plainTxtLength input size of the payload.
-	 * @param additionalData input a addtional data.
-	 * @param additionalDataLength input a size of the addtional data.
+	 * @param aad input a addtional data.
+	 * @param aadLength input a size of the addtional data.
+	 * @param keyId input identifier of the key to use for encryption.
 	 * @param nonce input a nonce to use for operation.
 	 * @param cipherText output encrypted paylod.
 	 * @param authTag output authentication tag.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError EncryptPayload(uint32_t keyId, const Byte *plainTxt, size_t plainTxtLength,
-				  const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
-				  Byte *cipherText, AuthenticationTag &authTag);
+	AliroError EncryptPayload(const Byte *plainTxt, size_t plainTxtLength, const Byte *aad, size_t aadLength,
+				  uint32_t keyId, const Nonce &nonce, Byte *cipherText, AuthenticationTag &authTag);
 
 	/**
 	 * Encrypt data payload.
 	 *
-	 * @param keyId input identifier of the key to use for encryption.
 	 * @param plainTxt input raw paylod to encrypt.
 	 * @param plainTxtLength input size of the payload.
+	 * @param keyId input identifier of the key to use for encryption.
 	 * @param cipherText output encrypted paylod.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError EncryptPayload(uint32_t keyId, const Byte *plainTxt, size_t plainTxtLength, Byte *cipherText);
+	AliroError EncryptPayload(const Byte *plainTxt, size_t plainTxtLength, uint32_t keyId, Byte *cipherText);
 
 	/**
 	 * Authenticated decryption (AEAD) data payload.
 	 *
 	 * @param keyId input identifier of the key to use for decryption.
-	 * @param cipherTextWithTag input encrypted and authenticated data. The buffer must contains the encrypted data
+	 * @param cipherText input encrypted and authenticated data. The buffer must contains the encrypted data
 	 * followed by authentication tag.
-	 * @param cipherTextWithTagLength input size of the cipherText buffer.
+	 * @param cipherTextLength input size of the cipherText buffer.
 	 * @param additionalData input a addtional data that has been authenticated but not encrypted.
 	 * @param additionalDataLength input a size of the addtional data.
 	 * @param nonce input a nonce to use for operation with fixed size.
@@ -218,7 +217,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DecryptPayload(uint32_t keyId, const Byte *cipherTextWithTag, size_t cipherTextWithTagLength,
+	AliroError DecryptPayload(uint32_t keyId, const Byte *cipherText, size_t cipherTextLength,
 				  const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
 				  Byte *plainText, size_t &plainTextLength);
 

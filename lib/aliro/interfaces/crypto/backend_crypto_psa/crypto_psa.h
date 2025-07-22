@@ -33,10 +33,10 @@ protected:
 				      SessionBoundKeys &sessionVolatileKeys);
 	AliroError _DeriveBleSessionKey(psa_key_id_t inputKeyId, const SharedByteSpan &info, const SharedByteSpan &salt,
 					psa_key_id_t &outputKeyId);
-	AliroError _EncryptPayload(psa_key_id_t keyId, const Byte *plainTxt, size_t plainTxtLength,
-				   const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
-				   Byte *cipherText, AuthenticationTag &authTag);
-	AliroError _EncryptPayload(psa_key_id_t keyId, const Byte *plainTxt, size_t plainTxtLength, Byte *cipherText);
+	AliroError _EncryptPayload(const Byte *plainTxt, size_t plainTxtLength, const Byte *aad, size_t aadLength,
+				   psa_key_id_t keyId, const Nonce &nonce, Byte *cipherText,
+				   AuthenticationTag &authTag);
+	AliroError _EncryptPayload(const Byte *plainTxt, size_t plainTxtLength, psa_key_id_t keyId, Byte *cipherText);
 	AliroError _DecryptPayload(psa_key_id_t keyId, const Byte *cipherText, size_t cipherTextLength,
 				   const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
 				   Byte *plainText, size_t &plainTextLength);

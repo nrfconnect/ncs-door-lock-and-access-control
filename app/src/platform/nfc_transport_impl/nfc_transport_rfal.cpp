@@ -23,7 +23,7 @@ K_THREAD_STACK_DEFINE(mStack, CONFIG_RFAL_WORKER_THREAD_STACK_SIZE);
 [[noreturn]] void NfcTransportRfal::Run()
 {
 	while (true) {
-		if (mRecoverPolling && !mSendInProgress) {
+		if (mRecoverPolling) {
 			mRecoverPolling = false;
 			RecoverPolling();
 		}
@@ -62,18 +62,15 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 	case RFAL_NFC_STATE_START_DISCOVERY:
 		LOG_DBG("RFAL: Start discovery state");
 		mMultiSel = false;
-		mSendInProgress = false;
 		break;
 	case RFAL_NFC_STATE_DATAEXCHANGE:
 		LOG_DBG("RFAL: Data exchange state");
 		break;
 	case RFAL_NFC_STATE_DATAEXCHANGE_DONE:
-		mSendInProgress = false;
 		CaptureRxData();
 		break;
 	case RFAL_NFC_STATE_DEACTIVATION:
 		LOG_DBG("RFAL: Deactivation State");
-		mSendInProgress = false;
 		break;
 	case RFAL_NFC_STATE_ACTIVATED:
 		LOG_DBG("RFAL: Activated state");
@@ -220,13 +217,11 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 AliroError NfcTransportRfal::_Send(Data data, [[maybe_unused]] uint32_t maximumFrameDelayTime)
 {
 	LOG_HEXDUMP_DBG(data.mData, data.mLength, "RFAL: TX data:");
-	mSendInProgress = true;
 
 	// use RFAL_FWT_NONE as FWT because the driver with ISO-DEP enabled will ignore it anyway
 	ReturnCode err = rfalNfcDataExchangeStart(data.mData, data.mLength, &mRxData, &mRcvLen, RFAL_FWT_NONE);
 	VerifyOrReturnStatus(err == RFAL_ERR_NONE, ALIRO_ERROR_INTERNAL,
-			     LOG_ERR("RFAL: Data exchange failed, return code: %d", err);
-			     mSendInProgress = false);
+			     LOG_ERR("RFAL: Data exchange failed, return code: %d", err));
 
 	return ALIRO_NO_ERROR;
 }

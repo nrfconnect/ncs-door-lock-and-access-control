@@ -13,12 +13,29 @@ file(GLOB app_sources CONFIGURE_DEPENDS src/*.cpp)
 
 add_subdirectory(src/platform)
 
-if (CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT)
-  add_subdirectory(src/access_manager_impl_default)
-elseif (CONFIG_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM)
-  add_subdirectory(src/access_manager_impl_custom)
-else()
-  message(FATAL_ERROR "No access manager implementation selected")
+target_sources(app PRIVATE ${app_sources})
+
+set(PUBLIC_API ${ZEPHYR_NCS_ALIRO_MODULE_DIR})
+
+if(CONFIG_SOC_SERIES_NRF52X)
+  set(ALIRO_LIB_PATH ${ZEPHYR_NCS_ALIRO_MODULE_DIR}/applications/doorlock/lib/aliro/bin/cortex-m4)
+elseif(CONFIG_SOC_SERIES_NRF54LX OR CONFIG_SOC_SERIES_NRF53X)
+  set(ALIRO_LIB_PATH ${ZEPHYR_NCS_ALIRO_MODULE_DIR}/applications/doorlock/lib/aliro/bin/cortex-m33)
 endif()
 
-target_sources(app PRIVATE ${app_sources})
+add_library(aliro_stack STATIC IMPORTED GLOBAL)
+
+if(CONFIG_ALIRO_BLE_TP)
+  set_target_properties(aliro_stack PROPERTIES IMPORTED_LOCATION ${ALIRO_LIB_PATH}/libaliro_ble.a)
+else(CONFIG_ALIRO_BLE_TP)
+  set_target_properties(aliro_stack PROPERTIES IMPORTED_LOCATION ${ALIRO_LIB_PATH}/libaliro.a)
+endif(CONFIG_ALIRO_BLE_TP)
+
+target_link_libraries(app PRIVATE aliro_stack)
+target_link_libraries(aliro_stack INTERFACE zephyr_interface)
+
+zephyr_include_directories(
+  ${PUBLIC_API}/include
+  ${PUBLIC_API}/interfaces
+  ${PUBLIC_API}/interfaces/crypto/backend_crypto_psa
+)
