@@ -10,7 +10,7 @@ Aliro is the new industry-standard access control and communication protocol, of
 
 Aliro features several key features that distinguish it from existing access protocols:
 
-* Interoperability and compatibility - Ensures seamless interaction between access readers, such as electronic locks and access control readers, and User Devices like a smartphone and wearables.
+* Interoperability and compatibility - Ensures seamless interaction between access readers, such as electronic locks and access control readers, and user devices like smartphone and wearables.
   The standardized solution allows manufacturer-independent devices and readers to work together without compromising security.
 * Flexibility - Does not dictate how your digital door lock or access control reader connects to the rest of your ecosystem.
 * Protocol support - Supports various transport protocols, including mandatory Near Field Communication (NFC), Bluetooth® LE or Bluetooth LE with Ultra-Wideband (UWB).

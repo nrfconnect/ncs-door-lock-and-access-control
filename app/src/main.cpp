@@ -6,17 +6,19 @@
 
 #include "aliro/aliro.h"
 #include "aliro/shell.h"
-#include "aliro/types.h"
 #include "aliro/utils.h"
+
+#ifdef CONFIG_ALIRO_BLE_TP
+#include "uwb/uwb.h"
+#include "uwb_impl.h"
+#endif // CONFIG_ALIRO_BLE_TP
+
+#include <zephyr/logging/log.h>
+#include <zephyr/shell/shell.h>
 
 #ifdef CONFIG_ACCESS_DECISION_INDICATOR
 #include "access_decision_indicator.h"
 #endif // CONFIG_ACCESS_DECISION_INDICATOR
-
-#include "access_manager/access_manager.h"
-
-#include <zephyr/logging/log.h>
-#include <zephyr/shell/shell.h>
 
 #include <cstdio>
 #include <stdlib.h>
@@ -36,20 +38,29 @@ int main()
 			    LOG_ERR("Failed to initialize access decision indicator"));
 #endif // CONFIG_ACCESS_DECISION_INDICATOR
 
-	AccessManagerInstance().Init({ .mAccessGrantedIndicatorClb = Indicator::SignalAccessGranted });
-
-	const AliroConfig config{
-#ifdef CONFIG_DISABLE_ALIRO_NFC_TP
-		.mEnableNfc = false,
-#endif // CONFIG_DISABLE_ALIRO_NFC_TP
-
 #ifdef CONFIG_ALIRO_BLE_TP
-		.mMaxBleSessions = CONFIG_ALIRO_BLE_TP_MAX_SESSIONS,
+	Uwb::UltraWideBandImpl::Callbacks callbacks{};
+	ec = Uwb::UltraWideBandImpl::Instance().Init(callbacks);
+	if (ec == ALIRO_ERROR_NOT_IMPLEMENTED) {
+		LOG_INF("UWB is not implemented");
+	} else {
+		VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Failed to initialize UWB module"));
+	}
 #endif // CONFIG_ALIRO_BLE_TP
-	};
 
 	ec = AliroStack::Instance().Init(
-		{ .mOnError = [](AliroError error) { LOG_ERR("Aliro error: %s", error.ToString()); } }, config);
+		{ .mOnAccessAttempt =
+			  [](Status status) {
+				  if (status == Status::Denied) {
+					  LOG_INF("ACCESS DENIED");
+				  } else {
+					  LOG_INF("ACCESS GRANTED");
+#ifdef CONFIG_ACCESS_DECISION_INDICATOR
+					  Indicator::SignalAccessGranted();
+#endif // CONFIG_ACCESS_DECISION_INDICATOR
+				  }
+			  },
+		  .mOnError = [](AliroError error) { LOG_ERR("Aliro error: %s", error.ToString()); } });
 
 	VerifyOrDie(ec == ALIRO_NO_ERROR, "Aliro stack initialization failed");
 

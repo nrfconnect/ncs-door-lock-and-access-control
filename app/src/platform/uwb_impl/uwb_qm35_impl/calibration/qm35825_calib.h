@@ -2,7 +2,7 @@
  * Header file for chip calibration.
  *
  * SPDX-FileCopyrightText: Copyright (c) 2025 Qorvo, Inc.
- * SPDX-License-Identifier: LicenseRef-Qorvo-SDK-1
+ * SPDX-License-Identifier: LicenseRef-QORVO-2
  */
 
 #pragma once

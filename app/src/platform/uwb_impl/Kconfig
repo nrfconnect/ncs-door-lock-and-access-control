@@ -4,6 +4,6 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-if QM35_UWB_ALIRO_ZEPHYR || QM35_UWB_LIB
-rsource "uwb_qm35_impl/Kconfig"
-endif # QM35_UWB_ALIRO_ZEPHYR || QM35_UWB_LIB
+if QM35_UWB_ZEPHYR
+rsource "uwb_qm35_impl/Kconfig.defconfig"
+endif # QM35_UWB_ZEPHYR
