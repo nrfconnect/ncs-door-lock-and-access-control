@@ -3,6 +3,10 @@
 Software requirements
 #####################
 
+.. contents::
+   :local:
+   :depth: 2
+
 This page summarizes the requirements for setting up and working with the |app_name|.
 
 .. _sdk_set_up:

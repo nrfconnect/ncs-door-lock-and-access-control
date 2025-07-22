@@ -5,13 +5,13 @@
 
 .. _`ncs-door-lock-app`: https://github.com/nrfconnect/ncs-door-lock-app
 .. _`Aliro Certification Tool`: https://github.com/csa-access-control/aliro-certification-tool
+.. _`Aliro Certification Test Tool for GTE#2` : https://github.com/csa-access-control/aliro-certification-tool/releases/tag/release%2Fgating_test_event2-2025-aliro_specification_v0.9.3-v1.0
 .. _`test harness hardware requirements`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#requirements
 .. _`test harness usage instructions`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#usage-instructions
 .. _`running test scripts`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#c---creating-a-test-run-running-test-scripts
 .. _`Setting up the command-line build environment`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/installation/install_ncs.html#set_up_the_command-line_build_environment
 .. _`Zephyr CMake package`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/build/zephyr_cmake_package.html#cmake-pkg
 .. _`Test Harness issue #191`: https://github.com/csa-access-control/aliro-certification-tool/issues/191
-
 
 .. ### Source: docs.nordicsemi.com
        Requires manual update to align it with the NCS version.
@@ -22,6 +22,8 @@
 .. _`Get the nRF Connect SDK code`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/installation/install_ncs.html#get_the_nrf_connect_sdk_code
 
 .. _`Platform Security Architecture (PSA)`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/libraries/security/nrf_security/doc/configuration.html#psa_crypto_support
+
+.. _`Bluetooth LE Controller` : https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/protocols/bt/bt_stack_arch.html
 
 .. _`West`: https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/nrf/dev_model_and_contributions/code_base.html#ncs-west-intro
 
@@ -56,6 +58,8 @@
 .. _`OM27160B1EVK`: https://www.nxp.com/part/OM27160B1EVK
 .. _`OM27160A1EVK`: https://www.nxp.com/part/OM27160A1EVK
 .. _`LBUA0VG2BP-EVK-P`: https://www.murata.com/en-eu/products/connectivitymodule/ultra-wide-band/nxp/type2bp
+
+.. _`QM35825` : https://www.qorvo.com/products/p/QM35825
 
 .. ### External links
 

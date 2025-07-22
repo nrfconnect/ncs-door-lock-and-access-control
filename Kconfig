@@ -5,6 +5,48 @@
 #
 
 rsource "drivers/Kconfig"
+rsource "lib/Kconfig"
 
-config ALIRO_PRINT_READER_GROUP_ID
-	bool "Print reader group ID that should be provisioned into the User Device"
+menuconfig NCS_ALIRO
+	bool "NCS Aliro reader [EXPERIMENTAL]"
+	depends on (SOC_SERIES_NRF54LX || SOC_SERIES_NRF53X || SOC_SERIES_NRF52X)
+	select EXPERIMENTAL
+	imply NFC_T4T_APDU
+	imply POLL
+	# storage
+	imply SETTINGS
+	imply NVS
+	imply FLASH
+	imply FLASH_MAP
+	help
+	  This option enables the Aliro reader stack.
+
+if NCS_ALIRO
+
+config ALIRO_BLE_TP
+	bool "Aliro BLE transport"
+	help
+	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
+	  used by Reader to communicate with the User Device. It is used to send and
+	  receive packets over BLE.
+
+config DISABLE_ALIRO_NFC_TP
+	bool "Disable NFC transport protocol for development purposes"
+	help
+	  Disable the NFC transport protocol. This is useful if you want to use Aliro with BLE only.
+
+if ALIRO_BLE_TP
+
+config ALIRO_BLE_TP_MAX_SESSIONS
+	int "Maximum number of BLE sessions"
+	default BT_MAX_CONN
+	help
+	  The maximum number of BLE sessions that can be established.
+
+rsource "lib/aliro/Kconfig.ble.defconfig"
+
+endif # ALIRO_BLE_TP
+
+rsource "lib/aliro/Kconfig.defconfig"
+
+endif # NCS_ALIRO

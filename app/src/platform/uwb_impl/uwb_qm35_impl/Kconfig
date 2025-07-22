@@ -1,0 +1,67 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config ALIRO_UWB_MIN_RAN_MULTIPLIER
+	int "Minimum RAN multiplier for UWB ranging blocks"
+	default 1
+	range 1 255
+	help
+	  The RAN multiplier allows to define the time between 2 ranging blocks.
+	  The time range is between 96 ms (RAN multiplier is 1) and 24480 ms 
+	  (RAN multiplier is 255).
+
+choice ALIRO_UWB_PREFERRED_HOPPING_CONFIG
+	prompt "Preferred hopping configuration"
+	default ALIRO_UWB_HOPPING_CONTINUOUS
+	help
+	  Select the preferred hopping configuration for UWB.
+
+config ALIRO_UWB_HOPPING_AES
+	bool "AES based hopping sequence"
+
+config ALIRO_UWB_HOPPING_DEFAULT
+	bool "Default hopping sequence"
+
+config ALIRO_UWB_HOPPING_ADAPTIVE
+	bool "Adaptive hopping mode"
+
+config ALIRO_UWB_HOPPING_CONTINUOUS
+	bool "Continuous hopping mode"
+
+config ALIRO_UWB_HOPPING_NONE
+	bool "No hopping"
+
+endchoice
+
+config ALIRO_UWB_PREFERRED_HOPPING_CONFIG_VALUE
+	hex
+	default 0x01 if ALIRO_UWB_HOPPING_AES
+	default 0x02 if ALIRO_UWB_HOPPING_DEFAULT
+	default 0x04 if ALIRO_UWB_HOPPING_ADAPTIVE
+	default 0x08 if ALIRO_UWB_HOPPING_CONTINUOUS
+	default 0x10 if ALIRO_UWB_HOPPING_NONE
+
+config ALIRO_UWB_MAC_MODE_OFFSET
+	int "Offset between ranging blocks in MAC mode"
+	default 0
+	range 0 63
+	help
+	  Offset between the 2 ranging blocks.
+
+config ALIRO_UWB_MAC_MODE_RANGING_ROUNDS
+	int "Number of ranging rounds per ranging block"
+	default 0
+	range 0 1
+	help
+	  Number of ranging rounds used in a ranging block.
+	  Values:
+	  - 0: 1 ranging round
+	  - 1: 2 ranging round
+
+config ALIRO_UWB_SESSION_LOGGING
+	bool "Enable UWB session state logging"
+	help
+	  Enable logging for UWB session states and reason codes.
