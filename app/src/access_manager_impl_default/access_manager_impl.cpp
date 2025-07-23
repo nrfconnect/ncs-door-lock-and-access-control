@@ -44,7 +44,8 @@ AliroError AccessManagerImpl::_Init(const Callbacks &callbacks)
 
 	k_work_init(&mWork, [](k_work *) {
 		LOG_DBG("Ranging start timer expired");
-		AliroError error = Uwb::UltraWideBandImpl::Instance().InitiateRangingSession();
+		// TODO: Workaround for one session.
+		AliroError error = Uwb::UltraWideBandImpl::Instance().InitiateRangingSession(nullptr);
 		VerifyOrReturn(error == ALIRO_NO_ERROR,
 			       LOG_ERR("Failed to initiate ranging session: %d", error.ToInt()));
 	});
@@ -82,7 +83,8 @@ AliroError AccessManagerImpl::_StartAccessDecision(const CryptoTypes::PublicKey 
 	// We are in the NFC session, make the decision only based on the User Device public key
 	else {
 #ifdef CONFIG_ALIRO_BLE_TP
-		AliroError status = Uwb::UltraWideBandImpl::Instance().TerminateRangingSession();
+		// TODO: Workaround for one session.
+		AliroError status = Uwb::UltraWideBandImpl::Instance().TerminateRangingSession(nullptr);
 		VerifyOrReturnStatus(status == ALIRO_NO_ERROR || status == ALIRO_ERROR_NOT_IMPLEMENTED,
 				     ALIRO_INVALID_STATE,
 				     LOG_ERR("Cannot terminate UWB ranging session: %d", status.ToInt()));
