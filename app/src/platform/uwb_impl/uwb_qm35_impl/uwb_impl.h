@@ -42,26 +42,19 @@ public:
 	AliroError _Init(const Callbacks &callbacks);
 	AliroError _Deinit();
 	void _BleTimeSync() const;
-	AliroError _HandleBleMessage(const uint8_t *data, size_t length);
+	AliroError _HandleBleMessage(const uint8_t *data, size_t length, SessionContextHandle sessionContextData);
 	AliroError _ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
-					    void *sessionUserData);
-	AliroError _InitiateRangingSession();
-	AliroError _TerminateRangingSession();
-	AliroError _SuspendRangingSession();
-	AliroError _ResumeRangingSession();
+					    SessionContextHandle sessionContextData);
+	AliroError _InitiateRangingSession(SessionContextHandle sessionContextData);
+	AliroError _TerminateRangingSession(SessionContextHandle sessionContextData);
+	AliroError _SuspendRangingSession(SessionContextHandle sessionContextData) const;
+	AliroError _ResumeRangingSession(SessionContextHandle sessionContextData) const;
 
 	// Delete copy and move constructors and assignment operators.
 	UltraWideBandImpl(const UltraWideBandImpl &) = delete;
 	UltraWideBandImpl &operator=(const UltraWideBandImpl &) = delete;
 	UltraWideBandImpl(UltraWideBandImpl &&) = delete;
 	UltraWideBandImpl &operator=(UltraWideBandImpl &&) = delete;
-
-	friend void UwbCoreCallback(cherry_core_event *event, void *userData);
-	friend void TransmitBleMessage(aliro_uwb_message *message, aliro_uwb_session *sessionCtx, void *userData,
-				       bool timeout);
-
-protected:
-	CoreEvent *mCoreEvent{};
 
 private:
 	static constexpr size_t kCurrentDistanceBufferSize{ sizeof(
@@ -70,13 +63,17 @@ private:
 	UltraWideBandImpl() = default;
 	~UltraWideBandImpl() = default;
 
-	void SessionHandlerCallback(aliro_uwb_session_event *event, void *user_data);
+	static void UwbCoreCallback(cherry_core_event *event, void *userData);
+	static void TransmitBleMessage(aliro_uwb_message *message, aliro_uwb_session *sessionCtx, void *userData,
+				       bool timeout);
+	static void SessionHandlerCallback(aliro_uwb_session_event *event, void *user_data);
 
+	CoreEvent *mCoreEvent{};
 	Callbacks mCallbacks{};
 	cherry *mCtx{};
 	aliro_uwb_adapter *mAliroCtx{};
 	aliro_uwb_session *mAliroSessionCtx{};
-	void *mAliroSessionUserData{};
+	SessionContextHandle mSessionContextData{};
 	std::array<uint8_t, kCurrentDistanceBufferSize> mCurrentDistanceCm{};
 	aliro_uwb_adapter_reader_config mReaderConfig = {
 		.min_ran_multiplier = CONFIG_ALIRO_UWB_MIN_RAN_MULTIPLIER,
