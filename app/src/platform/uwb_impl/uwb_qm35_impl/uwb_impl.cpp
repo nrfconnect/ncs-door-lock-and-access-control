@@ -119,7 +119,7 @@ constexpr const char *CherryCccReasonCodeToString(enum cherry_ccc_state_change_r
 
 namespace Aliro::Uwb {
 
-void UwbCoreCallback(cherry_core_event *event, void *userData)
+void UltraWideBandImpl::UwbCoreCallback(cherry_core_event *event, void *userData)
 {
 	VerifyOrExit(event && userData, LOG_ERR("Invalid event or user data."));
 
@@ -143,65 +143,80 @@ exit:
 	cherry_core_event_free(event);
 }
 
-void TransmitBleMessage(aliro_uwb_message *message, aliro_uwb_session *sessionCtx, void *userData, bool timeout)
+void UltraWideBandImpl::TransmitBleMessage(aliro_uwb_message *message, [[maybe_unused]] aliro_uwb_session *,
+					   void *userData, [[maybe_unused]] bool)
 {
-	auto *uwbImpl = static_cast<UltraWideBandImpl *>(userData);
+	VerifyOrExit(message && userData, LOG_ERR("UWB message or user data is null."));
 
-	uwbImpl->mCallbacks.mTransmitBleMessage(uwbImpl->mAliroSessionUserData, message->data, message->len);
+	{
+		auto *uwbImpl = static_cast<UltraWideBandImpl *>(userData);
+		VerifyAndCall(uwbImpl->mCallbacks.mTransmitBleMessage, uwbImpl->mSessionContextData, message->data,
+			      message->len);
+	}
 
+exit:
 	// Free the consumed message.
 	aliro_uwb_session_message_free(message);
 }
 
-void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, void *user_data)
+void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, void *userData)
 {
-	auto sessionData = event->data;
-	switch (event->type) {
-	case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_STATUS:
+	VerifyOrExit(event && userData, LOG_ERR("UWB session event or user data is null."));
+
+	{
+		auto sessionData = event->data;
+		switch (event->type) {
+		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_STATUS:
 #ifdef CONFIG_ALIRO_UWB_SESSION_LOGGING
 
-		LOG_INF("Session status changed: %s (%d), reason: %s (%d)",
-			CherryCccSessionStateToString(sessionData.status->session_state),
-			sessionData.status->session_state, CherryCccReasonCodeToString(sessionData.status->reason_code),
-			sessionData.status->reason_code);
+			LOG_INF("Session status changed: %s (%d), reason: %s (%d)",
+				CherryCccSessionStateToString(sessionData.status->session_state),
+				sessionData.status->session_state,
+				CherryCccReasonCodeToString(sessionData.status->reason_code),
+				sessionData.status->reason_code);
 
 #else // CONFIG_ALIRO_UWB_SESSION_LOGGING
 
-		LOG_INF("Session status changed: %d, reason: %d", sessionData.status->session_state,
-			sessionData.status->reason_code);
+			LOG_INF("Session status changed: %d, reason: %d", sessionData.status->session_state,
+				sessionData.status->reason_code);
 
 #endif // CONFIG_ALIRO_UWB_SESSION_LOGGING
-		break;
-	case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_ERROR:
-		LOG_INF("Session error: 0x%x", sessionData.error->status_err);
-		break;
-	case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_CONTROLLER_REPORT: {
-		const cherry_ccc_controller_session_report *results = sessionData.controller_report;
-		LOG_INF("Controller report %d measurements", results->n_measurements);
-		break;
-	}
-	case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_CONTROLEE_REPORT: {
-		const cherry_ccc_session_controlee_measurements *currentMeasurement =
-			sessionData.controlee_report->measurements;
-		while (currentMeasurement) {
-			if (!currentMeasurement->frame_status) {
-				LOG_INF("Controlee report distance %d [cm]", currentMeasurement->distance_cm);
-				sys_put_be16(currentMeasurement->distance_cm, mCurrentDistanceCm.data());
-				VerifyAndCall(mCallbacks.mRangingData,
-					      UwbRangingData{ .mData = mCurrentDistanceCm.data(),
-							      .mLength = mCurrentDistanceCm.size() });
-			} else {
-				LOG_INF("Controlee report error status: 0x%x on slot id: %d",
-					currentMeasurement->frame_status, currentMeasurement->slot_index);
-			}
-			currentMeasurement = currentMeasurement->next;
+			break;
+		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_ERROR:
+			LOG_INF("Session error: 0x%x", sessionData.error->status_err);
+			break;
+		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_CONTROLLER_REPORT: {
+			const cherry_ccc_controller_session_report *results = sessionData.controller_report;
+			LOG_INF("Controller report %d measurements", results->n_measurements);
+			break;
 		}
-		break;
-	}
-	default:
-		break;
+		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_CONTROLEE_REPORT: {
+			const cherry_ccc_session_controlee_measurements *currentMeasurement =
+				sessionData.controlee_report->measurements;
+			while (currentMeasurement) {
+				if (!currentMeasurement->frame_status) {
+					LOG_INF("Controlee report distance %d [cm]", currentMeasurement->distance_cm);
+
+					auto *uwbImpl = static_cast<UltraWideBandImpl *>(userData);
+					sys_put_be16(currentMeasurement->distance_cm,
+						     uwbImpl->mCurrentDistanceCm.data());
+					VerifyAndCall(uwbImpl->mCallbacks.mRangingData,
+						      UwbRangingData{ .mData = uwbImpl->mCurrentDistanceCm.data(),
+								      .mLength = uwbImpl->mCurrentDistanceCm.size() });
+				} else {
+					LOG_INF("Controlee report error status: 0x%x on slot id: %d",
+						currentMeasurement->frame_status, currentMeasurement->slot_index);
+				}
+				currentMeasurement = currentMeasurement->next;
+			}
+			break;
+		}
+		default:
+			break;
+		}
 	}
 
+exit:
 	// Free the consumed event.
 	aliro_uwb_session_event_free(event);
 }
@@ -255,7 +270,7 @@ exit:
 
 AliroError UltraWideBandImpl::_Deinit()
 {
-	_TerminateRangingSession();
+	_TerminateRangingSession(nullptr);
 
 	if (mAliroCtx) {
 		aliro_uwb_adapter_destroy(mAliroCtx);
@@ -278,7 +293,7 @@ void UltraWideBandImpl::_BleTimeSync() const
 	LOG_INF("Start Bluetooth LE and UWB time synchronization, procedure 0");
 }
 
-AliroError UltraWideBandImpl::_HandleBleMessage(const uint8_t *data, size_t length)
+AliroError UltraWideBandImpl::_HandleBleMessage(const uint8_t *data, size_t length, SessionContextHandle)
 {
 	VerifyOrReturnStatus(data && length > 0, ALIRO_INVALID_ARGUMENT, LOG_ERR("Invalid BLE message data."));
 
@@ -296,25 +311,21 @@ AliroError UltraWideBandImpl::_HandleBleMessage(const uint8_t *data, size_t leng
 	return ALIRO_NO_ERROR;
 
 exit:
-	_TerminateRangingSession();
+	_TerminateRangingSession(nullptr);
 
 	return ALIRO_ERROR_INTERNAL;
 }
 
 AliroError UltraWideBandImpl::_ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
-						       void *sessionUserData)
+						       SessionContextHandle sessionContextData)
 {
 	VerifyOrReturnStatus(mAliroCtx, ALIRO_INVALID_STATE, LOG_ERR("UWB is not initialized."));
 
 	aliro_uwb_err uwbErr{ ALIRO_UWB_ERR_INTERNAL };
 
-	mAliroSessionUserData = sessionUserData;
-	mAliroSessionCtx = aliro_uwb_session_create(
-		mAliroCtx, sessionId,
-		[](aliro_uwb_session_event *event, void *user_data) {
-			Instance().SessionHandlerCallback(event, user_data);
-		},
-		&TransmitBleMessage, this);
+	mSessionContextData = sessionContextData;
+	mAliroSessionCtx =
+		aliro_uwb_session_create(mAliroCtx, sessionId, &SessionHandlerCallback, &TransmitBleMessage, this);
 	VerifyOrExit(mAliroSessionCtx, LOG_ERR("Failed to create UWB session."));
 
 	uwbErr = aliro_uwb_session_set_ursk(mAliroSessionCtx, ursk.data());
@@ -323,12 +334,12 @@ AliroError UltraWideBandImpl::_ConfigureRangingSession(SessionIdentifier session
 	return ALIRO_NO_ERROR;
 
 exit:
-	_TerminateRangingSession();
+	_TerminateRangingSession(nullptr);
 
 	return ConvertUwbError(uwbErr);
 }
 
-AliroError UltraWideBandImpl::_InitiateRangingSession()
+AliroError UltraWideBandImpl::_InitiateRangingSession(SessionContextHandle)
 {
 	VerifyOrReturnStatus(mAliroSessionCtx, ALIRO_INVALID_STATE, LOG_ERR("UWB session is not initialized."));
 	aliro_uwb_err err = aliro_uwb_session_init_setup(mAliroSessionCtx);
@@ -338,23 +349,23 @@ AliroError UltraWideBandImpl::_InitiateRangingSession()
 	return ALIRO_NO_ERROR;
 }
 
-AliroError UltraWideBandImpl::_TerminateRangingSession()
+AliroError UltraWideBandImpl::_TerminateRangingSession(SessionContextHandle)
 {
 	if (mAliroSessionCtx) {
 		aliro_uwb_session_destroy(mAliroSessionCtx);
 		mAliroSessionCtx = nullptr;
-		mAliroSessionUserData = nullptr;
+		mSessionContextData = nullptr;
 	}
 
 	return ALIRO_NO_ERROR;
 }
 
-AliroError UltraWideBandImpl::_SuspendRangingSession()
+AliroError UltraWideBandImpl::_SuspendRangingSession(SessionContextHandle) const
 {
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-AliroError UltraWideBandImpl::_ResumeRangingSession()
+AliroError UltraWideBandImpl::_ResumeRangingSession(SessionContextHandle) const
 {
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
