@@ -11,6 +11,3 @@ common:
   integration_platforms: *platforms
 tests:
   app.nfc_door_lock: {}
-  app.nfc_door_lock_src_no:
-    extra_args:
-      - CONFIG_NCS_ALIRO_SRC=n
