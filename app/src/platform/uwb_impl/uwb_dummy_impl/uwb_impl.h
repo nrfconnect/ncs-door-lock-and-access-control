@@ -33,16 +33,16 @@ public:
 		return sInstance;
 	}
 
-	AliroError _Init([[maybe_unused]] const Callbacks &);
-	AliroError _Deinit();
+	AliroError _Init(const Callbacks &callbacks) const;
+	AliroError _Deinit() const;
 	void _BleTimeSync() const;
-	AliroError _HandleBleMessage([[maybe_unused]] const uint8_t *, [[maybe_unused]] size_t);
-	AliroError _ConfigureRangingSession([[maybe_unused]] SessionIdentifier,
-					    [[maybe_unused]] const CryptoTypes::Ursk &, [[maybe_unused]] void *);
-	AliroError _InitiateRangingSession();
-	AliroError _TerminateRangingSession();
-	AliroError _SuspendRangingSession();
-	AliroError _ResumeRangingSession();
+	AliroError _HandleBleMessage(const uint8_t *data, size_t length, SessionContextHandle sessionContextData) const;
+	AliroError _ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
+					    SessionContextHandle sessionContextData) const;
+	AliroError _InitiateRangingSession(SessionContextHandle sessionContextData) const;
+	AliroError _TerminateRangingSession(SessionContextHandle sessionContextData) const;
+	AliroError _SuspendRangingSession(SessionContextHandle sessionContextData) const;
+	AliroError _ResumeRangingSession(SessionContextHandle sessionContextData) const;
 
 	// Delete copy and move constructors and assignment operators.
 	UltraWideBandImpl(const UltraWideBandImpl &) = delete;
