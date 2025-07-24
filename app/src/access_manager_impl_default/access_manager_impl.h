@@ -35,11 +35,26 @@ private:
 	 * @brief Starts an access decision process based on provided inputs.
 	 *
 	 * @param userPublicKey The user device public key to verify.
-	 * @param isBleSession Indicates if the access decision is being made in the BLE transport context.
+	 * @param sessionContext A pointer to the session context.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError _StartAccessDecision(const CryptoTypes::PublicKey &userPublicKey, bool isBleSession);
+	AliroError _StartAccessDecision(const CryptoTypes::PublicKey &userPublicKey, SessionContext sessionContext);
+
+#ifdef CONFIG_ALIRO_BLE_TP
+	/**
+	 * @brief Starts an access decision process based on provided inputs.
+	 *
+	 * @param userPublicKey The user device public key to verify.
+	 * @param rangingSessionId The ranging session ID.
+	 * @param ursk The ranging session key.
+	 * @param sessionContext A pointer to the session context.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError _StartAccessDecision(const CryptoTypes::PublicKey &userPublicKey, uint32_t rangingSessionId,
+					const CryptoTypes::Ursk &ursk, SessionContext sessionContext);
+#endif // CONFIG_ALIRO_BLE_TP
 
 	/**
 	 * @brief Add a new public key to the AccessManager.
@@ -85,6 +100,13 @@ private:
 	 */
 	void _HandleRangingSessionData(const UwbRangingData &uwbData);
 
+	/**
+	 * @brief Handles the session termination.
+	 *
+	 * @param sessionContext The session context.
+	 */
+	void _HandleSessionTermination(SessionContext sessionContext);
+
 private:
 	AccessManagerImpl() = default;
 	~AccessManagerImpl() = default;
@@ -118,6 +140,8 @@ private:
 #ifdef CONFIG_ALIRO_BLE_TP
 	// Maximum allowed distance for UWB ranging (in centimeters)
 	uint32_t mMaxAllowedDistance{ kDefaultMaxAllowedDistance };
+	// Session context for the current ranging session.
+	SessionContext mSessionContext;
 #endif // CONFIG_ALIRO_BLE_TP
 
 #ifdef CONFIG_AUTOMATIC_RANGING_SESSION_INITIATION
