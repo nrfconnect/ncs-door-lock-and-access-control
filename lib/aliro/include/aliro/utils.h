@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <zephyr/kernel.h>
 #include <zephyr/sys/__assert.h>
 
 #include <algorithm>
@@ -196,29 +195,3 @@ template <typename T, size_t N> bool IsArrayDefaultInitialized(const std::array<
 template <typename T> struct IsStdArrayType : std::false_type {};
 template <typename T, std::size_t N> struct IsStdArrayType<std::array<T, N>> : std::true_type {};
 template <typename T> constexpr bool IsStdArray = IsStdArrayType<T>::value;
-
-struct MutexGuard {
-	/**
-	 * @brief Constructor for MutexGuard.
-	 * Locks the mutex when the MutexGuard object is created.
-	 *
-	 * @param mutex Pointer to the mutex to lock.
-	 */
-	explicit MutexGuard(k_mutex &mutex) noexcept;
-
-	/**
-	 * @brief Destructor for MutexGuard.
-	 *
-	 * Unlocks the mutex when the MutexGuard object is destroyed.
-	 */
-	~MutexGuard() noexcept;
-
-	// Disable copy and move constructors and assignment operators.
-	MutexGuard(const MutexGuard &) = delete;
-	MutexGuard(MutexGuard &&) = delete;
-	MutexGuard &operator=(const MutexGuard &) = delete;
-	MutexGuard &operator=(MutexGuard &&) = delete;
-
-private:
-	k_mutex *const mMutex{ nullptr };
-};
