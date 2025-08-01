@@ -56,9 +56,56 @@ To configure number of Bluetooth LE sessions, set the ``BT_MAX_CONN`` to maximum
 
 You can configure Bluetooth LE transport parameters, such as buffer sizes, MTU, GATT database, L2CAP channels, TX power, and PHY through Kconfig (see :file:`lib/aliro/Kconfig.ble.defconfig`).
 
-The UWB interface allows you to use an UWB hardware module with the Aliro stack and Access Manager.
+.. _uwb_interface:
+
+UWB interface
+*************
+
+The UWB interface (:file:`uwb.h`) allows you to use an UWB hardware module with the Aliro stack and Access Manager.
 This interface operates when the Bluetooth LE transport is enabled.
 Using ranging measurements, the Access Manager can detect the distance between the User Device and the Reader and grant or deny access based on the access policy.
+
+Qorvo QM35 interface implementation
+===================================
+
+The Qorvo QM35 implementation is the default implementation for the UWB interface.
+It is based on the Qorvo QM35825 UWB module and you can enable it through the ``uwb_qm35`` snippet.
+
+You can also provide custom implementation using different UWB hardware module.
+
+Kconfig options
+---------------
+
+You can configure the Qorvo QM35 interface implementation using the following Kconfig options located under the :file:`app/src/platform/uwb_impl/uwb_qm35_impl/Kconfig` path:
+
+* ``CONFIG_ALIRO_UWB_MIN_RAN_MULTIPLIER`` - This option specifies the minimum RAN multiplier for UWB ranging blocks.
+  The RAN multiplier allows you to define the time between 2 ranging blocks.
+  The time range is between 96 ms (RAN multiplier is 1) and 24480 ms (RAN multiplier is 255).
+  Default value is ``1``.
+
+* ``ALIRO_UWB_HOPPING_MODE`` - This option allows you to select the preferred hopping mode.
+  You can choose the following Kconfig options:
+
+  * ``ALIRO_UWB_HOPPING_MODE_ADAPTIVE`` - Adaptive hopping mode
+  * ``ALIRO_UWB_HOPPING_MODE_CONTINUOUS`` - Continuous hopping mode (default)
+  * ``ALIRO_UWB_HOPPING_MODE_NONE`` - No hopping
+
+* ``CONFIG_ALIRO_UWB_HOPPING_SEQUENCE_AES`` - This option enables AES-based hopping sequence for continous or adaptive hopping modes.
+
+* ``CONFIG_ALIRO_UWB_MAC_MODE_OFFSET`` - This option sets the offset between the 2 ranging blocks in MAC mode.
+  The range is from 0 to 63, with a default value of ``0``.
+
+* ``CONFIG_ALIRO_UWB_MAC_MODE_RANGING_ROUNDS`` - This option specifies the number of ranging rounds used in a ranging block.
+  Available values are:
+
+  * ``0`` - 1 ranging round (default)
+  * ``1`` - 2 ranging rounds
+
+* ``CONFIG_ALIRO_UWB_SESSION_LOGGING`` - This option enables logging for UWB session states including status codes.
+  Use it for debugging and monitoring UWB session behavior.
+
+* ``CONFIG_ALIRO_UWB_RANGING_SESSION_INIT_DELAY_MS`` - This option specifies the time (in milliseconds) a Reader Device waits before it initiates the ranging session on its own.
+  The range is from 10 to 5000 ms, with a default value of ``100`` ms.
 
 
 .. _Access_decision_indicator:
@@ -119,11 +166,6 @@ You can configure the default implementation through Kconfig options located und
   .. note::
      Currently only a single public key is supported.
      For this reason, you should set this value to ``1``.
-
-* ``CONFIG_AUTOMATIC_RANGING_SESSION_INITIATION``- Enabling this option allows the Reader Device to automatically initiate the UWB ranging session in case the User Device fails to initiate it once the Access Protocol has been finalized.
-
-* ``CONFIG_RANGING_START_TIMEOUT_MS``- This option specifies in milliseconds the time the Reader Device waits before initiating the ranging session.
-  To start ranging immediately after the Access Protocol is finalized, set the value to ``0``.
 
 Configuring Access Manager
 ==========================

@@ -23,12 +23,14 @@ class AccessManagerImpl;
  */
 class AccessManager {
 public:
+	using SessionContext = const void *;
 	using AccessGrantedIndicatorCallback = void (*)();
+	using TerminateSessionCallback = void (*)(SessionContext sessionContext);
 
 	/**
-	 * @brief Callbacks for the command handlers.
+	 * @brief Application callbacks.
 	 */
-	struct Callbacks {
+	struct ApplicationCallbacks {
 		/**
 		 * @brief Callback for signaling access granted.
 		 *
@@ -38,23 +40,58 @@ public:
 	};
 
 	/**
+	 * @brief Stack callbacks.
+	 *
+	 */
+	struct StackCallbacks {
+		/**
+		 * @brief Callback for terminating the Aliro session.
+		 *
+		 * This callback is called when the session should be terminated.
+		 */
+		TerminateSessionCallback mTerminateSessionClb{ nullptr };
+	};
+
+	/**
 	 * @brief Initialize the AccessManager.
 	 *
 	 * @param callbacks Callbacks.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError Init(const Callbacks &callbacks);
+	AliroError Init(const ApplicationCallbacks &callbacks);
+
+	/**
+	 * @brief Set the stack callbacks.
+	 *
+	 * @param callbacks Stack callbacks.
+	 */
+	void SetStackCallbacks(const StackCallbacks &callbacks);
 
 	/**
 	 * @brief Starts an access decision process based on provided inputs.
 	 *
 	 * @param userPublicKey The user device public key to verify.
-	 * @param isBleSession Indicates if the access decision is being made in the BLE transport context.
+	 * @param context A pointer to the session context.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError StartAccessDecision(const CryptoTypes::PublicKey &userPublicKey, bool isBleSession);
+	AliroError StartAccessDecision(const CryptoTypes::PublicKey &userPublicKey, SessionContext sessionContext);
+
+#ifdef CONFIG_ALIRO_BLE_TP
+	/**
+	 * @brief Starts an access decision process based on provided inputs.
+	 *
+	 * @param userPublicKey The user device public key to verify.
+	 * @param rangingSessionId The ranging session ID.
+	 * @param ursk The ranging session key.
+	 * @param context A pointer to the session context.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError StartAccessDecision(const CryptoTypes::PublicKey &userPublicKey, uint32_t rangingSessionId,
+				       const CryptoTypes::Ursk &ursk, SessionContext sessionContext);
+#endif // CONFIG_ALIRO_BLE_TP
 
 	/**
 	 * @brief Add a new public key to the AccessManager.
@@ -96,9 +133,17 @@ public:
 	/**
 	 * @brief Handles the ranging session data.
 	 *
+	 * @param sessionContext The session context.
 	 * @param uwbData The ranging session data.
 	 */
-	void HandleRangingSessionData(const UwbRangingData &uwbData);
+	void HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData);
+
+	/**
+	 * @brief Handles the session termination.
+	 *
+	 * @param sessionContext The session context.
+	 */
+	void HandleSessionTermination(SessionContext sessionContext);
 
 private:
 	AccessManagerImpl *Impl();
