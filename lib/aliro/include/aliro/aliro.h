@@ -17,6 +17,11 @@ struct AliroConfig {
 	 */
 	bool mEnableNfc{ true };
 
+	/**
+	 * @brief The number of Access Credential public key slots.
+	 */
+	size_t mAccessCredentialKeySlots{ 0 };
+
 #ifdef CONFIG_ALIRO_BLE_TP
 	/**
 	 * @brief The maximum number of BLE sessions.

@@ -6,43 +6,54 @@
 
 config ALIRO_UWB_MIN_RAN_MULTIPLIER
 	int "Minimum RAN multiplier for UWB ranging blocks"
-	default 1
+	default 2
 	range 1 255
 	help
 	  The RAN multiplier allows to define the time between 2 ranging blocks.
-	  The time range is between 96 ms (RAN multiplier is 1) and 24480 ms 
+	  The time range is between 96 ms (RAN multiplier is 1) and 24480 ms
 	  (RAN multiplier is 255).
 
-choice ALIRO_UWB_PREFERRED_HOPPING_CONFIG
+### Hopping bitmasks based on the Table 19-31, CCC spec. 1.2.3 (Hopping_Config_Bitmask)
+choice ALIRO_UWB_HOPPING_MODE
 	prompt "Preferred hopping configuration"
-	default ALIRO_UWB_HOPPING_CONTINUOUS
+	default ALIRO_UWB_HOPPING_MODE_CONTINUOUS
 	help
 	  Select the preferred hopping configuration for UWB.
 
-config ALIRO_UWB_HOPPING_AES
-	bool "AES based hopping sequence"
-
-config ALIRO_UWB_HOPPING_DEFAULT
-	bool "Default hopping sequence"
-
-config ALIRO_UWB_HOPPING_ADAPTIVE
+config ALIRO_UWB_HOPPING_MODE_ADAPTIVE
 	bool "Adaptive hopping mode"
 
-config ALIRO_UWB_HOPPING_CONTINUOUS
+config ALIRO_UWB_HOPPING_MODE_CONTINUOUS
 	bool "Continuous hopping mode"
 
-config ALIRO_UWB_HOPPING_NONE
+config ALIRO_UWB_HOPPING_MODE_NONE
 	bool "No hopping"
 
 endchoice
 
-config ALIRO_UWB_PREFERRED_HOPPING_CONFIG_VALUE
+config ALIRO_UWB_HOPPING_MODE_VALUE
 	hex
-	default 0x01 if ALIRO_UWB_HOPPING_AES
-	default 0x02 if ALIRO_UWB_HOPPING_DEFAULT
-	default 0x04 if ALIRO_UWB_HOPPING_ADAPTIVE
-	default 0x08 if ALIRO_UWB_HOPPING_CONTINUOUS
-	default 0x10 if ALIRO_UWB_HOPPING_NONE
+	default 0x20 if ALIRO_UWB_HOPPING_MODE_ADAPTIVE
+	default 0x40 if ALIRO_UWB_HOPPING_MODE_CONTINUOUS
+	default 0x80 if ALIRO_UWB_HOPPING_MODE_NONE
+
+if !ALIRO_UWB_HOPPING_MODE_NONE
+
+config ALIRO_UWB_HOPPING_SEQUENCE_AES
+	bool "AES based hopping sequence"
+
+config ALIRO_UWB_HOPPING_SEQUENCE_AES_VALUE
+	hex
+	default 0x08 if ALIRO_UWB_HOPPING_SEQUENCE_AES
+	default 0x00
+
+config ALIRO_UWB_HOPPING_SEQUENCE_DEFAULT_VALUE
+	hex
+	default 0x10
+
+endif
+
+###
 
 config ALIRO_UWB_MAC_MODE_OFFSET
 	int "Offset between ranging blocks in MAC mode"
@@ -65,3 +76,10 @@ config ALIRO_UWB_SESSION_LOGGING
 	bool "Enable UWB session state logging"
 	help
 	  Enable logging for UWB session states and reason codes.
+
+config ALIRO_UWB_RANGING_SESSION_INIT_DELAY_MS
+	int "Delay before automatic UWB ranging session initiation (milliseconds) by the Reader"
+	default 100
+	range 10 5000
+	help
+	  Specifies the time a Reader Device waits before it initiates the ranging session by its own.
