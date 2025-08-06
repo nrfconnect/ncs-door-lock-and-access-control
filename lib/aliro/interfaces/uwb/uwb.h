@@ -23,6 +23,7 @@ namespace Aliro::Uwb {
 template <typename IfaceImpl> class UltraWideBand {
 public:
 	using SessionIdentifier = uint32_t;
+	using SessionContextHandle = const void *;
 
 	/**
 	 * @struct Callbacks
@@ -40,19 +41,21 @@ public:
 		 * specified in Table 11-10 of the Aliro specification, and the payload must stay
 		 * unencrypted.
 		 *
-		 * @param userData User-defined context data.
+		 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
 		 * @param data Pointer to the formatted BLE message data.
 		 * @param length Size of the message data in bytes.
 		 */
-		void (*mTransmitBleMessage)(void *userData, const uint8_t *data, size_t length){ nullptr };
+		void (*mTransmitBleMessage)(SessionContextHandle sessionContextData, const uint8_t *data,
+					    size_t length){ nullptr };
 		/**
 		 * @brief Callback to receive ranging data.
 		 *
 		 * This callback is invoked when the UWB module receives ranging data.
 		 *
+		 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
 		 * @param uwbData Ultra Wide Band ranging data.
 		 */
-		void (*mRangingData)(const UwbRangingData &uwbData){ nullptr };
+		void (*mRangingData)(SessionContextHandle sessionContextData, const UwbRangingData &uwbData){ nullptr };
 	};
 
 	/**
@@ -98,12 +101,13 @@ public:
 	 *
 	 * @param data Pointer to data to be transmitted.
 	 * @param length Length of the data in bytes.
+	 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
 	 *
 	 * @return ALIRO_NO_ERROR if the transmission was successful, an error code otherwise.
 	 */
-	AliroError HandleBleMessage(const uint8_t *data, size_t length)
+	AliroError HandleBleMessage(const uint8_t *data, size_t length, SessionContextHandle sessionContextData)
 	{
-		return Impl()->_HandleBleMessage(data, length);
+		return Impl()->_HandleBleMessage(data, length, sessionContextData);
 	}
 
 	/**
@@ -113,14 +117,14 @@ public:
 	 *
 	 * @param sessionId The session identifier for the ranging session (Chapter 11.7.2.1.3 in the Aliro spec.).
 	 * @param ursk Reference to the URSK.
-	 * @param sessionUserData Pointer to user data.
+	 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
 	 *
 	 * @return ALIRO_NO_ERROR on success, or an error code on failure.
 	 */
 	AliroError ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
-					   void *sessionUserData)
+					   SessionContextHandle sessionContextData)
 	{
-		return Impl()->_ConfigureRangingSession(sessionId, ursk, sessionUserData);
+		return Impl()->_ConfigureRangingSession(sessionId, ursk, sessionContextData);
 	}
 
 	/**
@@ -129,18 +133,28 @@ public:
 	 * This method starts a UWB ranging session by creating the M1 message and sending it
 	 * over the BLE interface to the User Device.
 	 *
+	 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
+	 *
 	 * @return ALIRO_NO_ERROR if the session was initiated successfully, an error code otherwise.
 	 */
-	AliroError InitiateRangingSession() { return Impl()->_InitiateRangingSession(); }
+	AliroError InitiateRangingSession(SessionContextHandle sessionContextData)
+	{
+		return Impl()->_InitiateRangingSession(sessionContextData);
+	}
 
 	/**
 	 * @brief Terminates the current UWB ranging session.
 	 *
 	 * This method terminates the current UWB ranging session and releases any resources it was using.
 	 *
+	 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
+	 *
 	 * @return ALIRO_NO_ERROR if the session was terminated successfully, an error code otherwise.
 	 */
-	AliroError TerminateRangingSession() { return Impl()->_TerminateRangingSession(); }
+	AliroError TerminateRangingSession(SessionContextHandle sessionContextData)
+	{
+		return Impl()->_TerminateRangingSession(sessionContextData);
+	}
 
 	/**
 	 * @brief Suspends the current UWB ranging session.
@@ -148,11 +162,15 @@ public:
 	 * This method suspends the current UWB ranging session. It can be used to pause the session temporarily, to
 	 * resume the session use `AliroUwbResumeRangingSession()`.
 	 *
+	 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
 	 * @param force If true, forces the suspension even if there are ongoing operations.
 	 *
 	 * @return ALIRO_NO_ERROR if the session was suspended successfully, an error code otherwise.
 	 */
-	AliroError SuspendRangingSession(bool force = false) { return Impl()->_SuspendRangingSession(force); }
+	AliroError SuspendRangingSession(SessionContextHandle sessionContextData, bool force = false)
+	{
+		return Impl()->_SuspendRangingSession(sessionContextData, force);
+	}
 
 	/**
 	 * @brief Resumes the suspended UWB ranging session.
@@ -160,9 +178,14 @@ public:
 	 * This method resumes the UWB ranging session that was previously suspended by
 	 * `AliroUwbSuspendRangingSession()`.
 	 *
+	 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
+	 *
 	 * @return ALIRO_NO_ERROR if the session was resumed successfully, an error code otherwise.
 	 */
-	AliroError ResumeRangingSession() { return Impl()->_ResumeRangingSession(); }
+	AliroError ResumeRangingSession(SessionContextHandle sessionContextData)
+	{
+		return Impl()->_ResumeRangingSession(sessionContextData);
+	}
 
 protected:
 	IfaceImpl *Impl() { return static_cast<IfaceImpl *>(this); }

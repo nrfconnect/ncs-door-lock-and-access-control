@@ -25,8 +25,8 @@ protected:
 	AliroError _DestroyKey(psa_key_id_t &keyId) const;
 	AliroError _GenerateSignature(const uint8_t *msg, const size_t msgLength, TransactionSignature &signature,
 				      psa_key_id_t privateKeyId);
-	AliroError _VerifySignature(const uint8_t *msg, const size_t msgLength, const TransactionSignature &signature,
-				    psa_key_id_t spublicKeyId);
+	AliroError _VerifySignature(psa_key_id_t publicKeyId, const uint8_t *msg, const size_t msgLength,
+				    const TransactionSignature &signature);
 	AliroError _ComputeSharedKeyDH(psa_key_id_t privKeyId, const EccP256PublicKey &publicKey,
 				       const TransactionIdentifier &transactionId, psa_key_id_t &keyDhId);
 	AliroError _DeriveSessionKeys(psa_key_id_t kDh, const KdfInfo &info, const KdfSalt &salt,

@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-config ACCESS_MANAGER_MAX_STORED_KEYS
+config ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS
     int "Maximum number of stored public keys"
-    default 1
+    default 5
     help
       Specifies the maximum number of public keys that can be
       stored in the AccessManager. This determines the size of
@@ -14,7 +14,7 @@ config ACCESS_MANAGER_MAX_STORED_KEYS
 
 if ALIRO_BLE_TP
 
-config ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
+config ALIRO_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
     int "Maximum allowed distance for granting access (cm)"
     default 100
     help
@@ -23,26 +23,33 @@ config ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
       This is used to determine if the Aliro User Device
       is within the allowed proximity range.
 
-config AUTOMATIC_RANGING_SESSION_INITIATION
-    bool "Automatic ranging session initiation"
-    depends on SOC_SERIES_NRF53X
-    default y
+choice ALIRO_ACCESS_MANAGER_TERMINATE_SESSION
+    prompt "Terminate session on given condition"
+    default ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
     help
-      Specifies if the Reader Device will autonomously initiate
-      the UWB ranging session in case the session is not initiated
-      by the User Device after Access Protocol is finalized.
+      Select the condition under which the AccessManager will
+      terminate the current Aliro session.
 
-if AUTOMATIC_RANGING_SESSION_INITIATION
-
-config RANGING_START_TIMEOUT_MS
-    int "Ranging start timeout in ms"
-    default 3000
+config ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+    bool "Terminate the session if the access was granted"
     help
-      Specifies the time a Reader Device waits before it
-      initiates the ranging session by its own.
-      Set 0 to initiate the ranging session immediately after
-      the Access Protocol is finalized.
+      If enabled, the AccessManager will terminate each
+      session immediately when an access is granted.
 
-endif # AUTOMATIC_RANGING_SESSION_INITIATION
+config ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+    bool "Terminate session on timeout"
+    help
+      If enabled, the AccessManager will terminate each ongoing
+      session if it times out according to ALIRO_ACCESS_MANAGER_SESSION_TIMEOUT_MS.
+
+endchoice
+
+if ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+
+config ALIRO_ACCESS_MANAGER_SESSION_TIMEOUT_MS
+    int "Session timeout in milliseconds"
+    default 10000
+
+endif
 
 endif # ALIRO_BLE_TP

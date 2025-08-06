@@ -113,13 +113,15 @@ public:
 	 * NOTE: The Reader's public key (LTK) is used message verify.
 	 * The key must be loaded and avialable before this method is invoked.
 	 *
+	 * @param pubKeyId input identifier of the public key to use for verification.
 	 * @param msg input message whose signature is to be verified.
 	 * @param msgLength input size of the message.
 	 * @param signature input signature to verify.
 	 *
 	 * @return ALIRO_NO_ERROR when siganture is valid, ALIRO_INVALID_SIGNATURE otherwise.
 	 */
-	AliroError VerifySignature(const uint8_t *msg, const size_t msgLength, const TransactionSignature &signature);
+	AliroError VerifySignature(uint32_t pubKeyId, const uint8_t *msg, const size_t msgLength,
+				   const TransactionSignature &signature);
 
 	/**
 	 * Comupte shared key with ECDH procedure.

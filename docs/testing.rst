@@ -92,25 +92,54 @@ In case you do not have access to `Aliro Certification Tool`_ repository, see th
 
    .. code-block:: console
 
-      uart:~$ dl provisioning AC_key <65-byte public key in hex in hex without 0x>
+      uart:~$ dl provisioning AC_key set <key id> <65-byte public key in hex in hex without 0x>
 
    For example:
 
    .. code-block:: console
 
-      uart:~$ dl provisioning AC_key 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa
+      uart:~$ dl provisioning AC_key set 0 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa
 
-   Executing the same command without specifying the public key will return the stored value.
-   For example:
+   .. note::
+      You can also use the following command to clear the public key stored in the DUT:
 
-   .. code-block:: console
+      .. code-block:: console
 
-      uart:~$ dl provisioning AC_key
-      00000000: 04 74 2d f7 36 d0 fc 9b  e9 78 c4 5b 00 e8 fd f7 |.t-.6... .x.[....|
-      00000010: ce a6 84 ea 10 5a e5 74  c1 50 5a 2c 24 ab 61 98 |.....Z.t .PZ,$.a.|
-      00000020: e3 12 5b 7f 1b 7e 1d 13  4c 55 ec e6 96 81 ba 8e |..[..~.. LU......|
-      00000030: cc 18 a3 83 6d c5 19 9c  75 9f 31 e8 cc f1 7e 3e |....m... u.1...~>|
-      00000040: fa                                               |.                |
+         uart:~$ dl provisioning AC_key clear <key id>
+
+      For example:
+
+      .. code-block:: console
+
+         uart:~$ dl provisioning AC_key clear 0
+
+      To clear all public keys stored in the DUT, use the following command:
+
+      .. code-block:: console
+
+         uart:~$ dl provisioning AC_key clear all
+
+      To list all public keys stored in the DUT, use the following command:
+
+      .. code-block:: console
+
+         uart:~$ dl provisioning AC_key list
+
+      For example:
+
+      .. code-block:: console
+
+         uart:~$ dl provisioning AC_key list
+         [0]: 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efb
+         [1]: (null)
+         [2]: (null)
+         [3]: (null)
+         [4]: (null)
+         [5]: (null)
+         [6]: (null)
+         [7]: (null)
+         [8]: (null)
+         [9]: (null)
 
 .. _testing_verification:
 
