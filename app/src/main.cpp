@@ -43,6 +43,8 @@ int main()
 		.mEnableNfc = false,
 #endif // CONFIG_DISABLE_ALIRO_NFC_TP
 
+		.mAccessCredentialKeySlots = CONFIG_ACCESS_MANAGER_MAX_STORED_KEYS,
+
 #ifdef CONFIG_ALIRO_BLE_TP
 		.mMaxBleSessions = CONFIG_ALIRO_BLE_TP_MAX_SESSIONS,
 #endif // CONFIG_ALIRO_BLE_TP
