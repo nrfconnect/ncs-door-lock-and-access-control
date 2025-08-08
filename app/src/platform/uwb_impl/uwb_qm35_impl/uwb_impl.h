@@ -44,7 +44,7 @@ public:
 
 	AliroError _Init(const Callbacks &callbacks);
 	AliroError _Deinit();
-	void _BleTimeSync() const;
+	void _BleTimeSync();
 	AliroError _HandleBleMessage(const uint8_t *data, size_t length, SessionContextHandle sessionContextData);
 	AliroError _ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
 					    SessionContextHandle sessionContextData);

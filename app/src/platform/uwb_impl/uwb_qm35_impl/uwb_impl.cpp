@@ -317,7 +317,7 @@ AliroError UltraWideBandImpl::_Deinit()
 	return ALIRO_NO_ERROR;
 }
 
-void UltraWideBandImpl::_BleTimeSync() const
+void UltraWideBandImpl::_BleTimeSync()
 {
 	LOG_INF("Start Bluetooth LE and UWB time synchronization, procedure 0");
 }
