@@ -11,3 +11,10 @@ common:
   integration_platforms: *platforms
 tests:
   app.nfc_door_lock: {}
+  app.door_lock_ble_uwb:
+    platform_allow:
+      - nrf5340dk/nrf5340/cpuapp
+    integration_platforms:
+      - nrf5340dk/nrf5340/cpuapp
+    extra_args:
+      - app_SNIPPET=uwb_qm35
