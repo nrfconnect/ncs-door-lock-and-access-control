@@ -90,7 +90,7 @@ public:
 	 * @note In implementation of this method for example, the GPIO pin can be used to trigger time
 	 * synchronnization between BLE and UWB modules.
 	 */
-	void BleTimeSync() const { Impl()->_BleTimeSync(); }
+	void BleTimeSync() { Impl()->_BleTimeSync(); }
 
 	/**
 	 * @brief Transmits deserialized and decrypted Aliro BLE messages to the UWB module.
