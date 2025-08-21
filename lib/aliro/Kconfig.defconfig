@@ -5,9 +5,6 @@
 #
 
 # crypto default configuration
-config ENTROPY_PSA_CRYPTO_RNG
-	default y
-
 config MBEDTLS_PSA_CRYPTO_C
 	default y
 

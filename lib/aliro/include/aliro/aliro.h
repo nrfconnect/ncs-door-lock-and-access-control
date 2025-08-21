@@ -7,6 +7,7 @@
 #pragma once
 
 #include "aliro/errors.h"
+#include "aliro/types.h"
 #include <cstddef>
 
 namespace Aliro {
@@ -71,6 +72,13 @@ public:
 	AliroError Init(const Callbacks &callbacks, const AliroConfig &config);
 
 	/**
+	 * @brief Sets the reader identifier.
+	 *
+	 * @param identifier The reader identifier.
+	 */
+	AliroError SetReaderIdentifier(const Identifier &identifier);
+
+	/**
 	 * @brief Starts the Aliro stack.
 	 *
 	 * @return ALIRO_NO_ERROR if the stack was started successfully, an error code otherwise.
@@ -83,6 +91,13 @@ public:
 	 * @return The Aliro configuration.
 	 */
 	const AliroConfig &GetConfig() const { return mConfig; }
+
+	/**
+	 * @brief Gets the Aliro library version string.
+	 *
+	 * @return The Aliro library version.
+	 */
+	static const char *GetLibraryVersion();
 
 private:
 	Callbacks mCallbacks{};

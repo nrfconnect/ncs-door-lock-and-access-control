@@ -37,7 +37,7 @@ int ncs_pal_timer_create(uint16_t time_ms);
  *
  * @param timer_id the timer identifier.
  */
-void ncs_pal_timer_destroy(int timer_id);
+void ncs_pal_timer_destroy(uint8_t timer_id);
 
 /**
  * @brief Checks if the given timer is expired.
@@ -46,7 +46,7 @@ void ncs_pal_timer_destroy(int timer_id);
  *
  * @return True when the timer expired, false otherwise.
  */
-bool ncs_pal_timer_is_expired(uint32_t timer_id);
+bool ncs_pal_timer_is_expired(uint8_t timer_id);
 
 /**
  * @brief Set delay in milliseconds.
@@ -54,6 +54,15 @@ bool ncs_pal_timer_is_expired(uint32_t timer_id);
  * @param delay_ms the delay in milliseconds.
  */
 void ncs_pal_delay(uint16_t delay_ms);
+
+/**
+ * @brief Get the remaining time of the timer.
+ *
+ * @param timer_id the timer identifier.
+ *
+ * @return Remaining time in units of system ticks, or 0 if the timer is not running.
+ */
+uint32_t ncs_pal_timer_get_remaining(uint8_t timer_id);
 
 #ifdef __cplusplus
 }

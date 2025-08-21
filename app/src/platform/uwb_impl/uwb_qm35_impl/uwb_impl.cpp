@@ -169,27 +169,28 @@ void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, v
 	VerifyOrExit(event && userData, LOG_ERR("UWB session event or user data is null."));
 
 	{
-		auto sessionData = event->data;
+		const auto sessionData = event->data;
 
 		switch (event->type) {
-		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_STATUS:
+		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_STATUS: {
+			auto state = static_cast<uint32_t>(sessionData.status->session_state);
+			auto reason = static_cast<uint32_t>(sessionData.status->reason_code);
+
 #ifdef CONFIG_ALIRO_UWB_SESSION_LOGGING
 
-			LOG_INF("Session status changed: %s (%d), reason: %s (%d)",
-				CherryCccSessionStateToString(sessionData.status->session_state),
-				sessionData.status->session_state,
-				CherryCccReasonCodeToString(sessionData.status->reason_code),
-				sessionData.status->reason_code);
+			LOG_INF("Session status changed: %s (%u), reason: %s (%u)",
+				CherryCccSessionStateToString(state), state, CherryCccReasonCodeToString(reason),
+				reason);
 
 #else // CONFIG_ALIRO_UWB_SESSION_LOGGING
 
-			LOG_INF("Session status changed: %d, reason: %d", sessionData.status->session_state,
-				sessionData.status->reason_code);
+			LOG_INF("Session status changed: %u, reason: %u", state, reason);
 
 #endif // CONFIG_ALIRO_UWB_SESSION_LOGGING
 			break;
+		}
 		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_ERROR:
-			LOG_INF("Session error: 0x%x", sessionData.error->status_err);
+			LOG_INF("Session error: 0x%x", static_cast<uint32_t>(sessionData.error->status_err));
 			break;
 		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_CONTROLLER_REPORT: {
 			const cherry_ccc_controller_session_report *results = sessionData.controller_report;
@@ -461,29 +462,30 @@ exit:
 
 void UltraWideBandImpl::RemoveSession(SessionContext *sessionCtx)
 {
-	k_work_sync sync{};
-	k_work_cancel_delayable_sync(&sessionCtx->mInitiateRangingWork, &sync);
-
-	// TODO: Need to change to async.
-	if (sessionCtx->mUwbSessionContext) {
-		aliro_uwb_session_destroy(sessionCtx->mUwbSessionContext);
-		sessionCtx->mUwbSessionContext = nullptr;
+	{
+		MutexGuard lock{ mMutex };
+		VerifyOrReturn(sys_slist_find_and_remove(&mActiveSessionsList, &sessionCtx->mSessionContextNode),
+			       LOG_WRN("Session doesn't exist"));
 	}
 
-	MutexGuard lock{ mMutex };
-	if (sys_slist_find_and_remove(&mActiveSessionsList, &sessionCtx->mSessionContextNode)) {
-		delete sessionCtx;
-	}
+	DestroySession(sessionCtx);
+	delete sessionCtx;
 }
 
 void UltraWideBandImpl::RemoveAllSessions()
 {
-	SessionContext *sessionCtx{};
-	SessionContext *nextSessionCtx{};
+	while (true) {
+		SessionContext *sessionCtx = nullptr;
 
-	MutexGuard lock{ mMutex };
-	SYS_SLIST_FOR_EACH_CONTAINER_SAFE (&mActiveSessionsList, sessionCtx, nextSessionCtx, mSessionContextNode) {
-		RemoveSession(sessionCtx);
+		{
+			MutexGuard lock{ mMutex };
+			sys_snode_t *node = sys_slist_get(&mActiveSessionsList);
+			VerifyOrReturn(node);
+			sessionCtx = CONTAINER_OF(node, SessionContext, mSessionContextNode);
+		}
+
+		DestroySession(sessionCtx);
+		delete sessionCtx;
 	}
 }
 
@@ -513,6 +515,17 @@ UltraWideBandImpl::SessionContext *UltraWideBandImpl::FindSession(SessionContext
 	}
 
 	return nullptr;
+}
+
+void UltraWideBandImpl::DestroySession(SessionContext *sessionCtx)
+{
+	k_work_sync sync{};
+	k_work_cancel_delayable_sync(&sessionCtx->mInitiateRangingWork, &sync);
+
+	if (sessionCtx->mUwbSessionContext) {
+		aliro_uwb_session_destroy(sessionCtx->mUwbSessionContext);
+		sessionCtx->mUwbSessionContext = nullptr;
+	}
 }
 
 } // namespace Aliro::Uwb

@@ -19,18 +19,24 @@
 namespace Aliro {
 
 /**
- * @brief Type alias for byte values.
- *
- * Represents a single byte of data.
+ * @brief Length of the reader group identifier.
  */
-using Byte = uint8_t;
+constexpr size_t kReaderGroupIdentifierLength{ 16 };
 
 /**
- * @brief Type alias for size values.
- *
- * Used to represent sizes, lengths, and counts in.
+ * @brief Length of the reader group sub-identifier.
  */
-using Size = size_t;
+constexpr size_t kReaderGroupSubIdentifierLength{ 16 };
+
+/**
+ * @brief Length of the reader identifier.
+ */
+constexpr size_t kReaderIdentifierLength{ kReaderGroupIdentifierLength + kReaderGroupSubIdentifierLength };
+
+/**
+ * @brief Type alias for reader identifier.
+ */
+using Identifier = std::array<uint8_t, kReaderIdentifierLength>;
 
 /**
  * @brief Type alias for data storage.
@@ -39,7 +45,7 @@ using Size = size_t;
  */
 struct Data {
 	uint8_t *mData{ nullptr };
-	Size mLength{ 0 };
+	size_t mLength{ 0 };
 };
 
 /**

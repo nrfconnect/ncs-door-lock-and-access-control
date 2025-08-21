@@ -166,14 +166,6 @@ inline bool IsBufferEmpty(const uint8_t *data, size_t length)
 }
 
 /**
- * @brief Calculates the bit count based on the input bytes count.
- */
-constexpr uint32_t BitsCount(uint8_t lengthInBytes)
-{
-	return (lengthInBytes << 3);
-}
-
-/**
  * @brief Check if a std::array is default initialized (all zeros).
  *
  * @param arr The array to check
@@ -193,5 +185,5 @@ template <typename T, size_t N> bool IsArrayDefaultInitialized(const std::array<
  * @return true if the type is a std::array, false otherwise
  */
 template <typename T> struct IsStdArrayType : std::false_type {};
-template <typename T, std::size_t N> struct IsStdArrayType<std::array<T, N>> : std::true_type {};
+template <typename T, size_t N> struct IsStdArrayType<std::array<T, N>> : std::true_type {};
 template <typename T> constexpr bool IsStdArray = IsStdArrayType<T>::value;
