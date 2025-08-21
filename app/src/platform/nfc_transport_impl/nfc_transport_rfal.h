@@ -59,7 +59,7 @@ private:
 	k_thread mThread{};
 	bool mMultiSel{ false };
 
-	std::array<Byte, CONFIG_RFAL_FEATURE_ISO_DEP_APDU_MAX_LEN> mRxBuffer{};
+	std::array<uint8_t, CONFIG_RFAL_FEATURE_ISO_DEP_APDU_MAX_LEN> mRxBuffer{};
 	uint8_t *mRxData{};
 	uint16_t *mRcvLen{};
 
