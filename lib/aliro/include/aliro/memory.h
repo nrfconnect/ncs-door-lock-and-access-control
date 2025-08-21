@@ -16,7 +16,7 @@ template <typename T, typename... Args> T *new_nothrow(Args &&...args) noexcept
 	return new (std::nothrow) T(std::forward<Args>(args)...);
 }
 
-template <typename T> T *new_array_nothrow(std::size_t n) noexcept
+template <typename T> T *new_array_nothrow(size_t n) noexcept
 {
 	return new (std::nothrow) T[n];
 }

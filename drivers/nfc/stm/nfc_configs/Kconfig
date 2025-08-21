@@ -1,0 +1,21 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+choice RFAL_WAKE_UP_MODE
+	prompt "Wake-Up Mode configuration"
+	default RFAL_WAKE_UP_MODE_RELAXED
+	depends on RFAL_FEATURE_WAKEUP_MODE && ST25R200_DRV
+
+config RFAL_WAKE_UP_MODE_STRICT
+	bool "Strict configuration - less sensitive, more robust"
+
+config RFAL_WAKE_UP_MODE_RELAXED
+	bool "Relaxed configuration - more sensitive, less robust"
+
+config RFAL_WAKE_UP_MODE_DEFAULT
+	bool "Default RFAL WUM configuration - balanced sensitivity and robustness"
+
+endchoice # RFAL_WAKE_UP_MODE

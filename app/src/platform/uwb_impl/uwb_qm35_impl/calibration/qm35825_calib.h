@@ -21,140 +21,149 @@ static const uint8_t util_calib_qm35825_ant_set0_rx_ants[] = { 0x00, 0x01,
 static const uint8_t util_calib_qm35825_ant_set3_rx_ants[] = { 0x02, 0xFF,
 							       0xFF };
 
+static const uint8_t util_calib_qm35825_ant_set4_tx_ant_paths[] = { 0x06,
+								    0xFF };
+static const uint8_t util_calib_qm35825_ant_set4_rx_ants[] = { 0x04, 0xFF,
+							       0xFF };
+static const uint8_t util_calib_qm35825_ant_set5_tx_ant_paths[] = { 0x07,
+								    0xFF };
+static const uint8_t util_calib_qm35825_ant_set5_rx_ants[] = { 0x05, 0xFF,
+							       0xFF };
+
 static const uint16_t util_calib_qm35825_pdoa_lut0_ch5[][2] = {
-	{ 0xEBBC, 0xF370 }, /* original: -2.533321, -1.570796 */
-	{ 0xEBFB, 0xF446 }, /* original: -2.502671, -1.466077 */
-	{ 0xEC95, 0xF51C }, /* original: -2.427698, -1.361357 */
-	{ 0xED66, 0xF5F3 }, /* original: -2.325576, -1.256637 */
-	{ 0xEE3F, 0xF6C9 }, /* original: -2.219499, -1.151917 */
-	{ 0xEF0D, 0xF7A0 }, /* original: -2.118834, -1.047198 */
-	{ 0xEFEF, 0xF876 }, /* original: -2.008664, -0.942478 */
-	{ 0xF0F5, 0xF94D }, /* original: -1.880509, -0.837758 */
-	{ 0xF22D, 0xFA23 }, /* original: -1.728161, -0.733038 */
-	{ 0xF3A2, 0xFAFA }, /* original: -1.545929, -0.628319 */
-	{ 0xF541, 0xFBD0 }, /* original: -1.343469, -0.523599 */
-	{ 0xF701, 0xFCA7 }, /* original: -1.124806, -0.418879 */
-	{ 0xF8E9, 0xFD7D }, /* original: -0.886351, -0.314159 */
-	{ 0xFB09, 0xFE54 }, /* original: -0.621014, -0.209440 */
-	{ 0xFD66, 0xFF2A }, /* original: -0.325595, -0.104720 */
-	{ 0xFFEE, 0x0000 }, /* original: -0.008833, 0.000000 */
-	{ 0x0294, 0x00D6 }, /* original: 0.322504, 0.104720 */
-	{ 0x0529, 0x01AC }, /* original: 0.645128, 0.209440 */
-	{ 0x0791, 0x0283 }, /* original: 0.946167, 0.314159 */
-	{ 0x09BE, 0x0359 }, /* original: 1.217986, 0.418879 */
-	{ 0x0B99, 0x0430 }, /* original: 1.450172, 0.523599 */
-	{ 0x0D1F, 0x0506 }, /* original: 1.640173, 0.628319 */
-	{ 0x0E84, 0x05DD }, /* original: 1.814894, 0.733038 */
-	{ 0x100C, 0x06B3 }, /* original: 2.006023, 0.837758 */
-	{ 0x11E4, 0x078A }, /* original: 2.236502, 0.942478 */
-	{ 0x13E9, 0x0860 }, /* original: 2.489156, 1.047198 */
-	{ 0x159C, 0x0937 }, /* original: 2.701204, 1.151917 */
-	{ 0x16D1, 0x0A0D }, /* original: 2.852178, 1.256637 */
-	{ 0x1798, 0x0AE4 }, /* original: 2.949266, 1.361357 */
-	{ 0x181E, 0x0BBA }, /* original: 3.014801, 1.466077 */
-	{ 0x18B3, 0x0C90 }, /* original: 3.087452, 1.570796 */
+	{ 0xEB2D, 0xF36F }, /* original: -2.602930, -1.570796 */
+	{ 0xEB58, 0xF445 }, /* original: -2.582271, -1.466077 */
+	{ 0xEBC3, 0xF51C }, /* original: -2.529768, -1.361357 */
+	{ 0xEC68, 0xF5F2 }, /* original: -2.449346, -1.256637 */
+	{ 0xED2E, 0xF6C9 }, /* original: -2.352646, -1.151917 */
+	{ 0xEE0E, 0xF79F }, /* original: -2.243066, -1.047198 */
+	{ 0xEF15, 0xF876 }, /* original: -2.114530, -0.942478 */
+	{ 0xF040, 0xF94C }, /* original: -1.968700, -0.837758 */
+	{ 0xF197, 0xFA23 }, /* original: -1.801494, -0.733038 */
+	{ 0xF324, 0xFAF9 }, /* original: -1.607584, -0.628319 */
+	{ 0xF4E4, 0xFBD0 }, /* original: -1.388774, -0.523599 */
+	{ 0xF6CE, 0xFCA6 }, /* original: -1.149404, -0.418879 */
+	{ 0xF8D0, 0xFD7D }, /* original: -0.898402, -0.314159 */
+	{ 0xFAF7, 0xFE53 }, /* original: -0.629632, -0.209440 */
+	{ 0xFD4F, 0xFF2A }, /* original: -0.336526, -0.104720 */
+	{ 0xFFE3, 0x0000 }, /* original: -0.014023, 0.000000 */
+	{ 0x0285, 0x00D6 }, /* original: 0.314980, 0.104720 */
+	{ 0x0512, 0x01AD }, /* original: 0.633580, 0.209440 */
+	{ 0x077E, 0x0283 }, /* original: 0.936523, 0.314159 */
+	{ 0x09C1, 0x035A }, /* original: 1.219335, 0.418879 */
+	{ 0x0BD7, 0x0430 }, /* original: 1.480114, 0.523599 */
+	{ 0x0DBC, 0x0507 }, /* original: 1.716937, 0.628319 */
+	{ 0x0F73, 0x05DD }, /* original: 1.931293, 0.733038 */
+	{ 0x1121, 0x06B4 }, /* original: 2.141143, 0.837758 */
+	{ 0x12D0, 0x078A }, /* original: 2.351714, 0.942478 */
+	{ 0x145E, 0x0861 }, /* original: 2.546088, 1.047198 */
+	{ 0x15AE, 0x0937 }, /* original: 2.709871, 1.151917 */
+	{ 0x169B, 0x0A0E }, /* original: 2.825772, 1.256637 */
+	{ 0x176A, 0x0AE4 }, /* original: 2.926944, 1.361357 */
+	{ 0x1845, 0x0BBB }, /* original: 3.033820, 1.466077 */
+	{ 0x1963, 0x0C91 }, /* original: 3.173142, 1.570796 */
 };
 
 static const uint16_t util_calib_qm35825_pdoa_lut1_ch9[][2] = {
-	{ 0xE276, 0xF370 }, /* original: -3.692644, -1.570796 */
-	{ 0xE552, 0xF446 }, /* original: -3.334963, -1.466077 */
-	{ 0xE7A9, 0xF51C }, /* original: -3.042653, -1.361357 */
-	{ 0xE99B, 0xF5F3 }, /* original: -2.799788, -1.256637 */
-	{ 0xEB8F, 0xF6C9 }, /* original: -2.555214, -1.151917 */
-	{ 0xEDD8, 0xF7A0 }, /* original: -2.269609, -1.047198 */
-	{ 0xF040, 0xF876 }, /* original: -1.968854, -0.942478 */
-	{ 0xF26B, 0xF94D }, /* original: -1.698059, -0.837758 */
-	{ 0xF3F7, 0xFA23 }, /* original: -1.504771, -0.733038 */
-	{ 0xF4E2, 0xFAFA }, /* original: -1.389977, -0.628319 */
-	{ 0xF596, 0xFBD0 }, /* original: -1.302234, -0.523599 */
-	{ 0xF6D7, 0xFCA7 }, /* original: -1.145199, -0.418879 */
-	{ 0xF8BD, 0xFD7D }, /* original: -0.907927, -0.314159 */
-	{ 0xFB11, 0xFE54 }, /* original: -0.616846, -0.209440 */
-	{ 0xFD93, 0xFF2A }, /* original: -0.303409, -0.104720 */
-	{ 0xFFEC, 0x0000 }, /* original: -0.009988, 0.000000 */
-	{ 0x01F6, 0x00D6 }, /* original: 0.245181, 0.104720 */
-	{ 0x03A1, 0x01AC }, /* original: 0.453615, 0.209440 */
-	{ 0x0518, 0x0283 }, /* original: 0.637080, 0.314159 */
-	{ 0x068D, 0x0359 }, /* original: 0.819239, 0.418879 */
-	{ 0x0836, 0x0430 }, /* original: 1.026568, 0.523599 */
-	{ 0x0A43, 0x0506 }, /* original: 1.282985, 0.628319 */
-	{ 0x0C8A, 0x05DD }, /* original: 1.567616, 0.733038 */
-	{ 0x0EA8, 0x06B3 }, /* original: 1.832378, 0.837758 */
-	{ 0x107F, 0x078A }, /* original: 2.062391, 0.942478 */
-	{ 0x1215, 0x0860 }, /* original: 2.260298, 1.047198 */
-	{ 0x137E, 0x0937 }, /* original: 2.436810, 1.151917 */
-	{ 0x14D6, 0x0A0D }, /* original: 2.604729, 1.256637 */
-	{ 0x1623, 0x0AE4 }, /* original: 2.767291, 1.361357 */
-	{ 0x173E, 0x0BBA }, /* original: 2.905700, 1.466077 */
-	{ 0x17F9, 0x0C90 }, /* original: 2.996765, 1.570796 */
+	{ 0xE161, 0xF36F }, /* original: -3.827516, -1.570796 */
+	{ 0xE46C, 0xF445 }, /* original: -3.447385, -1.466077 */
+	{ 0xE740, 0xF51C }, /* original: -3.093565, -1.361357 */
+	{ 0xE9C2, 0xF5F2 }, /* original: -2.780069, -1.256637 */
+	{ 0xEC30, 0xF6C9 }, /* original: -2.476374, -1.151917 */
+	{ 0xEEB5, 0xF79F }, /* original: -2.161623, -1.047198 */
+	{ 0xF148, 0xF876 }, /* original: -1.839775, -0.942478 */
+	{ 0xF382, 0xF94C }, /* original: -1.561503, -0.837758 */
+	{ 0xF516, 0xFA23 }, /* original: -1.364230, -0.733038 */
+	{ 0xF5FA, 0xFAF9 }, /* original: -1.253113, -0.628319 */
+	{ 0xF68C, 0xFBD0 }, /* original: -1.181710, -0.523599 */
+	{ 0xF795, 0xFCA6 }, /* original: -1.052401, -0.418879 */
+	{ 0xF94A, 0xFD7D }, /* original: -0.838672, -0.314159 */
+	{ 0xFB7D, 0xFE53 }, /* original: -0.563794, -0.209440 */
+	{ 0xFDCE, 0xFF2A }, /* original: -0.274634, -0.104720 */
+	{ 0xFFEE, 0x0000 }, /* original: -0.008756, 0.000000 */
+	{ 0x01B5, 0x00D6 }, /* original: 0.213468, 0.104720 */
+	{ 0x0347, 0x01AD }, /* original: 0.409443, 0.209440 */
+	{ 0x04B6, 0x0283 }, /* original: 0.588916, 0.314159 */
+	{ 0x062C, 0x035A }, /* original: 0.771504, 0.418879 */
+	{ 0x07E2, 0x0430 }, /* original: 0.985169, 0.523599 */
+	{ 0x09FE, 0x0507 }, /* original: 1.248879, 0.628319 */
+	{ 0x0C45, 0x05DD }, /* original: 1.533630, 0.733038 */
+	{ 0x0E72, 0x06B4 }, /* original: 1.805584, 0.837758 */
+	{ 0x1059, 0x078A }, /* original: 2.043332, 0.942478 */
+	{ 0x11E6, 0x0861 }, /* original: 2.237329, 1.047198 */
+	{ 0x134C, 0x0937 }, /* original: 2.412205, 1.151917 */
+	{ 0x14AE, 0x0A0E }, /* original: 2.585158, 1.256637 */
+	{ 0x1608, 0x0AE4 }, /* original: 2.754007, 1.361357 */
+	{ 0x1733, 0x0BBB }, /* original: 2.899662, 1.466077 */
+	{ 0x1814, 0x0C91 }, /* original: 3.009969, 1.570796 */
 };
 
 static const uint16_t util_calib_qm35825_pdoa_lut2_ch5[][2] = {
-	{ 0xE9A9, 0xF370 }, /* original: -2.792527, -1.570796 */
-	{ 0xEB2C, 0xF446 }, /* original: -2.603787, -1.466077 */
-	{ 0xEBA9, 0xF51C }, /* original: -2.542772, -1.361357 */
-	{ 0xEBE6, 0xF5F3 }, /* original: -2.512901, -1.256637 */
-	{ 0xEC73, 0xF6C9 }, /* original: -2.443996, -1.151917 */
-	{ 0xED40, 0xF7A0 }, /* original: -2.343959, -1.047198 */
-	{ 0xEE2F, 0xF876 }, /* original: -2.227345, -0.942478 */
-	{ 0xEF79, 0xF94D }, /* original: -2.066077, -0.837758 */
-	{ 0xF18A, 0xFA23 }, /* original: -1.807950, -0.733038 */
-	{ 0xF3AE, 0xFAFA }, /* original: -1.540392, -0.628319 */
-	{ 0xF549, 0xFBD0 }, /* original: -1.339376, -0.523599 */
-	{ 0xF715, 0xFCA7 }, /* original: -1.114900, -0.418879 */
-	{ 0xF8A6, 0xFD7D }, /* original: -0.919253, -0.314159 */
-	{ 0xFAE7, 0xFE54 }, /* original: -0.637496, -0.209440 */
-	{ 0xFDBD, 0xFF2A }, /* original: -0.282860, -0.104720 */
-	{ 0xFFF8, 0x0000 }, /* original: -0.003959, 0.000000 */
-	{ 0x02B5, 0x00D6 }, /* original: 0.338599, 0.104720 */
-	{ 0x0598, 0x01AC }, /* original: 0.699250, 0.209440 */
-	{ 0x07DF, 0x0283 }, /* original: 0.984358, 0.314159 */
-	{ 0x0A49, 0x0359 }, /* original: 1.285751, 0.418879 */
-	{ 0x0CA8, 0x0430 }, /* original: 1.582377, 0.523599 */
-	{ 0x0E60, 0x0506 }, /* original: 1.796904, 0.628319 */
-	{ 0x0FFC, 0x05DD }, /* original: 1.998268, 0.733038 */
-	{ 0x1162, 0x06B3 }, /* original: 2.173067, 0.837758 */
-	{ 0x1251, 0x078A }, /* original: 2.289824, 0.942478 */
-	{ 0x12D9, 0x0860 }, /* original: 2.356255, 1.047198 */
-	{ 0x135E, 0x0937 }, /* original: 2.421218, 1.151917 */
-	{ 0x13E1, 0x0A0D }, /* original: 2.484917, 1.256637 */
-	{ 0x1429, 0x0AE4 }, /* original: 2.520422, 1.361357 */
-	{ 0x14CC, 0x0BBA }, /* original: 2.599798, 1.466077 */
-	{ 0x1657, 0x0C90 }, /* original: 2.792527, 1.570796 */
+	{ 0xE9A9, 0xF36F }, /* original: -2.792527, -1.570796 */
+	{ 0xEB3D, 0xF445 }, /* original: -2.595256, -1.466077 */
+	{ 0xEC06, 0xF51C }, /* original: -2.497197, -1.361357 */
+	{ 0xEC48, 0xF5F2 }, /* original: -2.465013, -1.256637 */
+	{ 0xECE2, 0xF6C9 }, /* original: -2.389712, -1.151917 */
+	{ 0xEDBD, 0xF79F }, /* original: -2.282880, -1.047198 */
+	{ 0xEED4, 0xF876 }, /* original: -2.146335, -0.942478 */
+	{ 0xF06B, 0xF94C }, /* original: -1.947676, -0.837758 */
+	{ 0xF2BF, 0xFA23 }, /* original: -1.656585, -0.733038 */
+	{ 0xF482, 0xFAF9 }, /* original: -1.436441, -0.628319 */
+	{ 0xF5D0, 0xFBD0 }, /* original: -1.273355, -0.523599 */
+	{ 0xF7A3, 0xFCA6 }, /* original: -1.045348, -0.418879 */
+	{ 0xF91A, 0xFD7D }, /* original: -0.862066, -0.314159 */
+	{ 0xFB62, 0xFE53 }, /* original: -0.577365, -0.209440 */
+	{ 0xFE0D, 0xFF2A }, /* original: -0.243863, -0.104720 */
+	{ 0xFFEE, 0x0000 }, /* original: -0.008900, 0.000000 */
+	{ 0x034C, 0x00D6 }, /* original: 0.412168, 0.104720 */
+	{ 0x067D, 0x01AD }, /* original: 0.811005, 0.209440 */
+	{ 0x08AF, 0x0283 }, /* original: 1.085629, 0.314159 */
+	{ 0x0B49, 0x035A }, /* original: 1.410721, 0.418879 */
+	{ 0x0D96, 0x0430 }, /* original: 1.698024, 0.523599 */
+	{ 0x0F20, 0x0507 }, /* original: 1.890397, 0.628319 */
+	{ 0x10B5, 0x05DD }, /* original: 2.088518, 0.733038 */
+	{ 0x1220, 0x06B4 }, /* original: 2.265577, 0.837758 */
+	{ 0x132D, 0x078A }, /* original: 2.397055, 0.942478 */
+	{ 0x13E2, 0x0861 }, /* original: 2.485442, 1.047198 */
+	{ 0x1482, 0x0937 }, /* original: 2.563443, 1.151917 */
+	{ 0x1500, 0x0A0E }, /* original: 2.624997, 1.256637 */
+	{ 0x1531, 0x0AE4 }, /* original: 2.649017, 1.361357 */
+	{ 0x158F, 0x0BBB }, /* original: 2.694788, 1.466077 */
+	{ 0x1657, 0x0C91 }, /* original: 2.792527, 1.570796 */
 };
 
 static const uint16_t util_calib_qm35825_pdoa_lut3_ch9[][2] = {
-	{ 0xE844, 0xF370 }, /* original: -2.967060, -1.570796 */
-	{ 0xE91A, 0xF446 }, /* original: -2.862340, -1.466077 */
-	{ 0xEA42, 0xF51C }, /* original: -2.717778, -1.361357 */
-	{ 0xEB40, 0xF5F3 }, /* original: -2.593895, -1.256637 */
-	{ 0xEBAA, 0xF6C9 }, /* original: -2.542119, -1.151917 */
-	{ 0xEC4A, 0xF7A0 }, /* original: -2.464203, -1.047198 */
-	{ 0xEE05, 0xF876 }, /* original: -2.247908, -0.942478 */
-	{ 0xF181, 0xF94D }, /* original: -1.812106, -0.837758 */
-	{ 0xF571, 0xFA23 }, /* original: -1.320167, -0.733038 */
-	{ 0xF721, 0xFAFA }, /* original: -1.109353, -0.628319 */
-	{ 0xF79D, 0xFBD0 }, /* original: -1.048388, -0.523599 */
-	{ 0xF8BF, 0xFCA7 }, /* original: -0.906986, -0.418879 */
-	{ 0xFA51, 0xFD7D }, /* original: -0.710901, -0.314159 */
-	{ 0xFBCE, 0xFE54 }, /* original: -0.524584, -0.209440 */
-	{ 0xFDB2, 0xFF2A }, /* original: -0.288408, -0.104720 */
-	{ 0xFFD6, 0x0000 }, /* original: -0.020595, 0.000000 */
-	{ 0x029D, 0x00D6 }, /* original: 0.326923, 0.104720 */
-	{ 0x053A, 0x01AC }, /* original: 0.653783, 0.209440 */
-	{ 0x07DA, 0x0283 }, /* original: 0.981670, 0.314159 */
-	{ 0x0A61, 0x0359 }, /* original: 1.297462, 0.418879 */
-	{ 0x0CAF, 0x0430 }, /* original: 1.585514, 0.523599 */
-	{ 0x0F38, 0x0506 }, /* original: 1.902817, 0.628319 */
-	{ 0x1176, 0x05DD }, /* original: 2.182937, 0.733038 */
-	{ 0x1377, 0x06B3 }, /* original: 2.433119, 0.837758 */
-	{ 0x151E, 0x078A }, /* original: 2.640119, 0.942478 */
-	{ 0x1661, 0x0860 }, /* original: 2.797588, 1.047198 */
-	{ 0x1768, 0x0937 }, /* original: 2.925985, 1.151917 */
-	{ 0x183E, 0x0A0D }, /* original: 3.030629, 1.256637 */
-	{ 0x18C9, 0x0AE4 }, /* original: 3.098309, 1.361357 */
-	{ 0x1922, 0x0BBA }, /* original: 3.142011, 1.466077 */
-	{ 0x196E, 0x0C90 }, /* original: 3.178911, 1.570796 */
+	{ 0xE843, 0xF36F }, /* original: -2.967060, -1.570796 */
+	{ 0xE91A, 0xF445 }, /* original: -2.862340, -1.466077 */
+	{ 0xEA40, 0xF51C }, /* original: -2.718937, -1.361357 */
+	{ 0xEB5B, 0xF5F2 }, /* original: -2.580806, -1.256637 */
+	{ 0xEBD1, 0xF6C9 }, /* original: -2.523085, -1.151917 */
+	{ 0xEC6D, 0xF79F }, /* original: -2.446824, -1.047198 */
+	{ 0xEE54, 0xF876 }, /* original: -2.209184, -0.942478 */
+	{ 0xF17A, 0xF94C }, /* original: -1.815553, -0.837758 */
+	{ 0xF490, 0xFA23 }, /* original: -1.429622, -0.733038 */
+	{ 0xF6DB, 0xFAF9 }, /* original: -1.143278, -0.628319 */
+	{ 0xF7D0, 0xFBD0 }, /* original: -1.023196, -0.523599 */
+	{ 0xF89B, 0xFCA6 }, /* original: -0.924179, -0.418879 */
+	{ 0xFA09, 0xFD7D }, /* original: -0.745822, -0.314159 */
+	{ 0xFB73, 0xFE53 }, /* original: -0.568702, -0.209440 */
+	{ 0xFDBC, 0xFF2A }, /* original: -0.283155, -0.104720 */
+	{ 0xFFE6, 0x0000 }, /* original: -0.012917, 0.000000 */
+	{ 0x0291, 0x00D6 }, /* original: 0.320914, 0.104720 */
+	{ 0x0509, 0x01AD }, /* original: 0.629215, 0.209440 */
+	{ 0x079B, 0x0283 }, /* original: 0.950551, 0.314159 */
+	{ 0x09F8, 0x035A }, /* original: 1.246241, 0.418879 */
+	{ 0x0C23, 0x0430 }, /* original: 1.517158, 0.523599 */
+	{ 0x0ED0, 0x0507 }, /* original: 1.851507, 0.628319 */
+	{ 0x111A, 0x05DD }, /* original: 2.137758, 0.733038 */
+	{ 0x132E, 0x06B4 }, /* original: 2.397456, 0.837758 */
+	{ 0x14BD, 0x078A }, /* original: 2.592345, 0.942478 */
+	{ 0x15D6, 0x0861 }, /* original: 2.729294, 1.047198 */
+	{ 0x1714, 0x0937 }, /* original: 2.884840, 1.151917 */
+	{ 0x17FD, 0x0A0E }, /* original: 2.998408, 1.256637 */
+	{ 0x1893, 0x0AE4 }, /* original: 3.071675, 1.361357 */
+	{ 0x1915, 0x0BBB }, /* original: 3.135068, 1.466077 */
+	{ 0x1970, 0x0C91 }, /* original: 3.179507, 1.570796 */
 };
 
 static const struct cherry_calib_key util_partial_calib_qm35825_keys[] = {
@@ -261,6 +270,7 @@ static const struct cherry_calib_key util_calib_qm35825_keys[] = {
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set0.rx_ants",
 				     util_calib_qm35825_ant_set0_rx_ants),
 	CHERRY_CALIB_UINT8("ant_set0.tx_power_control", 0x01),
+        CHERRY_CALIB_BOOL("legacy_android_ccc", 0),
 
 	/* Ant Set3 : for radar. */
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set3.tx_ant_paths",
@@ -270,7 +280,44 @@ static const struct cherry_calib_key util_calib_qm35825_keys[] = {
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set3.rx_ants",
 				     util_calib_qm35825_ant_set3_rx_ants),
 	CHERRY_CALIB_UINT8("ant_set3.tx_power_control", 0x01),
-        CHERRY_CALIB_BOOL("legacy_android_ccc", 0),
+
+	/* Ant Set for Mac Mode 1. */
+
+	/* ant4 */
+	CHERRY_CALIB_UINT8("ant4.transceiver", 0x02),
+	CHERRY_CALIB_UINT8("ant4.port", 0x01),
+	CHERRY_CALIB_UINT8("ant4.lna", 1),
+
+	/* ant5 */
+	CHERRY_CALIB_UINT8("ant5.transceiver", 0x02),
+	CHERRY_CALIB_UINT8("ant5.port", 0x02),
+	CHERRY_CALIB_UINT8("ant5.lna", 1),
+
+	/* ant6 */
+	CHERRY_CALIB_UINT8("ant6.transceiver", 0x00),
+	CHERRY_CALIB_UINT8("ant6.port", 0x01),
+	CHERRY_CALIB_UINT8("ant6.lna", 0),
+
+	/* ant7 */
+	CHERRY_CALIB_UINT8("ant7.transceiver", 0x00),
+	CHERRY_CALIB_UINT8("ant7.port", 0x02),
+	CHERRY_CALIB_UINT8("ant7.lna", 0),
+
+	/* Ant Set 4 */
+	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set4.tx_ant_paths",
+				     util_calib_qm35825_ant_set4_tx_ant_paths),
+	CHERRY_CALIB_UINT8("ant_set4.nb_rx_ants", 0x01),
+	CHERRY_CALIB_BOOL("ant_set4.rx_ants_are_pairs", false),
+	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set4.rx_ants",
+				     util_calib_qm35825_ant_set4_rx_ants),
+
+	/* Ant Set 5 */
+	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set5.tx_ant_paths",
+				     util_calib_qm35825_ant_set5_tx_ant_paths),
+	CHERRY_CALIB_UINT8("ant_set5.nb_rx_ants", 0x01),
+	CHERRY_CALIB_BOOL("ant_set5.rx_ants_are_pairs", false),
+	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set5.rx_ants",
+				     util_calib_qm35825_ant_set5_rx_ants),
 };
 
 static const struct cherry_calib util_calib_qm35825 = {

@@ -63,8 +63,20 @@ In case you do not have access to `Aliro Certification Tool`_ repository, see th
 
 #. Set up the test harness by inputting the 65-byte long Reader public key into the ``dut_reader_public_key`` field.
 
-#. Install the 16-byte long Reader group identifier and reader group sub-identifier in the Reader device.
-   Both values can be provided to the DUT using the following ``dl install`` shell commands:
+#. Install the Reader identifier in the Reader device.
+   The full 32-byte Reader identifier can be set using the following ``dl install`` shell command:
+
+   .. code-block:: console
+
+      uart:~$ dl install identifier <32-byte reader_identifier in hex without 0x>
+
+   For example:
+
+   .. code-block:: console
+
+      uart:~$ dl install identifier 00113344667799AA00113344667799AA113344667799AA00113344667799AA00
+
+   Alternatively, you can set the Reader group identifier and Reader group sub-identifier individually using the following ``dl install`` shell commands:
 
    .. code-block:: console
 
