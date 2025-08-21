@@ -102,6 +102,7 @@ extern "C" {
 #define platformTimerIsExpired( timer )               ncs_pal_timer_is_expired(timer)               /*!< Checks if the given timer is expired        */
 #define platformTimerDestroy( timer )                 ncs_pal_timer_destroy(timer)                  /*!< Stop and release the given timer            */
 #define platformDelay( t )                            ncs_pal_delay(t)                              /*!< Performs a delay for the given time (ms)    */
+#define platformTimerGetRemaining( timer )            ncs_pal_timer_get_remaining(timer)            /*!< Get the remaining time of the given timer   */
 
 #define platformGetSysTick()                          ncs_pal_get_sys_tick()                        /*!< Get System Tick ( 1 tick = 1 ms)            */
 
