@@ -1,6 +1,6 @@
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2023 Qorvo, Inc.
- * SPDX-License-Identifier: LicenseRef-Qorvo-SDK-1 OR GPL-2.0
+ * SPDX-License-Identifier: LicenseRef-Qorvo-SDK-1
  */
 
 #pragma once

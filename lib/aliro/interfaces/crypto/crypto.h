@@ -32,7 +32,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError GenerateRandom(Byte *rngBuf, size_t rngBufLength);
+	AliroError GenerateRandom(uint8_t *rngBuf, size_t rngBufLength);
 
 	/**
 	 * @brief Generate ephemeral EC key pair.
@@ -100,13 +100,15 @@ public:
 	 * NOTE: The Reader's private key (LTK) is used for message signing.
 	 * The key must be loaded and avialable before this method is invoked.
 	 *
+	 * @param keyId input identifier of the private key to use for signing.
 	 * @param msg input message to sign.
 	 * @param msgLength input size of the message.
 	 * @param signature output buffer where te signature is to be copied.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError GenerateSignature(const uint8_t *msg, const size_t msgLength, TransactionSignature &signature);
+	AliroError GenerateSignature(uint32_t privKeyId, const uint8_t *msg, const size_t msgLength,
+				     TransactionSignature &signature);
 
 	/**
 	 * Verify signature of a message.
@@ -188,9 +190,9 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError EncryptPayload(uint32_t keyId, const Byte *plainTxt, size_t plainTxtLength,
-				  const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
-				  Byte *cipherText, AuthenticationTag &authTag);
+	AliroError EncryptPayload(uint32_t keyId, const uint8_t *plainTxt, size_t plainTxtLength,
+				  const uint8_t *additionalData, size_t additionalDataLength, const Nonce &nonce,
+				  uint8_t *cipherText, AuthenticationTag &authTag);
 
 	/**
 	 * Encrypt data payload.
@@ -202,7 +204,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError EncryptPayload(uint32_t keyId, const Byte *plainTxt, size_t plainTxtLength, Byte *cipherText);
+	AliroError EncryptPayload(uint32_t keyId, const uint8_t *plainTxt, size_t plainTxtLength, uint8_t *cipherText);
 
 	/**
 	 * Authenticated decryption (AEAD) data payload.
@@ -220,9 +222,9 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DecryptPayload(uint32_t keyId, const Byte *cipherTextWithTag, size_t cipherTextWithTagLength,
-				  const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
-				  Byte *plainText, size_t &plainTextLength);
+	AliroError DecryptPayload(uint32_t keyId, const uint8_t *cipherTextWithTag, size_t cipherTextWithTagLength,
+				  const uint8_t *additionalData, size_t additionalDataLength, const Nonce &nonce,
+				  uint8_t *plainText, size_t &plainTextLength);
 
 	/**
 	 * Authenticated decryption (AEAD) data payload.
@@ -238,8 +240,8 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DecryptPayload(uint32_t keyId, const Byte *cipherText, size_t cipherTextLength, const Nonce &nonce,
-				  Byte *plainText, size_t &plainTextLength)
+	AliroError DecryptPayload(uint32_t keyId, const uint8_t *cipherText, size_t cipherTextLength,
+				  const Nonce &nonce, uint8_t *plainText, size_t &plainTextLength)
 	{
 		return DecryptPayload(keyId, cipherText, cipherTextLength, nullptr, 0U, nonce, plainText,
 				      plainTextLength);

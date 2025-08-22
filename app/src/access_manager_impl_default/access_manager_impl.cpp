@@ -82,13 +82,13 @@ AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &public
 
 	// Check if storage is full
 	VerifyOrReturnStatus(mStoredKeyCount < kMaxStoredKeys, ALIRO_NO_MEMORY,
-			     LOG_WRN("Cannot add public key - storage is full (%zu/%zu)", mStoredKeyCount,
+			     LOG_WRN("Cannot add public key - storage is full (%u/%u)", mStoredKeyCount,
 				     kMaxStoredKeys));
 	// Add the key to storage
 	mStoredKeys[mStoredKeyCount] = publicKey;
 	mStoredKeyCount++;
 
-	LOG_INF("Added public key to storage. Total keys: %zu", mStoredKeyCount);
+	LOG_INF("Added public key to storage. Total keys: %u", mStoredKeyCount);
 
 	return ALIRO_NO_ERROR;
 }
@@ -105,7 +105,7 @@ AliroError AccessManagerImpl::_RemovePublicKey(const CryptoTypes::PublicKey &pub
 				mStoredKeys[i] = mStoredKeys[mStoredKeyCount - 1];
 			}
 			mStoredKeyCount--;
-			LOG_INF("Removed public key from storage. Total keys: %zu", mStoredKeyCount);
+			LOG_INF("Removed public key from storage. Total keys: %u", mStoredKeyCount);
 			return ALIRO_NO_ERROR;
 		}
 	}
@@ -146,7 +146,7 @@ uint32_t AccessManagerImpl::_GetMaxAllowedDistance()
 
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData)
 {
-	LOG_DBG("Handling ranging session data - length: %zu for session: %p", uwbData.mLength, sessionContext);
+	LOG_DBG("Handling ranging session data - length: %u for session: %p", uwbData.mLength, sessionContext);
 
 #ifdef CONFIG_ALIRO_BLE_TP
 	const auto currentSessionInRange = AnalyzeUwbRangingData(uwbData);
@@ -204,7 +204,7 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 
 bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey)
 {
-	LOG_DBG("Verifying public key against %zu stored keys", mStoredKeyCount);
+	LOG_DBG("Verifying public key against %u stored keys", mStoredKeyCount);
 
 	// Check if the user's public key matches any stored key
 	VerifyOrReturnFalse(IsPublicKeyStored(userPublicKey), LOG_DBG("No matching public key found"));
@@ -236,7 +236,7 @@ void AccessManagerImpl::AccessDeniedAction() const
 #ifdef CONFIG_ALIRO_BLE_TP
 bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData)
 {
-	LOG_DBG("Analyzing UWB ranging data - length: %zu", uwbData.mLength);
+	LOG_DBG("Analyzing UWB ranging data - length: %u", uwbData.mLength);
 
 	// Check if UWB data is valid
 	VerifyOrReturnFalse(uwbData.mData && uwbData.mLength, LOG_WRN("Invalid UWB ranging data"));

@@ -5,7 +5,6 @@
  */
 
 #include "aliro/aliro.h"
-#include "aliro/shell.h"
 #include "aliro/types.h"
 #include "aliro/utils.h"
 
@@ -14,6 +13,9 @@
 #endif // CONFIG_ACCESS_DECISION_INDICATOR
 
 #include "access_manager/access_manager.h"
+#include "shell.h"
+#include "storage.h"
+#include "storage_keys.h"
 
 #include <zephyr/logging/log.h>
 #include <zephyr/shell/shell.h>
@@ -25,6 +27,98 @@ LOG_MODULE_REGISTER(door_lock_app, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 
 using namespace Aliro;
 using namespace Aliro::Access;
+
+namespace {
+
+#ifdef CONFIG_DOOR_LOCK_USE_TEST_READER_IDENTIFIER
+
+constexpr Identifier kTestIdentifier{ 0x37, 0x65, 0x20, 0x39, 0x31, 0x20, 0x61, 0x65, 0x20, 0x31, 0x64,
+				      0x20, 0x33, 0x64, 0x20, 0x65, 0x63, 0x20, 0x38, 0x36, 0x20, 0x31,
+				      0x62, 0x20, 0x33, 0x39, 0x20, 0x31, 0x66, 0x20, 0x33, 0x34 };
+
+#endif // CONFIG_DOOR_LOCK_USE_TEST_READER_IDENTIFIER
+
+AliroError LoadAccessCredentials()
+{
+	size_t keyCount{};
+
+	for (size_t keyId = 0; keyId < CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS; keyId++) {
+		StorageKeys::KeyNameBuffer keyName;
+		snprintf(keyName.data(), keyName.size(), "%s/%u", StorageKeys::kStorageKeyNameAccessCredentialPublicKey,
+			 keyId);
+
+		Aliro::CryptoTypes::PublicKey pubKey{};
+
+		int ec = KeyValueStorage::Instance().Get(keyName.data(), pubKey.data(), pubKey.size());
+		VerifyOrReturnStatus(ec == 0 || ec == -ENODATA, ALIRO_ERROR_INTERNAL,
+				     LOG_ERR("Cannot get user device public key, error code: %d", ec));
+		if (ec == 0) {
+			AliroError err = AccessManagerInstance().AddPublicKey(pubKey);
+			VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot set public key."));
+			++keyCount;
+		}
+	}
+
+	if (keyCount == 0) {
+		LOG_INF("No Access Credential public keys available");
+	}
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError LoadReaderIdentifier()
+{
+	Identifier identifier{};
+	int ec = KeyValueStorage::Instance().Get(StorageKeys::kStorageKeyNameIdentifier, identifier.data(),
+						 identifier.size());
+	[[maybe_unused]] bool identifierAvailable = ec == 0;
+
+	if (ec == -ENODATA) {
+#ifdef CONFIG_DOOR_LOCK_USE_TEST_READER_IDENTIFIER
+		identifier = kTestIdentifier;
+		ec = KeyValueStorage::Instance().Save(StorageKeys::kStorageKeyNameIdentifier, identifier.data(),
+						      identifier.size());
+		VerifyOrReturnStatus(ec == 0, ALIRO_ERROR_INTERNAL,
+				     LOG_ERR("Cannot save reader identifier, error: %d", ec));
+		identifierAvailable = true;
+#else // CONFIG_DOOR_LOCK_USE_TEST_READER_IDENTIFIER
+		LOG_INF("No reader identifier available");
+#endif // CONFIG_DOOR_LOCK_USE_TEST_READER_IDENTIFIER
+	} else if (ec) {
+		LOG_ERR("Cannot get reader identifier, error code: %d", ec);
+		return ALIRO_ERROR_INTERNAL;
+	}
+
+	AliroStack::Instance().SetReaderIdentifier(identifier);
+
+#ifdef CONFIG_DOOR_LOCK_PRINT_READER_GROUP_IDENTIFIER
+	if (identifierAvailable) {
+		// First 16 bytes of the Reader Identifier constitute the Reader Group Identifier
+		char hexString[kReaderGroupIdentifierLength * 2 + 1];
+		size_t resLen = bin2hex(identifier.data(), kReaderGroupIdentifierLength, hexString, sizeof(hexString));
+		VerifyOrReturnStatus(resLen == kReaderGroupIdentifierLength * 2, ALIRO_ERROR_INTERNAL,
+				     LOG_ERR("Cannot convert buffer to hex string"));
+
+		LOG_INF("\nProvision the Test Harness with the following Reader Group Identifier:");
+		LOG_INF("%s\n", hexString);
+	}
+#endif
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError StorageInit()
+{
+	AliroError err = LoadAccessCredentials();
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Access Credentials"));
+
+	err = LoadReaderIdentifier();
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load reader identifier"));
+
+	return ALIRO_NO_ERROR;
+}
+
+} // namespace
 
 int main()
 {
@@ -43,8 +137,6 @@ int main()
 		.mEnableNfc = false,
 #endif // CONFIG_DISABLE_ALIRO_NFC_TP
 
-		.mAccessCredentialKeySlots = CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS,
-
 #ifdef CONFIG_ALIRO_BLE_TP
 		.mMaxBleSessions = CONFIG_ALIRO_BLE_TP_MAX_SESSIONS,
 #endif // CONFIG_ALIRO_BLE_TP
@@ -54,6 +146,9 @@ int main()
 		{ .mOnError = [](AliroError error) { LOG_ERR("Aliro error: %s", error.ToString()); } }, config);
 
 	VerifyOrDie(ec == ALIRO_NO_ERROR, "Aliro stack initialization failed");
+
+	ec = StorageInit();
+	VerifyOrDie(ec == ALIRO_NO_ERROR, "Storage initialization failed");
 
 	ec = AliroStack::Instance().Start();
 
