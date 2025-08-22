@@ -6,13 +6,19 @@
 
 /{
 	/* Disable buttons to avoid collision with interrupt and SCK pins for NFC tag reader. */
-	/delete-node/ buttons;
+	buttons {
+		/delete-node/ button_0;
+		/delete-node/ button_1;
+		/delete-node/ button_2;
+		/delete-node/ button_3;
+	};
 
 	aliases {
 		/delete-property/ sw0;
 		/delete-property/ sw1;
 		/delete-property/ sw2;
 		/delete-property/ sw3;
+		/delete-property/ mcuboot-button0;
 	};
 };
 

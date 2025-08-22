@@ -12,6 +12,7 @@ if NFC_DRIVER_STM
 rsource "Kconfig.defconfig"
 rsource "Kconfig.rfal"
 rsource "Kconfig.pal"
+rsource "nfc_configs/Kconfig"
 
 choice
 	prompt "Select ST25R driver"
@@ -28,6 +29,9 @@ config ST25R3916B_DRV
 
 config ST25R200_DRV
 	bool "NFC ST25R200/ST25R100 driver"
+
+config ST25R500_DRV
+	bool "NFC ST25R500/ST25R300 driver"
 
 endchoice
 
