@@ -10,6 +10,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <zephyr/logging/log.h>
 
 #define _ALIRO_LOG(level, ...)                                                                                         \
@@ -35,6 +36,20 @@
 #define ALIRO_LOG_HEXDUMP_WRN(data, size, str) _ALIRO_LOG_HEXDUMP(LOG_LEVEL_WRN, data, size, str)
 #define ALIRO_LOG_HEXDUMP_INF(data, size, str) _ALIRO_LOG_HEXDUMP(LOG_LEVEL_INF, data, size, str)
 #define ALIRO_LOG_HEXDUMP_DBG(data, size, str) _ALIRO_LOG_HEXDUMP(LOG_LEVEL_DBG, data, size, str)
+
+/*
+ * Helpers: Debug builds print hexdump, other levels print info logs.
+ */
+#ifdef CONFIG_NCS_ALIRO_LOG_LEVEL_DBG
+#define ALIRO_LOG_DBG_HEXDUMP_OR_INFO(data, size, fmt, ...)                                                            \
+	do {                                                                                                           \
+		char _aliro_log_desc[128];                                                                             \
+		(void)snprintf(_aliro_log_desc, sizeof(_aliro_log_desc), fmt, ##__VA_ARGS__);                          \
+		ALIRO_LOG_HEXDUMP_DBG(data, size, _aliro_log_desc);                                                    \
+	} while (0)
+#else
+#define ALIRO_LOG_DBG_HEXDUMP_OR_INFO(data, size, fmt, ...) ALIRO_LOG_INF(fmt, ##__VA_ARGS__)
+#endif
 
 /**
  * @brief Writes a log message with the specified log level.

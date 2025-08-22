@@ -181,6 +181,13 @@ private:
 	 */
 	void RemoveAllSessions();
 
+	/**
+	 * @brief Destroys a UWB session.
+	 *
+	 * @param sessionCtx Pointer to the session context to destroy.
+	 */
+	void DestroySession(SessionContext *sessionCtx);
+
 	CoreEvent *mCoreEvent{};
 	Callbacks mCallbacks{};
 	cherry *mCtx{};

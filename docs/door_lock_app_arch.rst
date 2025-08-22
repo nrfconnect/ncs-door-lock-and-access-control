@@ -28,6 +28,11 @@ The Aliro stack library files are placed in the :file:`lib/aliro` directory.
 
 The RF Abstraction Layer (NFC RFAL) handles communication with the STMicroelectronics :ref:`NFC integrated circuit (IC) <hw_requirements_nfc_reader>`.
 This layer contains drivers, platform abstraction layer (PAL) and the NFC protocol stack, covering evrything from physical characteristic to the application layer.
+You can choose three NFC sensitivity options, configurable through Kconfig (see :file:`drivers/nfc/stm/nfc_configs/Kconfig`):
+
+* ``RFAL_WAKE_UP_MODE_STRICT`` - Offers lower sensitivity for increased robustness against noise.
+* ``RFAL_WAKE_UP_MODE_RELAXED`` - Provides higher sensitivity, which allows the detection of weaker NFC signals but may also increase sensitivity to noise.
+* ``RFAL_WAKE_UP_MODE_DEFAULT`` - Uses the default RFAL configuration, suitable for general use cases where no specific tuning is required.
 
 Communication with external IC's is done through the Serial Peripheral Interface (SPI) bus.
 

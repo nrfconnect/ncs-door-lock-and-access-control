@@ -37,3 +37,23 @@ endchoice
 if ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
 rsource "src/access_manager_impl_default/Kconfig"
 endif
+
+config DOOR_LOCK_CLI
+	bool "Door Lock CLI support"
+	default y
+	select SHELL
+	select REBOOT
+	help
+	  Enable support for Door Lock CLI.
+
+config DOOR_LOCK_PRINT_READER_GROUP_IDENTIFIER
+	bool "Print reader group identifier that should be provisioned into the User Device"
+	default y
+	help
+	  Enable printing of the reader group identifier that should be provisioned into the User Device.
+
+config DOOR_LOCK_USE_TEST_READER_IDENTIFIER
+	bool "Use test reader identifier"
+	default y
+	help
+	  Initialize the reader Group Identifier and Group Sub Identifier to test values.
