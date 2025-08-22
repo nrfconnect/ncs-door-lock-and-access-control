@@ -1,12 +1,10 @@
 /*
  * Copyright (c) 2025 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
 #pragma once
-
-namespace Aliro {
 
 /**
  * @brief Registers shell commands for managing a door lock system.
@@ -17,10 +15,12 @@ namespace Aliro {
  *
  * ## Subcommands
  * - `install`:
- *   - `group_id [value]`: Gets or sets the group identifier. If a value is provided, it sets the group ID to that
- * value.
- *   - `group_sub_id [value]`: Gets or sets the group sub-identifier. If a value is provided, it sets the group sub ID
- * to that value.
+ *   - `identifier [value]`: Gets or sets the full reader identifier (concatenation of group identifier and group
+ * sub-identifier). If a value is provided, it sets the reader identifier to that value.
+ *   - `group_id [value]`: Gets or sets the group identifier (the first 16 bytes of the reader identifier). If a value
+ * is provided, it sets the group ID to that value.
+ *   - `group_sub_id [value]`: Gets or sets the group sub-identifier (the last 16 bytes of the reader identifier). If a
+ * value is provided, it sets the group sub ID to that value.
  * - `provisioning`:
  *   - `AC_key [value]`: Gets or sets the Access Credential public key. If a value is provided, it sets the public key
  * to that value.
@@ -34,5 +34,3 @@ namespace Aliro {
  * registered before the shell is used.
  */
 void RegisterShellCommands();
-
-} // namespace Aliro
