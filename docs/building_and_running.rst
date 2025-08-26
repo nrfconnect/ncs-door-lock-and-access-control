@@ -75,7 +75,7 @@ To build and run the application on one of the :ref:`supported development kits 
 
    .. code-block:: console
 
-      *** Booting My Application v0.1.0-f0e5cf444fb0 ***
-      *** Using nRF Connect SDK v2.9.0-7787b2649840 ***
+      *** Booting My Application v0.3.0-8264718b4735 ***
+      *** Using nRF Connect SDK v3.1.0-6c6e5b32496e ***
       *** Using Zephyr OS v3.7.99-1f8f3dc29142 ***
       [00:00:00.009,613] <inf> door_lock_app: Starting nRF Door Lock Reference Application for the nRF Connect SDK

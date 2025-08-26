@@ -6,7 +6,7 @@ name: NCS Setup
 description: "Configure environment to build and test NCS-Aliro project"
 
 inputs:
-  toolchain_manager_version:
+  sdk_manager_version:
     required: true
   nrf_util_url:
     required: true
@@ -31,7 +31,7 @@ runs:
         echo "WORKSPACE_PARENT=$(dirname ${{ github.workspace }})" >> $GITHUB_ENV
         echo "WORKSPACE_NAME=$(basename ${{ github.workspace }})" >> $GITHUB_ENV
       shell: bash
-    
+
     # If west manifest file contains project url-base which uses SSH this step must be performed.
     #   1. Create a pair of SSH keys at any location: 'ssh-keygen -t rsa -f gh_action_key'. !!! Use '-f' option to avoid overwriting your default ssh keys !!!
     #   2. Provide content of generated gh_action_key.pub key to GitHub project: https://github.com/settings/keys -> "SSH and GPG keys"
@@ -48,7 +48,7 @@ runs:
         sudo apt install -y gcc-multilib g++-multilib
       shell: bash
 
-    - name: Cache nrfutil, toolchain-manager
+    - name: Cache nrfutil, sdk-manager
       id: nrf-cache
       if: always()
       uses: actions/cache@v4.2.0
@@ -57,7 +57,7 @@ runs:
           /home/runner/.local/bin/nrfutil
           /home/runner/.nrfutil
           /home/runner/ncs
-        key: nrfutil-ncs-${{ inputs.nrf_util_url }} NCS_SDK_VERSION=${{ inputs.ncs_sdk_version }} TOOLCHAIN_MANAGER_VERSION=${{ inputs.toolchain_manager_version }}
+        key: nrfutil-ncs-${{ inputs.nrf_util_url }} NCS_SDK_VERSION=${{ inputs.ncs_sdk_version }} SDK_MANAGER_VERSION=${{ inputs.sdk_manager_version }}
 
     - name: Cache west workspace
       id: west-cache
@@ -72,24 +72,24 @@ runs:
         # Any change in west.yml will force to run 'west init' step again, new cache will be created
         key: ${{ runner.os }}-west-${{ hashFiles(format('{0}/west.yml', github.workspace)) }}
 
-    - name: Install nrfutil, toolchain-manager
+    - name: Install nrfutil, sdk-manager
       if: steps.nrf-cache.outputs.cache-hit != 'true'
       run: |
         mkdir -p $HOME/.local/bin
         wget -nv ${{ inputs.nrf_util_url }} -O $HOME/.local/bin/nrfutil && chmod +x $HOME/.local/bin/nrfutil
-        nrfutil install toolchain-manager=${{ inputs.toolchain_manager_version }} && chmod +777 $HOME/.nrfutil
-        nrfutil toolchain-manager install --ncs-version ${{ inputs.ncs_sdk_version }}
+        nrfutil install sdk-manager=${{ inputs.sdk_manager_version }} && chmod +777 $HOME/.nrfutil
+        nrfutil sdk-manager toolchain install --ncs-version ${{ inputs.ncs_sdk_version }}
       shell: bash
 
     - name: West init, west update
       if: steps.west-cache.outputs.cache-hit != 'true'
       run: |
-        nrfutil toolchain-manager launch west init -- -l --mf west.yml
-        nrfutil toolchain-manager launch west update -- --narrow -o=--depth=1
+        nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west init -- -l --mf west.yml
+        nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west update -- --narrow -o=--depth=1
       shell: bash
 
     - name: West update on cache hit
       if: steps.west-cache.outputs.cache-hit == 'true'
       run: |
-        nrfutil toolchain-manager launch west update -- --narrow -o=--depth=1
+        nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west update -- --narrow -o=--depth=1
       shell: bash
