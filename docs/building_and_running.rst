@@ -36,28 +36,36 @@ To build and run the application on one of the :ref:`supported development kits 
 
          west build -p -b nrf5340dk/nrf5340/cpuapp app
 
-   If you are using the nRF54L15 DK and `X-NUCLEO-NFC08A1`_, the command is:
+   For the nRF54L15 DK and `X-NUCLEO-NFC08A1`_, run:
 
       .. code-block:: bash
 
          west build -p -b nrf54l15dk/nrf54l15/cpuapp app -- -DCONFIG_ST25R3916B_DRV=y
 
-   If you are using the nRF52840 DK and `X-NUCLEO-NFC05A1`_, the command is:
+#. You can also apply optional configurations depending on the modules used:
 
-      .. code-block:: bash
+   * If you are using the `QM35825`_ UWB module with the Qorvo Arduino Interface Board, execute the following command to build the application specifically for this setup:
 
-         west build -p -b nrf52840dk/nrf52840 app -- -DCONFIG_ST25R3911_DRV=y
+     .. code-block:: bash
 
-#. Optionally, if you are using the `QM35825`_ UWB module with the Qorvo Arduino Interface Board, you can execute the following command to build the application specifically for this setup:
-   
-   .. code-block:: bash
-   
       west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35
 
-   .. note::
+     .. note::
       The snippet's configuration disables the NFC reader to enable the use of the UWB module with the Qorvo Arduino Interface Board.
 
-#. Once you have built the application, run the following command to flash it:
+   * For Matter over Thread, execute the following command to build the application:
+
+     .. code-block:: bash
+
+        west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DSNIPPET='matter'
+
+   * To build the application with `QM35825`_ UWB module support and Matter over Thread enabled, run:
+
+     .. code-block:: bash
+
+        west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35 -DSNIPPET='matter'
+
+#. Once you have built the application, flash it:
 
    .. code-block:: bash
 
@@ -78,4 +86,22 @@ To build and run the application on one of the :ref:`supported development kits 
       *** Booting My Application v0.1.0-f0e5cf444fb0 ***
       *** Using nRF Connect SDK v2.9.0-7787b2649840 ***
       *** Using Zephyr OS v3.7.99-1f8f3dc29142 ***
-      [00:00:00.009,613] <inf> door_lock_app: Starting nRF Door Lock Reference Application for the nRF Connect SDK
+      door_lock_app: Starting nRF Door Lock Reference Application for the nRF Connect SDK
+
+   Optionally, if you activated QM35 UWB support, you should also see the following logs:
+
+   .. code-block:: console
+
+      uwb: Initializing UWB device...
+      hsspi_helpers: Awake frame sending supported by FW
+      hsspi_helpers: Awake frame not received
+      uwb: UWB device initialized successfully.
+
+   Additionally, if you enabled Matter, you should also see the logs:
+
+   .. code-block:: console
+
+      Init CHIP stack
+      [DL]OpenThread started: OK
+      ...
+      [ZCL]Door Lock server initialized

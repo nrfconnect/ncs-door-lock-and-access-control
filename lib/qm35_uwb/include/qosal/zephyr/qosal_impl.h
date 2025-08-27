@@ -32,7 +32,7 @@
 #define QOSAL_IMPL_LOG_MODULE(module) &log_const_##module
 #endif
 
-#if (KERNEL_VERSION_MAJOR >= 3) && (KERNEL_VERSION_MINOR >= 6)
+#if (KERNEL_VERSION_MAJOR >= 4) || (KERNEL_VERSION_MAJOR >= 3) && (KERNEL_VERSION_MINOR >= 6)
 #define CONFIG_LOG_DOMAIN_ID Z_LOG_LOCAL_DOMAIN_ID
 #endif
 
@@ -42,7 +42,7 @@
  * "const char * " strings.
  */
 
-#if (KERNEL_VERSION_MAJOR >= 3) && (KERNEL_VERSION_MINOR >= 4)
+#if (KERNEL_VERSION_MAJOR >= 4) || (KERNEL_VERSION_MAJOR >= 3) && (KERNEL_VERSION_MINOR >= 4)
 
 /* Redefine Z_LOG_MSG_SIMPLE_CREATE by just forcing the flag
  * CBPRINTF_PACKAGE_CONST_CHAR_RO */

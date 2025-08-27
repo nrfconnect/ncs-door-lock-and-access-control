@@ -13,7 +13,7 @@ There are following components of the code structure and their roles within the 
 
 ## Supported configuration
 
-See the list of the currently supported NFC configurations: 
+See the list of the currently supported NFC configurations:
 
 - ST25R3911
 - ST25R3911B
@@ -21,6 +21,8 @@ See the list of the currently supported NFC configurations:
 - ST25R3916B
 - ST25R100
 - ST25R200
+- ST25R500
+- ST25R300
 
 ## Supported shields
 
@@ -42,7 +44,7 @@ Complete the following steps to integrate a new ST driver into your project.
 2. Unzip the downloaded package and locate the folder containing the driver files.
 
 3. Copy the folder with the driver files to the `/RFAL/source` directory:
-  
+
         ├── app
         │   └── src
         ├── docs
@@ -59,6 +61,7 @@ Complete the following steps to integrate a new ST driver into your project.
         │   │               ├── st25r200
         │   │               ├── st25r3911
         │   │               └── st25r3916
+        │   │               ├── st25r500
         |   |               └── **[NEW RFAL HAL]**
         │   └── samples
         │       └── nfc_reader
@@ -76,24 +79,22 @@ Complete the following steps to integrate a new ST driver into your project.
 1. Add configuration for your new ST NFC platform.
 
     First, you must add a new configuration option in the `Kconfig` file. See the following example:
-    
+
         config ST25RXXXX_DRV
             bool "NFC ST25RXXXX driver"
-            default n
 
     Replace `XXXX` with the appropriate values for your platform.
     For example, if you are using X-NUCLEO-NFC03A1, your platform driver is ST25R95, and your `Kconfig` should be as follows:
 
         config ST25R95_DRV
             bool "NFC ST25R95 driver"
-            default n
 
 2. Update the `CmakeLists.txt` file.
 
     Add your NFC platform driver directory to the `CmakeLists.txt` file using the `Kconfig` option defined in step 1:
 
         elseif(CONFIG_ST25RXXXX_DRV)
-            zephyr_library_compile_definitions(-DST25RXXXX) 
+            zephyr_library_compile_definitions(-DST25RXXXX)
             set(ST_DRIVER_INC ${ST_RFAL_SRC_DIR}/st25rXXXX)
         else()
 
