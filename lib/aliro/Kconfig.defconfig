@@ -5,9 +5,6 @@
 #
 
 # crypto default configuration
-config ENTROPY_PSA_CRYPTO_RNG
-	default y
-
 config MBEDTLS_PSA_CRYPTO_C
 	default y
 
@@ -59,11 +56,25 @@ config PSA_WANT_GENERATE_RANDOM
 config PSA_WANT_ALG_GCM
 	default y
 
+config TRUSTED_STORAGE
+	default y
+
+config MBEDTLS_PSA_CRYPTO_STORAGE_C
+	default y
+
+choice TRUSTED_STORAGE_BACKEND_AEAD_KEY
+	default TRUSTED_STORAGE_BACKEND_AEAD_KEY_HASH_UID if SOC_SERIES_NRF52X
+	default TRUSTED_STORAGE_BACKEND_AEAD_KEY_DERIVE_FROM_HUK
+endchoice
+
+config HW_UNIQUE_KEY_WRITE_ON_CRYPTO_INIT
+	default y if (SOC_NRF5340_CPUAPP || SOC_SERIES_NRF54LX)
+
 # APDU library
 config NFC_T4T_APDU
 	default y
 
-# required by Aliro persistent storage 
+# required by Aliro persistent storage
 config FLASH
 	default y
 
@@ -71,12 +82,27 @@ config FLASH_MAP
 	default y
 
 config NVS
-	default y
+	default y if !SOC_FLASH_NRF_RRAM
+
+config NVS_LOOKUP_CACHE_SIZE
+	default 512 if NVS
+
+config NVS_LOOKUP_CACHE_FOR_SETTINGS
+	default y if NVS
+
+config ZMS
+	default y if SOC_FLASH_NRF_RRAM
+
+config ZMS_LOOKUP_CACHE_SIZE
+	default 512 if ZMS
+
+config ZMS_LOOKUP_CACHE_FOR_SETTINGS
+	default y if ZMS
 
 config SETTINGS
 	default y
 
-# required by Aliro CLI 
+# required by Aliro CLI
 config REBOOT
 	default y
 
@@ -102,6 +128,30 @@ choice NVS_LOG_LEVEL_CHOICE
 	default NVS_LOG_LEVEL_ERR
 endchoice
 
+choice ZMS_LOG_LEVEL_CHOICE
+	default ZMS_LOG_LEVEL_ERR
+endchoice
+
 choice SETTINGS_LOG_LEVEL_CHOICE
 	default SETTINGS_LOG_LEVEL_ERR
 endchoice
+
+choice LIBC_IMPLEMENTATION
+	default NEWLIB_LIBC
+endchoice
+
+config SHELL_CMD_BUFF_SIZE
+	default 256
+
+if !CHIP
+
+config MAIN_STACK_SIZE
+	default 4096
+
+config HEAP_MEM_POOL_SIZE
+	default 4096
+
+config SYSTEM_WORKQUEUE_STACK_SIZE
+	default 2048
+
+endif # !CHIP

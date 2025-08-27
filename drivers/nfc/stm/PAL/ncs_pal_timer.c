@@ -56,9 +56,9 @@ int ncs_pal_timer_create(uint16_t time_ms)
 	return 0;
 }
 
-bool ncs_pal_timer_is_expired(uint32_t timer_id)
+bool ncs_pal_timer_is_expired(uint8_t timer_id)
 {
-	if (timer_id < 1 || timer_id > CONFIG_PAL_MAX_TIMERS_NUM) {
+	if (!IN_RANGE(timer_id, 1, CONFIG_PAL_MAX_TIMERS_NUM)) {
 		LOG_DBG("Invalid timer ID %d", timer_id);
 		return true;
 	}
@@ -69,9 +69,9 @@ bool ncs_pal_timer_is_expired(uint32_t timer_id)
 	return false;
 }
 
-void ncs_pal_timer_destroy(int timer_id)
+void ncs_pal_timer_destroy(uint8_t timer_id)
 {
-	if (timer_id < 1 || timer_id > CONFIG_PAL_MAX_TIMERS_NUM) {
+	if (!IN_RANGE(timer_id, 1, CONFIG_PAL_MAX_TIMERS_NUM)) {
 		LOG_DBG("Invalid timer ID %d", timer_id);
 		return;
 	}
@@ -85,4 +85,14 @@ void ncs_pal_timer_destroy(int timer_id)
 void ncs_pal_delay(uint16_t delay_ms)
 {
 	k_sleep(K_MSEC(delay_ms));
+}
+
+uint32_t ncs_pal_timer_get_remaining(uint8_t timer_id)
+{
+	if (!IN_RANGE(timer_id, 1, CONFIG_PAL_MAX_TIMERS_NUM)) {
+		LOG_DBG("Invalid timer ID %d", timer_id);
+		return 0;
+	}
+	k_ticks_t ticks = k_timer_remaining_ticks(&timers[timer_id - 1].timer);
+	return k_ticks_to_ms_floor32(ticks);
 }

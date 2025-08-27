@@ -7,6 +7,7 @@
 #pragma once
 
 #include "aliro/errors.h"
+#include "aliro/types.h"
 #include <cstddef>
 
 namespace Aliro {
@@ -16,11 +17,6 @@ struct AliroConfig {
 	 * @brief Enable NFC transport.
 	 */
 	bool mEnableNfc{ true };
-
-	/**
-	 * @brief The number of Access Credential public key slots.
-	 */
-	size_t mAccessCredentialKeySlots{ 0 };
 
 #ifdef CONFIG_ALIRO_BLE_TP
 	/**
@@ -71,11 +67,37 @@ public:
 	AliroError Init(const Callbacks &callbacks, const AliroConfig &config);
 
 	/**
+	 * @brief Provision the Reader.
+	 *
+	 * @param privateKeyId The private key ID.
+	 * @param groupResolvingKeyId The group resolving key ID.
+	 * @param identifier The reader identifier.
+	 *
+	 * @return ALIRO_NO_ERROR if the Reader was provisioned successfully, an error code otherwise.
+	 */
+	AliroError Provision(CryptoTypes::KeyId privateKeyId, CryptoTypes::KeyId groupResolvingKeyId,
+			     const Identifier &identifier);
+
+	/**
+	 * @brief Sets the reader identifier.
+	 *
+	 * @param identifier The reader identifier.
+	 */
+	AliroError SetReaderIdentifier(const Identifier &identifier);
+
+	/**
 	 * @brief Starts the Aliro stack.
 	 *
 	 * @return ALIRO_NO_ERROR if the stack was started successfully, an error code otherwise.
 	 */
 	AliroError Start() const;
+
+	/**
+	 * @brief Stops the Aliro stack.
+	 *
+	 * @return ALIRO_NO_ERROR if the stack was stopped successfully, an error code otherwise.
+	 */
+	AliroError Stop() const;
 
 	/**
 	 * @brief Gets the Aliro configuration.
@@ -84,9 +106,17 @@ public:
 	 */
 	const AliroConfig &GetConfig() const { return mConfig; }
 
+	/**
+	 * @brief Gets the Aliro library version string.
+	 *
+	 * @return The Aliro library version.
+	 */
+	static const char *GetLibraryVersion();
+
 private:
 	Callbacks mCallbacks{};
 	AliroConfig mConfig;
+	bool mProvisioned{ false };
 };
 
 } // namespace Aliro

@@ -19,18 +19,24 @@
 namespace Aliro {
 
 /**
- * @brief Type alias for byte values.
- *
- * Represents a single byte of data.
+ * @brief Length of the reader group identifier.
  */
-using Byte = uint8_t;
+constexpr size_t kReaderGroupIdentifierLength{ 16 };
 
 /**
- * @brief Type alias for size values.
- *
- * Used to represent sizes, lengths, and counts in.
+ * @brief Length of the reader group sub-identifier.
  */
-using Size = size_t;
+constexpr size_t kReaderGroupSubIdentifierLength{ 16 };
+
+/**
+ * @brief Length of the reader identifier.
+ */
+constexpr size_t kReaderIdentifierLength{ kReaderGroupIdentifierLength + kReaderGroupSubIdentifierLength };
+
+/**
+ * @brief Type alias for reader identifier.
+ */
+using Identifier = std::array<uint8_t, kReaderIdentifierLength>;
 
 /**
  * @brief Type alias for data storage.
@@ -39,7 +45,7 @@ using Size = size_t;
  */
 struct Data {
 	uint8_t *mData{ nullptr };
-	Size mLength{ 0 };
+	size_t mLength{ 0 };
 };
 
 /**
@@ -91,6 +97,13 @@ constexpr size_t kEccP256PublicKeyPrefixLength{ 1 };
 constexpr size_t kEccP256KeySingleCoordinateLength{ 32 };
 
 /**
+ * @brief Length of the ECC P-256 signature.
+ *
+ * Signature is two times longer than the key.
+ */
+constexpr size_t kEccP256SignatureLength{ 2 * kEccP256KeySingleCoordinateLength };
+
+/**
  * @brief Total length of an ECC P-256 public key.
  *
  * Calculated as: prefix (1 byte) + x coordinate (32 bytes) + y coordinate (32 bytes)
@@ -107,6 +120,40 @@ constexpr size_t kEccP256PublicKeyLength{ kEccP256PublicKeyPrefixLength + (2 * k
 constexpr size_t kSymmetricKeyLength{ 32 };
 
 /**
+ * @brief Encryption/decryption counter length - for nonce generation.
+ */
+constexpr size_t kEncryptionDecryptionCounterLength{ 4 };
+
+/**
+ * @brief Length of the nonce.
+ *
+ * IV <= 0x0000000000000001 || device_counter (unsigned big endian, 4 bytes) - spec 8.3.1.6
+ */
+constexpr size_t kNonceLength{ sizeof(uint64_t) + kEncryptionDecryptionCounterLength };
+
+/**
+ * @brief Length of the transaction identifier.
+ */
+constexpr size_t kTransactionIdentifierLength{ 16 };
+
+/**
+ * @brief Length of the authentication tag.
+ */
+constexpr size_t kAuthenticationTagLength{ 16 };
+
+/**
+ * @brief Length of the Group Resolving Key.
+ *
+ * The length of the (symmetric) Group Resolving Key.
+ */
+constexpr size_t kGroupResolvingKeyLength{ 16 };
+
+/**
+ * @brief Type alias for ECC P-256 public key x coordinate.
+ */
+using PublicKeyXcoordinate = std::array<uint8_t, kEccP256KeySingleCoordinateLength>;
+
+/**
  * @brief Type alias for ECC P-256 public key storage.
  *
  * A fixed-size array that can hold a complete ECC P-256 public key
@@ -115,11 +162,59 @@ constexpr size_t kSymmetricKeyLength{ 32 };
 using PublicKey = std::array<uint8_t, kEccP256PublicKeyLength>;
 
 /**
+ * @brief Type alias for ECC P-256 private key storage.
+ *
+ * A fixed-size array that can hold a complete ECC P-256 private key.
+ */
+using PrivateKey = std::array<uint8_t, kEccP256KeySingleCoordinateLength>;
+
+/**
  * @brief Type alias for Ultra-wideband Ranging Session Key (URSK).
  *
  * A fixed-size array that holds the URSK used for UWB ranging sessions.
  * URSK is stored in plaintext and has the standard symmetric key length.
  */
 using Ursk = std::array<uint8_t, kSymmetricKeyLength>;
+
+/**
+ * @brief Type alias for ECC P-256 signature.
+ */
+using Signature = std::array<uint8_t, kEccP256SignatureLength>;
+
+/**
+ * @brief Type alias for nonce.
+ */
+using Nonce = std::array<uint8_t, kNonceLength>;
+
+/**
+ * @brief Type alias for transaction identifier.
+ */
+using TransactionIdentifier = std::array<uint8_t, kTransactionIdentifierLength>;
+
+/**
+ * @brief Type alias for authentication tag.
+ */
+using AuthenticationTag = std::array<uint8_t, kAuthenticationTagLength>;
+
+/**
+ * @brief Type alias for Group Resolving Key.
+ */
+using GroupResolvingKey = std::array<uint8_t, kGroupResolvingKeyLength>;
+
+/**
+ * Helper structure for representing symmetric session-bounds key IDs (respective):
+ * - ExpeditedSKReader - used for reader's messages encryption, when secure channel is established.
+ * - ExpeditedSKDevice - used for user device messages decryption, when secure channel is established.
+ * - StepUpSK - used for derive StepUpSKDevice and StepUpSKReader keys to protect Step-up phase.
+ * - BleSK - used to protect a ultra wideband (UWB) session setup commands.
+ * - URSK - as a UWB Ranging Secret Key (URSK).
+ */
+struct SessionBoundKeys {
+	KeyId mExpeditedSkReader{};
+	KeyId mExpeditedSkDevice{};
+	KeyId mStepUpSk{};
+	KeyId mBleSk{};
+	Ursk mUrsk{};
+};
 
 } // namespace Aliro::CryptoTypes

@@ -63,21 +63,16 @@ struct cherry_ccc_capabilities {
 	 */
 	uint32_t sync_code_index_bitmask;
 	/**
-	 * @hopping_config_bitmask: Hopping config modes and sequences.
+	 * @hopping_config_bitmask: Bitmap for supported hopping modes and sequences.
+ 	 *
+	 * 	b0: AES based hopping sequence.
+	 *	b1: Default hopping sequence (always set).
+	 *	b2: Adaptative hopping mode.
+	 *	b3: Continuous hopping mode (always set).
+	 *	b4: No hopping.
 	 *
-	 * - b0-b4 = Bit mask of hopping sequences the device offers to use in the ranging
-	 *   session where:
-	 *
-	 *   - b4 = 1 is always set because of the default hopping sequence.
-	 *     Support for it is mandatory.
-	 *   - b3 = 1 is set when the optional AES based hopping sequence is supported.
-	 *
-	 *   Rest of the bits are reserved for future hopping sequences.
-	 * - b5-b7 = Bitmask of hopping modes the device offers to use in the ranging session where:
-	 *
-	 *   - 100 - No Hopping.
-	 *   - 010 - Continuous Hopping.
-	 *   - 001 - Adaptive Hopping.
+	 *	Rest of the bits are reserved for future hopping sequences.
+	 *	b5-b7 = RFUs.
 	 */
 	uint8_t hopping_config_bitmask;
 	/**
@@ -504,6 +499,10 @@ struct cherry_ccc_aliro_session_config {
 	 * @hopping_mode: Ranging round hopping configuration
 	 */
 	enum cherry_ccc_hopping_mode hopping_mode;
+	/**
+	 * @hopping_config_bitmask: Hopping capabilities config bitmask
+	 */
+	uint8_t hopping_config_bitmask;
 	/**
 	 * @hop_mode_key: Key to generate hopping sequence.
 	 */
