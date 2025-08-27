@@ -18,3 +18,16 @@ tests:
       - nrf5340dk/nrf5340/cpuapp
     extra_args:
       - app_SNIPPET=uwb_qm35
+  app.nfc_door_lock.matter:
+    platform_allow: *platforms
+    integration_platforms: *platforms
+    extra_args:
+      - SNIPPET=matter
+  app.door_lock_ble_uwb.matter:
+    platform_allow:
+      - nrf5340dk/nrf5340/cpuapp
+    integration_platforms:
+      - nrf5340dk/nrf5340/cpuapp
+    extra_args:
+      - SNIPPET=matter
+      - app_SNIPPET=uwb_qm35
