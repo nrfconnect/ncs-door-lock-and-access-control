@@ -1,14 +1,16 @@
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2023 Qorvo, Inc.
- * SPDX-License-Identifier: LicenseRef-Qorvo-SDK-1 OR GPL-2.0
+ * SPDX-License-Identifier: LicenseRef-Qorvo-SDK-1
  */
 #pragma once
 
 #include "qtypes.h"
 
 #ifndef __KERNEL__
+#ifndef CONFIG_NEWLIB_LIBC_NANO
 #include <endian.h>
 #include <stddef.h>
+#endif // CONFIG_NEWLIB_LIBC_NANO
 #endif
 
 /**

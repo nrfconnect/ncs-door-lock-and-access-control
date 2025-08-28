@@ -122,14 +122,13 @@ struct aliro_uwb_adapter_reader_config {
 	 * @preferred_hopping_config: Order list of preferred hopping configuration.
 	 *
 	 * Hopping config values:
-	 *  - 0x01: AES based hopping sequence
-	 *  - 0x02: Default hopping sequence
-	 *  - 0x04: Adaptive Hopping mode
-	 *  - 0x08: Continuous Hopping mode
-	 *  - 0x10: No hopping
+	 *  - 0x00: No hopping
+	 *  - 0xA1: Continuous default hopping
+	 *  - 0xA3: Adaptive default hopping
 	 *
-	 * Remaing element of the list should be set to 0. The list should always contains the
-	 * default hopping sequence, it's mandatory according to the Aliro UWB specification.
+	 * Remaining element of the list should be set to 0. The list should always contains the
+	 * continuous default hopping sequence, it's mandatory according to the Aliro UWB
+	 * specification.
 	 */
 	uint8_t preferred_hopping_config[ALIRO_UWB_ADAPTER_PREFERRED_HOP_CONFIG_MAX];
 	/**

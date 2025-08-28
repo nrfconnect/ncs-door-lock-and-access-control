@@ -8,6 +8,7 @@
    :depth: 2
 
 The |APP_NAME| runs on the Nordic Semiconductor's :ref:`supported SoCs <hw_requirements>` and utilizes the Aliro stack for access protocol and communication with a User Device over Near Field Communication (NFC) or Bluetooth® LE.
+You can also use the application with Matter for provisioning the Aliro-specific credentials by the smart home ecosystem.
 See the following diagram for an architecture overview:
 
 .. _arch_overview:
@@ -18,7 +19,7 @@ See the following diagram for an architecture overview:
 
    |APP_NAME| architecture overview.
 
-The |APP_NAME| is build using the :ref:`nRF Connect SDK <sdk_set_up>`, which includes the Zephyr RTOS with all necessary modules.
+The |APP_NAME| is built using the :ref:`nRF Connect SDK <sdk_set_up>`, which includes the Zephyr RTOS with all necessary modules.
 
 The Aliro stack implements the Access Protocol logic, Aliro-specific cryptographic primitives, and communication with the User Device.
 The interfaces layer is a bridge connecting the Aliro stack to the Zephyr OS modules through specific backends that implement the following components required by the Aliro: crypto, NFC and, ultra wideband (UWB).
@@ -28,6 +29,11 @@ The Aliro stack library files are placed in the :file:`lib/aliro` directory.
 
 The RF Abstraction Layer (NFC RFAL) handles communication with the STMicroelectronics :ref:`NFC integrated circuit (IC) <hw_requirements_nfc_reader>`.
 This layer contains drivers, platform abstraction layer (PAL) and the NFC protocol stack, covering evrything from physical characteristic to the application layer.
+You can choose three NFC sensitivity options, configurable through Kconfig (see :file:`drivers/nfc/stm/nfc_configs/Kconfig`):
+
+* ``CONFIG_RFAL_WAKE_UP_MODE_STRICT`` - Offers lower sensitivity for increased robustness against noise.
+* ``CONFIG_RFAL_WAKE_UP_MODE_RELAXED`` - Provides higher sensitivity, which allows the detection of weaker NFC signals but may also increase sensitivity to noise.
+* ``CONFIG_RFAL_WAKE_UP_MODE_DEFAULT`` - Uses the default RFAL configuration, suitable for general use cases where no specific tuning is required.
 
 Communication with external IC's is done through the Serial Peripheral Interface (SPI) bus.
 
@@ -47,9 +53,9 @@ The payload updates automatically whenever these values change, ensuring that th
 When a Bluetooth LE central device connects, the Aliro stack manages the Bluetooth LE session, handling connection events, security, and data exchange over a dedicated L2CAP channel with Aliro-specific GATT services.
 Each session uses unique keys, which are destroyed after termination.
 In case of NFC transport, only one session can be active at a time.
-For Bluetooth LE transport, the maximum number of concurrent sessions is limited by the ``ALIRO_BLE_TP_MAX_SESSIONS`` Kconfig option and defaults to the value of ``BT_MAX_CONN``.
+For Bluetooth LE transport, the maximum number of concurrent sessions is limited by the ``CONFIG_ALIRO_BLE_TP_MAX_SESSIONS`` Kconfig option and defaults to the value of ``CONFIG_BT_MAX_CONN``.
 
-To configure number of Bluetooth LE sessions, set the ``BT_MAX_CONN`` to maximum number of connections and optionally use the ``ALIRO_BLE_TP_MAX_SESSIONS`` to limit the number of sessions.
+To configure number of Bluetooth LE sessions, set the ``CONFIG_BT_MAX_CONN`` to maximum number of connections and optionally use the ``CONFIG_ALIRO_BLE_TP_MAX_SESSIONS`` to limit the number of sessions.
 
 .. note::
    Each session consumes resources, such as RAM and PSA key slots, therefore the maximum number of the active sessions should be determined empirically based on the requirements of the final application.
@@ -83,12 +89,12 @@ You can configure the Qorvo QM35 interface implementation using the following Kc
   The time range is between 96 ms (RAN multiplier is 1) and 24480 ms (RAN multiplier is 255).
   Default value is ``2`` which corresponds to a measurement frequency of approximately 5 Hz.
 
-* ``ALIRO_UWB_HOPPING_MODE`` - This option allows you to select the preferred hopping mode.
+* ``CONFIG_ALIRO_UWB_HOPPING_MODE`` - This option allows you to select the preferred hopping mode.
   You can choose the following Kconfig options:
 
-  * ``ALIRO_UWB_HOPPING_MODE_ADAPTIVE`` - Adaptive hopping mode
-  * ``ALIRO_UWB_HOPPING_MODE_CONTINUOUS`` - Continuous hopping mode (default)
-  * ``ALIRO_UWB_HOPPING_MODE_NONE`` - No hopping
+  * ``CONFIG_ALIRO_UWB_HOPPING_MODE_ADAPTIVE`` - Adaptive hopping mode
+  * ``CONFIG_ALIRO_UWB_HOPPING_MODE_CONTINUOUS`` - Continuous hopping mode (default)
+  * ``CONFIG_ALIRO_UWB_HOPPING_MODE_NONE`` - No hopping
 
 * ``CONFIG_ALIRO_UWB_HOPPING_SEQUENCE_AES`` - This option enables AES-based hopping sequence for continous or adaptive hopping modes.
 
@@ -122,7 +128,7 @@ When access is granted, a generic indicator is activated for a predefined period
 By default, this indicator is a dedicated LED, but it can be adapted to other types of indicators such as a buzzer.
 
 You can set the duration of the indication in the :file:`app/src/platform/access_decision_indicator/Kconfig` file.
-Use the ``RESET_ACCESS_DECISION_INDICATOR_STATE_DELAY_MS`` Kconfig option to specify the time in milliseconds.
+Use the ``CONFIG_ACCESS_DECISION_INDICATOR_STATE_DELAY_MS`` Kconfig option to specify the time in milliseconds.
 
 You can select the hardware resource used for this indication by going to the device tree source file and setting the ``access_decision_indicator`` property in the corresponding node.
 
@@ -196,3 +202,19 @@ For instance:
 .. code-block::
 
    west build -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM=y
+
+Matter support
+**************
+
+The |APP_NAME| integrates with the `Matter`_ protocol stack provided by the |NCS| to enable seamless provisioning of Aliro-specific credentials through smart home ecosystems.
+This method is preferred over manual provisioning using the ``dl install`` and ``dl provisioning`` commands through the serial console.
+Currently, the |APP_NAME| supports only Matter over Thread technology.
+
+The |APP_NAME| implements smart home access control using the Matter door lock cluster, which is natively supported in the |NCS| by the `Matter door lock`_ sample.
+|APP_NAME| uses most of the functionality of the Matter door lock sample.
+
+For detaild information about Matter support in the |NCS|, see the following pages:
+
+* `Matter overview`_ - Provides an introduction to Matter, covering its architecture, firmware upgrade process, and details on network commissioning and security.
+* `Matter getting started`_ - Guides on developing Matter applications in the |NCS|, including the necessary tools and how to set up the testing environment.
+* `Matter end product`_ - Discusses developing a Matter end product, detailing supported security features, recommended configurations, and the Matter certification process.

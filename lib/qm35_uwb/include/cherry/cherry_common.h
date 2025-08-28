@@ -128,6 +128,8 @@ enum cherry_common_preamble_duration {
 		CHERRY_COMMON_PREAMBLE_DURATION_64,
 };
 
+#define CHERRY_COMMON_PREAMBLE_CODE_INDEX_DEFAULT 10
+
 /**
  * enum cherry_common_sts_length - Number of symbols in the STS segment.
  *
