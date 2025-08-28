@@ -109,6 +109,12 @@ The pinout is applicable for each of the supported NFC reader expansion boards:
 
 When using the `nRF5340 DK`_ or `nRF52840 DK`_, you can connect the NFC reader expansion board directly using the Arduino-compatible header available on the DK.
 
+.. note::
+
+   The `nRF5340 DK <nRF5340 DK connector interface_>`_ and `nRF52840 DK <nRF52840 DK connector interface_>`_ have P5 and P20 connectors located between their Arduino headers.
+   These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
+   To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
+
 .. _hw_requirements_uwb_reader:
 
 Ultra wideband (UWB) module

@@ -16,8 +16,8 @@ config BT_PERIPHERAL
 config BT_SMP
 	default y
 
-config BT_USER_PHY_UPDATE
-	default y
+config BT_PHY_UPDATE
+	default n
 
 config BT_BUF_ACL_RX_SIZE
 	default 251
@@ -42,3 +42,9 @@ config BT_L2CAP_DYNAMIC_CHANNEL
 
 config BT_CTLR_TX_PWR_DYNAMIC_CONTROL
 	default y if !SOC_NRF5340_CPUAPP
+
+config BT_BONDABLE
+	default n
+
+config BT_ID_MAX
+	default 2 if BT_BONDABLE
