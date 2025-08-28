@@ -4,12 +4,6 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-rsource "src/platform/Kconfig"
-
-menu "Zephyr"
-source "Kconfig.zephyr"
-endmenu
-
 module = NCS_DOOR_LOCK_APP
 module-str = NCS_DOOR_LOCK_APP
 module-dep = LOG
@@ -34,6 +28,41 @@ choice ACCESS_MANAGER_IMPLEMENTATION
 		  that can be tailored to specific requirements.
 endchoice
 
-if ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
-rsource "src/access_manager_impl_default/Kconfig"
-endif
+config DOOR_LOCK_CLI
+	bool "Door Lock CLI support"
+	default y
+	select SHELL
+	select REBOOT
+	help
+	  Enable support for Door Lock CLI.
+
+config DOOR_LOCK_PRINT_READER_GROUP_IDENTIFIER
+	bool "Print reader group identifier that should be provisioned into the User Device"
+	default y
+	help
+	  Enable printing of the reader group identifier that should be provisioned into the User Device.
+
+config DOOR_LOCK_USE_TEST_READER_IDENTIFIER
+	bool "Use test reader identifier"
+	default y
+	help
+	  Initialize the reader Group Identifier and Group Sub Identifier to test values.
+
+config DOOR_LOCK_USE_TEST_KEYS
+	bool "Use test keys"
+	default y
+	help
+	  Initialize the reader keys to test values.
+
+rsource "src/aliro/Kconfig"
+
+if CHIP
+
+rsource "src/matter/Kconfig"
+source "${ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR}/config/nrfconnect/chip-module/Kconfig.features"
+source "${ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR}/config/nrfconnect/chip-module/Kconfig.defaults"
+source "${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/src/Kconfig"
+
+endif # CHIP
+
+source "Kconfig.zephyr"

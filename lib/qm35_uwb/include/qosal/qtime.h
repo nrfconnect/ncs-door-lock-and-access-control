@@ -1,13 +1,6 @@
-/**
- * @file      qtime.h
- *
- * @brief     Header file for Qorvo timings
- *
- * @author    Qorvo Paris Applications
- *
- * @copyright SPDX-FileCopyrightText: Copyright (c) 2024 Qorvo, Inc.
- *            SPDX-License-Identifier: LicenseRef-Qorvo-SDK-1
- *
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2024 Qorvo, Inc.
+ * SPDX-License-Identifier: LicenseRef-Qorvo-SDK-1
  */
 
 #pragma once

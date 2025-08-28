@@ -6,7 +6,10 @@
 
 #pragma once
 
-#include "crypto/crypto_key_cache.h"
+#include "aliro/errors.h"
+#include "aliro/types.h"
+
+#include <cstddef>
 
 namespace Aliro {
 
@@ -32,7 +35,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError GenerateRandom(Byte *rngBuf, size_t rngBufLength);
+	AliroError GenerateRandom(uint8_t *rngBuf, size_t rngBufLength);
 
 	/**
 	 * @brief Generate ephemeral EC key pair.
@@ -42,7 +45,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError GenerateEphemeralKeyPair(uint32_t &keyId, EccP256PublicKey &ephemeralPubKey);
+	AliroError GenerateEphemeralKeyPair(CryptoTypes::KeyId &keyId, CryptoTypes::PublicKey &ephemeralPubKey);
 
 	/**
 	 * @brief Generate ephemeral EC key pair.
@@ -51,7 +54,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError GenerateEphemeralKeyPair(uint32_t &keyId);
+	AliroError GenerateEphemeralKeyPair(CryptoTypes::KeyId &keyId);
 
 	/**
 	 * @brief Export EC public key.
@@ -61,27 +64,40 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError ExportPublicKey(uint32_t keyId, EccP256PublicKey &publicKey);
+	AliroError ExportPublicKey(CryptoTypes::KeyId keyId, CryptoTypes::PublicKey &publicKey);
+
+	/**
+	 * @brief Export a key.
+	 *
+	 * @param keyId input identifier of a key to export.
+	 * @param key output buffer where the key is to be copied.
+	 * @param keyLength length of the key in bytes.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error status otherwise.
+	 */
+	AliroError ExportKey(CryptoTypes::KeyId keyId, uint8_t *key, size_t keyLength);
 
 	/**
 	 * Import a EC public key.
 	 *
-	 * @param staticPubKey input buffer with public key.
+	 * @param key input buffer with public key.
 	 * @param keyId output identifier of the imported key.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError ImportPublicKey(const EccP256PublicKey &staticPubKey, uint32_t &keyId);
+	AliroError ImportPublicKey(const CryptoTypes::PublicKey &key, CryptoTypes::KeyId &keyId);
 
 	/**
 	 * Import EC private key.
 	 *
-	 * @param privateKey input buffer with private key.
-	 * @param privateKeyId output identifier of the imported private key.
+	 * @param key input buffer with private key.
+	 * @param keyId output identifier of the imported private key.
+	 * @param isPersistent flag indicating whether the key should be persistent or temporary.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError ImportPrivateKey(const EccP256PrivateKey &privateKey, uint32_t &privateKeyId);
+	AliroError ImportPrivateKey(const CryptoTypes::PrivateKey &key, CryptoTypes::KeyId &keyId,
+				    bool isPersistent = false);
 
 	/**
 	 * Destroy an key by ID.
@@ -93,20 +109,22 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DestroyKey(uint32_t &keyId);
+	AliroError DestroyKey(CryptoTypes::KeyId &keyId);
 
 	/**
 	 * Generate signature for a message.
 	 * NOTE: The Reader's private key (LTK) is used for message signing.
 	 * The key must be loaded and avialable before this method is invoked.
 	 *
+	 * @param keyId input identifier of the private key to use for signing.
 	 * @param msg input message to sign.
 	 * @param msgLength input size of the message.
 	 * @param signature output buffer where te signature is to be copied.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError GenerateSignature(const uint8_t *msg, const size_t msgLength, TransactionSignature &signature);
+	AliroError GenerateSignature(CryptoTypes::KeyId privKeyId, const uint8_t *msg, const size_t msgLength,
+				     CryptoTypes::Signature &signature);
 
 	/**
 	 * Verify signature of a message.
@@ -120,8 +138,8 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR when siganture is valid, ALIRO_INVALID_SIGNATURE otherwise.
 	 */
-	AliroError VerifySignature(uint32_t pubKeyId, const uint8_t *msg, const size_t msgLength,
-				   const TransactionSignature &signature);
+	AliroError VerifySignature(CryptoTypes::KeyId pubKeyId, const uint8_t *msg, const size_t msgLength,
+				   const CryptoTypes::Signature &signature);
 
 	/**
 	 * Comupte shared key with ECDH procedure.
@@ -135,8 +153,9 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError ComputeSharedKeyDH(uint32_t privKeyId, const EccP256PublicKey &publicKey,
-				      const TransactionIdentifier &transactionId, uint32_t &keyDhId);
+	AliroError ComputeSharedKeyDH(CryptoTypes::KeyId privKeyId, const CryptoTypes::PublicKey &publicKey,
+				      const CryptoTypes::TransactionIdentifier &transactionId,
+				      CryptoTypes::KeyId &keyDhId);
 
 	/**
 	 * Derive session keys using Kdh.
@@ -153,26 +172,31 @@ public:
 	 *
 	 * @param kDh input identifier of the secret key.
 	 * @param info input information for key derivation.
+	 * @param infoLength input size of the info buffer.
 	 * @param salt input a salt for key derivation.
-	 * @param sessionVolatileKeys output bunch of session-bound key IDs.
+	 * @param saltLength input size of the salt buffer.
+	 * @param sessionVolatileKeys output bunch of session-bound keys.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DeriveSessionKeys(uint32_t kDh, const KdfInfo &info, const KdfSalt &salt,
-				     SessionBoundKeys &sessionVolatileKeys);
+	AliroError DeriveSessionKeys(CryptoTypes::KeyId kDh, const uint8_t *info, size_t infoLength,
+				     const uint8_t *salt, size_t saltLength,
+				     CryptoTypes::SessionBoundKeys &sessionVolatileKeys);
 
 	/**
 	 * Derive 32-bytes long BLE session key according to Aliro spec. v0.9.3 11.8.1
 	 *
 	 * @param inputKeyId input identifier of the secret key.
 	 * @param info input information for key derivation.
+	 * @param infoLength input size of the info buffer.
 	 * @param salt input a salt for key derivation.
+	 * @param saltLength input size of the salt buffer.
 	 * @param outputKeyId output identifier of the derived key.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DeriveBleSessionKey(uint32_t inputKeyId, const SharedByteSpan &info, const SharedByteSpan &salt,
-				       uint32_t &outputKeyId);
+	AliroError DeriveBleSessionKey(CryptoTypes::KeyId inputKeyId, const uint8_t *info, size_t infoLength,
+				       const uint8_t *salt, size_t saltLength, CryptoTypes::KeyId &outputKeyId);
 
 	/**
 	 * Encrypt data payload.
@@ -188,9 +212,9 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError EncryptPayload(uint32_t keyId, const Byte *plainTxt, size_t plainTxtLength,
-				  const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
-				  Byte *cipherText, AuthenticationTag &authTag);
+	AliroError EncryptPayload(CryptoTypes::KeyId keyId, const uint8_t *plainTxt, size_t plainTxtLength,
+				  const uint8_t *info, size_t infoLength, const CryptoTypes::Nonce &nonce,
+				  uint8_t *cipherText, CryptoTypes::AuthenticationTag &authTag);
 
 	/**
 	 * Encrypt data payload.
@@ -202,7 +226,8 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError EncryptPayload(uint32_t keyId, const Byte *plainTxt, size_t plainTxtLength, Byte *cipherText);
+	AliroError EncryptPayload(CryptoTypes::KeyId keyId, const uint8_t *plainTxt, size_t plainTxtLength,
+				  uint8_t *cipherText);
 
 	/**
 	 * Authenticated decryption (AEAD) data payload.
@@ -220,9 +245,10 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DecryptPayload(uint32_t keyId, const Byte *cipherTextWithTag, size_t cipherTextWithTagLength,
-				  const Byte *additionalData, size_t additionalDataLength, const Nonce &nonce,
-				  Byte *plainText, size_t &plainTextLength);
+	AliroError DecryptPayload(CryptoTypes::KeyId keyId, const uint8_t *cipherTextWithTag,
+				  size_t cipherTextWithTagLength, const uint8_t *additionalData,
+				  size_t additionalDataLength, const CryptoTypes::Nonce &nonce, uint8_t *plainText,
+				  size_t &plainTextLength);
 
 	/**
 	 * Authenticated decryption (AEAD) data payload.
@@ -238,8 +264,8 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DecryptPayload(uint32_t keyId, const Byte *cipherText, size_t cipherTextLength, const Nonce &nonce,
-				  Byte *plainText, size_t &plainTextLength)
+	AliroError DecryptPayload(CryptoTypes::KeyId keyId, const uint8_t *cipherText, size_t cipherTextLength,
+				  const CryptoTypes::Nonce &nonce, uint8_t *plainText, size_t &plainTextLength)
 	{
 		return DecryptPayload(keyId, cipherText, cipherTextLength, nullptr, 0U, nonce, plainText,
 				      plainTextLength);
@@ -258,7 +284,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError ProvisionSymmetricKey(const uint8_t *key, size_t keyLength, uint32_t &keyId,
+	AliroError ProvisionSymmetricKey(const uint8_t *key, size_t keyLength, CryptoTypes::KeyId &keyId,
 					 bool isPersistent = false);
 
 	/**
@@ -268,7 +294,7 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR if the key available, a error code otherwise.
 	 */
-	AliroError IsKeyValid(uint32_t keyId);
+	AliroError IsKeyValid(CryptoTypes::KeyId keyId);
 
 protected:
 	Crypto() = default;

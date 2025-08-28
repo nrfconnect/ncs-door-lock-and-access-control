@@ -34,6 +34,12 @@ extern "C" {
 /**
  * DOC: Changelog
  *
+ * Version 2.15.00:
+ *  - Add API for punctured HPRF radar:
+ *    @cherry_radar_session_set_preamble_duration.
+ *    @cherry_radar_session_set_rframe_config.
+ *    @cherry_radar_session_set_preamble_code_index.
+ *
  * Version 2.14.00:
  *  - Add @cherry_ccc_session_set_sts_index API.
  *  - Add @cherry_ccc_session_set_initiation_time API.

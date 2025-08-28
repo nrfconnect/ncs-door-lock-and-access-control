@@ -1,0 +1,11 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+rsource "platform/Kconfig"
+
+if ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
+rsource "access_manager_impl_default/Kconfig"
+endif
