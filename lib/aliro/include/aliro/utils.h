@@ -129,7 +129,6 @@
 		}                                      \
 	} while (false)
 
-
 /**
  *  @def VerifyAndCall(clb, ...)
  *

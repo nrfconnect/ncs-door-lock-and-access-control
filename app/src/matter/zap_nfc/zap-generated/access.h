@@ -53,9 +53,6 @@
     0x00000101, /* Cluster: Door Lock, Attribute: AliroReaderGroupIdentifier, Privilege: administer */ \
     0x00000101, /* Cluster: Door Lock, Attribute: AliroReaderGroupSubIdentifier, Privilege: administer */ \
     0x00000101, /* Cluster: Door Lock, Attribute: AliroExpeditedTransactionSupportedProtocolVersions, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Attribute: AliroGroupResolvingKey, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Attribute: AliroSupportedBLEUWBProtocolVersions, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Attribute: AliroBLEAdvertisingVersion, Privilege: administer */ \
 }
 
 // Parallel array data (cluster, *attribute*, privilege) for read attribute
@@ -84,9 +81,6 @@
     0x00000081, /* Cluster: Door Lock, Attribute: AliroReaderGroupIdentifier, Privilege: administer */ \
     0x00000082, /* Cluster: Door Lock, Attribute: AliroReaderGroupSubIdentifier, Privilege: administer */ \
     0x00000083, /* Cluster: Door Lock, Attribute: AliroExpeditedTransactionSupportedProtocolVersions, Privilege: administer */ \
-    0x00000084, /* Cluster: Door Lock, Attribute: AliroGroupResolvingKey, Privilege: administer */ \
-    0x00000085, /* Cluster: Door Lock, Attribute: AliroSupportedBLEUWBProtocolVersions, Privilege: administer */ \
-    0x00000086, /* Cluster: Door Lock, Attribute: AliroBLEAdvertisingVersion, Privilege: administer */ \
 }
 
 // Parallel array data (cluster, attribute, *privilege*) for read attribute
@@ -115,9 +109,6 @@
     chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Attribute: AliroReaderGroupIdentifier, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Attribute: AliroReaderGroupSubIdentifier, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Attribute: AliroExpeditedTransactionSupportedProtocolVersions, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Attribute: AliroGroupResolvingKey, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Attribute: AliroSupportedBLEUWBProtocolVersions, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Attribute: AliroBLEAdvertisingVersion, Privilege: administer */ \
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -194,7 +185,6 @@
     0x00000030, /* Cluster: General Commissioning, Command: SetRegulatoryConfig, Privilege: administer */ \
     0x00000030, /* Cluster: General Commissioning, Command: CommissioningComplete, Privilege: administer */ \
     0x00000031, /* Cluster: Network Commissioning, Command: ScanNetworks, Privilege: administer */ \
-    0x00000031, /* Cluster: Network Commissioning, Command: AddOrUpdateWiFiNetwork, Privilege: administer */ \
     0x00000031, /* Cluster: Network Commissioning, Command: AddOrUpdateThreadNetwork, Privilege: administer */ \
     0x00000031, /* Cluster: Network Commissioning, Command: RemoveNetwork, Privilege: administer */ \
     0x00000031, /* Cluster: Network Commissioning, Command: ConnectNetwork, Privilege: administer */ \
@@ -233,7 +223,6 @@
     0x00000002, /* Cluster: General Commissioning, Command: SetRegulatoryConfig, Privilege: administer */ \
     0x00000004, /* Cluster: General Commissioning, Command: CommissioningComplete, Privilege: administer */ \
     0x00000000, /* Cluster: Network Commissioning, Command: ScanNetworks, Privilege: administer */ \
-    0x00000002, /* Cluster: Network Commissioning, Command: AddOrUpdateWiFiNetwork, Privilege: administer */ \
     0x00000003, /* Cluster: Network Commissioning, Command: AddOrUpdateThreadNetwork, Privilege: administer */ \
     0x00000004, /* Cluster: Network Commissioning, Command: RemoveNetwork, Privilege: administer */ \
     0x00000006, /* Cluster: Network Commissioning, Command: ConnectNetwork, Privilege: administer */ \
@@ -272,7 +261,6 @@
     chip::Access::Privilege::kAdminister, /* Cluster: General Commissioning, Command: SetRegulatoryConfig, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: General Commissioning, Command: CommissioningComplete, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Network Commissioning, Command: ScanNetworks, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Network Commissioning, Command: AddOrUpdateWiFiNetwork, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Network Commissioning, Command: AddOrUpdateThreadNetwork, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Network Commissioning, Command: RemoveNetwork, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Network Commissioning, Command: ConnectNetwork, Privilege: administer */ \

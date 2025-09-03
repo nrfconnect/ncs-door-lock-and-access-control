@@ -1460,300 +1460,6 @@ cluster ThreadNetworkDiagnostics = 53 {
   command access(invoke: manage) ResetCounts(): DefaultSuccess = 0;
 }
 
-/** Accurate time is required for a number of reasons, including scheduling, display and validating security materials. */
-cluster TimeSynchronization = 56 {
-  revision 2;
-
-  enum GranularityEnum : enum8 {
-    kNoTimeGranularity = 0;
-    kMinutesGranularity = 1;
-    kSecondsGranularity = 2;
-    kMillisecondsGranularity = 3;
-    kMicrosecondsGranularity = 4;
-  }
-
-  enum StatusCode : enum8 {
-    kTimeNotAccepted = 2;
-  }
-
-  enum TimeSourceEnum : enum8 {
-    kNone = 0;
-    kUnknown = 1;
-    kAdmin = 2;
-    kNodeTimeCluster = 3;
-    kNonMatterSNTP = 4;
-    kNonMatterNTP = 5;
-    kMatterSNTP = 6;
-    kMatterNTP = 7;
-    kMixedNTP = 8;
-    kNonMatterSNTPNTS = 9;
-    kNonMatterNTPNTS = 10;
-    kMatterSNTPNTS = 11;
-    kMatterNTPNTS = 12;
-    kMixedNTPNTS = 13;
-    kCloudSource = 14;
-    kPTP = 15 [spec_name = "PTP"];
-    kGNSS = 16 [spec_name = "GNSS"];
-  }
-
-  enum TimeZoneDatabaseEnum : enum8 {
-    kFull = 0;
-    kPartial = 1;
-    kNone = 2;
-  }
-
-  bitmap Feature : bitmap32 {
-    kTimeZone = 0x1;
-    kNTPClient = 0x2;
-    kNTPServer = 0x4;
-    kTimeSyncClient = 0x8;
-  }
-
-  struct DSTOffsetStruct {
-    int32s offset = 0;
-    epoch_us validStarting = 1;
-    nullable epoch_us validUntil = 2;
-  }
-
-  struct FabricScopedTrustedTimeSourceStruct {
-    node_id nodeID = 0;
-    endpoint_no endpoint = 1;
-  }
-
-  struct TimeZoneStruct {
-    int32s offset = 0;
-    epoch_us validAt = 1;
-    optional char_string<64> name = 2;
-  }
-
-  struct TrustedTimeSourceStruct {
-    fabric_idx fabricIndex = 0;
-    node_id nodeID = 1;
-    endpoint_no endpoint = 2;
-  }
-
-  info event DSTTableEmpty = 0 {
-  }
-
-  info event DSTStatus = 1 {
-    boolean DSTOffsetActive = 0;
-  }
-
-  info event TimeZoneStatus = 2 {
-    int32s offset = 0;
-    optional char_string name = 1;
-  }
-
-  info event TimeFailure = 3 {
-  }
-
-  info event MissingTrustedTimeSource = 4 {
-  }
-
-  readonly attribute nullable epoch_us UTCTime = 0;
-  readonly attribute GranularityEnum granularity = 1;
-  readonly attribute optional TimeSourceEnum timeSource = 2;
-  readonly attribute optional nullable TrustedTimeSourceStruct trustedTimeSource = 3;
-  readonly attribute optional nullable char_string<128> defaultNTP = 4;
-  readonly attribute optional TimeZoneStruct timeZone[] = 5;
-  readonly attribute optional DSTOffsetStruct DSTOffset[] = 6;
-  readonly attribute optional nullable epoch_us localTime = 7;
-  readonly attribute optional TimeZoneDatabaseEnum timeZoneDatabase = 8;
-  readonly attribute optional boolean NTPServerAvailable = 9;
-  readonly attribute optional int8u timeZoneListMaxSize = 10;
-  readonly attribute optional int8u DSTOffsetListMaxSize = 11;
-  readonly attribute optional boolean supportsDNSResolve = 12;
-  readonly attribute command_id generatedCommandList[] = 65528;
-  readonly attribute command_id acceptedCommandList[] = 65529;
-  readonly attribute attrib_id attributeList[] = 65531;
-  readonly attribute bitmap32 featureMap = 65532;
-  readonly attribute int16u clusterRevision = 65533;
-
-  request struct SetUTCTimeRequest {
-    epoch_us UTCTime = 0;
-    GranularityEnum granularity = 1;
-    optional TimeSourceEnum timeSource = 2;
-  }
-
-  request struct SetTrustedTimeSourceRequest {
-    nullable FabricScopedTrustedTimeSourceStruct trustedTimeSource = 0;
-  }
-
-  request struct SetTimeZoneRequest {
-    TimeZoneStruct timeZone[] = 0;
-  }
-
-  response struct SetTimeZoneResponse = 3 {
-    boolean DSTOffsetRequired = 0;
-  }
-
-  request struct SetDSTOffsetRequest {
-    DSTOffsetStruct DSTOffset[] = 0;
-  }
-
-  request struct SetDefaultNTPRequest {
-    nullable char_string<128> defaultNTP = 0;
-  }
-
-  /** This command MAY be issued by Administrator to set the time. */
-  command access(invoke: administer) SetUTCTime(SetUTCTimeRequest): DefaultSuccess = 0;
-  /** This command SHALL set TrustedTimeSource. */
-  fabric command access(invoke: administer) SetTrustedTimeSource(SetTrustedTimeSourceRequest): DefaultSuccess = 1;
-  /** This command SHALL set TimeZone. */
-  command access(invoke: manage) SetTimeZone(SetTimeZoneRequest): SetTimeZoneResponse = 2;
-  /** This command SHALL set DSTOffset. */
-  command access(invoke: manage) SetDSTOffset(SetDSTOffsetRequest): DefaultSuccess = 4;
-  /** This command is used to set DefaultNTP. */
-  command access(invoke: administer) SetDefaultNTP(SetDefaultNTPRequest): DefaultSuccess = 5;
-}
-
-/** Accurate time is required for a number of reasons, including scheduling, display and validating security materials. */
-cluster TimeSynchronization = 56 {
-  revision 2;
-
-  enum GranularityEnum : enum8 {
-    kNoTimeGranularity = 0;
-    kMinutesGranularity = 1;
-    kSecondsGranularity = 2;
-    kMillisecondsGranularity = 3;
-    kMicrosecondsGranularity = 4;
-  }
-
-  enum StatusCode : enum8 {
-    kTimeNotAccepted = 2;
-  }
-
-  enum TimeSourceEnum : enum8 {
-    kNone = 0;
-    kUnknown = 1;
-    kAdmin = 2;
-    kNodeTimeCluster = 3;
-    kNonMatterSNTP = 4;
-    kNonMatterNTP = 5;
-    kMatterSNTP = 6;
-    kMatterNTP = 7;
-    kMixedNTP = 8;
-    kNonMatterSNTPNTS = 9;
-    kNonMatterNTPNTS = 10;
-    kMatterSNTPNTS = 11;
-    kMatterNTPNTS = 12;
-    kMixedNTPNTS = 13;
-    kCloudSource = 14;
-    kPTP = 15 [spec_name = "PTP"];
-    kGNSS = 16 [spec_name = "GNSS"];
-  }
-
-  enum TimeZoneDatabaseEnum : enum8 {
-    kFull = 0;
-    kPartial = 1;
-    kNone = 2;
-  }
-
-  bitmap Feature : bitmap32 {
-    kTimeZone = 0x1;
-    kNTPClient = 0x2;
-    kNTPServer = 0x4;
-    kTimeSyncClient = 0x8;
-  }
-
-  struct DSTOffsetStruct {
-    int32s offset = 0;
-    epoch_us validStarting = 1;
-    nullable epoch_us validUntil = 2;
-  }
-
-  struct FabricScopedTrustedTimeSourceStruct {
-    node_id nodeID = 0;
-    endpoint_no endpoint = 1;
-  }
-
-  struct TimeZoneStruct {
-    int32s offset = 0;
-    epoch_us validAt = 1;
-    optional char_string<64> name = 2;
-  }
-
-  struct TrustedTimeSourceStruct {
-    fabric_idx fabricIndex = 0;
-    node_id nodeID = 1;
-    endpoint_no endpoint = 2;
-  }
-
-  info event DSTTableEmpty = 0 {
-  }
-
-  info event DSTStatus = 1 {
-    boolean DSTOffsetActive = 0;
-  }
-
-  info event TimeZoneStatus = 2 {
-    int32s offset = 0;
-    optional char_string name = 1;
-  }
-
-  info event TimeFailure = 3 {
-  }
-
-  info event MissingTrustedTimeSource = 4 {
-  }
-
-  readonly attribute nullable epoch_us UTCTime = 0;
-  readonly attribute GranularityEnum granularity = 1;
-  readonly attribute optional TimeSourceEnum timeSource = 2;
-  readonly attribute optional nullable TrustedTimeSourceStruct trustedTimeSource = 3;
-  readonly attribute optional nullable char_string<128> defaultNTP = 4;
-  readonly attribute optional TimeZoneStruct timeZone[] = 5;
-  readonly attribute optional DSTOffsetStruct DSTOffset[] = 6;
-  readonly attribute optional nullable epoch_us localTime = 7;
-  readonly attribute optional TimeZoneDatabaseEnum timeZoneDatabase = 8;
-  readonly attribute optional boolean NTPServerAvailable = 9;
-  readonly attribute optional int8u timeZoneListMaxSize = 10;
-  readonly attribute optional int8u DSTOffsetListMaxSize = 11;
-  readonly attribute optional boolean supportsDNSResolve = 12;
-  readonly attribute command_id generatedCommandList[] = 65528;
-  readonly attribute command_id acceptedCommandList[] = 65529;
-  readonly attribute attrib_id attributeList[] = 65531;
-  readonly attribute bitmap32 featureMap = 65532;
-  readonly attribute int16u clusterRevision = 65533;
-
-  request struct SetUTCTimeRequest {
-    epoch_us UTCTime = 0;
-    GranularityEnum granularity = 1;
-    optional TimeSourceEnum timeSource = 2;
-  }
-
-  request struct SetTrustedTimeSourceRequest {
-    nullable FabricScopedTrustedTimeSourceStruct trustedTimeSource = 0;
-  }
-
-  request struct SetTimeZoneRequest {
-    TimeZoneStruct timeZone[] = 0;
-  }
-
-  response struct SetTimeZoneResponse = 3 {
-    boolean DSTOffsetRequired = 0;
-  }
-
-  request struct SetDSTOffsetRequest {
-    DSTOffsetStruct DSTOffset[] = 0;
-  }
-
-  request struct SetDefaultNTPRequest {
-    nullable char_string<128> defaultNTP = 0;
-  }
-
-  /** This command MAY be issued by Administrator to set the time. */
-  command access(invoke: administer) SetUTCTime(SetUTCTimeRequest): DefaultSuccess = 0;
-  /** This command SHALL set TrustedTimeSource. */
-  fabric command access(invoke: administer) SetTrustedTimeSource(SetTrustedTimeSourceRequest): DefaultSuccess = 1;
-  /** This command SHALL set TimeZone. */
-  command access(invoke: manage) SetTimeZone(SetTimeZoneRequest): SetTimeZoneResponse = 2;
-  /** This command SHALL set DSTOffset. */
-  command access(invoke: manage) SetDSTOffset(SetDSTOffsetRequest): DefaultSuccess = 4;
-  /** This command is used to set DefaultNTP. */
-  command access(invoke: administer) SetDefaultNTP(SetDefaultNTPRequest): DefaultSuccess = 5;
-}
-
 /** Commands to trigger a Node to allow a new Administrator to commission it. */
 cluster AdministratorCommissioning = 60 {
   revision 1; // NOTE: Default/not specifically set
@@ -2781,7 +2487,6 @@ endpoint 0 {
   device type ma_otarequestor = 18, version 1;
 
   binding cluster OtaSoftwareUpdateProvider;
-  binding cluster TimeSynchronization;
 
   server cluster Descriptor {
     callback attribute deviceTypeList;
@@ -3012,30 +2717,6 @@ endpoint 0 {
     handle command ResetCounts;
   }
 
-  server cluster TimeSynchronization {
-    callback attribute UTCTime;
-    callback attribute granularity;
-    callback attribute trustedTimeSource;
-    callback attribute timeZone;
-    callback attribute DSTOffset;
-    callback attribute localTime;
-    ram      attribute timeZoneDatabase default = 2;
-    callback attribute timeZoneListMaxSize;
-    callback attribute DSTOffsetListMaxSize;
-    callback attribute generatedCommandList;
-    callback attribute acceptedCommandList;
-    callback attribute attributeList;
-    ram      attribute featureMap default = 9;
-    ram      attribute clusterRevision default = 2;
-
-    handle command SetUTCTime;
-    handle command SetTrustedTimeSource;
-    handle command SetTimeZone;
-    handle command SetTimeZoneResponse;
-    handle command SetDSTOffset;
-    handle command SetDefaultNTP;
-  }
-
   server cluster AdministratorCommissioning {
     callback attribute windowStatus;
     callback attribute adminFabricIndex;
@@ -3142,9 +2823,6 @@ endpoint 1 {
     ram      attribute actuatorEnabled;
     ram      attribute numberOfTotalUsersSupported default = 10;
     ram      attribute numberOfPINUsersSupported default = 10;
-    ram      attribute numberOfWeekDaySchedulesSupportedPerUser default = 0;
-    ram      attribute numberOfYearDaySchedulesSupportedPerUser default = 0;
-    ram      attribute numberOfHolidaySchedulesSupported default = 0;
     ram      attribute maxPINCodeLength default = 8;
     ram      attribute minPINCodeLength default = 6;
     ram      attribute credentialRulesSupport default = 1;
@@ -3163,32 +2841,17 @@ endpoint 1 {
     callback attribute aliroReaderGroupIdentifier;
     callback attribute aliroReaderGroupSubIdentifier;
     callback attribute aliroExpeditedTransactionSupportedProtocolVersions;
-    callback attribute aliroGroupResolvingKey;
-    callback attribute aliroSupportedBLEUWBProtocolVersions;
-    callback attribute aliroBLEAdvertisingVersion;
     callback attribute numberOfAliroCredentialIssuerKeysSupported;
     callback attribute numberOfAliroEndpointKeysSupported;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute attributeList;
-    ram      attribute featureMap default = 0x6D91;
+    ram      attribute featureMap default = 0x2181;
     ram      attribute clusterRevision default = 8;
 
     handle command LockDoor;
     handle command UnlockDoor;
     handle command UnlockWithTimeout;
-    handle command SetWeekDaySchedule;
-    handle command GetWeekDaySchedule;
-    handle command GetWeekDayScheduleResponse;
-    handle command ClearWeekDaySchedule;
-    handle command SetYearDaySchedule;
-    handle command GetYearDaySchedule;
-    handle command GetYearDayScheduleResponse;
-    handle command ClearYearDaySchedule;
-    handle command SetHolidaySchedule;
-    handle command GetHolidaySchedule;
-    handle command GetHolidayScheduleResponse;
-    handle command ClearHolidaySchedule;
     handle command SetUser;
     handle command GetUser;
     handle command GetUserResponse;

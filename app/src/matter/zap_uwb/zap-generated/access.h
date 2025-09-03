@@ -200,11 +200,6 @@
     0x00000031, /* Cluster: Network Commissioning, Command: ReorderNetwork, Privilege: administer */ \
     0x00000033, /* Cluster: General Diagnostics, Command: TestEventTrigger, Privilege: manage */ \
     0x00000035, /* Cluster: Thread Network Diagnostics, Command: ResetCounts, Privilege: manage */ \
-    0x00000038, /* Cluster: Time Synchronization, Command: SetUTCTime, Privilege: administer */ \
-    0x00000038, /* Cluster: Time Synchronization, Command: SetTrustedTimeSource, Privilege: administer */ \
-    0x00000038, /* Cluster: Time Synchronization, Command: SetTimeZone, Privilege: manage */ \
-    0x00000038, /* Cluster: Time Synchronization, Command: SetDSTOffset, Privilege: manage */ \
-    0x00000038, /* Cluster: Time Synchronization, Command: SetDefaultNTP, Privilege: administer */ \
     0x0000003C, /* Cluster: Administrator Commissioning, Command: OpenCommissioningWindow, Privilege: administer */ \
     0x0000003C, /* Cluster: Administrator Commissioning, Command: OpenBasicCommissioningWindow, Privilege: administer */ \
     0x0000003C, /* Cluster: Administrator Commissioning, Command: RevokeCommissioning, Privilege: administer */ \
@@ -220,15 +215,6 @@
     0x0000003F, /* Cluster: Group Key Management, Command: KeySetRead, Privilege: administer */ \
     0x0000003F, /* Cluster: Group Key Management, Command: KeySetRemove, Privilege: administer */ \
     0x0000003F, /* Cluster: Group Key Management, Command: KeySetReadAllIndices, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: SetWeekDaySchedule, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: GetWeekDaySchedule, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: ClearWeekDaySchedule, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: SetYearDaySchedule, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: GetYearDaySchedule, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: ClearYearDaySchedule, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: SetHolidaySchedule, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: GetHolidaySchedule, Privilege: administer */ \
-    0x00000101, /* Cluster: Door Lock, Command: ClearHolidaySchedule, Privilege: administer */ \
     0x00000101, /* Cluster: Door Lock, Command: SetUser, Privilege: administer */ \
     0x00000101, /* Cluster: Door Lock, Command: GetUser, Privilege: administer */ \
     0x00000101, /* Cluster: Door Lock, Command: ClearUser, Privilege: administer */ \
@@ -252,11 +238,6 @@
     0x00000008, /* Cluster: Network Commissioning, Command: ReorderNetwork, Privilege: administer */ \
     0x00000000, /* Cluster: General Diagnostics, Command: TestEventTrigger, Privilege: manage */ \
     0x00000000, /* Cluster: Thread Network Diagnostics, Command: ResetCounts, Privilege: manage */ \
-    0x00000000, /* Cluster: Time Synchronization, Command: SetUTCTime, Privilege: administer */ \
-    0x00000001, /* Cluster: Time Synchronization, Command: SetTrustedTimeSource, Privilege: administer */ \
-    0x00000002, /* Cluster: Time Synchronization, Command: SetTimeZone, Privilege: manage */ \
-    0x00000004, /* Cluster: Time Synchronization, Command: SetDSTOffset, Privilege: manage */ \
-    0x00000005, /* Cluster: Time Synchronization, Command: SetDefaultNTP, Privilege: administer */ \
     0x00000000, /* Cluster: Administrator Commissioning, Command: OpenCommissioningWindow, Privilege: administer */ \
     0x00000001, /* Cluster: Administrator Commissioning, Command: OpenBasicCommissioningWindow, Privilege: administer */ \
     0x00000002, /* Cluster: Administrator Commissioning, Command: RevokeCommissioning, Privilege: administer */ \
@@ -272,15 +253,6 @@
     0x00000001, /* Cluster: Group Key Management, Command: KeySetRead, Privilege: administer */ \
     0x00000003, /* Cluster: Group Key Management, Command: KeySetRemove, Privilege: administer */ \
     0x00000004, /* Cluster: Group Key Management, Command: KeySetReadAllIndices, Privilege: administer */ \
-    0x0000000B, /* Cluster: Door Lock, Command: SetWeekDaySchedule, Privilege: administer */ \
-    0x0000000C, /* Cluster: Door Lock, Command: GetWeekDaySchedule, Privilege: administer */ \
-    0x0000000D, /* Cluster: Door Lock, Command: ClearWeekDaySchedule, Privilege: administer */ \
-    0x0000000E, /* Cluster: Door Lock, Command: SetYearDaySchedule, Privilege: administer */ \
-    0x0000000F, /* Cluster: Door Lock, Command: GetYearDaySchedule, Privilege: administer */ \
-    0x00000010, /* Cluster: Door Lock, Command: ClearYearDaySchedule, Privilege: administer */ \
-    0x00000011, /* Cluster: Door Lock, Command: SetHolidaySchedule, Privilege: administer */ \
-    0x00000012, /* Cluster: Door Lock, Command: GetHolidaySchedule, Privilege: administer */ \
-    0x00000013, /* Cluster: Door Lock, Command: ClearHolidaySchedule, Privilege: administer */ \
     0x0000001A, /* Cluster: Door Lock, Command: SetUser, Privilege: administer */ \
     0x0000001B, /* Cluster: Door Lock, Command: GetUser, Privilege: administer */ \
     0x0000001D, /* Cluster: Door Lock, Command: ClearUser, Privilege: administer */ \
@@ -304,11 +276,6 @@
     chip::Access::Privilege::kAdminister, /* Cluster: Network Commissioning, Command: ReorderNetwork, Privilege: administer */ \
     chip::Access::Privilege::kManage, /* Cluster: General Diagnostics, Command: TestEventTrigger, Privilege: manage */ \
     chip::Access::Privilege::kManage, /* Cluster: Thread Network Diagnostics, Command: ResetCounts, Privilege: manage */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Time Synchronization, Command: SetUTCTime, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Time Synchronization, Command: SetTrustedTimeSource, Privilege: administer */ \
-    chip::Access::Privilege::kManage, /* Cluster: Time Synchronization, Command: SetTimeZone, Privilege: manage */ \
-    chip::Access::Privilege::kManage, /* Cluster: Time Synchronization, Command: SetDSTOffset, Privilege: manage */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Time Synchronization, Command: SetDefaultNTP, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Administrator Commissioning, Command: OpenCommissioningWindow, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Administrator Commissioning, Command: OpenBasicCommissioningWindow, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Administrator Commissioning, Command: RevokeCommissioning, Privilege: administer */ \
@@ -324,15 +291,6 @@
     chip::Access::Privilege::kAdminister, /* Cluster: Group Key Management, Command: KeySetRead, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Group Key Management, Command: KeySetRemove, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Group Key Management, Command: KeySetReadAllIndices, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: SetWeekDaySchedule, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: GetWeekDaySchedule, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: ClearWeekDaySchedule, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: SetYearDaySchedule, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: GetYearDaySchedule, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: ClearYearDaySchedule, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: SetHolidaySchedule, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: GetHolidaySchedule, Privilege: administer */ \
-    chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: ClearHolidaySchedule, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: SetUser, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: GetUser, Privilege: administer */ \
     chip::Access::Privilege::kAdminister, /* Cluster: Door Lock, Command: ClearUser, Privilege: administer */ \

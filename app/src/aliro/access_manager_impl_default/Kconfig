@@ -12,7 +12,7 @@ config ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS
       stored in the AccessManager. This determines the size of
       the statically allocated array for key storage.
 
-if ALIRO_BLE_TP
+if ALIRO_BLE_UWB
 
 config ALIRO_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
     int "Maximum allowed distance for granting access (cm)"
@@ -52,4 +52,4 @@ config ALIRO_ACCESS_MANAGER_SESSION_TIMEOUT_MS
 
 endif
 
-endif # ALIRO_BLE_TP
+endif # ALIRO_BLE_UWB

@@ -8,10 +8,10 @@
 #include "aliro/mutex_guard.h"
 #include "aliro/utils.h"
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 #include "aliro/memory.h"
 #include "uwb_impl.h"
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -56,7 +56,7 @@ AliroError AccessManagerImpl::_VerifyAccessCredential(const CryptoTypes::PublicK
 	return ALIRO_NO_ERROR;
 }
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 AliroError AccessManagerImpl::_StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 						   SessionContext sessionContext)
 {
@@ -70,7 +70,7 @@ AliroError AccessManagerImpl::_StartRangingSession(uint32_t rangingSessionId, co
 	return AddRangingSession(sessionContext);
 }
 
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &publicKey)
 {
@@ -125,30 +125,36 @@ void AccessManagerImpl::_ClearStoredKeys()
 
 void AccessManagerImpl::_SetMaxAllowedDistance(uint32_t maxDistance)
 {
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
+
 	MutexGuard lock{ mMutex };
 
 	mMaxAllowedDistance = maxDistance;
 	LOG_INF("Set maximum allowed distance to %u cm", maxDistance);
-#endif // CONFIG_ALIRO_BLE_TP
+
+#else // CONFIG_ALIRO_BLE_UWB
+
+	ARG_UNUSED(maxDistance);
+
+#endif // CONFIG_ALIRO_BLE_UWB
 }
 
 uint32_t AccessManagerImpl::_GetMaxAllowedDistance()
 {
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	MutexGuard lock{ mMutex };
 
 	return mMaxAllowedDistance;
 #else
 	return 0;
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 }
 
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData)
 {
 	LOG_DBG("Handling ranging session data - length: %u for session: %p", uwbData.mLength, sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	const auto currentSessionInRange = AnalyzeUwbRangingData(uwbData);
 	{
 		MutexGuard lock{ mMutex };
@@ -190,7 +196,7 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 
 	LOG_INF("Handling session termination");
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	MutexGuard lock{ mMutex };
 
 	AliroError status = Uwb::UltraWideBandImpl::Instance().TerminateRangingSession(sessionContext);
@@ -199,7 +205,7 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 
 	RemoveRangingSession(sessionContext);
 
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 }
 
 bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey)
@@ -233,7 +239,7 @@ void AccessManagerImpl::AccessDeniedAction() const
 	LOG_INF("ACCESS DENIED");
 }
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData)
 {
 	LOG_DBG("Analyzing UWB ranging data - length: %u", uwbData.mLength);
@@ -342,6 +348,6 @@ void AccessManagerImpl::TerminateAliroSession(SessionContext sessionContext)
 	VerifyAndCall(mStackCallbacks.mTerminateSessionClb, sessionContext);
 }
 
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 } // namespace Aliro
