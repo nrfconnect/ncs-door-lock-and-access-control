@@ -7,6 +7,6 @@
 rsource "access_decision_indicator/Kconfig"
 rsource "nfc_transport_impl/Kconfig"
 
-if ALIRO_BLE_TP
+if ALIRO_BLE_UWB
 rsource "uwb_impl/Kconfig"
-endif # ALIRO_BLE_TP
+endif # ALIRO_BLE_UWB

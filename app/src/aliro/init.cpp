@@ -16,6 +16,10 @@
 #include "test_key.h"
 #endif // CONFIG_DOOR_LOCK_USE_TEST_KEYS
 
+#ifdef CONFIG_ALIRO_BLE_UWB
+#include "ble_impl.h"
+#endif // CONFIG_ALIRO_BLE_UWB
+
 #include "access_manager/access_manager.h"
 #include "crypto_key_ids.h"
 #include "shell.h"
@@ -54,7 +58,7 @@ AliroError LoadAccessCredentials()
 		snprintf(keyName.data(), keyName.size(), "%s/%u", StorageKeys::kStorageKeyNameAccessCredentialPublicKey,
 			 keyId);
 
-		Aliro::CryptoTypes::PublicKey pubKey{};
+		CryptoTypes::PublicKey pubKey{};
 
 		int ec = KeyValueStorage::Instance().Get(keyName.data(), pubKey.data(), pubKey.size());
 		VerifyOrReturnStatus(ec == 0 || ec == -ENODATA, ALIRO_ERROR_INTERNAL,
@@ -73,14 +77,13 @@ AliroError LoadAccessCredentials()
 	return ALIRO_NO_ERROR;
 }
 
-AliroError LoadReaderKeys(Aliro::CryptoTypes::KeyId &privateKeyId,
-			  [[maybe_unused]] Aliro::CryptoTypes::KeyId &groupResolvingKeyId)
+AliroError LoadReaderKeys(CryptoTypes::KeyId &privateKeyId, [[maybe_unused]] CryptoTypes::KeyId &groupResolvingKeyId)
 {
-	Aliro::CryptoTypes::PrivateKey privateKey{};
-	Aliro::CryptoTypes::PublicKey publicKey{};
+	CryptoTypes::PrivateKey privateKey{};
+	CryptoTypes::PublicKey publicKey{};
 
-	privateKeyId = Aliro::kPrivateKeyId;
-	AliroError ec = Aliro::CryptoInstance().ExportPublicKey(privateKeyId, publicKey);
+	privateKeyId = kPrivateKeyId;
+	AliroError ec = CryptoInstance().ExportPublicKey(privateKeyId, publicKey);
 	if (ec != ALIRO_NO_ERROR) {
 #ifdef CONFIG_DOOR_LOCK_USE_TEST_KEYS
 
@@ -94,25 +97,24 @@ AliroError LoadReaderKeys(Aliro::CryptoTypes::KeyId &privateKeyId,
 
 #endif /* CONFIG_DOOR_LOCK_USE_TEST_KEYS */
 
-		AliroError err = Aliro::CryptoInstance().ImportPrivateKey(privateKey, privateKeyId, true);
+		AliroError err = CryptoInstance().ImportPrivateKey(privateKey, privateKeyId, true);
 		VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot import reader private key"));
 	}
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 
 	groupResolvingKeyId = kGroupResolvingKeyId;
 
-	Aliro::CryptoTypes::GroupResolvingKey groupResolvingKey{};
-	ec = Aliro::CryptoInstance().ExportKey(Aliro::kGroupResolvingKeyId, groupResolvingKey.data(),
-					       groupResolvingKey.size());
+	CryptoTypes::GroupResolvingKey groupResolvingKey{};
+	ec = CryptoInstance().ExportKey(kGroupResolvingKeyId, groupResolvingKey.data(), groupResolvingKey.size());
 	if (ec != ALIRO_NO_ERROR) {
 		LOG_DBG("Group Resolving Key is not provisioned, all-zero key will be used");
-		AliroError err = Aliro::CryptoInstance().ProvisionSymmetricKey(
+		AliroError err = CryptoInstance().ProvisionSymmetricKey(
 			groupResolvingKey.data(), groupResolvingKey.size(), groupResolvingKeyId, true);
 		VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot provision group resolving key"));
 	}
 
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 	return ALIRO_NO_ERROR;
 }
@@ -160,8 +162,8 @@ AliroError StorageInit()
 	AliroError err = LoadAccessCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Access Credentials"));
 
-	Aliro::CryptoTypes::KeyId privateKeyId{ 0 };
-	Aliro::CryptoTypes::KeyId groupResolvingKeyId{ 0 };
+	CryptoTypes::KeyId privateKeyId{ 0 };
+	CryptoTypes::KeyId groupResolvingKeyId{ 0 };
 	err = LoadReaderKeys(privateKeyId, groupResolvingKeyId);
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load reader keys"));
 
@@ -196,9 +198,12 @@ int AliroInit()
 		.mEnableNfc = false,
 #endif // CONFIG_DISABLE_ALIRO_NFC_TP
 
-#ifdef CONFIG_ALIRO_BLE_TP
-		.mMaxBleSessions = CONFIG_ALIRO_BLE_TP_MAX_SESSIONS,
-#endif // CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
+
+		.mMaxBleSessions = CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS,
+		.mBleAdvertising = &BleInterface::BleAdvertisingImpl::Instance(),
+
+#endif // CONFIG_ALIRO_BLE_UWB
 	};
 
 	ec = AliroStack::Instance().Init(
@@ -249,21 +254,21 @@ void ClearStorageAliro()
 			StorageKeys::kStorageKeyNameIdentifier, ec);
 	}
 
-	Aliro::CryptoTypes::KeyId keyId{ kPrivateKeyId };
-	AliroError err = Aliro::CryptoInstance().DestroyKey(keyId);
+	CryptoTypes::KeyId keyId{ kPrivateKeyId };
+	AliroError err = CryptoInstance().DestroyKey(keyId);
 	if (err != ALIRO_NO_ERROR) {
 		LOG_ERR("Failed to destroy Reader Private Key: %d", err.ToInt());
 	}
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 
 	keyId = kGroupResolvingKeyId;
-	err = Aliro::CryptoInstance().DestroyKey(keyId);
+	err = CryptoInstance().DestroyKey(keyId);
 	if (err != ALIRO_NO_ERROR) {
 		LOG_ERR("Failed to destroy Group Resolving Key: %d", err.ToInt());
 	}
 
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 }
 
 #endif // CONFIG_CHIP

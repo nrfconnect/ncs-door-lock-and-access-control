@@ -65,7 +65,7 @@ private:
 	AliroError _VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
 					   SessionContext sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	/**
 	 * @brief Starts a ranging session based on provided inputs.
 	 *
@@ -77,7 +77,7 @@ private:
 	 */
 	AliroError _StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 					SessionContext sessionContext);
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 	/**
 	 * @brief Add a new public key to the AccessManager.
@@ -146,7 +146,7 @@ private:
 	bool VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey);
 	bool IsPublicKeyStored(const CryptoTypes::PublicKey &userPublicKey);
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	struct RangingSessionContext {
 #ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		RangingSessionContext(uint32_t timeoutMs, Timer::Callback callback, Timer::Context userData)
@@ -175,7 +175,7 @@ private:
 	// Session context for the current ranging session.
 	bool mInRange{ false };
 	sys_slist_t mActiveSessions{};
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 	ApplicationCallbacks mCallbacks{};
 	StackCallbacks mStackCallbacks{};

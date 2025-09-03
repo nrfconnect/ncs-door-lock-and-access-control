@@ -42,6 +42,17 @@ To build and run the application on one of the :ref:`supported development kits 
 
          west build -p -b nrf54l15dk/nrf54l15/cpuapp app -- -DCONFIG_ST25R3916B_DRV=y
 
+#. To build the application with Bluetooth LE transport and UWB, run the following command:
+
+   .. _bluetooth_le_enable:
+
+   .. code-block:: bash
+
+      west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_ALIRO_BLE_UWB=y
+
+   .. note::
+      Currently, the Bluetooth LE transport is supported only for the nRF5340 device.
+
 #. You can also apply optional configurations depending on the modules used:
 
    * If you are using the `QM35825`_ UWB module with the Qorvo Arduino Interface Board, execute the following command to build the application specifically for this setup:
@@ -83,8 +94,8 @@ To build and run the application on one of the :ref:`supported development kits 
 
    .. code-block:: console
 
-      *** Booting My Application v0.3.0-8264718b4735 ***
-      *** Using nRF Connect SDK v3.1.0-6c6e5b32496e ***
+      *** Booting My Application v0.1.0-f0e5cf444fb0 ***
+      *** Using nRF Connect SDK v2.9.0-7787b2649840 ***
       *** Using Zephyr OS v3.7.99-1f8f3dc29142 ***
       Starting nRF Door Lock Reference Application for the nRF Connect SDK
 

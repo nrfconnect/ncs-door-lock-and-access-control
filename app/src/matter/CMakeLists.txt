@@ -12,6 +12,14 @@ include(${ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR}/config/nrfconnect/app/enable-gnu-st
 # Include all source files that are located in the Matter common directory.
 include(${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/cmake/source_common.cmake)
 
+if(NOT CONFIG_NCS_SAMPLE_MATTER_ZAP_FILE_PATH)
+  if(CONFIG_ALIRO_BLE_UWB)
+    set(CONFIG_NCS_SAMPLE_MATTER_ZAP_FILE_PATH "${APPLICATION_CONFIG_DIR}/src/matter/zap_uwb/lock.zap")
+  else()
+    set(CONFIG_NCS_SAMPLE_MATTER_ZAP_FILE_PATH "${APPLICATION_CONFIG_DIR}/src/matter/zap_nfc/lock.zap")
+  endif()
+endif()
+
 # Include Data Model utils
 include(${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/cmake/data_model.cmake)
 

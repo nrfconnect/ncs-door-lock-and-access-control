@@ -29,13 +29,13 @@ AliroError AccessManagerImpl::_VerifyAccessCredential(const CryptoTypes::PublicK
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 AliroError AccessManagerImpl::_StartRangingSession(uint32_t, const CryptoTypes::Ursk &, SessionContext)
 {
 	LOG_INF("AccessManagerImpl custom start ranging session");
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &)
 {
