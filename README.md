@@ -5,12 +5,12 @@ NCS manifest repo for the door lock reference application.
 
 Before getting started, you must set up the nRF Connect SDK development environment.
 
-Follow the official [Getting Started Guide](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/develop/getting_started/index.html) article: execute the following steps:
+Follow the official [Getting Started Guide](https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/develop/getting_started/index.html) article: execute the following steps:
 
-- [Select and Update OS](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/develop/getting_started/index.html#select_and_update_os)
-- [Install dependencies](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/develop/getting_started/index.html#install_dependencies)
-- [Get Zephyr and install Python dependencies](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/develop/getting_started/index.html#get_zephyr_and_install_python_dependencies)
-- [Install the Zephyr SDK](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/develop/getting_started/index.html#install_the_zephyr_sdk)
+- [Select and Update OS](https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/develop/getting_started/index.html#select_and_update_os)
+- [Install dependencies](https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/develop/getting_started/index.html#install_dependencies)
+- [Get Zephyr and install Python dependencies](https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/develop/getting_started/index.html#get_zephyr_and_install_python_dependencies)
+- [Install the Zephyr SDK](https://docs.nordicsemi.com/bundle/ncs-2.9.0/page/zephyr/develop/getting_started/index.html#install_the_zephyr_sdk)
 
 ### Initialization
 
@@ -22,6 +22,10 @@ Run the following commands:
 # initialize workspace for the ncs-door-lock-app (main branch)
 west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr main door-lock-workspace
 ```
+
+> **NOTE**
+>
+> Before executing `west update` make sure that you have access to `ncs-aliro` private repository.
 
 ```shell
 # update nRF Connect SDK modules

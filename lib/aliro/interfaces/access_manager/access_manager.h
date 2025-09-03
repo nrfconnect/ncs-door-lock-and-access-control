@@ -80,7 +80,7 @@ public:
 	AliroError VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
 					  SessionContext sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	/**
 	 * @brief Starts a ranging session based on provided inputs.
 	 *
@@ -92,7 +92,7 @@ public:
 	 */
 	AliroError StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 				       SessionContext sessionContext);
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 	/**
 	 * @brief Add a new public key to the AccessManager.

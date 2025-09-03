@@ -53,9 +53,9 @@ The payload updates automatically whenever these values change, ensuring that th
 When a Bluetooth LE central device connects, the Aliro stack manages the Bluetooth LE session, handling connection events, security, and data exchange over a dedicated L2CAP channel with Aliro-specific GATT services.
 Each session uses unique keys, which are destroyed after termination.
 In case of NFC transport, only one session can be active at a time.
-For Bluetooth LE transport, the maximum number of concurrent sessions is limited by the ``CONFIG_ALIRO_BLE_TP_MAX_SESSIONS`` Kconfig option and defaults to the value of ``CONFIG_BT_MAX_CONN``.
+For Bluetooth LE transport, the maximum number of concurrent sessions is limited by the ``CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS`` Kconfig option and defaults to the value of ``CONFIG_BT_MAX_CONN``.
 
-To configure number of Bluetooth LE sessions, set the ``CONFIG_BT_MAX_CONN`` to maximum number of connections and optionally use the ``CONFIG_ALIRO_BLE_TP_MAX_SESSIONS`` to limit the number of sessions.
+To configure number of Bluetooth LE sessions, set the ``CONFIG_BT_MAX_CONN`` to maximum number of connections and optionally use the ``CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS`` to limit the number of sessions.
 
 .. note::
    Each session consumes resources, such as RAM and PSA key slots, therefore the maximum number of the active sessions should be determined empirically based on the requirements of the final application.
@@ -68,7 +68,7 @@ UWB interface
 *************
 
 The UWB interface (:file:`uwb.h`) allows you to use an UWB hardware module with the Aliro stack and Access Manager.
-This interface operates when the Bluetooth LE transport is enabled.
+This interface operates when the Bluetooth LE transport is :ref:`enabled <bluetooth_le_enable>`.
 Using ranging measurements, the Access Manager can detect the distance between the User Device and the Reader and grant or deny access based on the access policy.
 
 Qorvo QM35 interface implementation
