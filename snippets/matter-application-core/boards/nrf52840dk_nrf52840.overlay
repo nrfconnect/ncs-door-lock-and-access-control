@@ -8,6 +8,10 @@
 	chosen {
 		nordic,pm-ext-flash = &mx25r64;
 	};
+
+	aliases {
+		/delete-property/ access-decision-indicator;
+	};
 };
 
 /* Disable unused peripherals to reduce power consumption */

@@ -16,7 +16,7 @@ class AccessManagerImpl;
 /**
  * @brief AccessManager An interface for making access control decisions.
  *
- * This class is an API that should manage user device public keys and makes access decisions based on:
+ * This class is an API that should manage User Device public keys and makes access decisions based on:
  * - Signature verification status
  * - Public key validation against stored keys
  * - UWB ranging data analysis
@@ -24,7 +24,8 @@ class AccessManagerImpl;
 class AccessManager {
 public:
 	using SessionContext = const void *;
-	using AccessGrantedIndicatorCallback = void (*)();
+	using LockIndicatorCallback = void (*)();
+	using AccessIndicatorCallback = void (*)(bool isAccessGranted, bool isNfcSession);
 	using TerminateSessionCallback = void (*)(SessionContext sessionContext);
 
 	/**
@@ -32,11 +33,26 @@ public:
 	 */
 	struct ApplicationCallbacks {
 		/**
-		 * @brief Callback for signaling access granted.
+		 * @brief Callback for signaling unlock action.
 		 *
-		 * This callback is called when access is granted.
+		 * This callback is called when access is granted and the door should be unlocked.
 		 */
-		AccessGrantedIndicatorCallback mAccessGrantedIndicatorClb{ nullptr };
+		LockIndicatorCallback mUnlockIndicatorClb{ nullptr };
+
+		/**
+		 * @brief Callback for signaling lock action.
+		 *
+		 * This callback is called when access is granted and the door should be locked.
+		 */
+		LockIndicatorCallback mLockIndicatorClb{ nullptr };
+
+		/**
+		 * @brief Callback for signaling access action.
+		 *
+		 * This callback is called when the access is granted or denied.
+		 * This callback can be used for security logs.
+		 */
+		AccessIndicatorCallback mAccessIndicatorClb{ nullptr };
 	};
 
 	/**
@@ -53,13 +69,11 @@ public:
 	};
 
 	/**
-	 * @brief Initialize the AccessManager.
+	 * @brief Set the application callbacks for the AccessManager.
 	 *
 	 * @param callbacks Callbacks.
-	 *
-	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError Init(const ApplicationCallbacks &callbacks);
+	void SetApplicationCallbacks(const ApplicationCallbacks &callbacks);
 
 	/**
 	 * @brief Set the stack callbacks.
@@ -71,7 +85,7 @@ public:
 	/**
 	 * @brief Verifies the access credential based on provided inputs.
 	 *
-	 * @param userPublicKey The user device public key to verify.
+	 * @param userPublicKey The User Device public key to verify.
 	 * @param isNfcSession Indicates if the session is a NFC session.
 	 * @param sessionContext A pointer to the session context.
 	 *
@@ -80,7 +94,7 @@ public:
 	AliroError VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
 					  SessionContext sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	/**
 	 * @brief Starts a ranging session based on provided inputs.
 	 *
@@ -92,12 +106,12 @@ public:
 	 */
 	AliroError StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 				       SessionContext sessionContext);
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 	/**
 	 * @brief Add a new public key to the AccessManager.
 	 *
-	 * @param publicKey The public key to add.
+	 * @param publicKey The User Device public key to add.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
@@ -106,7 +120,7 @@ public:
 	/**
 	 * @brief Remove a public key from the AccessManager.
 	 *
-	 * @param publicKey The public key to remove.
+	 * @param publicKey The User Device public key to remove.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */

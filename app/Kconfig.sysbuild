@@ -13,6 +13,42 @@ config NRF_DEFAULT_IPC_RADIO
 config NETCORE_IPC_RADIO_BT_HCI_IPC
 	default y if SOC_SERIES_NRF53X
 
+#### Bootloader
+choice BOOTLOADER
+    default BOOTLOADER_MCUBOOT if MATTER || SOC_SERIES_NRF53X
+endchoice
+
+if BOOTLOADER_MCUBOOT
+
+choice MCUBOOT_MODE
+    default MCUBOOT_MODE_OVERWRITE_ONLY
+endchoice
+
+choice BOOT_SIGNATURE_TYPE
+	default BOOT_SIGNATURE_TYPE_ECDSA_P256
+endchoice
+
+if SOC_SERIES_NRF53X
+
+config MCUBOOT_UPDATEABLE_IMAGES
+    default 2
+
+config SECURE_BOOT_NETCORE
+    default y
+
+config NETCORE_APP_UPDATE
+    default y
+
+config MCUBOOT_NRF53_MULTI_IMAGE_UPDATE
+    default y
+
+config PM_EXTERNAL_FLASH_MCUBOOT_SECONDARY
+    default y
+
+endif # SOC_SERIES_NRF53X
+
+endif # BOOTLOADER_MCUBOOT
+
 if MATTER
 
 config WIFI_NRF70
@@ -23,11 +59,6 @@ config WIFI_NRF70
 config NETCORE_IPC_RADIO_IEEE802154
 	default y if SOC_SERIES_NRF53X && !WIFI_NRF70
 
-#### Bootloader
-choice BOOTLOADER
-	default BOOTLOADER_MCUBOOT if !BOARD_NRF21540DK
-endchoice
-
 if BOOTLOADER_MCUBOOT
 
 #### DFU multi-image support
@@ -37,28 +68,8 @@ config DFU_MULTI_IMAGE_PACKAGE_BUILD
 config DFU_MULTI_IMAGE_PACKAGE_APP
 	default y
 
-config PM_EXTERNAL_FLASH_MCUBOOT_SECONDARY
-	default y
-
 #### DFU network core configuration
 if SOC_SERIES_NRF53X
-
-config MCUBOOT_UPDATEABLE_IMAGES
-	default 2
-
-choice MCUBOOT_MODE
-	default MCUBOOT_MODE_OVERWRITE_ONLY
-endchoice
-
-choice BOOT_SIGNATURE_TYPE
-	default BOOT_SIGNATURE_TYPE_RSA
-endchoice
-
-config SECURE_BOOT_NETCORE
-	default y
-
-config NETCORE_APP_UPDATE
-	default y
 
 config DFU_MULTI_IMAGE_PACKAGE_NET
 	default y
@@ -76,7 +87,7 @@ endif # BOOTLOADER_MCUBOOT
 
 #### Enable generating factory data
 config MATTER_FACTORY_DATA_GENERATE
-	default y if !BOARD_NRF21540DK
+	default y
 
 endif # MATTER
 

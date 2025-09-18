@@ -27,6 +27,9 @@
 
 .. _`West`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/dev_model_and_contributions/code_base.html#ncs-west-intro
 
+.. _`nRF54LM20 DK`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/boards/nordic/nrf54lm20dk/doc/index.html
+.. _`nrf54lm20dk`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/app_dev/device_guides/nrf54l/index.html
+
 .. _`nRF54L15 DK`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/boards/nordic/nrf54l15dk/doc/index.html#nrf54l15dk-nrf54l15
 .. _`nrf54l15dk`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/app_dev/device_guides/nrf54l/index.html
 
@@ -53,6 +56,7 @@
 .. _`Matter door lock`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/lock/README.html
 .. _`Matter door lock remote access`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/lock/README.html#testing_remote_access_with_pin_code_credential
 .. _`Matter marketing note`: https://www.nordicsemi.com/Products/Technologies/Matter
+.. _`Matter fork release`: https://github.com/nrfconnect/sdk-connectedhomeip/releases/tag/v3.1.0
 .. _`Thread Border Router`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#thread_border_router
 .. _`Thread radio co-processor`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#configuring_a_radio_co-processor
 .. _`Running OTBR using Docker`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#running_otbr_using_docker

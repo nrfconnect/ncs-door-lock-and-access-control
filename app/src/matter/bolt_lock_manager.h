@@ -18,7 +18,8 @@
 struct BoltLockManagerEvent;
 
 class BoltLockManager {
-	using AccessMgr = AccessManager<DoorLockData::PIN | DoorLockData::ALIRO_EV_EP | DoorLockData::ALIRO_NON_EV_EP>;
+	using AccessMgr = AccessManager<DoorLockData::PIN | DoorLockData::ALIRO_CRED_ISSUER |
+					DoorLockData::ALIRO_EV_EP | DoorLockData::ALIRO_NON_EV_EP>;
 
 public:
 	static constexpr size_t kMaxCredentialLength{ 128 };

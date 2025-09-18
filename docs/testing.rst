@@ -223,28 +223,54 @@ The following steps will guide you through the process of commissioning the Alir
 
 #. Configure Aliro reader based on the Test Harness configuration.
 
-   a. Follow the :ref:`setting_up_the_aliro_test_harness` to locate necessary credentials in the Test Harness project configuration.
+   a. Generate an ECC key pair for the Reader by running the following commands:
 
-   #. Copy the ``dut_reader_public_key``, ``th_access_credential_public_key``, ``dut_reader_group_identifier``, and ``dut_reader_group_sub_identifier`` values from the Test Harness project configuration.
+      .. code-block:: console
 
-   #. Set the Aliro Rader configuration remotely with CHIP Tool using the following command:
+         KEY_OUTPUT=$(openssl ecparam -name prime256v1 -genkey | openssl ec -text -noout) && \
+         echo "Private Key:" && \
+         echo "$KEY_OUTPUT" | sed -n '/priv:/,/pub:/p' | grep -v 'priv:\|pub:' | tr -d ' \n:' && \
+         echo -e "\nPublic Key:" && \
+         echo "$KEY_OUTPUT" | sed -n '/pub:/,/ASN1/p' | grep -v 'pub:\|ASN1' | tr -d ' \n:'
+
+      See the following example output:
+
+      .. code-block:: console
+
+         Private Key:
+         9df123f58dd15f6bab71bb6635827faf25100b043cdf6b62c93ea3c244ad4403
+         Public Key:
+         043c05b91fc09a84ad2ab7940a1b84f09b8ddf5323f1aac0f6568e1c973f37275dc67500a9df08d1bd69ee04e8641d9cbc73a4c1be30eed64def414f8afdc44642
+
+   #. Follow the :ref:`setting_up_the_aliro_test_harness` section to locate the necessary credentials in the Test Harness project configuration.
+
+   #. Configure the Test Harness project:
+
+      * Set ``dut_reader_public_key`` to the generated ``Public Key``.
+      * Note down the values of ``th_access_credential_public_key`` and ``dut_reader_group_identifier``.
+        You will need them for further configuration.
+
+   #. Set the Aliro Reader configuration remotely with CHIP Tool using the following command:
 
       .. code-block:: console
 
          ./chip-tool doorlock set-aliro-reader-config hex:<signing_key> hex:<verification_key> hex:<group_identifier> <node-id> <endpoint-id> --GroupResolvingKey hex:<group_resolving_key>
 
-      * ``<signing_key>`` - Signing key of the Reader device (corresponds to ``dut_reader_public_key``)
-      * ``<verification_key>`` - Verification key of the Reader device (corresponds to ``th_access_credential_public_key``)
+      * ``<signing_key>`` - Signing key of the Reader device (generated ``Private Key``)
+      * ``<verification_key>`` - Verification key of the Reader device (generated ``Public Key``)
       * ``<group_identifier>`` - Group identifier of the Reader device (corresponds to ``dut_reader_group_identifier``)
       * ``<node-id>`` - Unique node ID for the device (for example, ``1``)
       * ``<endpoint-id>`` - Endpoint ID of the Reader device (for example, ``1`` for the door lock cluster)
-      * ``<group_resolving_key>`` - Group resolving key of the Reader device (corresponds to ``dut_reader_group_sub_identifier``)
+      * ``<group_resolving_key>`` - Group resolving key of the Reader device
+
+      .. note::
+         The ``<group_resolving_key>`` option corresponds to ``dut_reader_group_sub_identifier``, which can be set in the Test Harness project configuration.
 
       See the following example:
 
       .. code-block:: console
 
-         ./chip-tool doorlock set-aliro-reader-config hex:00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff hex:04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa hex:00113344667799AA00113344667799AA 1 1 --GroupResolvingKey hex:00000000000000000000000000000000 --timedInteractionTimeoutMs 5000
+         ./chip-tool doorlock set-aliro-reader-config hex:9df123f58dd15f6bab71bb6635827faf25100b043cdf6b62c93ea3c244ad4403 hex:043c05b91fc09a84ad2ab7940a1b84f09b8ddf5323f1aac0f6568e1c973f37275dc67500a9df08d1bd69ee04e8641d9cbc73a4c1be30eed64def414f8afdc44642 hex:00113344667799AA00113344667799AA 1 1 --GroupResolvingKey hex:00000000000000000000000000000000 --timedInteractionTimeoutMs 5000
 
       .. note::
          The ``GroupResolvingKey`` can only be set if the Aliro door lock application is built with Bluetooth LE transport and Ultra-Wideband (UWB) support.
@@ -272,7 +298,7 @@ The following steps will guide you through the process of commissioning the Alir
 
       .. code-block:: console
 
-         ./chip-tool doorlock set-credential 0 '{"credentialType": 7, "credentialIndex": 1}' hex:02250101020220e5827bbf0ee6b5f1622140eaad860d247bebf0821e0526d0243ead7f681ebb3c 1 null null 1 1 --timedInteractionTimeoutMs 5000
+         ./chip-tool doorlock set-credential 0 '{"credentialType": 7, "credentialIndex": 1}' hex:<credential-data> 1 null null 1 1 --timedInteractionTimeoutMs 5000
 
       * Endpoint ID - ``0``
       * User index - ``1``
@@ -285,7 +311,13 @@ The following steps will guide you through the process of commissioning the Alir
       * Fabric index - ``1``
       * Credential type - ``7``
       * Credential index - ``1``
-      * Credential data - ``hex:02250101...``
+      * ``<credential-data>`` - Is an octet string parameter with the secret credential data (corresponds to ``th_access_credential_public_key``)
+
+       See the following example:
+
+      .. code-block:: console
+
+         ./chip-tool doorlock set-credential 0 '{"credentialType": 7, "credentialIndex": 1}' hex:04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa 1 null null 1 1 --timedInteractionTimeoutMs 5000
 
    #. Read the status of credential assigned to the user to verify that it was set correctly:
 
@@ -302,7 +334,7 @@ This section describes the user interface of the |APP_NAME| when Matter is enabl
 
 .. tabs::
 
-   .. group-tab:: nRF52, nRF53 DKs
+   .. group-tab:: nRF52, nRF53, nRF54LM20 DKs
 
       LED 1:
          .. include:: /include/matter_state_led.txt
@@ -325,7 +357,7 @@ This section describes the user interface of the |APP_NAME| when Matter is enabl
          * Changes the lock state to the opposite one.
 
 
-   .. group-tab:: nRF54 DKs
+   .. group-tab:: nRF54L15 DK
 
       LED 0:
           .. include:: /include/matter_state_led.txt
@@ -347,6 +379,37 @@ This section describes the user interface of the |APP_NAME| when Matter is enabl
       Button 2:
          .. include:: /include/matter_button.txt
 
+Aliro and Matter lock state synchronization
+*******************************************
+
+When the door lock is unlocked through Aliro, the lock state automatically synchronizes with the Matter door-lock server cluster.
+This synchronization ensures that User Devices in the Matter network are notified of lock state changes in real time.
+
+To verify the current lock state, run the following command:
+
+.. code-block:: console
+
+   ./chip-tool doorlock read lock-state 1 1
+
+After executing the command, find the lock state in the response, for example:
+
+.. code-block:: console
+
+   [1757071349.943] [949263:949265] [TOO]   LockState: 1
+
+The response indicates that the lock is locked.
+
+Next, try to execute, for example, the ``BLEUWB_RDR_EXPEDITED_STANDARD_PHASE`` test with Bluetooth LE transport (see :ref:`testing_verification_th`) using the Test Harness.
+If the test is successful, run again the ``./chip-tool doorlock read lock-state 1 1`` command.
+You should see the following status in the response:
+
+.. code-block:: console
+
+   [1757072050.821] [951199:951201] [TOO]   LockState: 2
+
+The response indicates that the lock is unlocked.
+
+.. _testing_verification_th:
 
 Verification and testing process
 ********************************
@@ -388,27 +451,27 @@ For verification, execute the following tests, based on the `Aliro Certification
 
    .. tab:: Bluetooth LE
 
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | Test case                                                 | Description                                                           |
-            +===========================================================+=======================================================================+
-            | BLEUWB_RDR_EXPEDITED_STANDARD_PHASE                    | Verify conformance of Reader UT in standard phase expedited transaction. |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | BLEUWB_RDR_RANGING_SUSPEND                             | Verify conformance of Reader UT in ranging suspend functionality.        |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | BLEUWB_RDR_NEG_FAILED_L2CAP                            | Verify conformance of Reader UT in L2CAP connection failure handling.    |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | BLEUWB_RDR_NEG_FAILED_SPSM_L2CAP                       | Verify conformance of Reader UT in SPSM L2CAP failure handling.          |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | BLEUWB_RDR_NEG_TIMEOUT_BEFORE_AUTH0                    | Verify conformance of Reader UT in timeout handling before AUTH0.        |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | BLEUWB_RDR_TIMEOUT_EXTENSION                           | Verify conformance of Reader UT in timeout extension handling.           |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | BLEUWB_RDR_NEG_M2_MISMATCH_PARAMETER                   | Verify conformance of Reader UT in M2 parameter mismatch handling.       |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | BLEUWB_RDR_NEG_M4_MISMATCH_PARAMETER                   | Verify conformance of Reader UT in M4 parameter mismatch handling.       |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
-            | BLEUWB_RDR_ADVERTISEMENT_FORMAT                        | Verify conformance of Reader UT in advertisement format.                 |
-            +-----------------------------------------------------------+-----------------------------------------------------------------------+
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | Test case                                                 | Description                                                              |
+            +===========================================================+==========================================================================+
+            | BLEUWB_RDR_EXPEDITED_STANDARD_PHASE                       | Verify conformance of Reader UT in standard phase expedited transaction. |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | BLEUWB_RDR_RANGING_SUSPEND                                | Verify conformance of Reader UT in ranging suspend functionality.        |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | BLEUWB_RDR_NEG_FAILED_L2CAP                               | Verify conformance of Reader UT in L2CAP connection failure handling.    |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | BLEUWB_RDR_NEG_FAILED_SPSM_L2CAP                          | Verify conformance of Reader UT in SPSM L2CAP failure handling.          |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | BLEUWB_RDR_NEG_TIMEOUT_BEFORE_AUTH0                       | Verify conformance of Reader UT in timeout handling before AUTH0.        |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | BLEUWB_RDR_TIMEOUT_EXTENSION                              | Verify conformance of Reader UT in timeout extension handling.           |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | BLEUWB_RDR_NEG_M2_MISMATCH_PARAMETER                      | Verify conformance of Reader UT in M2 parameter mismatch handling.       |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | BLEUWB_RDR_NEG_M4_MISMATCH_PARAMETER                      | Verify conformance of Reader UT in M4 parameter mismatch handling.       |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
+            | BLEUWB_RDR_ADVERTISEMENT_FORMAT                           | Verify conformance of Reader UT in advertisement format.                 |
+            +-----------------------------------------------------------+--------------------------------------------------------------------------+
 
 Running the test
 ================

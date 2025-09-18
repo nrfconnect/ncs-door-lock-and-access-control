@@ -38,13 +38,11 @@ private:
 	}
 
 	/**
-	 * @brief Initialize the AccessManager.
+	 * @brief Set the application callbacks for the AccessManager.
 	 *
 	 * @param callbacks Application callbacks.
-	 *
-	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError _Init(const ApplicationCallbacks &callbacks);
+	void _SetApplicationCallbacks(const ApplicationCallbacks &callbacks);
 
 	/**
 	 * @brief Set the stack callbacks.
@@ -56,7 +54,7 @@ private:
 	/**
 	 * @brief Verifies the access credential based on provided inputs.
 	 *
-	 * @param userPublicKey The user device public key to verify.
+	 * @param userPublicKey The User Device public key to verify.
 	 * @param isNfcSession Indicates if the session is a NFC session.
 	 * @param sessionContext A pointer to the session context.
 	 *
@@ -65,7 +63,7 @@ private:
 	AliroError _VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
 					   SessionContext sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	/**
 	 * @brief Starts a ranging session based on provided inputs.
 	 *
@@ -77,7 +75,7 @@ private:
 	 */
 	AliroError _StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 					SessionContext sessionContext);
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 	/**
 	 * @brief Add a new public key to the AccessManager.
@@ -140,14 +138,50 @@ private:
 	AccessManagerImpl(AccessManagerImpl &&) = delete;
 	AccessManagerImpl &operator=(AccessManagerImpl &&) = delete;
 
-	void AccessGrantedAction() const;
-	void AccessDeniedAction() const;
+	/**
+	 * @brief Signals the access granted action.
+	 *
+	 * @param isNfcSession Indicates if the session is a NFC session.
+	 *
+	 * This callback is called when the User Device is authenticated and the access is granted.
+	 */
+	void AccessGrantedAction(bool isNfcSession) const;
+
+	/**
+	 * @brief Signals the access denied action.
+	 *
+	 * @param isNfcSession Indicates if the session is a NFC session.
+	 *
+	 * This callback is called when the User Device is not authenticated or the access is denied.
+	 */
+	void AccessDeniedAction(bool isNfcSession) const;
+
+	/**
+	 * @brief Signals the unlock action.
+	 *
+	 * This callback is called when access is granted and the door should be unlocked.
+	 * In case of:
+	 * - UWB ranging, this callback is called when the User Device is in range.
+	 * - NFC, this callback is called just after the access credential is verified.
+	 */
+	void UnlockAction() const;
+
+	/**
+	 * @brief Signals the lock action.
+	 *
+	 * This callback is called when the door should be locked.
+	 * In case of:
+	 * - UWB ranging, this callback is called when the User Device is out of range or BLE session is terminated.
+	 */
+	void LockAction() const;
 
 	bool VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey);
 	bool IsPublicKeyStored(const CryptoTypes::PublicKey &userPublicKey);
+	bool ShouldUnlockImmediately(bool isNfcSession) const;
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	struct RangingSessionContext {
+		sys_snode_t mNode{};
 #ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		RangingSessionContext(uint32_t timeoutMs, Timer::Callback callback, Timer::Context userData)
 			: mRangingSessionTimer(timeoutMs, callback, userData)
@@ -155,14 +189,14 @@ private:
 		}
 		Timer mRangingSessionTimer;
 #endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-		sys_snode_t mNode{};
 		SessionContext mSessionContext{};
 		bool mInRange{ false };
 	};
 
 	bool AnalyzeUwbRangingData(const UwbRangingData &uwbData);
 	std::optional<uint16_t> ExtractDistanceFromUwbData(const UwbRangingData &uwbData) const;
-	AliroError AddRangingSession(const SessionContext sessionCtx);
+	AliroError AddRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
+				     const SessionContext sessionCtx);
 	void RemoveRangingSession(SessionContext sessionCtx);
 	RangingSessionContext *FindRangingSession(const SessionContext sessionCtx);
 	bool IsUserDeviceInRange();
@@ -175,7 +209,7 @@ private:
 	// Session context for the current ranging session.
 	bool mInRange{ false };
 	sys_slist_t mActiveSessions{};
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 	ApplicationCallbacks mCallbacks{};
 	StackCallbacks mStackCallbacks{};

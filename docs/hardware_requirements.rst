@@ -23,36 +23,76 @@ The application supports the following development kit (DK):
      - PCA
      - Board name
      - Build target
-   * - `nRF54L15 DK`_
-     - PCA10156
-     - `nrf54l15dk`_
-     - ``nrf54l15dk/nrf54l15/cpuapp``
-   * - `nRF5340 DK`_
-     - PCA10095
-     - `nrf5340dk`_
-     - ``nrf5340dk/nrf5340/cpuapp``
    * - `nRF52840 DK`_
      - PCA10056
      - `nrf52840dk`_
      - ``nrf52840dk/nrf52840``
+   * - `nRF5340 DK`_
+     - PCA10095
+     - `nrf5340dk`_
+     - ``nrf5340dk/nrf5340/cpuapp``
+   * - `nRF54L15 DK`_
+     - PCA10156
+     - `nrf54l15dk`_
+     - ``nrf54l15dk/nrf54l15/cpuapp``
+   * - `nRF54LM20 DK`_
+     - PCA10184
+     - `nrf54lm20dk`_
+     - ``nrf54lm20dk/nrf54lm20a/cpuapp``
 
 .. _hw_requirements_vddio_configuration:
 
-Configuring VDDIO voltage on the nRF54L15 DK
-============================================
-
-The nRF54L15 DK operates at default voltage level of 1.8V.
+Configuring VDDIO voltage
+=========================
+The nRF54L15 DK and the nRF54LM20 DK operate at default voltage level of 1.8V.
 Some expansion boards, especially Arduino-style boards, require higher voltage to operate properly.
-You can adjust the voltage for ports on the nRF54L15 DK up to 3.3V using the `Board Configurator app`_.
-First, you must `install the Board Configurator app <Installing Board Configurator app_>`_ and once completed `Update your DK's configuration <Updating the board configuration_>`_.
 
-See the recommended configuration for VDD (nPM VOUT1):
+.. tabs::
 
-.. figure:: /images/VDDIO-configuration.png
-   :scale: 70%
-   :alt: VDD board configuration.
+   .. tab:: nRF54L15 DK
 
-   VDD board configuration.
+      You can adjust the voltage for ports on the nRF54L15 DK up to 3.3V using the `Board Configurator app`_.
+      First, you must `install the Board Configurator app <Installing Board Configurator app_>`_ and once completed `Update your DK's configuration <Updating the board configuration_>`_.
+
+      See the recommended configuration for VDD (nPM VOUT1):
+
+      .. figure:: /images/VDDIO-configuration.png
+         :scale: 70%
+         :alt: VDD board configuration.
+
+         VDD board configuration.
+
+   .. tab:: nRF54LM20 DK
+
+      You can adjust the voltage for ports on the nRF54LM20 DK using the following steps:
+
+      #. Create a json file with this content:
+
+         .. code-block:: json
+
+            {
+               "operations": [
+                  {
+                        "operation":{
+                           "type": "smp",
+                           "operation":2,
+                           "group_id":64,
+                           "command_id":0,
+                           "sequence_number":0,
+                           "data": [[6, true, 20, true, 22, true, 23, false, 42, true, 45, true, 47, true],[1,2700,2,2700]]
+                        },
+                        "operationId":"1"
+                  }
+               ]
+            }
+
+      #. Run the following command:
+
+         .. code-block:: console
+
+            nrfutil device x-execute-batch --traits boardController --batch-path <json_file_path>
+
+      #. Turn the DK off and on using the power switch.
 
 .. _hw_requirements_nfc_reader:
 
@@ -75,37 +115,63 @@ The application supports the following NFC readers and their corresponding devel
 .. note::
 
    The `X-NUCLEO-NFC09A1`_ board requires a minimum of 2.7V to operate.
-   Because of that, you must adjust the GPIO voltage for the `nRF54L15 DK`_ as outlined in the :ref:`hw_requirements_vddio_configuration` section.
+   Because of that, you must adjust the GPIO voltage for the `nRF54L15 DK`_ and the `nRF54LM20 DK`_ as outlined in the :ref:`hw_requirements_vddio_configuration` section.
 
-The `nRF54L15 DK`_ does not have Arduino-compatible header, therefore, you must connect your board using wires.
-To connect the NFC reader expansion board to the `nRF54L15 DK`_, refer to the following pin mapping.
+The `nRF54L15 DK`_ and the `nRF54LM20 DK`_ do not have Arduino-compatible header, therefore, you must connect your board using wires.
+To connect the NFC reader expansion board to the DK, refer to the following pin mapping.
 The pinout is applicable for each of the supported NFC reader expansion boards:
 
-+-------------------+-----------------------+
-| nRF54L15 DK       | X-NUCLEO board        |
-+===================+=======================+
-| P1.13             | SCK MCU (D13)         |
-+-------------------+-----------------------+
-| P1.12             | MISO MCU (D12)        |
-+-------------------+-----------------------+
-| P1.11             | MOSI MCU (D11)        |
-+-------------------+-----------------------+
-| P2.08             | /SS MCU (D10)         |
-+-------------------+-----------------------+
-| P0.04             | IRQ MCU (A0)          |
-+-------------------+-----------------------+
-| VBUS              | +5V                   |
-+-------------------+-----------------------+
-| VDDIO             | +3V3                  |
-+-------------------+-----------------------+
-| GND               | GND                   |
-+-------------------+-----------------------+
+.. tabs::
 
-.. figure:: /images/nRF54L_X_NUCLEO_connection.png
-   :scale: 50%
-   :alt: Expansion board connection to the nRF54L15 DK.
+   .. tab:: nRF54L15 DK
 
-   X-NUCLEO expansion board connection to the nRF54L15 DK.
+      +-------------------+-----------------------+
+      | nRF54L15 DK       | X-NUCLEO board        |
+      +===================+=======================+
+      | P1.13             | SCK MCU (D13)         |
+      +-------------------+-----------------------+
+      | P1.12             | MISO MCU (D12)        |
+      +-------------------+-----------------------+
+      | P1.11             | MOSI MCU (D11)        |
+      +-------------------+-----------------------+
+      | P2.08             | /SS MCU (D10)         |
+      +-------------------+-----------------------+
+      | P0.04             | IRQ MCU (A0)          |
+      +-------------------+-----------------------+
+      | VBUS              | +5V                   |
+      +-------------------+-----------------------+
+      | VDDIO             | +3V3                  |
+      +-------------------+-----------------------+
+      | GND               | GND                   |
+      +-------------------+-----------------------+
+
+      .. figure:: /images/nRF54L_X_NUCLEO_connection.png
+         :scale: 50%
+         :alt: Expansion board connection to the nRF54L15 DK.
+
+         X-NUCLEO expansion board connection to the nRF54L15 DK.
+
+   .. tab:: nRF54LM20 DK
+
+      +-------------------+-----------------------+
+      | nRF54LM20 DK      | X-NUCLEO board        |
+      +===================+=======================+
+      | P1.13             | SCK MCU (D13)         |
+      +-------------------+-----------------------+
+      | P1.12             | MISO MCU (D12)        |
+      +-------------------+-----------------------+
+      | P1.11             | MOSI MCU (D11)        |
+      +-------------------+-----------------------+
+      | P1.24             | /SS MCU (D10)         |
+      +-------------------+-----------------------+
+      | P0.04             | IRQ MCU (A0)          |
+      +-------------------+-----------------------+
+      | VBUS              | +5V                   |
+      +-------------------+-----------------------+
+      | VDDIO             | +3V3                  |
+      +-------------------+-----------------------+
+      | GND               | GND                   |
+      +-------------------+-----------------------+
 
 When using the `nRF5340 DK`_ or `nRF52840 DK`_, you can connect the NFC reader expansion board directly using the Arduino-compatible header available on the DK.
 

@@ -7,7 +7,14 @@
 #pragma once
 
 #include "aliro/errors.h"
+#include "aliro/protocol_version.h"
 #include "aliro/types.h"
+
+#ifdef CONFIG_ALIRO_BLE_UWB
+#include "aliro/ble_types.h"
+#include "transport/ble/ble_iface.h"
+#endif // CONFIG_ALIRO_BLE_UWB
+
 #include <cstddef>
 
 namespace Aliro {
@@ -18,12 +25,19 @@ struct AliroConfig {
 	 */
 	bool mEnableNfc{ true };
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
+
 	/**
 	 * @brief The maximum number of BLE sessions.
 	 */
 	size_t mMaxBleSessions{ 1 };
-#endif
+
+	/**
+	 * @brief The BLE advertising interface.
+	 */
+	BleInterface::BleAdvertisingIfc *mBleAdvertising{};
+
+#endif // CONFIG_ALIRO_BLE_UWB
 };
 
 /**
@@ -112,6 +126,44 @@ public:
 	 * @return The Aliro library version.
 	 */
 	static const char *GetLibraryVersion();
+
+	/**
+	 * @brief Gets the Expedited Standard protocol version.
+
+	 * @param versionCount The number of protocol versions.
+	 *
+	 * @return Pointer to the static Expedited Standard protocol version list.
+	 */
+	const ProtocolVersion *GetExpeditedStandardProtocolVersions(size_t &versionCount) const;
+
+#ifdef CONFIG_ALIRO_BLE_UWB
+
+	/**
+	 * @brief Sets the BLE notification which will be advertised.
+	 *
+	 * @param notification The BLE notification.
+	 *
+	 * @return ALIRO_NO_ERROR if the notification was set successfully, an error code otherwise.
+	 */
+	AliroError SetBleNotification(BleTypes::AdvertisingServiceData::Notification notification) const;
+
+	/**
+	 * @brief Gets the BLE advertising version.
+	 *
+	 * @return The BLE advertising version.
+	 */
+	uint8_t GetBleAdvertisingVersion() const;
+
+	/**
+	 * @brief Gets the BLE/UWB protocol version.
+
+	 * @param versionCount The number of protocol versions.
+	 *
+	 * @return Pointer to the static BLE/UWB protocol version list.
+	 */
+	const ProtocolVersion *GetBleUwbProtocolVersions(size_t &versionCount) const;
+
+#endif // CONFIG_ALIRO_BLE_UWB
 
 private:
 	Callbacks mCallbacks{};

@@ -21,6 +21,12 @@ void BoltLockManager::Init(StateChangeCallback callback)
 	k_timer_init(&mActuatorTimer, &BoltLockManager::ActuatorTimerEventHandler, nullptr);
 	k_timer_user_data_set(&mActuatorTimer, this);
 
+	// Set Aliro AccessManager application callbacks
+	Aliro::AccessManagerInstance().SetApplicationCallbacks({
+		.mUnlockIndicatorClb = [] { BoltLockMgr().Unlock(BoltLockManager::OperationSource::kAliro); },
+		.mLockIndicatorClb = [] { BoltLockMgr().Lock(BoltLockManager::OperationSource::kAliro); },
+	});
+
 	auto addPublicKey = []([[maybe_unused]] uint16_t credentialIndex, CredentialTypeEnum credentialType,
 			       chip::ByteSpan credentialData) {
 		if (credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey ||
