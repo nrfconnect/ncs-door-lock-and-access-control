@@ -7,9 +7,19 @@ manifest:
   remotes:
     - name: ncs
       url-base: https://github.com/nrfconnect
+    - name: nrfconnect-sdk-qorvo
+      url-base: git@gitlab.com:qorvo/qswg/public
   projects:
     - name: nrf
       remote: ncs
       repo-path: sdk-nrf
       revision: v3.1.0
       import: true
+    - name: nrfconnect-sdk-qorvo
+      remote: nrfconnect-sdk-qorvo
+      repo-path: nrfconnect-sdk-qorvo
+      revision: matter
+      groups:
+        - nrfconnect-sdk-qorvo
+  group-filter:
+    - -nrfconnect-sdk-qorvo
