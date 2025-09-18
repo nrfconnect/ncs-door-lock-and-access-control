@@ -23,6 +23,7 @@ protected:
 	AliroError _ExportKey(CryptoTypes::KeyId keyId, uint8_t *key, size_t keyLength);
 	AliroError _ImportPublicKey(const CryptoTypes::PublicKey &key, CryptoTypes::KeyId &keyId);
 	AliroError _ImportPrivateKey(const CryptoTypes::PrivateKey &key, CryptoTypes::KeyId &keyId, bool isPersistent);
+	AliroError _PreserveKey(CryptoTypes::KeyId &volatileKeyId, CryptoTypes::KeyId persistentKeyId);
 	AliroError _DestroyKey(CryptoTypes::KeyId &keyId) const;
 	AliroError _GenerateSignature(CryptoTypes::KeyId privateKeyId, const uint8_t *msg, const size_t msgLength,
 				      CryptoTypes::Signature &signature);
@@ -34,8 +35,13 @@ protected:
 	AliroError _DeriveSessionKeys(CryptoTypes::KeyId kDh, const uint8_t *info, size_t infoLength,
 				      const uint8_t *salt, size_t saltLength,
 				      CryptoTypes::SessionBoundKeys &sessionVolatileKeys);
+	AliroError _DeriveSessionKeysFromKpersistent(CryptoTypes::KeyId kpersistentKeyId, const uint8_t *info,
+						     size_t infoLength, const uint8_t *salt, size_t saltLength,
+						     CryptoTypes::SessionBoundKeys &sessionVolatileKeys);
 	AliroError _DeriveBleSessionKey(CryptoTypes::KeyId inputKeyId, const uint8_t *info, size_t infoLength,
 					const uint8_t *salt, size_t saltLength, CryptoTypes::KeyId &outputKeyId);
+	AliroError _DeriveKpersistent(CryptoTypes::KeyId inputKeyId, const uint8_t *info, size_t infoLength,
+				      const uint8_t *salt, size_t saltLength, CryptoTypes::KeyId &outputKeyId);
 	AliroError _EncryptPayload(CryptoTypes::KeyId keyId, const uint8_t *plainTxt, size_t plainTxtLength,
 				   const uint8_t *additionalData, size_t additionalDataLength,
 				   const CryptoTypes::Nonce &nonce, uint8_t *cipherText,

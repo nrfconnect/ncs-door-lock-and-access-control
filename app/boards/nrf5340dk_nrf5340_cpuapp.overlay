@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+/{
+	aliases {
+		access-decision-indicator = &led1; // green LED2 on nRF5340DK
+	};
+};
+
 &pinctrl {
 	spi1_default_alt: spi1_default_alt {
 		group1 {
@@ -42,9 +48,7 @@
 };
 
 / {
-	access_decision_indicator: access_decision_indicator {
-		status = "okay";
-		compatible = "access-decision-indicator";
-		gpios = <&gpio0 5 GPIO_ACTIVE_HIGH>;
+	chosen {
+		nordic,pm-ext-flash = &mx25r64;
 	};
 };

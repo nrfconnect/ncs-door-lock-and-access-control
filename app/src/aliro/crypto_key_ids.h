@@ -16,8 +16,8 @@ constexpr CryptoTypes::KeyId kKeyIdRangeSize{ 0x10000 };
 
 constexpr CryptoTypes::KeyId kPrivateKeyId{ kKeyIdRangeBegin + 0x0000 };
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 constexpr CryptoTypes::KeyId kGroupResolvingKeyId{ kKeyIdRangeBegin + 0x0001 };
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 } // namespace Aliro

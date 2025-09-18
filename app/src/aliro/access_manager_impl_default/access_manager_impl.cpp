@@ -8,10 +8,10 @@
 #include "aliro/mutex_guard.h"
 #include "aliro/utils.h"
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 #include "aliro/memory.h"
 #include "uwb_impl.h"
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -24,13 +24,9 @@ LOG_MODULE_REGISTER(access_manager, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace Aliro {
 
-AliroError AccessManagerImpl::_Init(const ApplicationCallbacks &callbacks)
+void AccessManagerImpl::_SetApplicationCallbacks(const ApplicationCallbacks &callbacks)
 {
 	mCallbacks = callbacks;
-
-	LOG_INF("AccessManager initialized");
-
-	return ALIRO_NO_ERROR;
 }
 
 void AccessManagerImpl::_SetStackCallbacks(const StackCallbacks &callbacks)
@@ -41,36 +37,36 @@ void AccessManagerImpl::_SetStackCallbacks(const StackCallbacks &callbacks)
 AliroError AccessManagerImpl::_VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
 						      SessionContext sessionContext)
 {
+	bool isAuthenticated{};
+
 	{
 		MutexGuard lock{ mMutex };
-
-		// Verify if a public key is present in the Reader's database (whether the User Device is a trusted one)
-		VerifyOrReturnStatus(VerifyPublicKey(userPublicKey), ALIRO_INVALID_ARGUMENT,
-				     LOG_INF("Provided User Device public key not found in Access Manager database"););
+		isAuthenticated = VerifyPublicKey(userPublicKey);
 	}
 
-	if (isNfcSession) {
-		AccessGrantedAction();
+	VerifyOrExit(isAuthenticated);
+
+	AccessGrantedAction(isNfcSession);
+
+	if (ShouldUnlockImmediately(isNfcSession)) {
+		UnlockAction();
 	}
 
 	return ALIRO_NO_ERROR;
+
+exit:
+	AccessDeniedAction(isNfcSession);
+	return ALIRO_INVALID_PUBLIC_KEY;
 }
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 AliroError AccessManagerImpl::_StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 						   SessionContext sessionContext)
 {
-	MutexGuard lock{ mMutex };
-
-	AliroError status =
-		Uwb::UltraWideBandImpl::Instance().ConfigureRangingSession(rangingSessionId, ursk, sessionContext);
-	VerifyOrReturnStatus(status == ALIRO_NO_ERROR, status,
-			     LOG_ERR("Failed to configure ranging session: %d", status.ToInt()));
-
-	return AddRangingSession(sessionContext);
+	return AddRangingSession(rangingSessionId, ursk, sessionContext);
 }
 
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &publicKey)
 {
@@ -125,30 +121,36 @@ void AccessManagerImpl::_ClearStoredKeys()
 
 void AccessManagerImpl::_SetMaxAllowedDistance(uint32_t maxDistance)
 {
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
+
 	MutexGuard lock{ mMutex };
 
 	mMaxAllowedDistance = maxDistance;
 	LOG_INF("Set maximum allowed distance to %u cm", maxDistance);
-#endif // CONFIG_ALIRO_BLE_TP
+
+#else // CONFIG_ALIRO_BLE_UWB
+
+	ARG_UNUSED(maxDistance);
+
+#endif // CONFIG_ALIRO_BLE_UWB
 }
 
 uint32_t AccessManagerImpl::_GetMaxAllowedDistance()
 {
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	MutexGuard lock{ mMutex };
 
 	return mMaxAllowedDistance;
 #else
 	return 0;
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 }
 
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData)
 {
 	LOG_DBG("Handling ranging session data - length: %u for session: %p", uwbData.mLength, sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	const auto currentSessionInRange = AnalyzeUwbRangingData(uwbData);
 	{
 		MutexGuard lock{ mMutex };
@@ -173,14 +175,14 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext,
 	VerifyOrReturn(userDeviceInRange != mInRange);
 	mInRange = userDeviceInRange;
 	if (mInRange) {
-		AccessGrantedAction();
+		UnlockAction();
 #ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 		TerminateAliroSession(sessionContext);
 #endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 	} else
-#endif
+#endif // CONFIG_ALIRO_BLE_UWB
 	{
-		AccessDeniedAction();
+		LockAction();
 	}
 }
 
@@ -190,16 +192,14 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 
 	LOG_INF("Handling session termination");
 
-#ifdef CONFIG_ALIRO_BLE_TP
-	MutexGuard lock{ mMutex };
-
-	AliroError status = Uwb::UltraWideBandImpl::Instance().TerminateRangingSession(sessionContext);
-	VerifyOrReturn(status == ALIRO_NO_ERROR || status == ALIRO_ERROR_NOT_IMPLEMENTED,
-		       LOG_ERR("Cannot terminate UWB ranging session: %d", status.ToInt()));
+#ifdef CONFIG_ALIRO_BLE_UWB
 
 	RemoveRangingSession(sessionContext);
 
-#endif // CONFIG_ALIRO_BLE_TP
+	// If any ranging session is still in range, then keep this flag true.
+	mInRange = IsUserDeviceInRange();
+
+#endif // CONFIG_ALIRO_BLE_UWB
 }
 
 bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey)
@@ -207,7 +207,8 @@ bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublic
 	LOG_DBG("Verifying public key against %u stored keys", mStoredKeyCount);
 
 	// Check if the user's public key matches any stored key
-	VerifyOrReturnFalse(IsPublicKeyStored(userPublicKey), LOG_DBG("No matching public key found"));
+	VerifyOrReturnFalse(IsPublicKeyStored(userPublicKey),
+			    LOG_INF("Provided User Device public key not found in Access Manager database"));
 
 	return true;
 }
@@ -222,18 +223,47 @@ bool AccessManagerImpl::IsPublicKeyStored(const CryptoTypes::PublicKey &userPubl
 	return false;
 }
 
-void AccessManagerImpl::AccessGrantedAction() const
+void AccessManagerImpl::UnlockAction() const
+{
+	VerifyAndCall(mCallbacks.mUnlockIndicatorClb);
+}
+
+void AccessManagerImpl::LockAction() const
+{
+	VerifyAndCall(mCallbacks.mLockIndicatorClb);
+}
+
+void AccessManagerImpl::AccessGrantedAction(bool isNfcSession) const
 {
 	LOG_INF("ACCESS GRANTED");
-	VerifyAndCall(mCallbacks.mAccessGrantedIndicatorClb);
+	VerifyAndCall(mCallbacks.mAccessIndicatorClb, true, isNfcSession);
 }
 
-void AccessManagerImpl::AccessDeniedAction() const
+void AccessManagerImpl::AccessDeniedAction(bool isNfcSession) const
 {
 	LOG_INF("ACCESS DENIED");
+	VerifyAndCall(mCallbacks.mAccessIndicatorClb, false, isNfcSession);
 }
 
-#ifdef CONFIG_ALIRO_BLE_TP
+bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
+{
+	VerifyOrReturnFalse(isNfcSession);
+
+#ifdef CONFIG_ALIRO_BLE_UWB
+
+	// For NFC sessions with UWB enabled, only unlock if not already in range
+	// This prevents double-unlocking when user is already detected via UWB
+	return !mInRange;
+
+#else // CONFIG_ALIRO_BLE_UWB
+
+	// For NFC sessions without UWB, always unlock immediately
+	return true;
+
+#endif // CONFIG_ALIRO_BLE_UWB
+}
+
+#ifdef CONFIG_ALIRO_BLE_UWB
 bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData)
 {
 	LOG_DBG("Analyzing UWB ranging data - length: %u", uwbData.mLength);
@@ -252,9 +282,9 @@ bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData)
 
 	// Check if distance is within acceptable range
 	VerifyOrReturnFalse(distance.value() <= mMaxAllowedDistance,
-			    LOG_DBG("Distance check failed - user device is too far"));
+			    LOG_DBG("Distance check failed - User Device is too far"));
 
-	LOG_DBG("Distance check passed, user device is within range");
+	LOG_DBG("Distance check passed, User Device is within range");
 	return true;
 }
 
@@ -266,7 +296,8 @@ std::optional<uint16_t> AccessManagerImpl::ExtractDistanceFromUwbData(const UwbR
 	return std::make_optional<uint16_t>(sys_get_be16(uwbData.mData));
 }
 
-AliroError AccessManagerImpl::AddRangingSession(const SessionContext sessionCtx)
+AliroError AccessManagerImpl::AddRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
+						const SessionContext sessionCtx)
 {
 	auto *newCtx = Aliro::new_nothrow<RangingSessionContext>(
 #ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
@@ -281,9 +312,22 @@ AliroError AccessManagerImpl::AddRangingSession(const SessionContext sessionCtx)
 	newCtx->mSessionContext = sessionCtx;
 
 	MutexGuard lock{ mMutex };
+
+	AliroError status =
+		Uwb::UltraWideBandImpl::Instance().ConfigureRangingSession(rangingSessionId, ursk, sessionCtx);
+	VerifyOrExit(status == ALIRO_NO_ERROR, LOG_ERR("Failed to configure ranging session: %d", status.ToInt()));
+
 	sys_slist_append(&mActiveSessions, &newCtx->mNode);
 
 	return ALIRO_NO_ERROR;
+
+exit:
+#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+	newCtx->mRangingSessionTimer.Stop();
+#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+	delete newCtx;
+
+	return status;
 }
 
 void AccessManagerImpl::RemoveRangingSession(SessionContext sessionCtx)
@@ -294,8 +338,12 @@ void AccessManagerImpl::RemoveRangingSession(SessionContext sessionCtx)
 	sys_snode_t *nodeSafe{ nullptr };
 	sys_snode_t *prevNode{ nullptr };
 
+	AliroError status = Uwb::UltraWideBandImpl::Instance().TerminateRangingSession(sessionCtx);
+	VerifyOrReturn(status == ALIRO_NO_ERROR || status == ALIRO_ERROR_NOT_IMPLEMENTED,
+		       LOG_ERR("Cannot terminate UWB ranging session: %d", status.ToInt()));
+
 	SYS_SLIST_FOR_EACH_NODE_SAFE (&mActiveSessions, node, nodeSafe) {
-		RangingSessionContext *ctx = CONTAINER_OF(node, RangingSessionContext, mSessionContext);
+		auto *ctx = CONTAINER_OF(node, RangingSessionContext, mNode);
 		if (ctx->mSessionContext == sessionCtx) {
 			sys_slist_remove(&mActiveSessions, prevNode, &ctx->mNode);
 #ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
@@ -342,6 +390,6 @@ void AccessManagerImpl::TerminateAliroSession(SessionContext sessionContext)
 	VerifyAndCall(mStackCallbacks.mTerminateSessionClb, sessionContext);
 }
 
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 } // namespace Aliro

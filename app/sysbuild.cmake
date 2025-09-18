@@ -5,13 +5,14 @@
 #
 
 if("matter" IN_LIST SNIPPET)
+
   if(SB_CONFIG_SOC_SERIES_NRF52X)
     set(PM_STATIC_YML_FILE ${CMAKE_CURRENT_LIST_DIR}/pm_static_nrf52840dk_nrf52840_matter.yml CACHE INTERNAL "")
-  elseif(SB_CONFIG_SOC_SERIES_NRF53X)
-    set(PM_STATIC_YML_FILE ${CMAKE_CURRENT_LIST_DIR}/pm_static_nrf5340dk_nrf5340_cpuapp_matter.yml CACHE INTERNAL "")
-  elseif(SB_CONFIG_SOC_SERIES_NRF54LX)
+  elseif(SB_CONFIG_SOC_NRF54L15)
     set(PM_STATIC_YML_FILE ${CMAKE_CURRENT_LIST_DIR}/pm_static_nrf54l15dk_nrf54l15_cpuapp_matter.yml CACHE INTERNAL "")
-  else()
+  elseif(SB_CONFIG_SOC_NRF54LM20A)
+    set(PM_STATIC_YML_FILE ${CMAKE_CURRENT_LIST_DIR}/pm_static_nrf54lm20dk_nrf54lm20a_cpuapp_matter.yml CACHE INTERNAL "")
+  elseif(NOT SB_CONFIG_SOC_SERIES_NRF53X)
     message(FATAL_ERROR "Unsupported SOC")
   endif()
 

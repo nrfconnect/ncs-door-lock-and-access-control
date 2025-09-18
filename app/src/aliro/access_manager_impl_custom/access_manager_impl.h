@@ -21,14 +21,14 @@ class AccessManagerImpl : public AccessManager {
 private:
 	friend class AccessManager;
 
-	AliroError _Init(const ApplicationCallbacks &callbacks);
+	void _SetApplicationCallbacks(const ApplicationCallbacks &callbacks);
 	void _SetStackCallbacks(const StackCallbacks &callbacks);
 	AliroError _VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
 					   SessionContext sessionContext);
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 	AliroError _StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 					SessionContext sessionContext);
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 	AliroError _AddPublicKey(const CryptoTypes::PublicKey &publicKey);
 	AliroError _RemovePublicKey(const CryptoTypes::PublicKey &publicKey);
 	void _ClearStoredKeys();

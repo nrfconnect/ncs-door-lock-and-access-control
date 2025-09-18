@@ -1460,82 +1460,6 @@ cluster ThreadNetworkDiagnostics = 53 {
   command access(invoke: manage) ResetCounts(): DefaultSuccess = 0;
 }
 
-/** The Wi-Fi Network Diagnostics Cluster provides a means to acquire standardized diagnostics metrics that MAY be used by a Node to assist a user or Administrative Node in diagnosing potential problems. */
-cluster WiFiNetworkDiagnostics = 54 {
-  revision 1;
-
-  enum AssociationFailureCauseEnum : enum8 {
-    kUnknown = 0;
-    kAssociationFailed = 1;
-    kAuthenticationFailed = 2;
-    kSsidNotFound = 3;
-  }
-
-  enum ConnectionStatusEnum : enum8 {
-    kConnected = 0;
-    kNotConnected = 1;
-  }
-
-  enum SecurityTypeEnum : enum8 {
-    kUnspecified = 0;
-    kNone = 1;
-    kWEP = 2 [spec_name = "WEP"];
-    kWPA = 3 [spec_name = "WPA"];
-    kWPA2 = 4 [spec_name = "WPA2"];
-    kWPA3 = 5 [spec_name = "WPA3"];
-  }
-
-  enum WiFiVersionEnum : enum8 {
-    kA = 0;
-    kB = 1;
-    kG = 2;
-    kN = 3;
-    kAc = 4;
-    kAx = 5;
-    kAh = 6;
-  }
-
-  bitmap Feature : bitmap32 {
-    kPacketCounts = 0x1;
-    kErrorCounts = 0x2;
-  }
-
-  info event Disconnection = 0 {
-    int16u reasonCode = 0;
-  }
-
-  info event AssociationFailure = 1 {
-    AssociationFailureCauseEnum associationFailureCause = 0;
-    int16u status = 1;
-  }
-
-  info event ConnectionStatus = 2 {
-    ConnectionStatusEnum connectionStatus = 0;
-  }
-
-  readonly attribute nullable octet_string<6> bssid = 0;
-  readonly attribute nullable SecurityTypeEnum securityType = 1;
-  readonly attribute nullable WiFiVersionEnum wiFiVersion = 2;
-  readonly attribute nullable int16u channelNumber = 3;
-  readonly attribute nullable int8s rssi = 4;
-  readonly attribute optional nullable int32u beaconLostCount = 5;
-  readonly attribute optional nullable int32u beaconRxCount = 6;
-  readonly attribute optional nullable int32u packetMulticastRxCount = 7;
-  readonly attribute optional nullable int32u packetMulticastTxCount = 8;
-  readonly attribute optional nullable int32u packetUnicastRxCount = 9;
-  readonly attribute optional nullable int32u packetUnicastTxCount = 10;
-  readonly attribute optional nullable int64u currentMaxRate = 11;
-  readonly attribute optional nullable int64u overrunCount = 12;
-  readonly attribute command_id generatedCommandList[] = 65528;
-  readonly attribute command_id acceptedCommandList[] = 65529;
-  readonly attribute attrib_id attributeList[] = 65531;
-  readonly attribute bitmap32 featureMap = 65532;
-  readonly attribute int16u clusterRevision = 65533;
-
-  /** This command is used to reset the count attributes. */
-  command ResetCounts(): DefaultSuccess = 0;
-}
-
 /** Accurate time is required for a number of reasons, including scheduling, display and validating security materials. */
 cluster TimeSynchronization = 56 {
   revision 2;
@@ -2958,7 +2882,6 @@ endpoint 0 {
     callback attribute lastNetworkingStatus;
     callback attribute lastNetworkID;
     callback attribute lastConnectErrorValue;
-    callback attribute supportedWiFiBands;
     callback attribute supportedThreadFeatures;
     callback attribute threadVersion;
     callback attribute generatedCommandList;
@@ -2969,7 +2892,6 @@ endpoint 0 {
 
     handle command ScanNetworks;
     handle command ScanNetworksResponse;
-    handle command AddOrUpdateWiFiNetwork;
     handle command AddOrUpdateThreadNetwork;
     handle command RemoveNetwork;
     handle command NetworkConfigResponse;
@@ -3088,24 +3010,6 @@ endpoint 0 {
     ram      attribute clusterRevision default = 3;
 
     handle command ResetCounts;
-  }
-
-  server cluster WiFiNetworkDiagnostics {
-    callback attribute bssid;
-    callback attribute securityType;
-    callback attribute wiFiVersion;
-    callback attribute channelNumber;
-    callback attribute rssi;
-    callback attribute beaconRxCount;
-    callback attribute packetMulticastRxCount;
-    callback attribute packetMulticastTxCount;
-    callback attribute packetUnicastRxCount;
-    callback attribute packetUnicastTxCount;
-    callback attribute generatedCommandList;
-    callback attribute acceptedCommandList;
-    callback attribute attributeList;
-    ram      attribute featureMap default = 1;
-    ram      attribute clusterRevision default = 0x0001;
   }
 
   server cluster TimeSynchronization {

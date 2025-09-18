@@ -6,6 +6,7 @@
 
 config ACCESS_DECISION_INDICATOR
 	bool "Enable access decision indicator"
+	default y if !CHIP
 
 config RESET_ACCESS_DECISION_INDICATOR_STATE_DELAY_MS
 	int "Access decision indicator reset state delay (ms)"

@@ -19,22 +19,22 @@
 namespace Aliro {
 
 /**
- * @brief Length of the reader group identifier.
+ * @brief Length of the Reader group identifier.
  */
 constexpr size_t kReaderGroupIdentifierLength{ 16 };
 
 /**
- * @brief Length of the reader group sub-identifier.
+ * @brief Length of the Reader group sub-identifier.
  */
 constexpr size_t kReaderGroupSubIdentifierLength{ 16 };
 
 /**
- * @brief Length of the reader identifier.
+ * @brief Length of the Reader identifier.
  */
 constexpr size_t kReaderIdentifierLength{ kReaderGroupIdentifierLength + kReaderGroupSubIdentifierLength };
 
 /**
- * @brief Type alias for reader identifier.
+ * @brief Type alias for Reader identifier.
  */
 using Identifier = std::array<uint8_t, kReaderIdentifierLength>;
 
@@ -74,6 +74,20 @@ namespace Aliro::CryptoTypes {
 using KeyId = uint32_t;
 
 /**
+ * @brief Length of an ECC P-256 private key.
+ *
+ * The number of bytes used for the private key.
+ */
+constexpr size_t kEccP256KeyPrivateKeyLength{ 32 };
+
+/**
+ * @brief Length of the signing key.
+ *
+ * The number of bytes used for the signing key.
+ */
+constexpr size_t kReaderSigningKeyLength{ kEccP256KeyPrivateKeyLength };
+
+/**
  * @brief ECC P-256 public key prefix byte.
  *
  * The standard prefix byte (0x04) used to indicate an uncompressed
@@ -99,9 +113,9 @@ constexpr size_t kEccP256KeySingleCoordinateLength{ 32 };
 /**
  * @brief Length of the ECC P-256 signature.
  *
- * Signature is two times longer than the key.
+ * Aliro spec. 8.3.1.2 Generate transaction data signature procedure.
  */
-constexpr size_t kEccP256SignatureLength{ 2 * kEccP256KeySingleCoordinateLength };
+constexpr size_t kEccP256SignatureLength{ 64 };
 
 /**
  * @brief Total length of an ECC P-256 public key.
@@ -166,10 +180,11 @@ using PublicKey = std::array<uint8_t, kEccP256PublicKeyLength>;
  *
  * A fixed-size array that can hold a complete ECC P-256 private key.
  */
-using PrivateKey = std::array<uint8_t, kEccP256KeySingleCoordinateLength>;
+using PrivateKey = std::array<uint8_t, kEccP256KeyPrivateKeyLength>;
 
 /**
  * @brief Type alias for Ultra-wideband Ranging Session Key (URSK).
+ * @brief Type alias for ultra wideband Ranging Session Key (URSK).
  *
  * A fixed-size array that holds the URSK used for UWB ranging sessions.
  * URSK is stored in plaintext and has the standard symmetric key length.
@@ -203,7 +218,7 @@ using GroupResolvingKey = std::array<uint8_t, kGroupResolvingKeyLength>;
 
 /**
  * Helper structure for representing symmetric session-bounds key IDs (respective):
- * - ExpeditedSKReader - used for reader's messages encryption, when secure channel is established.
+ * - ExpeditedSKReader - used for Reader's messages encryption, when secure channel is established.
  * - ExpeditedSKDevice - used for user device messages decryption, when secure channel is established.
  * - StepUpSK - used for derive StepUpSKDevice and StepUpSKReader keys to protect Step-up phase.
  * - BleSK - used to protect a ultra wideband (UWB) session setup commands.

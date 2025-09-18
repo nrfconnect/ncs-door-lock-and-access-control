@@ -18,7 +18,7 @@ typedef struct {
 	bool in_use;
 } ncs_pal_timer_t;
 
-static ncs_pal_timer_t timers[CONFIG_PAL_MAX_TIMERS_NUM];
+static ncs_pal_timer_t timers[CONFIG_RFAL_MAX_TIMERS_NUM];
 
 uint32_t ncs_pal_get_sys_tick()
 {
@@ -33,7 +33,7 @@ static void timer_expiry_callback(struct k_timer *timer)
 void ncs_pal_timers_init()
 {
 	int timer_id = 0;
-	for (timer_id = 0; timer_id < CONFIG_PAL_MAX_TIMERS_NUM; timer_id++) {
+	for (timer_id = 0; timer_id < CONFIG_RFAL_MAX_TIMERS_NUM; timer_id++) {
 		k_timer_init(&timers[timer_id].timer, timer_expiry_callback, NULL);
 		timers[timer_id].in_use = false;
 	}
@@ -43,7 +43,7 @@ void ncs_pal_timers_init()
 int ncs_pal_timer_create(uint16_t time_ms)
 {
 	int timer_id = 0;
-	for (timer_id = 0; timer_id < CONFIG_PAL_MAX_TIMERS_NUM; timer_id++) {
+	for (timer_id = 0; timer_id < CONFIG_RFAL_MAX_TIMERS_NUM; timer_id++) {
 		if (!timers[timer_id].in_use) {
 			k_timer_start(&timers[timer_id].timer, K_MSEC(time_ms), K_NO_WAIT);
 			timers[timer_id].in_use = true;
@@ -58,7 +58,7 @@ int ncs_pal_timer_create(uint16_t time_ms)
 
 bool ncs_pal_timer_is_expired(uint8_t timer_id)
 {
-	if (!IN_RANGE(timer_id, 1, CONFIG_PAL_MAX_TIMERS_NUM)) {
+	if (!IN_RANGE(timer_id, 1, CONFIG_RFAL_MAX_TIMERS_NUM)) {
 		LOG_DBG("Invalid timer ID %d", timer_id);
 		return true;
 	}
@@ -71,7 +71,7 @@ bool ncs_pal_timer_is_expired(uint8_t timer_id)
 
 void ncs_pal_timer_destroy(uint8_t timer_id)
 {
-	if (!IN_RANGE(timer_id, 1, CONFIG_PAL_MAX_TIMERS_NUM)) {
+	if (!IN_RANGE(timer_id, 1, CONFIG_RFAL_MAX_TIMERS_NUM)) {
 		LOG_DBG("Invalid timer ID %d", timer_id);
 		return;
 	}
@@ -89,7 +89,7 @@ void ncs_pal_delay(uint16_t delay_ms)
 
 uint32_t ncs_pal_timer_get_remaining(uint8_t timer_id)
 {
-	if (!IN_RANGE(timer_id, 1, CONFIG_PAL_MAX_TIMERS_NUM)) {
+	if (!IN_RANGE(timer_id, 1, CONFIG_RFAL_MAX_TIMERS_NUM)) {
 		LOG_DBG("Invalid timer ID %d", timer_id);
 		return 0;
 	}

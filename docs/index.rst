@@ -14,7 +14,7 @@ Aliro features several key features that distinguish it from existing access pro
 * Interoperability and compatibility - Ensures seamless interaction between access readers, such as electronic locks and access control readers, and User Devices like a smartphone and wearables.
   The standardized solution allows manufacturer-independent devices and readers to work together without compromising security.
 * Flexibility - Does not dictate how your digital door lock or access control reader connects to the rest of your ecosystem.
-* Protocol support - Supports various transport protocols, including mandatory Near Field Communication (NFC), Bluetooth® LE or Bluetooth LE with Ultra-Wideband (UWB).
+* Protocol support - Supports various transport protocols, including mandatory Near Field Communication (NFC), Bluetooth® LE or Bluetooth LE with ultra wideband (UWB).
 
 .. toctree::
    :maxdepth: 1
@@ -27,6 +27,7 @@ Aliro features several key features that distinguish it from existing access pro
    software_requirements.rst
    building_and_running.rst
    testing.rst
+   firmware_update.rst
    troubleshooting.rst
    release_notes.rst
    known_issues.rst

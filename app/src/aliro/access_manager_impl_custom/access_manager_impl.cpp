@@ -12,10 +12,9 @@ LOG_MODULE_REGISTER(access_manager_impl_custom, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEV
 
 namespace Aliro {
 
-AliroError AccessManagerImpl::_Init(const ApplicationCallbacks &)
+void AccessManagerImpl::_SetApplicationCallbacks(const ApplicationCallbacks &)
 {
-	LOG_INF("AccessManagerImpl custom init");
-	return ALIRO_ERROR_NOT_IMPLEMENTED;
+	LOG_INF("AccessManagerImpl custom set application callbacks");
 }
 
 void AccessManagerImpl::_SetStackCallbacks(const StackCallbacks &)
@@ -29,13 +28,13 @@ AliroError AccessManagerImpl::_VerifyAccessCredential(const CryptoTypes::PublicK
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-#ifdef CONFIG_ALIRO_BLE_TP
+#ifdef CONFIG_ALIRO_BLE_UWB
 AliroError AccessManagerImpl::_StartRangingSession(uint32_t, const CryptoTypes::Ursk &, SessionContext)
 {
 	LOG_INF("AccessManagerImpl custom start ranging session");
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
-#endif // CONFIG_ALIRO_BLE_TP
+#endif // CONFIG_ALIRO_BLE_UWB
 
 AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &)
 {

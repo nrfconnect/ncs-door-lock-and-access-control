@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-config PAL_MAX_TIMERS_NUM
+config RFAL_MAX_TIMERS_NUM
     int "Maximum number of timers used by RFAL"
     default 10
     help
@@ -30,3 +30,8 @@ config RFAL_WORKER_THREAD_PRIORITY
 config RFAL_WORKER_THREAD_STACK_SIZE
     int "Stack size of the thread that the RFAL worker lives in"
     default 4096
+
+config RFAL_SINGLE_SPI_BUS
+    bool "Configure SPI bus to work with multiple devices on the same bus"
+    help
+        Enable this option to share the SPI bus with other devices.

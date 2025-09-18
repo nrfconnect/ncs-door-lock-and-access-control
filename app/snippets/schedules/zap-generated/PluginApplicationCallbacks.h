@@ -30,7 +30,6 @@ void MatterDiagnosticLogsPluginServerInitCallback();
 void MatterGeneralDiagnosticsPluginServerInitCallback();
 void MatterSoftwareDiagnosticsPluginServerInitCallback();
 void MatterThreadNetworkDiagnosticsPluginServerInitCallback();
-void MatterWiFiNetworkDiagnosticsPluginServerInitCallback();
 void MatterTimeSynchronizationPluginServerInitCallback();
 void MatterAdministratorCommissioningPluginServerInitCallback();
 void MatterOperationalCredentialsPluginServerInitCallback();
@@ -50,7 +49,6 @@ void MatterDoorLockPluginServerInitCallback();
 	MatterGeneralDiagnosticsPluginServerInitCallback();                                                            \
 	MatterSoftwareDiagnosticsPluginServerInitCallback();                                                           \
 	MatterThreadNetworkDiagnosticsPluginServerInitCallback();                                                      \
-	MatterWiFiNetworkDiagnosticsPluginServerInitCallback();                                                        \
 	MatterTimeSynchronizationPluginServerInitCallback();                                                           \
 	MatterAdministratorCommissioningPluginServerInitCallback();                                                    \
 	MatterOperationalCredentialsPluginServerInitCallback();                                                        \

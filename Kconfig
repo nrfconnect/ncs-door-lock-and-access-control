@@ -15,39 +15,42 @@ menuconfig NCS_ALIRO
 	imply POLL
 	# storage
 	imply SETTINGS
-	imply NVS
 	imply FLASH
 	imply FLASH_MAP
+	imply REQUIRES_FULL_LIBCPP
+	imply REQUIRES_FULL_LIBC
+	imply NEWLIB_LIBC_NANO
 	help
 	  This option enables the Aliro reader stack.
 
 if NCS_ALIRO
 
-rsource "lib/aliro/interfaces/logger/Kconfig"
+orsource "lib/aliro/interfaces/logger/Kconfig"
 
-config ALIRO_BLE_TP
-	bool "Aliro BLE transport"
+config ALIRO_BLE_UWB
+	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
 	help
 	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
-	  used by Reader to communicate with the User Device. It is used to send and
-	  receive packets over BLE.
+	  used by the Reader to communicate with the User Device. It is used to send and
+	  receive packets over BLE. Additionally the UWB is enabled in order to manage the
+	  ranging between the Reader and the User Device.
 
 config DISABLE_ALIRO_NFC_TP
 	bool "Disable NFC transport protocol for development purposes"
 	help
 	  Disable the NFC transport protocol. This is useful if you want to use Aliro with BLE only.
 
-if ALIRO_BLE_TP
+if ALIRO_BLE_UWB
 
-config ALIRO_BLE_TP_MAX_SESSIONS
-	int "Maximum number of BLE sessions"
+config ALIRO_BLE_UWB_MAX_SESSIONS
+	int "Maximum number of BLE and UWB sessions"
 	default BT_MAX_CONN
 	help
-	  The maximum number of BLE sessions that can be established.
+	  The maximum number of BLE and UWB sessions that can be established.
 
 rsource "lib/aliro/Kconfig.ble.defconfig"
 
-endif # ALIRO_BLE_TP
+endif # ALIRO_BLE_UWB
 
 rsource "lib/aliro/Kconfig.defconfig"
 
