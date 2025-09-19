@@ -4,30 +4,28 @@ sample:
 common:
   sysbuild: true
   build_only: true
-  platform_allow: &platforms
-    - nrf54l15dk/nrf54l15/cpuapp
-    - nrf52840dk/nrf52840
-    - nrf5340dk/nrf5340/cpuapp
-  integration_platforms: *platforms
 tests:
-  app.nfc_door_lock: {}
+  app.nfc_door_lock:
+    platform_allow: &platforms_all
+      - nrf52840dk/nrf52840
+      - nrf5340dk/nrf5340/cpuapp
+      - nrf54l15dk/nrf54l15/cpuapp
+      - nrf54lm20dk/nrf54lm20a/cpuapp
+    integration_platforms: *platforms_all
   app.door_lock_ble_uwb:
-    platform_allow:
+    platform_allow: &platforms_uwb
       - nrf5340dk/nrf5340/cpuapp
-    integration_platforms:
-      - nrf5340dk/nrf5340/cpuapp
+    integration_platforms: *platforms_uwb
     extra_args:
       - app_SNIPPET=uwb_qm35
   app.nfc_door_lock.matter:
-    platform_allow: *platforms
-    integration_platforms: *platforms
+    platform_allow: *platforms_all
+    integration_platforms: *platforms_all
     extra_args:
       - SNIPPET=matter
   app.door_lock_ble_uwb.matter:
-    platform_allow:
-      - nrf5340dk/nrf5340/cpuapp
-    integration_platforms:
-      - nrf5340dk/nrf5340/cpuapp
+    platform_allow: *platforms_uwb
+    integration_platforms: *platforms_uwb
     extra_args:
       - SNIPPET=matter
       - app_SNIPPET=uwb_qm35
