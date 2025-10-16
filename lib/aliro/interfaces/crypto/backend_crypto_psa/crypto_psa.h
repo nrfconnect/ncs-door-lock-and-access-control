@@ -35,11 +35,8 @@ protected:
 	AliroError _DeriveSessionKeys(CryptoTypes::KeyId kDh, const uint8_t *info, size_t infoLength,
 				      const uint8_t *salt, size_t saltLength,
 				      CryptoTypes::SessionBoundKeys &sessionVolatileKeys);
-	AliroError _DeriveSessionKeysFromKpersistent(CryptoTypes::KeyId kpersistentKeyId, const uint8_t *info,
-						     size_t infoLength, const uint8_t *salt, size_t saltLength,
-						     CryptoTypes::SessionBoundKeys &sessionVolatileKeys);
-	AliroError _DeriveBleSessionKey(CryptoTypes::KeyId inputKeyId, const uint8_t *info, size_t infoLength,
-					const uint8_t *salt, size_t saltLength, CryptoTypes::KeyId &outputKeyId);
+	AliroError _DeriveSymmetricKey(CryptoTypes::KeyId inputKeyId, const uint8_t *info, size_t infoLength,
+				       const uint8_t *salt, size_t saltLength, CryptoTypes::KeyId &outputKeyId);
 	AliroError _DeriveKpersistent(CryptoTypes::KeyId inputKeyId, const uint8_t *info, size_t infoLength,
 				      const uint8_t *salt, size_t saltLength, CryptoTypes::KeyId &outputKeyId);
 	AliroError _EncryptPayload(CryptoTypes::KeyId keyId, const uint8_t *plainTxt, size_t plainTxtLength,
@@ -54,6 +51,7 @@ protected:
 	AliroError _ProvisionSymmetricKey(const uint8_t *key, size_t keyLength, CryptoTypes::KeyId &keyId,
 					  bool isPersistent = false);
 	AliroError _IsKeyValid(CryptoTypes::KeyId keyId) const;
+	AliroError _Sha256(const uint8_t *data, size_t dataLength, CryptoTypes::Sha256Hash &hash) const;
 };
 
 } /* namespace Aliro */

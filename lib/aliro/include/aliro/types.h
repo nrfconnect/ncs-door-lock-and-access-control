@@ -9,6 +9,7 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 
 /**
  * @brief Aliro specific common types definitions.
@@ -217,19 +218,66 @@ using AuthenticationTag = std::array<uint8_t, kAuthenticationTagLength>;
 using GroupResolvingKey = std::array<uint8_t, kGroupResolvingKeyLength>;
 
 /**
+ * @brief Length of the key identifier.
+ */
+constexpr size_t kKeyIdentifierLength{ 8 };
+
+/**
+ * @brief Type alias for key identifier ("kid").
+ */
+using KeyIdentifier = std::array<uint8_t, kKeyIdentifierLength>;
+
+/**
+ * @brief Length of the SHA-256 hash.
+ */
+constexpr size_t kSha256HashLength{ 32 };
+
+/**
+ * @brief Type alias for SHA-256 hash.
+ */
+using Sha256Hash = std::array<uint8_t, kSha256HashLength>;
+
+/**
  * Helper structure for representing symmetric session-bounds key IDs (respective):
- * - ExpeditedSKReader - used for Reader's messages encryption, when secure channel is established.
- * - ExpeditedSKDevice - used for user device messages decryption, when secure channel is established.
- * - StepUpSK - used for derive StepUpSKDevice and StepUpSKReader keys to protect Step-up phase.
- * - BleSK - used to protect a ultra wideband (UWB) session setup commands.
- * - URSK - as a UWB Ranging Secret Key (URSK).
+ * - SkReader - used for Reader's messages encryption, when secure channel is established.
+ * - SkDevice - used for User Device messages decryption, when secure channel is established.
+ * - StepUpSK - used for derive StepUpSKDevice and StepUpSKReader keys to protect Step-up phase. Available only for
+ * Expedited-standard phase.
+ * - BleSK - used to protect a ultra wideband (UWB) session setup commands. Available only for BLE session.
+ * - URSK - as a UWB Ranging Secret Key (URSK). Available only for BLE session.
+ *
+ * NOTE: CryptogramSK and StepUpSK cannot be derived during the same Access Protocol session.
+ * CryptogramSK is valid only for Expedited-fast phase and StepUpSK is valid only for Step-up-phase
+ * that requires the Expedited-standard (not fast) phase as a prerequisite.
  */
 struct SessionBoundKeys {
-	KeyId mExpeditedSkReader{};
-	KeyId mExpeditedSkDevice{};
-	KeyId mStepUpSk{};
-	KeyId mBleSk{};
-	Ursk mUrsk{};
+	KeyId mSkReader{};
+	KeyId mSkDevice{};
+	std::optional<KeyId> mStepUpSk{};
+	std::optional<KeyId> mBleSk{};
+	std::optional<Ursk> mUrsk{};
 };
 
 } // namespace Aliro::CryptoTypes
+
+namespace Aliro::AccessDocumentTypes {
+
+/**
+ * @brief Document type.
+ */
+enum class DocumentType {
+	Access,
+	Revocation,
+};
+
+/**
+ * @brief Structure representing an access document data.
+ * The mPublicKey is the public key retrieved from the IssuerAuth structure in the Access Document.
+ * The mDataElement contains data elements (IssuerSignedItems) retrieved from the Access Document.
+ */
+struct AccessDocument {
+	CryptoTypes::PublicKey mPublicKey;
+	Data mDataElement;
+};
+
+} // namespace Aliro::AccessDocumentTypes

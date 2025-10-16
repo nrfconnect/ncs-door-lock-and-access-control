@@ -1,0 +1,22 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config MAX_NUMBER_OF_KPERSISTENT
+    int "Maximum number of supported Kpersistent keys"
+    depends on DOOR_LOCK_EXPEDITED_FAST_PHASE
+    default ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS if CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
+    range 1 ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS if CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
+    default 255
+    range 1 255
+    help
+      Specifies the maximum number of Kpersistent keys
+      that can be supported in the Expedited-fast Phase.
+
+config TRUSTED_STORAGE
+    default y
+
+config PSA_PROTECTED_STORAGE
+    default y

@@ -53,6 +53,10 @@
 };
 
 / {
+	chosen {
+		nordic,pm-ext-flash = &mx25r64;
+	};
+
 	psa_rng: psa-rng {
 		compatible = "zephyr,psa-crypto-rng";
 		status = "okay";
@@ -61,4 +65,8 @@
 	aliases {
 		access-decision-indicator = &led1; // green LED2 on nRF52840DK
 	};
+};
+
+&mx25r64 {
+	status = "okay";
 };

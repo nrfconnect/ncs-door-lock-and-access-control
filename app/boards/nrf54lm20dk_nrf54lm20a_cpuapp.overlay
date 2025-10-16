@@ -40,27 +40,23 @@
 };
 
 / {
-	nfc_power_switch: nfc_power_switch {
-		status = "okay";
-		compatible = "nfc-power-control";
-		gpios = <&gpio1 22 ( GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN )>;
+
+	/* Disable button0 to align with the nRF54L15DK.
+	It also allows to use the button with the same label (1) on all supported dev kits. */
+	buttons {
+		/delete-node/ button_0;
 	};
 
-	access_decision_indicator: access_decision_indicator{
-		status = "okay";
-		compatible = "access-decision-indicator";
-		gpios = <&gpio1 25 GPIO_ACTIVE_HIGH>;
-	};
-
-	/* Disable led0 to avoid collision with NFC power switch. */
-	leds {
-		/delete-node/ led_0;
-	};
 
 	aliases {
-		/delete-property/ led0;
+		/delete-property/ sw0;
 		access-decision-indicator = &led1; // green LED1 on nRF54LM20DK
 	};
+
+	chosen {
+		nordic,pm-ext-flash = &mx25r64;
+	};
+
 };
 
 &gpio0 {
@@ -68,5 +64,9 @@
 };
 
 &gpio1 {
+	status = "okay";
+};
+
+&mx25r64 {
 	status = "okay";
 };

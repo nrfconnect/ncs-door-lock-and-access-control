@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "storage_keys.h"
+
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
@@ -16,6 +18,8 @@
  */
 class KeyValueStorage {
 public:
+	using KeyIdString = const char *const;
+
 	static KeyValueStorage &Instance()
 	{
 		static KeyValueStorage sKeyValueStorage;
@@ -53,6 +57,16 @@ public:
 	 * @return 0 when key has read, the -ENODATA when key does not exist or error code otherwise.
 	 */
 	int Get(const char *keyName, uint8_t *buf, size_t bufLength);
+
+	/**
+	 * @brief Converts a string key name to a key name in storage.
+	 *
+	 * @param keyIdString input name of key.
+	 * @param keyId input id of key.
+	 *
+	 * @return a key name.
+	 */
+	static Aliro::StorageKeys::KeyNameBuffer GetStorageKeyName(KeyIdString keyIdString, size_t keyId);
 
 private:
 	KeyValueStorage() = default;

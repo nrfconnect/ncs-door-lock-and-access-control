@@ -1,0 +1,11 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+module = NCS_ALIRO_BLE
+module-str = ALIRO_BLE
+module-dep = LOG
+module-help = Enables Aliro BLE platform log messages.
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"

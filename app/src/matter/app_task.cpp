@@ -11,6 +11,10 @@
 #include "app/matter_init.h"
 #include "app/task_executor.h"
 
+#ifdef CONFIG_CHIP_NUS
+#include "bt_nus/bt_nus_service.h"
+#endif
+
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <app/clusters/door-lock-server/door-lock-server.h>
 #include <app/clusters/identify-server/identify-server.h>
@@ -29,6 +33,12 @@ using namespace ::chip::DeviceLayer;
 
 namespace {
 constexpr EndpointId kLockEndpointId{ 1 };
+
+#ifdef CONFIG_CHIP_NUS
+constexpr uint16_t kAdvertisingIntervalMin{ 400 };
+constexpr uint16_t kAdvertisingIntervalMax{ 500 };
+constexpr uint8_t kLockNUSPriority{ 2 };
+#endif
 
 #define APPLICATION_BUTTON_MASK DK_BTN2_MSK
 
@@ -86,17 +96,29 @@ void AppTask::LockStateChanged(const BoltLockManager::StateData &stateData)
 	case BoltLockManager::State::kLockingInitiated:
 		LOG_INF("Lock action initiated");
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Blink(50, 50);
+#ifdef CONFIG_CHIP_NUS
+		Nrf::GetNUSService().SendData("locking", sizeof("locking"));
+#endif
 		break;
 	case BoltLockManager::State::kLockingCompleted:
 		LOG_INF("Lock action completed");
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Set(true);
+#ifdef CONFIG_CHIP_NUS
+		Nrf::GetNUSService().SendData("locked", sizeof("locked"));
+#endif
 		break;
 	case BoltLockManager::State::kUnlockingInitiated:
 		LOG_INF("Unlock action initiated");
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Blink(50, 50);
+#ifdef CONFIG_CHIP_NUS
+		Nrf::GetNUSService().SendData("unlocking", sizeof("unlocking"));
+#endif
 		break;
 	case BoltLockManager::State::kUnlockingCompleted:
 		LOG_INF("Unlock action completed");
+#ifdef CONFIG_CHIP_NUS
+		Nrf::GetNUSService().SendData("unlocked", sizeof("unlocked"));
+#endif
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Set(false);
 		break;
 	}
@@ -178,6 +200,31 @@ void AppTask::UpdateClusterStateHandler(const BoltLockManager::StateData &stateD
 	}
 }
 
+#ifdef CONFIG_CHIP_NUS
+void AppTask::NUSLockCallback(void *context)
+{
+	LOG_DBG("Received LOCK command from NUS");
+	if (BoltLockMgr().GetState().mState == BoltLockManager::State::kLockingCompleted ||
+	    BoltLockMgr().GetState().mState == BoltLockManager::State::kLockingInitiated) {
+		LOG_INF("Device is already locked");
+		return;
+	}
+
+	Nrf::PostTask([] { LockActionEventHandler(); });
+}
+
+void AppTask::NUSUnlockCallback(void *context)
+{
+	LOG_DBG("Received UNLOCK command from NUS");
+	if (BoltLockMgr().GetState().mState == BoltLockManager::State::kUnlockingCompleted ||
+	    BoltLockMgr().GetState().mState == BoltLockManager::State::kUnlockingInitiated) {
+		LOG_INF("Device is already unlocked");
+	} else {
+		Nrf::PostTask([] { LockActionEventHandler(); });
+	}
+}
+#endif
+
 #ifdef CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS
 CHIP_ERROR AppTask::DoorLockJammedEventCallback(Nrf::Matter::TestEventTrigger::TriggerValue)
 {
@@ -209,6 +256,18 @@ CHIP_ERROR AppTask::Init()
 
 	/* Initialize lock manager */
 	BoltLockMgr().Init(LockStateChanged);
+
+#ifdef CONFIG_CHIP_NUS
+	/* Initialize Nordic UART Service for Lock purposes */
+	if (!Nrf::GetNUSService().Init(kLockNUSPriority, kAdvertisingIntervalMin, kAdvertisingIntervalMax)) {
+		ChipLogError(Zcl, "Cannot initialize NUS service");
+	}
+	Nrf::GetNUSService().RegisterCommand("Lock", sizeof("Lock"), NUSLockCallback, nullptr);
+	Nrf::GetNUSService().RegisterCommand("Unlock", sizeof("Unlock"), NUSUnlockCallback, nullptr);
+	if (!Nrf::GetNUSService().StartServer()) {
+		LOG_ERR("GetNUSService().StartServer() failed");
+	}
+#endif
 
 	/* Register Door Lock test event trigger */
 #ifdef CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS

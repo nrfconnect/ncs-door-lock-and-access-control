@@ -26,4 +26,9 @@ template <typename T, typename... Args> std::unique_ptr<T> make_unique_nothrow(A
 	return std::unique_ptr<T>(new_nothrow<T>(std::forward<Args>(args)...));
 }
 
+template <typename T> std::unique_ptr<T[]> make_unique_array_nothrow(size_t n) noexcept
+{
+	return std::unique_ptr<T[]>(new_array_nothrow<T>(n));
+}
+
 } // namespace Aliro

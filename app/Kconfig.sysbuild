@@ -15,7 +15,7 @@ config NETCORE_IPC_RADIO_BT_HCI_IPC
 
 #### Bootloader
 choice BOOTLOADER
-    default BOOTLOADER_MCUBOOT if MATTER || SOC_SERIES_NRF53X
+    default BOOTLOADER_MCUBOOT
 endchoice
 
 if BOOTLOADER_MCUBOOT
@@ -27,6 +27,9 @@ endchoice
 choice BOOT_SIGNATURE_TYPE
 	default BOOT_SIGNATURE_TYPE_ECDSA_P256
 endchoice
+
+config PM_EXTERNAL_FLASH_MCUBOOT_SECONDARY
+    default y
 
 if SOC_SERIES_NRF53X
 
@@ -40,9 +43,6 @@ config NETCORE_APP_UPDATE
     default y
 
 config MCUBOOT_NRF53_MULTI_IMAGE_UPDATE
-    default y
-
-config PM_EXTERNAL_FLASH_MCUBOOT_SECONDARY
     default y
 
 endif # SOC_SERIES_NRF53X

@@ -4,8 +4,32 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+config DOOR_LOCK_EXPEDITED_FAST_PHASE
+    bool "Support for Aliro Expedited-fast Phase"
+    default n
+    help
+        If enabled, the Expedited-fast phase is supported.
+        The user authentication is based on the Kpersistent keys.
+
+config DOOR_LOCK_STEP_UP_PHASE
+    bool "Support for Aliro Step-up Phase"
+    default n
+    help
+        If enabled, the Step-up phase is supported.
+        The user authentication is based on the Access Document.
+
 rsource "platform/Kconfig"
+
+config ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS
+    int "Maximum number of stored public keys"
+    default 5
+    help
+      Specifies the maximum number of public keys that can be
+      stored in the AccessManager. This determines the size of
+      the statically allocated array for key storage.
 
 if ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
 rsource "access_manager_impl_default/Kconfig"
 endif
+
+rsource "kpersistent_manager/Kconfig"

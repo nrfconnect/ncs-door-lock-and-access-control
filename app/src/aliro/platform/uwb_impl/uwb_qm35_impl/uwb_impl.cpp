@@ -22,7 +22,7 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/byteorder.h>
 
-LOG_MODULE_REGISTER(uwb, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(UwbImpl, CONFIG_NCS_ALIRO_UWB_LOG_LEVEL);
 
 namespace {
 
