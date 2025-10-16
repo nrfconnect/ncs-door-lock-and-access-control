@@ -6,11 +6,13 @@
 
 #pragma once
 
+#include <zephyr/sys/byteorder.h>
+#include <zephyr/sys/util.h>
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
-
-#include <zephyr/bluetooth/uuid.h>
+#include <cstring>
 
 /**
  * @brief Aliro BLE-specific type definitions.
@@ -21,9 +23,38 @@
 namespace Aliro::BleTypes {
 
 /**
+ * @brief Enumeration for the type of advertising data field.
+ *
+ * This enumeration maps to Bluetooth LE advertising data types as defined in
+ * @ref zephyr/include/zephyr/bluetooth/gap.h. Each type determines the format
+ * and content of the advertising data payload.
+ * @note This enumeration contains only the types that are supposed to be used by Aliro and door-lock application.
+ */
+enum class AdvertisingDataFieldType : uint8_t {
+
+	Uuid16, /// Service data with 16-bit UUID.
+	Uuid16All, /// Complete list of 16-bit service UUIDs.
+	Uuid32, /// Service data with 32-bit UUID.
+	Uuid32All, /// Complete list of 32-bit service UUIDs.
+	Uuid128, /// Service data with 128-bit UUID.
+	Uuid128All, /// Complete list of 128-bit service UUIDs.
+};
+
+/**
+ * @brief Constant representing the size of the BLE address.
+ */
+constexpr size_t kBleAddressSize{ 6 };
+
+/**
+ * @typedef BleAddress
+ * @brief Type alias for representing a BLE address.
+ */
+using BleAddress = std::array<uint8_t, kBleAddressSize>;
+
+/**
  * @brief Aliro Service UUID assigned by Bluetooth SIG.
  */
-constexpr bt_uuid_16 kAliroServiceUuid = BT_UUID_INIT_16(0xFFF2);
+constexpr uint16_t kAliroServiceUuid = 0xFFF2;
 
 /**
  * @brief Constant representing the size of the expiry time.
@@ -146,7 +177,7 @@ struct AdvertisingServiceData {
 	 */
 	void SetDynamicTag(const uint8_t *dynamicTag);
 
-} __packed;
+} __attribute__((packed));
 
 /**
  * @brief Aliro service structure for BLE advertising.
@@ -155,11 +186,10 @@ struct AdvertisingServiceData {
  * included in BLE advertising packets.
  */
 struct AdvertisingService {
-	// Service UUID in BLE format (little-endian).
-	uint8_t Uuid[2]{ BT_UUID_16_ENCODE(kAliroServiceUuid.val) };
+	// Aliro Service UUID assigned by Bluetooth SIG.
+	uint8_t Uuid[2] = sys_uint16_to_array(kAliroServiceUuid);
 
-	// Service data payload.
 	AdvertisingServiceData mAdvertisingServiceData{};
-} __packed;
+} __attribute__((packed));
 
 } // namespace Aliro::BleTypes

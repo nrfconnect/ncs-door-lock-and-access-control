@@ -27,23 +27,33 @@ void BoltLockManager::Init(StateChangeCallback callback)
 		.mLockIndicatorClb = [] { BoltLockMgr().Lock(BoltLockManager::OperationSource::kAliro); },
 	});
 
-	auto addPublicKey = []([[maybe_unused]] uint16_t credentialIndex, CredentialTypeEnum credentialType,
+	auto addPublicKey = [](uint16_t credentialIndex, CredentialTypeEnum credentialType,
 			       chip::ByteSpan credentialData) {
+		Aliro::CryptoTypes::PublicKey publicKey{};
+		std::copy_n(credentialData.data(), publicKey.size(), publicKey.data());
+
 		if (credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey ||
 		    credentialType == CredentialTypeEnum::kAliroNonEvictableEndpointKey) {
-			Aliro::CryptoTypes::PublicKey publicKey{};
-			std::copy_n(credentialData.data(), publicKey.size(), publicKey.data());
-			Aliro::AccessManagerInstance().AddPublicKey(publicKey);
+			Aliro::AccessManagerInstance().AddPublicKey(
+				publicKey, Aliro::AccessManager::PublicKeyType::AccessCredential, credentialIndex);
+		} else if (credentialType == CredentialTypeEnum::kAliroCredentialIssuerKey) {
+			Aliro::AccessManagerInstance().AddPublicKey(
+				publicKey, Aliro::AccessManager::PublicKeyType::CredentialIssuer);
 		}
 	};
 
 	auto removePublicKey = []([[maybe_unused]] uint16_t credentialIndex, CredentialTypeEnum credentialType,
 				  chip::ByteSpan credentialData) {
+		Aliro::CryptoTypes::PublicKey publicKey{};
+		std::copy_n(credentialData.data(), publicKey.size(), publicKey.data());
+
 		if (credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey ||
 		    credentialType == CredentialTypeEnum::kAliroNonEvictableEndpointKey) {
-			Aliro::CryptoTypes::PublicKey publicKey{};
-			std::copy_n(credentialData.data(), publicKey.size(), publicKey.data());
-			Aliro::AccessManagerInstance().RemovePublicKey(publicKey);
+			Aliro::AccessManagerInstance().RemovePublicKey(
+				publicKey, Aliro::AccessManager::PublicKeyType::AccessCredential);
+		} else if (credentialType == CredentialTypeEnum::kAliroCredentialIssuerKey) {
+			Aliro::AccessManagerInstance().RemovePublicKey(
+				publicKey, Aliro::AccessManager::PublicKeyType::CredentialIssuer);
 		}
 	};
 

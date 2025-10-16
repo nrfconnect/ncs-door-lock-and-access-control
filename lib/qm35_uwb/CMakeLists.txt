@@ -11,37 +11,37 @@ zephyr_include_directories(
 )
 
 zephyr_library_import(aliro_uwb_adapter
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libaliro_uwb_adapter.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libaliro_uwb_adapter.a
 )
 
 zephyr_library_import(cherry_core_impl
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libcherry_core_impl.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libcherry_core_impl.a
 )
 
 zephyr_library_import(cherry_uci_core_client
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libcherry_uci_core_client.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libcherry_uci_core_client.a
 )
 
 zephyr_library_import(cherry_ccc_impl
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libcherry_ccc_impl.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libcherry_ccc_impl.a
 )
 
 zephyr_library_import(cherry_uci_ccc_client
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libcherry_uci_ccc_client.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libcherry_uci_ccc_client.a
 )
 
 zephyr_library_import(hsspi
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libhsspi.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libhsspi.a
 )
 
 zephyr_library_import(qmutils
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libqmutils.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libqmutils.a
 )
 
 zephyr_library_import(qosal
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libqosal.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libqosal.a
 )
 
 zephyr_library_import(uci
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/libuci.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libuci.a
 )

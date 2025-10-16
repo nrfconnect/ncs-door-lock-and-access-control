@@ -9,6 +9,8 @@
 #include "aliro/errors.h"
 #include "aliro/types.h"
 
+#include <limits>
+
 namespace Aliro {
 
 class AccessManagerImpl;
@@ -27,6 +29,11 @@ public:
 	using LockIndicatorCallback = void (*)();
 	using AccessIndicatorCallback = void (*)(bool isAccessGranted, bool isNfcSession);
 	using TerminateSessionCallback = void (*)(SessionContext sessionContext);
+
+	enum class PublicKeyType : uint8_t {
+		AccessCredential = 0,
+		CredentialIssuer = 1,
+	};
 
 	/**
 	 * @brief Application callbacks.
@@ -83,16 +90,40 @@ public:
 	void SetStackCallbacks(const StackCallbacks &callbacks);
 
 	/**
-	 * @brief Verifies the access credential based on provided inputs.
+	 * @brief Checks if the document for a given public key should be requested.
+	 *
+	 * @param userPublicKey The User Device public key.
+	 *
+	 * @return True if the access document should be requested, false otherwise.
+	 */
+	bool ShouldRequestAccessDocument(const CryptoTypes::PublicKey &userPublicKey);
+
+	/**
+	 * @brief Verifies the Access Credential based on provided inputs.
 	 *
 	 * @param userPublicKey The User Device public key to verify.
+	 * @param isNfcSession Indicates if the session is a NFC session.
+	 * @param sessionContext A pointer to the session context.
+	 * @param accessDocument The access document provided by the User Device.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError
+	VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
+			       SessionContext sessionContext,
+			       const std::optional<AccessDocumentTypes::AccessDocument> &accessDocument = std::nullopt);
+
+	/**
+	 * @brief Verifies the Kpersistent key based on provided inputs.
+	 *
+	 * @param kpersistentKeyId The Kpersistent key ID to verify.
 	 * @param isNfcSession Indicates if the session is a NFC session.
 	 * @param sessionContext A pointer to the session context.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
-					  SessionContext sessionContext);
+	AliroError VerifyKPersistentKey(CryptoTypes::KeyId kpersistentKeyId, bool isNfcSession,
+					SessionContext sessionContext);
 
 #ifdef CONFIG_ALIRO_BLE_UWB
 	/**
@@ -112,19 +143,56 @@ public:
 	 * @brief Add a new public key to the AccessManager.
 	 *
 	 * @param publicKey The User Device public key to add.
+	 * @param publicKeyType The type of the public key.
+	 * @param keyIndex The index of the public key in the storage.
+	 * @note If provided, the key will be added to the specified index.
+	 * @note If not provided, the key will be added to the first free index.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError AddPublicKey(const CryptoTypes::PublicKey &publicKey);
+	AliroError AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType,
+				std::optional<size_t> keyIndex = std::nullopt);
+
+	/**
+	 * @brief Check if a public key is stored in the AccessManager.
+	 *
+	 * @param publicKey The public key to check.
+	 * @param keyIndex The index of the public key in the storage if the public key is stored.
+	 *
+	 * @return True if the public key is stored, false otherwise.
+	 */
+	bool IsPublicKeyStored(const CryptoTypes::PublicKey &publicKey, size_t *keyIndex = nullptr);
+
+	/**
+	 * @brief Get a public key from the AccessManager by its index.
+	 *
+	 * @param keyIndex The index of the public key in the storage.
+	 * @param publicKey The public key to get.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code on failure.
+	 */
+	AliroError GetPublicKey(size_t keyIndex, CryptoTypes::PublicKey &publicKey);
 
 	/**
 	 * @brief Remove a public key from the AccessManager.
 	 *
 	 * @param publicKey The User Device public key to remove.
+	 * @param publicKeyType The type of the public key.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError RemovePublicKey(const CryptoTypes::PublicKey &publicKey);
+	AliroError RemovePublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType);
+
+	/**
+	 * @brief Get a Credential Issuer public key by its identifier.
+	 *
+	 * @param keyIdentifier The key identifier of the Credential Issuer public key.
+	 * @param publicKey The public key to get.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code on failure.
+	 */
+	AliroError GetCredentialIssuerPublicKey(const CryptoTypes::KeyIdentifier &keyIdentifier,
+						CryptoTypes::PublicKey &publicKey) const;
 
 	/**
 	 * @brief Clear all stored public keys.

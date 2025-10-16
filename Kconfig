@@ -44,6 +44,7 @@ if ALIRO_BLE_UWB
 
 config ALIRO_BLE_UWB_MAX_SESSIONS
 	int "Maximum number of BLE and UWB sessions"
+	range 1 BT_MAX_CONN
 	default BT_MAX_CONN
 	help
 	  The maximum number of BLE and UWB sessions that can be established.
@@ -53,5 +54,17 @@ rsource "lib/aliro/Kconfig.ble.defconfig"
 endif # ALIRO_BLE_UWB
 
 rsource "lib/aliro/Kconfig.defconfig"
+
+config DOOR_LOCK_DFU_BLE_SMP 
+    bool "Enable DFU over SMP"
+    depends on !CHIP
+    help
+      Enables Device Firmware Upgrade over Bluetooth LE.
+
+config DOOR_LOCK_BLE_NUS
+    bool "Enable Nordic Uart Service (NUS)"
+    depends on !CHIP
+    help
+      Enables the Bluetooth LE Nordic Uart Service (NUS). Using NUS service you can control a door lock using pre-defined BLE commands.
 
 endif # NCS_ALIRO

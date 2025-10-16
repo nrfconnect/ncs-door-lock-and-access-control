@@ -6,6 +6,7 @@
 .. _`ncs-door-lock-app`: https://github.com/nrfconnect/ncs-door-lock-app
 .. _`Aliro Certification Tool`: https://github.com/csa-access-control/aliro-certification-tool
 .. _`Aliro Certification Test Tool for GTE#2` : https://github.com/csa-access-control/aliro-certification-tool/releases/tag/release%2Fgating_test_event2-2025-aliro_specification_v0.9.3-v1.0
+.. _`Aliro Certification Test Tool dry-run/sve-2025-v1.1` : https://github.com/csa-access-control/aliro-certification-tool/releases/tag/dry-run%2Fsve-2025-v1.1
 .. _`test harness hardware requirements`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#requirements
 .. _`test harness usage instructions`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#usage-instructions
 .. _`running test scripts`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#c---creating-a-test-run-running-test-scripts
@@ -52,14 +53,20 @@
 .. _`Matter over Thread tools`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/getting_started/tools.html#matter_over_thread_tools
 .. _`Matter chip-tool guide`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/matter/chip_tool_guide.html
 .. _`Matter testing`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/getting_started/testing/index.html#ug-matter-configuring
+.. _`Matter testing with Apple, Google, and Samsung ecosystems`: https://devzone.nordicsemi.com/nordic/nordic-blog/b/blog/posts/matter-testing-nrf-connect-sdk-platform-with-apple-google-and-samsung-ecosystems-218911247
 .. _`Matter end product`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/end_product/index.html
 .. _`Matter door lock`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/lock/README.html
 .. _`Matter door lock remote access`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/lock/README.html#testing_remote_access_with_pin_code_credential
+.. _`Matter door lock NUS`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/lock/README.html#matter_bluetooth_le_with_nordic_uart_service
 .. _`Matter marketing note`: https://www.nordicsemi.com/Products/Technologies/Matter
 .. _`Matter fork release`: https://github.com/nrfconnect/sdk-connectedhomeip/releases/tag/v3.1.0
 .. _`Thread Border Router`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#thread_border_router
 .. _`Thread radio co-processor`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#configuring_a_radio_co-processor
 .. _`Running OTBR using Docker`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#running_otbr_using_docker
+.. _`nRF Toolbox mobile application`: https://www.nordicsemi.com/Products/Development-tools/nRF-Toolbox
+
+.. _`DFU over Bluetooth LE using device manager app` : https://academy.nordicsemi.com/courses/nrf-connect-sdk-intermediate/lessons/lesson-9-bootloaders-and-dfu-fota/topic/exercise-5-fota-over-bluetooth-low-energy/
+.. _`DFU over Bluetooth LE using newt manager tool` : https://mynewt.apache.org/latest/tutorials/devmgmt/ota_upgrade_nrf52.html
 
 .. #### Development-Tools
 
@@ -67,6 +74,8 @@
 .. _`Installing Board Configurator app`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/installing.html
 .. _`Updating the board configuration`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/updating.html
 .. _`Serial Terminal app`: https://docs.nordicsemi.com/bundle/nrf-connect-serial-terminal/page/index.html
+.. _`nRF device manager`: https://www.nordicsemi.com/Products/Development-tools/nrf-connect-device-manager
+.. _`Newt manager`: https://github.com/apache/mynewt-newtmgr
 
 .. ### External: boards and IC documentation links
 

@@ -9,6 +9,7 @@
 #include "aliro/errors.h"
 #include "aliro/protocol_version.h"
 #include "aliro/types.h"
+#include "kpersistent_manager/kpersistent_manager.h"
 
 #ifdef CONFIG_ALIRO_BLE_UWB
 #include "aliro/ble_types.h"
@@ -25,17 +26,17 @@ struct AliroConfig {
 	 */
 	bool mEnableNfc{ true };
 
+	/**
+	 * @brief The Kpersistent manager needed for the Expedited-fast phase.
+	 */
+	[[maybe_unused]] KpersistentManager *mKpersistentManager{};
+
 #ifdef CONFIG_ALIRO_BLE_UWB
 
 	/**
-	 * @brief The maximum number of BLE sessions.
+	 * @brief The BLE interface.
 	 */
-	size_t mMaxBleSessions{ 1 };
-
-	/**
-	 * @brief The BLE advertising interface.
-	 */
-	BleInterface::BleAdvertisingIfc *mBleAdvertising{};
+	BleInterface::BleIfc *mBle{};
 
 #endif // CONFIG_ALIRO_BLE_UWB
 };

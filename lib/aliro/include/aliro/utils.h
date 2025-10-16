@@ -8,7 +8,6 @@
 
 #include <zephyr/sys/__assert.h>
 
-#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -162,18 +161,6 @@ template <class T> constexpr std::underlying_type_t<T> ToUnderlying(T e)
 inline bool IsBufferEmpty(const uint8_t *data, size_t length)
 {
 	return (data == nullptr) || (length == 0);
-}
-
-/**
- * @brief Check if a std::array is default initialized (all zeros).
- *
- * @param arr The array to check
- *
- * @return true if the array is default initialized, false otherwise
- */
-template <typename T, size_t N> bool IsArrayDefaultInitialized(const std::array<T, N> &arr)
-{
-	return std::all_of(arr.begin(), arr.end(), [](T x) { return x == T{}; });
 }
 
 /**

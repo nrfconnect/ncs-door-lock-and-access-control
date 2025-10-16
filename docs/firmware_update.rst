@@ -146,3 +146,48 @@ The following steps will guide you through the complete OTA update process:
    .. note::
       The update process can take several minutes depending on the firmware size and network conditions.
       Do not power off the device during the update process.
+
+
+.. _dfu_ble_smp:
+
+DFU over Bluetooth LE SMP
+*************************
+
+The DFU over Bluetooth LE Simple Management Protocol (SMP) allows for seamless firmware updates on devices using the SMP protocol over a Bluetooth LE connection.
+By building the application with the ``-Dapp_SNIPPET=dfu_smp`` option, you can enable this feature and update your device's firmware wirelessly.
+
+.. note::
+   For applications without Matter support, DFU over Bluetooth LE SMP is supported only on the nRF5340 DK.
+   To build Matter applications with DFU over Bluetooth LE SMP, add the ``-DCONFIG_CHIP_DFU_OVER_BT_SMP=y`` option to the build command.
+
+Enabling Bluetooth LE SMP advertising
+=====================================
+
+When the application is built with the ``-DCONFIG_ALIRO_BLE_UWB=y`` option, the Bluetooth LE SMP advertising is enabled by default.
+
+For the NFC-only applications, you can enable the Bluetooth LE SMP advertising by pressing a **Button 1** on the device to start or stop SMP advertising.
+
+Alternatively, if Matter is not enabled, you can run the following shell command:
+
+   .. code-block:: console
+
+      dl dfu_smp_adv on
+
+   To stop advertising, run:
+
+   .. code-block:: console
+
+      dl dfu_smp_adv off
+
+Updating firmware
+=================
+
+Before initiating the OTA update process, ensure that the new application is built with a higher version number than the currently running version.
+You can configure it in the :file:`app/VERSION` file.
+There following methods are recommended for performing a firmware update over Bluetooth LE:
+
+*  Using the `nRF Device Manager`_ - This application provides a user-friendly interface for performing DFU updates.
+   See the Nordic Developer Academy course on `DFU over Bluetooth LE using device manager app`_.
+
+*  Using the `Newt Manager`_ - This method allows you to perform DFU updates directly from the terminal.
+   For details, see `DFU over Bluetooth LE using newt manager tool`_.

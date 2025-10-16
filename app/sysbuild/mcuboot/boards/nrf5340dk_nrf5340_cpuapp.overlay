@@ -15,3 +15,7 @@
 &gpio_fwd {
 	status = "disabled";
 };
+
+&mx25r64 {
+	status = "okay";
+};

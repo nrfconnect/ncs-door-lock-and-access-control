@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_BT_NUS_MAX_COMMAND_LEN
+	int "Maximum length of single command in Bytes"
+	default 10
+	help
+	  Maximum length of single command. This command will be sent via Bluetooth LE to
+	  a paired smart door lock.
+
+config DOOR_LOCK_BT_NUS_FIXED_PASSKEY
+	int "Define the default passkey for NUS"
+	depends on BT_FIXED_PASSKEY
+	default 123456
+	help
+	  Define the default password for pairing with the Bluetooth LE device.
+
+config DOOR_LOCK_BT_NUS_MAX_COMMANDS
+	int "Define maximum NUS commands amount"
+	default 1
+	help
+	  Define the maximum number of NUS commands to declare by user.

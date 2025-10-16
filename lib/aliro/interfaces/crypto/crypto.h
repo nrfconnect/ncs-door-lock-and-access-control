@@ -105,7 +105,8 @@ public:
 	 * @param volatileKeyId input identifier of the volatile key.
 	 * @param persistentKeyId input identifier of the persistent key.
 	 *
-	 * @return ALIRO_NO_ERROR on success, error status otherwise.
+	 * @return ALIRO_NO_ERROR on success, ALIRO_KEY_ALREADY_EXISTS if the key already exists, other error status
+	 * otherwise.
 	 */
 	AliroError PreserveKey(CryptoTypes::KeyId &volatileKeyId, CryptoTypes::KeyId persistentKeyId);
 
@@ -158,7 +159,7 @@ public:
 	 *
 	 * @param privKeyId input identifier of private key id to use in procedure.
 	 * @param publicKey input user device public key to use in procedure.
-	 * @param transacionId input Transaction identifier.
+	 * @param transactionId input Transaction identifier.
 	 * @param keyDhId output identifier of the agreed key.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
@@ -173,9 +174,10 @@ public:
 	 * This function generates 160 bytes of derived key material and extracts from it symmetric keys:
 	 * - ExpeditedSKReader
 	 * - ExpeditedSKDevice
-	 * - StepUpSK
-	 * - BleSK
-	 * - URSK
+	 * - StepUpSK (optional)
+	 * - BleSK (optional)
+	 * - URSK (optional)
+	 * - CryptogramSK (optional)
 	 *
 	 * @param kDh input identifier of the secret key.
 	 * @param info input information for key derivation.
@@ -191,30 +193,7 @@ public:
 				     CryptoTypes::SessionBoundKeys &sessionVolatileKeys);
 
 	/**
-	 * Derive session keys using Kpersistent.
-	 * Aliro spec chapter 8.3.1.10.
-	 * This function generates 160 bytes of derived key material and extracts from it symmetric keys:
-	 * - ExpeditedSKReader
-	 * - ExpeditedSKDevice
-	 * - StepUpSK
-	 * - BleSK
-	 * - URSK
-	 *
-	 * @param kpersistentKeyId input identifier of the secret key.
-	 * @param info input information for key derivation.
-	 * @param infoLength input size of the info buffer.
-	 * @param salt input a salt for key derivation.
-	 * @param saltLength input size of the salt buffer.
-	 * @param sessionVolatileKeys output bunch of session-bound keys.
-	 *
-	 * @return ALIRO_NO_ERROR on success, error status otherwise.
-	 */
-	AliroError DeriveSessionKeysFromKpersistent(CryptoTypes::KeyId kpersistentKeyId, const uint8_t *info,
-						    size_t infoLength, const uint8_t *salt, size_t saltLength,
-						    CryptoTypes::SessionBoundKeys &sessionVolatileKeys);
-
-	/**
-	 * Derive 32-bytes long BLE session key according to Aliro spec. v0.9.3 11.8.1
+	 * Derive 32-bytes long symmetric key.
 	 *
 	 * @param inputKeyId input identifier of the secret key.
 	 * @param info input information for key derivation.
@@ -225,8 +204,8 @@ public:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError DeriveBleSessionKey(CryptoTypes::KeyId inputKeyId, const uint8_t *info, size_t infoLength,
-				       const uint8_t *salt, size_t saltLength, CryptoTypes::KeyId &outputKeyId);
+	AliroError DeriveSymmetricKey(CryptoTypes::KeyId inputKeyId, const uint8_t *info, size_t infoLength,
+				      const uint8_t *salt, size_t saltLength, CryptoTypes::KeyId &outputKeyId);
 
 	/**
 	 * Derive persistent key.
@@ -340,6 +319,17 @@ public:
 	 * @return ALIRO_NO_ERROR if the key available, a error code otherwise.
 	 */
 	AliroError IsKeyValid(CryptoTypes::KeyId keyId);
+
+	/**
+	 * @brief Computes the SHA-256 hash of the data.
+	 *
+	 * @param data The data to compute the hash of.
+	 * @param dataLength The length of the data.
+	 * @param hash The computed SHA-256 hash of the data.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error status otherwise.
+	 */
+	AliroError Sha256(const uint8_t *data, size_t dataLength, CryptoTypes::Sha256Hash &hash);
 
 protected:
 	Crypto() = default;

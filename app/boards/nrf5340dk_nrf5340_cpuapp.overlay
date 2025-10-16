@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-/{
+/ {
+	chosen {
+		nordic,pm-ext-flash = &mx25r64;
+	};
+
 	aliases {
 		access-decision-indicator = &led1; // green LED2 on nRF5340DK
 	};
@@ -47,8 +51,6 @@
 	};
 };
 
-/ {
-	chosen {
-		nordic,pm-ext-flash = &mx25r64;
-	};
+&mx25r64 {
+	status = "okay";
 };

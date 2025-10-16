@@ -233,9 +233,9 @@ AliroError NfcTransportRfal::_Send(Data data, [[maybe_unused]] uint32_t maximumF
 
 AliroError NfcTransportRfal::_NfcOn() const
 {
-	// The RF field is turned right after the STR25 boots
-	// The only thing that must be done is to activate the reader
-	// by starting tag discovery procedure.
+	VerifyOrReturnStatus(NfcTransportRfal::Instance().RfalNfcInit() == RFAL_ERR_NONE, ALIRO_ERROR_INTERNAL,
+			     LOG_ERR("RFAL: NFC initialization failed"));
+
 	ReturnCode err = rfalNfcDiscover(&mNfcConfig);
 	VerifyOrReturnStatus(err == RFAL_ERR_NONE, ALIRO_ERROR_INTERNAL,
 			     LOG_ERR("RFAL: NFC discovery failed, return code: %d", err));

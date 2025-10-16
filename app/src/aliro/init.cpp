@@ -17,11 +17,12 @@
 #endif // CONFIG_DOOR_LOCK_USE_TEST_KEYS
 
 #ifdef CONFIG_ALIRO_BLE_UWB
-#include "ble_impl.h"
+#include "ble_manager_impl.h"
 #endif // CONFIG_ALIRO_BLE_UWB
 
 #include "access_manager/access_manager.h"
 #include "crypto_key_ids.h"
+#include "kpersistent_manager/kpersistent_manager_impl.h"
 #include "shell.h"
 #include "storage.h"
 #include "storage_keys.h"
@@ -48,30 +49,55 @@ constexpr Identifier kTestIdentifier{ 0x37, 0x65, 0x20, 0x39, 0x31, 0x20, 0x61, 
 
 #endif // CONFIG_DOOR_LOCK_USE_TEST_READER_IDENTIFIER
 
-AliroError LoadAccessCredentials()
+AliroError LoadCredentials(KeyValueStorage::KeyIdString pubKeyName, size_t KeyNum, size_t &keyCount)
 {
-	size_t keyCount{};
+	const auto publicKeyType = (pubKeyName == StorageKeys::kStorageKeyNameAccessCredentialPublicKey) ?
+					   AccessManager::PublicKeyType::AccessCredential :
+					   AccessManager::PublicKeyType::CredentialIssuer;
 
-	for (size_t keyId = 0; keyId < CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS; keyId++) {
-		StorageKeys::KeyNameBuffer keyName;
-		snprintf(keyName.data(), keyName.size(), "%s/%u", StorageKeys::kStorageKeyNameAccessCredentialPublicKey,
-			 keyId);
+	for (size_t keyId = 0; keyId < KeyNum; keyId++) {
+		const auto keyName = KeyValueStorage::GetStorageKeyName(pubKeyName, keyId);
 
 		CryptoTypes::PublicKey pubKey{};
-
 		int ec = KeyValueStorage::Instance().Get(keyName.data(), pubKey.data(), pubKey.size());
 		VerifyOrReturnStatus(ec == 0 || ec == -ENODATA, ALIRO_ERROR_INTERNAL,
-				     LOG_ERR("Cannot get user device public key, error code: %d", ec));
+				     LOG_ERR("Cannot get %s/%d public key, error code: %d", pubKeyName, keyId, ec));
 		if (ec == 0) {
-			AliroError err = AccessManagerInstance().AddPublicKey(pubKey);
+			AliroError err = AccessManagerInstance().AddPublicKey(pubKey, publicKeyType, keyId);
 			VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot set public key."));
 			++keyCount;
 		}
 	}
 
+	return ALIRO_NO_ERROR;
+}
+
+AliroError LoadAccessCredentials()
+{
+	size_t keyCount{};
+	ReturnErrorOnFailure(LoadCredentials(StorageKeys::kStorageKeyNameAccessCredentialPublicKey,
+					     CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS, keyCount));
+
 	if (keyCount == 0) {
 		LOG_INF("No Access Credential public keys available");
 	}
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError LoadIssuerCredentials()
+{
+#if CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+
+	size_t keyCount{};
+	ReturnErrorOnFailure(LoadCredentials(StorageKeys::kStorageKeyNameIssuerCredentialPublicKey,
+					     CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS, keyCount));
+
+	if (keyCount == 0) {
+		LOG_INF("No Credential Issuer public keys available");
+	}
+
+#endif // CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 
 	return ALIRO_NO_ERROR;
 }
@@ -161,6 +187,9 @@ AliroError StorageInit()
 	AliroError err = LoadAccessCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Access Credentials"));
 
+	err = LoadIssuerCredentials();
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Issuer Credentials"));
+
 	CryptoTypes::KeyId privateKeyId{ 0 };
 	CryptoTypes::KeyId groupResolvingKeyId{ 0 };
 	err = LoadReaderKeys(privateKeyId, groupResolvingKeyId);
@@ -177,6 +206,12 @@ AliroError StorageInit()
 }
 
 #endif // CONFIG_CHIP
+
+#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
+KpersistentManagerImpl sKpersistentManagerImpl;
+
+#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
 } // namespace
 
@@ -195,10 +230,15 @@ int AliroInit()
 		.mEnableNfc = false,
 #endif // CONFIG_DISABLE_ALIRO_NFC_TP
 
+#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
+		.mKpersistentManager = &sKpersistentManagerImpl,
+
+#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
 #ifdef CONFIG_ALIRO_BLE_UWB
 
-		.mMaxBleSessions = CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS,
-		.mBleAdvertising = &BleInterface::BleAdvertisingImpl::Instance(),
+		.mBle = &BleInterface::BleManagerImpl::Instance(),
 
 #endif // CONFIG_ALIRO_BLE_UWB
 	};
@@ -224,6 +264,10 @@ int AliroInit()
 					  isNfcSession ? "NFC" : "BLE/UWB");
 			  } });
 
+#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+	AccessManagerInstanceImpl().SetKpersistentManager(&sKpersistentManagerImpl);
+#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
 	ec = StorageInit();
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Storage initialization failed"));
 
@@ -231,7 +275,7 @@ int AliroInit()
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack start failed"));
 #endif // CONFIG_CHIP
 
-	RegisterShellCommands();
+	InitShellCommands();
 
 	LOG_INF("Aliro stack initialized");
 

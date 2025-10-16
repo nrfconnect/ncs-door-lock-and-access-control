@@ -143,6 +143,12 @@ endchoice
 config SHELL_CMD_BUFF_SIZE
 	default 256
 
+config ZCBOR
+	default y
+
+config ZCBOR_CANONICAL
+	default y
+
 if !CHIP
 
 config MAIN_STACK_SIZE
