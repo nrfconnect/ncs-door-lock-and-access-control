@@ -14,64 +14,90 @@ namespace Aliro {
 
 void AccessManagerImpl::_SetApplicationCallbacks(const ApplicationCallbacks &)
 {
-	LOG_INF("AccessManagerImpl custom set application callbacks");
+	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
 void AccessManagerImpl::_SetStackCallbacks(const StackCallbacks &)
 {
-	LOG_INF("AccessManagerImpl custom set stack callbacks");
+	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
-AliroError AccessManagerImpl::_VerifyAccessCredential(const CryptoTypes::PublicKey &, bool, SessionContext)
+AliroError AccessManagerImpl::_VerifyAccessCredential(const CryptoTypes::PublicKey &, bool, SessionContext,
+						      const std::optional<AccessDocumentTypes::AccessDocument> &)
 {
-	LOG_INF("AccessManagerImpl custom verify access credential");
+	LOG_INF("Custom %s function", __FUNCTION__);
+	return ALIRO_ERROR_NOT_IMPLEMENTED;
+}
+
+AliroError AccessManagerImpl::_VerifyKPersistentKey(CryptoTypes::KeyId, bool, SessionContext)
+{
+	LOG_INF("Custom %s function", __FUNCTION__);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
 #ifdef CONFIG_ALIRO_BLE_UWB
 AliroError AccessManagerImpl::_StartRangingSession(uint32_t, const CryptoTypes::Ursk &, SessionContext)
 {
-	LOG_INF("AccessManagerImpl custom start ranging session");
+	LOG_INF("Custom %s function", __FUNCTION__);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 #endif // CONFIG_ALIRO_BLE_UWB
 
-AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &)
+AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &, PublicKeyType, std::optional<size_t>)
 {
-	LOG_INF("AccessManagerImpl custom add public key");
+	LOG_INF("Custom %s function", __FUNCTION__);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-AliroError AccessManagerImpl::_RemovePublicKey(const CryptoTypes::PublicKey &)
+AliroError AccessManagerImpl::_GetCredentialIssuerPublicKey(const CryptoTypes::KeyIdentifier &,
+							    CryptoTypes::PublicKey &) const
 {
-	LOG_INF("AccessManagerImpl custom remove public key");
+	LOG_INF("Custom %s function", __FUNCTION__);
+	return ALIRO_ERROR_NOT_IMPLEMENTED;
+}
+
+bool AccessManagerImpl::_IsPublicKeyStored(const CryptoTypes::PublicKey &, size_t *)
+{
+	LOG_INF("Custom %s function", __FUNCTION__);
+	return false;
+}
+
+AliroError AccessManagerImpl::_GetPublicKey(size_t, CryptoTypes::PublicKey &)
+{
+	LOG_INF("Custom %s function", __FUNCTION__);
+	return ALIRO_ERROR_NOT_IMPLEMENTED;
+}
+
+AliroError AccessManagerImpl::_RemovePublicKey(const CryptoTypes::PublicKey &, PublicKeyType)
+{
+	LOG_INF("Custom %s function", __FUNCTION__);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
 void AccessManagerImpl::_ClearStoredKeys()
 {
-	LOG_INF("AccessManagerImpl custom clear stored keys");
+	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
 void AccessManagerImpl::_SetMaxAllowedDistance(uint32_t)
 {
-	LOG_INF("AccessManagerImpl custom set max allowed distance");
+	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
 uint32_t AccessManagerImpl::_GetMaxAllowedDistance()
 {
-	LOG_INF("AccessManagerImpl custom get max allowed distance");
+	LOG_INF("Custom %s function", __FUNCTION__);
 	return 0;
 }
 
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext, const UwbRangingData &)
 {
-	LOG_INF("AccessManagerImpl custom handle ranging session data");
+	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
 void AccessManagerImpl::_HandleSessionTermination(SessionContext)
 {
-	LOG_INF("AccessManagerImpl custom handle session termination");
+	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
 } // namespace Aliro

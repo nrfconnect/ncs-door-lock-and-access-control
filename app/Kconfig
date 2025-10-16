@@ -56,6 +56,10 @@ config DOOR_LOCK_USE_TEST_KEYS
 
 rsource "src/aliro/Kconfig"
 
+if DOOR_LOCK_BLE_NUS
+rsource "src/bt_nus/Kconfig"
+endif # DOOR_LOCK_BLE_NUS
+
 if CHIP
 
 rsource "src/matter/Kconfig"

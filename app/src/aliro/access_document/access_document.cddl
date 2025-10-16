@@ -1,0 +1,80 @@
+;
+; Copyright (c) 2025 Nordic Semiconductor ASA
+;
+; SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+;
+; CDDL definitions for Aliro Access Document based on Aliro Specification v0.9.4
+;
+
+AccessData = {
+    AccessData_Version => uint,
+    ? AccessData_ID => bstr .size (1..16),
+    ? AccessData_AccessRules => [1*8 AccessRule],
+    ? AccessData_Schedules => [1*8 any], ; Schedules not supported
+    ? AccessData_ReaderRuleIds => [1*8 uint .size 2],
+    ? AccessData_NonAccessExtensions => {+ Vendor_RegisteredID => [+ NonAccessExtension] },
+    ? AccessData_AccessExtensions => {+ Vendor_RegisteredID => [+ AccessExtension] }
+}
+
+AccessData_Version = 0
+AccessData_ID = 1
+AccessData_AccessRules = 2
+AccessData_Schedules = 3
+AccessData_ReaderRuleIds = 4
+AccessData_NonAccessExtensions = 5
+AccessData_AccessExtensions = 6
+
+AccessRule = {
+    ? AccessRule_Capabilities => uint .bits AccessRuleCapabilitiesBits,
+    ? AccessRule_AllowScheduleIds => any, ; Schedules not supported
+    ? AccessRule_DenyScheduleIds => any   ; Schedules not supported
+}
+
+AccessRule_Capabilities = 0
+AccessRule_AllowScheduleIds = 1
+AccessRule_DenyScheduleIds = 2
+
+AccessRuleCapabilitiesBits = &(
+    Secure : 0,
+    Unsecure : 1,
+    Toggle_Secured_or_Unsecured : 2,
+    Momentary_Unsecure : 3,
+    Extended_Momentary_Unsecure : 4,
+    Payment_Permission : 5,
+    RFU_6 : 6,
+    RFU_7 : 7,
+    RFU_8 : 8,
+    RFU_9 : 9,
+    RFU_10 : 10,
+    RFU_11 : 11,
+    RFU_12 : 12,
+    RFU_13 : 13,
+    RFU_14 : 14,
+    RFU_15 : 15
+)
+
+NonAccessExtension = [
+    Vendor_ExtensionID : uint,
+    Version : uint,
+    Data : bstr
+]
+
+AccessExtension = [
+    Criticality : uint .bits Criticality_Bits,
+    Vendor_ExtensionID : uint,
+    Version : uint,
+    Data : bstr
+]
+
+Criticality_Bits = &(
+    Critical : 0,
+    RFU_1 : 1,
+    RFU_2 : 2,
+    RFU_3 : 3,
+    RFU_4 : 4,
+    RFU_5 : 5,
+    RFU_6 : 6,
+    RFU_7 : 7
+)
+
+Vendor_RegisteredID = uint .size 3

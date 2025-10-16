@@ -8,23 +8,38 @@
 #pragma once
 
 #include "access_manager/access_manager.h"
+#include "kpersistent_manager/kpersistent_manager.h"
 
 #ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 #include "aliro/timer.h"
 #endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 
+#include <zephyr/kernel.h>
+
 #include <array>
 #include <cstring>
 #include <optional>
 
-#include <zephyr/kernel.h>
-
 namespace Aliro {
 
 class AccessManagerImpl final : public AccessManager {
+public:
+	void SetKpersistentManager(KpersistentManager *kpersistentManager) { mKpersistentManager = kpersistentManager; }
+
 private:
 	friend class AccessManager;
 	friend AccessManager &AccessManagerInstance();
+	friend AccessManagerImpl &AccessManagerInstanceImpl();
+
+	/**
+	 * @brief A template for storing keys.
+	 *
+	 * @tparam MaxKeys The maximum number of keys to store.
+	 */
+	template <size_t MaxKeys> struct StoredKeys {
+		std::array<std::optional<CryptoTypes::PublicKey>, MaxKeys> mKeys{};
+		size_t mCount{ 0 };
+	};
 
 	/**
 	 * @brief Get an instance of the the AccessManagerImpl.
@@ -52,16 +67,30 @@ private:
 	void _SetStackCallbacks(const StackCallbacks &callbacks);
 
 	/**
-	 * @brief Verifies the access credential based on provided inputs.
+	 * @brief Verifies the Access Credential based on provided inputs.
 	 *
 	 * @param userPublicKey The User Device public key to verify.
+	 * @param isNfcSession Indicates if the session is a NFC session.
+	 * @param sessionContext A pointer to the session context.
+	 * @param accessDocument The access document provided by the User Device.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError _VerifyAccessCredential(
+		const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession, SessionContext sessionContext,
+		const std::optional<AccessDocumentTypes::AccessDocument> &accessDocument = std::nullopt);
+
+	/**
+	 * @brief Verifies the Kpersistent key based on provided inputs.
+	 *
+	 * @param kpersistentKeyId The Kpersistent key ID to verify.
 	 * @param isNfcSession Indicates if the session is a NFC session.
 	 * @param sessionContext A pointer to the session context.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError _VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
-					   SessionContext sessionContext);
+	AliroError _VerifyKPersistentKey(CryptoTypes::KeyId kpersistentKeyId, bool isNfcSession,
+					 SessionContext sessionContext);
 
 #ifdef CONFIG_ALIRO_BLE_UWB
 	/**
@@ -81,19 +110,54 @@ private:
 	 * @brief Add a new public key to the AccessManager.
 	 *
 	 * @param publicKey The public key to add.
+	 * @param publicKeyType The type of the public key.
+	 * @param keyIndex The index of the public key in the storage.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError _AddPublicKey(const CryptoTypes::PublicKey &publicKey);
+	AliroError _AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType,
+				 std::optional<size_t> keyIndex = std::nullopt);
+
+	/**
+	 * @brief Check if a public key is stored in the AccessManager.
+	 *
+	 * @param publicKey The public key to check.
+	 * @param keyIndex The index of the public key in the storage.
+	 *
+	 * @return True if the public key is stored, false otherwise.
+	 */
+	bool _IsPublicKeyStored(const CryptoTypes::PublicKey &publicKey, size_t *keyIndex = nullptr);
+
+	/**
+	 * @brief Get a public key from the AccessManager by its index.
+	 *
+	 * @param keyIndex The index of the public key in the storage.
+	 * @param publicKey The public key to get.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code on failure.
+	 */
+	AliroError _GetPublicKey(size_t keyIndex, CryptoTypes::PublicKey &publicKey);
 
 	/**
 	 * @brief Remove a public key from the AccessManager.
 	 *
 	 * @param publicKey The public key to remove.
+	 * @param publicKeyType The type of the public key.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError _RemovePublicKey(const CryptoTypes::PublicKey &publicKey);
+	AliroError _RemovePublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType);
+
+	/**
+	 * @brief Get a Credential Issuer public key by its identifier.
+	 *
+	 * @param keyIdentifier The key identifier of the Credential Issuer public key.
+	 * @param publicKey The public key to get.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code on failure.
+	 */
+	AliroError _GetCredentialIssuerPublicKey(const CryptoTypes::KeyIdentifier &keyIdentifier,
+						 CryptoTypes::PublicKey &publicKey) const;
 
 	/**
 	 * @brief Clear all stored public keys.
@@ -129,7 +193,6 @@ private:
 	 */
 	void _HandleSessionTermination(SessionContext sessionContext);
 
-private:
 	AccessManagerImpl() = default;
 	~AccessManagerImpl() = default;
 
@@ -162,7 +225,7 @@ private:
 	 * This callback is called when access is granted and the door should be unlocked.
 	 * In case of:
 	 * - UWB ranging, this callback is called when the User Device is in range.
-	 * - NFC, this callback is called just after the access credential is verified.
+	 * - NFC, this callback is called just after the Access Credential is verified.
 	 */
 	void UnlockAction() const;
 
@@ -175,9 +238,39 @@ private:
 	 */
 	void LockAction() const;
 
-	bool VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey);
-	bool IsPublicKeyStored(const CryptoTypes::PublicKey &userPublicKey);
+	/**
+	 * @brief Template helper function to remove a key from a StoredKeys container.
+	 *
+	 * @param container The container to remove the key from.
+	 * @param publicKey The public key to remove.
+	 * @param keyIndex The index of the public key in the storage.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code on failure.
+	 */
+	template <size_t T>
+	AliroError RemoveKeyFromContainer(StoredKeys<T> &container, const CryptoTypes::PublicKey &publicKey,
+					  size_t &keyIndex) const;
+
+	/**
+	 * @brief Add a new public key to a StoredKeys container.
+	 *
+	 * @param container The container to add the key to.
+	 * @param publicKey The public key to add.
+	 * @param keyIndex The index of the public key in the storage.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code on failure.
+	 */
+	template <size_t T>
+	AliroError AddKeyToContainer(StoredKeys<T> &container, const CryptoTypes::PublicKey &publicKey,
+				     std::optional<size_t> keyIndex = std::nullopt) const;
+
+	void HandleAccessGranted(bool isNfcSession, bool granted);
+	bool VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey) const;
 	bool ShouldUnlockImmediately(bool isNfcSession) const;
+
+	template <size_t T>
+	bool IsPublicKeyStored(const StoredKeys<T> &container, const CryptoTypes::PublicKey &userPublicKey,
+			       size_t *keyIndex = nullptr) const;
 
 #ifdef CONFIG_ALIRO_BLE_UWB
 	struct RangingSessionContext {
@@ -213,12 +306,11 @@ private:
 
 	ApplicationCallbacks mCallbacks{};
 	StackCallbacks mStackCallbacks{};
-	static constexpr size_t kMaxStoredKeys{ CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS };
-	// Storage for authorized public keys
-	std::array<CryptoTypes::PublicKey, kMaxStoredKeys> mStoredKeys{};
-	// Number of keys currently stored
-	size_t mStoredKeyCount{ 0 };
-	k_mutex mMutex{};
+
+	KpersistentManager *mKpersistentManager{ nullptr };
+
+	StoredKeys<CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS> mAcKeys{};
+	StoredKeys<CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS> mCiKeys{};
 };
 
 /**
@@ -227,6 +319,16 @@ private:
  * @return The instance of the AccessManagerImpl.
  */
 inline AccessManager &AccessManagerInstance()
+{
+	return AccessManagerImpl::Instance();
+}
+
+/**
+ * @brief Get the singleton instance of the AccessManagerImpl.
+ *
+ * @return The instance of the AccessManagerImpl.
+ */
+inline AccessManagerImpl &AccessManagerInstanceImpl()
 {
 	return AccessManagerImpl::Instance();
 }

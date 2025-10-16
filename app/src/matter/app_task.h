@@ -39,6 +39,11 @@ private:
 	static void LockStateChanged(const BoltLockManager::StateData &stateData);
 	static void UpdateClusterStateHandler(const BoltLockManager::StateData &stateData);
 
+#ifdef CONFIG_CHIP_NUS
+	static void NUSLockCallback(void *context);
+	static void NUSUnlockCallback(void *context);
+#endif
+
 #ifdef CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS
 	constexpr static Nrf::Matter::TestEventTrigger::EventTriggerId kDoorLockJammedEventTriggerId =
 		0xFFFF'FFFF'3277'4000;

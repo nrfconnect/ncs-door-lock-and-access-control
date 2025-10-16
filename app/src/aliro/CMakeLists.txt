@@ -6,19 +6,13 @@
 
 file(GLOB app_sources CONFIGURE_DEPENDS *.cpp)
 
+add_subdirectory(access_document)
 add_subdirectory(platform)
 add_subdirectory(storage)
 
-if (CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT)
-  add_subdirectory(access_manager_impl_default)
-elseif (CONFIG_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM)
-  add_subdirectory(access_manager_impl_custom)
-else()
-  message(FATAL_ERROR "No access manager implementation selected")
-endif()
-
-if(CONFIG_DOOR_LOCK_CLI)
-  add_subdirectory(cli)
-endif(CONFIG_DOOR_LOCK_CLI)
+add_subdirectory_ifdef(CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT access_manager_impl_default)
+add_subdirectory_ifdef(CONFIG_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM access_manager_impl_custom)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE kpersistent_manager)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_CLI cli)
 
 target_sources(app PRIVATE ${app_sources})

@@ -6,7 +6,6 @@
 
 #include "storage.h"
 #include "aliro/utils.h"
-#include "storage_keys.h"
 
 #include <zephyr/init.h>
 #include <zephyr/logging/log.h>
@@ -14,13 +13,15 @@
 
 LOG_MODULE_REGISTER(storage, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
 
+namespace {
+
 struct LoadItemParam {
 	uint8_t *buf;
 	size_t bufLen;
 	bool found;
 };
 
-static int LoadItemCallback(const char *, size_t len, settings_read_cb read_cb, void *cb_arg, void *param)
+int LoadItemCallback(const char *, size_t len, settings_read_cb read_cb, void *cb_arg, void *param)
 {
 	LoadItemParam &itemParam = *static_cast<LoadItemParam *>(param);
 
@@ -33,6 +34,16 @@ static int LoadItemCallback(const char *, size_t len, settings_read_cb read_cb, 
 	itemParam.found = true;
 	return 1;
 }
+
+int InitStorage(void)
+{
+	int status = settings_subsys_init();
+	VerifyOrReturnStatus(status == 0, status, LOG_ERR("Initializing settings subsystem failed: %d", status));
+
+	return 0;
+}
+
+} // namespace
 
 int KeyValueStorage::Save(const char *keyName, const uint8_t *value, size_t valueLen)
 {
@@ -62,12 +73,11 @@ int KeyValueStorage::Get(const char *keyName, uint8_t *buf, size_t bufLength)
 	return (param.found ? 0 : -ENODATA);
 }
 
-static int InitStorage(void)
+Aliro::StorageKeys::KeyNameBuffer KeyValueStorage::GetStorageKeyName(KeyIdString keyIdString, size_t keyId)
 {
-	int status = settings_subsys_init();
-	VerifyOrReturnStatus(status == 0, status, LOG_ERR("Initializing settings subsystem failed: %d", status));
-
-	return 0;
+	Aliro::StorageKeys::KeyNameBuffer keyName;
+	snprintf(keyName.data(), keyName.size(), "%s/%u", keyIdString, keyId);
+	return keyName;
 }
 
 SYS_INIT(InitStorage, POST_KERNEL, CONFIG_APPLICATION_INIT_PRIORITY);

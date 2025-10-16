@@ -188,13 +188,17 @@ Ultra wideband (UWB) module
 
 The application supports the following UWB modules:
 
-+-------------------+----------------------------------+
-| UWB module        | UWB module expansion board       |
-+===================+==================================+
-| `QM35825`_        | Qorvo Arduino Interface Board    |
-+-------------------+----------------------------------+
++-------------------+-------------------------------------------------------------+
+| UWB module        | UWB module expansion board                                  |
++===================+=============================================================+
+| `QM35825`_        | Qorvo Arduino Interface Board (with custom rework by Qorvo) |
++-------------------+-------------------------------------------------------------+
 
 With the Qorvo Arduino Interface Board, you can use the UWB module with the `nRF5340 DK`_ without requiring any additional hardware, as it connects directly to the Arduino header of the DK.
+
+.. note::
+   To run the application with the QM35825 UWB module, you need the Qorvo Arduino Interface Board with special rework done on the board.
+   To obtain a reworked board, contact your local Qorvo support team.
 
 .. note::
    The QM35825 SoC requires Aliro-specific firmware to work with the Aliro access protocol.

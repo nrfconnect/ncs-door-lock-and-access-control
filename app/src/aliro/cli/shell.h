@@ -7,12 +7,9 @@
 #pragma once
 
 /**
- * @brief Registers shell commands for managing a door lock system.
+ * @brief Initializes shell commands for managing a door lock system.
  *
- * This function sets up the Zephyr shell environment with specific commands related to the door lock.
- * It integrates several subcommands under the main command 'dl'. Each subcommand is designed to handle
- * different aspects of the door lock configuration and control.
- *
+ * Following commands are available:
  * ## Subcommands
  * - `install`:
  *   - `identifier [value]`: Gets or sets the full reader identifier (concatenation of group identifier and group
@@ -30,7 +27,7 @@
  * Commands are used through the shell interface provided by the Zephyr OS. Each command might require specific
  * parameters as detailed above. The commands are accessed by prefixing them with 'dl', e.g., `dl install group_id`.
  *
- * @note This function should be called during the system initialization phase to ensure all commands are properly
- * registered before the shell is used.
+ * @note This function should be called after system and Aliro stack initialization to ensure all components are
+ * properly initialized.
  */
-void RegisterShellCommands();
+void InitShellCommands();

@@ -23,14 +23,22 @@ private:
 
 	void _SetApplicationCallbacks(const ApplicationCallbacks &callbacks);
 	void _SetStackCallbacks(const StackCallbacks &callbacks);
-	AliroError _VerifyAccessCredential(const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession,
-					   SessionContext sessionContext);
+	AliroError _VerifyAccessCredential(
+		const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession, SessionContext sessionContext,
+		const std::optional<AccessDocumentTypes::AccessDocument> &accessDocument = std::nullopt);
+	AliroError _VerifyKPersistentKey(CryptoTypes::KeyId kpersistentKeyId, bool isNfcSession,
+					 SessionContext sessionContext);
 #ifdef CONFIG_ALIRO_BLE_UWB
 	AliroError _StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 					SessionContext sessionContext);
 #endif // CONFIG_ALIRO_BLE_UWB
-	AliroError _AddPublicKey(const CryptoTypes::PublicKey &publicKey);
-	AliroError _RemovePublicKey(const CryptoTypes::PublicKey &publicKey);
+	AliroError _AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType,
+				 std::optional<size_t> keyIndex = std::nullopt);
+	bool _IsPublicKeyStored(const CryptoTypes::PublicKey &publicKey, size_t *keyIndex);
+	AliroError _GetPublicKey(size_t keyIndex, CryptoTypes::PublicKey &publicKey);
+	AliroError _RemovePublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType);
+	AliroError _GetCredentialIssuerPublicKey(const CryptoTypes::KeyIdentifier &keyIdentifier,
+						 CryptoTypes::PublicKey &publicKey) const;
 	void _ClearStoredKeys();
 	void _SetMaxAllowedDistance(uint32_t maxDistance);
 	uint32_t _GetMaxAllowedDistance();

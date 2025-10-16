@@ -4,6 +4,23 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+config TIMESYNC_PROCEDURE_0
+	bool "Enable timesync Procedure 0"
+	help
+	  Enable the BLE and UWB time synchronization Procedure 0.
+
+config TIMESYNC_PROCEDURE_1
+	bool "Enable timesync Procedure 1"
+	help
+	  Enable the BLE and UWB time synchronization Procedure 1.
+
+
 if QM35_UWB_ALIRO_ZEPHYR || QM35_UWB_LIB
 rsource "uwb_qm35_impl/Kconfig"
 endif # QM35_UWB_ALIRO_ZEPHYR || QM35_UWB_LIB
+
+module = NCS_ALIRO_UWB
+module-str = ALIRO_UWB
+module-dep = LOG
+module-help = Enables Aliro UWB platform log messages.
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"

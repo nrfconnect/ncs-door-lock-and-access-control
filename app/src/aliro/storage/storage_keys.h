@@ -21,6 +21,7 @@ constexpr char kStorageKeyNameIdentifier[] = "identifier";
 #ifndef CONFIG_CHIP
 
 constexpr char kStorageKeyNameAccessCredentialPublicKey[] = "AC_key";
+constexpr char kStorageKeyNameIssuerCredentialPublicKey[] = "CI_key";
 
 #endif // CONFIG_CHIP
 

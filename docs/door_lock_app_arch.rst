@@ -213,8 +213,54 @@ Currently, the |APP_NAME| supports only Matter over Thread technology.
 The |APP_NAME| implements smart home access control using the Matter door lock cluster, which is natively supported in the |NCS| by the `Matter door lock`_ sample.
 |APP_NAME| uses most of the functionality of the Matter door lock sample.
 
-For detaild information about Matter support in the |NCS|, see the following pages:
+For detailed information about Matter support in the |NCS|, see the following pages:
 
 * `Matter overview`_ - Provides an introduction to Matter, covering its architecture, firmware upgrade process, and details on network commissioning and security.
 * `Matter getting started`_ - Guides on developing Matter applications in the |NCS|, including the necessary tools and how to set up the testing environment.
 * `Matter end product`_ - Discusses developing a Matter end product, detailing supported security features, recommended configurations, and the Matter certification process.
+
+Aliro Expedited-fast phase support
+**********************************
+
+The |APP_NAME| optionally supports the Aliro Expedited-fast phase as defined in the Aliro specification.
+The Expedited-fast phase provides an optimized authentication mechanism that enables faster subsequent transactions after an initial successful authentication of the User Device.
+
+Overview
+========
+
+During the first successful authentication of a User Device (using the Expedited-standard phase), the Reader derives and stores a persistent symmetric key (Kpersistent) associated with that User Device's Access Credential.
+In subsequent transaction attempts, the User Device can leverage this Kpersistent key to streamline the authentication process.
+
+Authentication flow
+===================
+
+The Expedited-fast phase authentication flow operates as follows:
+
+#. The User Device includes an encrypted cryptogram in its AUTH0 response, encrypted using its stored Kpersistent key.
+#. The Reader attempts to decrypt the cryptogram using each stored Kpersistent key until it finds a match.
+
+  * If decryption succeeds, the Reader establishes a secure channel using the matched Kpersistent key, bypassing the full Expedited-standard authentication flow.
+  * If decryption fails for all stored Kpersistent keys, the Reader falls back to the Expedited-standard phase.
+
+This optimization may reduce transaction latency for authenticated User Devices while maintaining security through cryptographic validation.
+
+Enabling the feature
+====================
+
+To enable the Expedited-fast phase support, build the application with the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option enabled.
+
+For example, to build the application with Bluetooth LE and UWB transport support, along with the Expedited-fast phase capability, run the following command:
+
+.. code-block:: bash
+
+   west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35 -DCONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+
+Configuration
+=============
+
+You can change the maximum number of Kpersistent keys that can be stored by adjusting the ``CONFIG_MAX_NUMBER_OF_KPERSISTENT`` Kconfig option.
+When using the default Access Manager implementation (``CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT``), this value is constrained by the ``CONFIG_ACCESS_MANAGER_MAX_STORED_KEYS`` option, which defines the maximum number of Access Credential public keys that can be stored.
+
+.. important::
+   The maximum number of Kpersistent keys must match the maximum number of stored Access Credential public keys.
+   Configurations with mismatched limits are not supported and may result in undefined behavior.

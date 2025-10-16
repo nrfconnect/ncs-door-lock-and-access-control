@@ -235,7 +235,7 @@ uint16_t DoorLockDelegate::GetNumberOfAliroCredentialIssuerKeysSupported()
 {
 	LOG_DBG("GetNumberOfAliroCredentialIssuerKeysSupported");
 
-	return CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS;
+	return CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS;
 }
 
 uint16_t DoorLockDelegate::GetNumberOfAliroEndpointKeysSupported()
