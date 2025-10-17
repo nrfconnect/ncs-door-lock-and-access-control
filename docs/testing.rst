@@ -407,6 +407,11 @@ For additional information about Matter testing with various ecosystems, see the
    While |APP_NAME|'s UWB ranging implementation can run with the Aliro Test Harness, it is not compliant with the Apple User Device.
    Currently, you can only use the NFC transport when testing |APP_NAME| with Apple ecosystem.
 
+.. note::
+   Testing with Apple ecosystem requires the Step-up phase support to be enabled on the device.
+   This feature is enabled by default.
+   Ensure you are building firmware with the ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig option enabled.
+
 Prerequisites
 -------------
 
@@ -590,6 +595,7 @@ If you are facing difficulties during the commissioning process, consider the fo
   * Ensure the HomePod mini is on the same network as your iPhone.
   * Check the device serial console for error messages indicating commissioning failures.
   * Ensure the firmware was built with Matter support enabled (the ``-DSNIPPET='matter'`` option).
+  * Ensure the Step-up phase support is enabled (the ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig option).
   * Try performing a factory reset of the device and restarting the commissioning process.
   * Ensure the Thread network is functioning correctly on the HomePod mini.
 

@@ -13,7 +13,7 @@ config DOOR_LOCK_EXPEDITED_FAST_PHASE
 
 config DOOR_LOCK_STEP_UP_PHASE
     bool "Support for Aliro Step-up Phase"
-    default n
+    default y if CHIP
     help
         If enabled, the Step-up phase is supported.
         The user authentication is based on the Access Document.
