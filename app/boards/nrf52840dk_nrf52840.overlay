@@ -63,7 +63,7 @@
 	};
 
 	aliases {
-		access-decision-indicator = &led1; // green LED2 on nRF52840DK
+		access-decision-indicator = &led1; /* green LED2 on nRF52840DK */
 	};
 };
 

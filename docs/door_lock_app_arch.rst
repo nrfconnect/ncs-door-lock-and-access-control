@@ -89,15 +89,6 @@ You can configure the Qorvo QM35 interface implementation using the following Kc
   The time range is between 96 ms (RAN multiplier is 1) and 24480 ms (RAN multiplier is 255).
   Default value is ``2`` which corresponds to a measurement frequency of approximately 5 Hz.
 
-* ``CONFIG_ALIRO_UWB_HOPPING_MODE`` - This option allows you to select the preferred hopping mode.
-  You can choose the following Kconfig options:
-
-  * ``CONFIG_ALIRO_UWB_HOPPING_MODE_ADAPTIVE`` - Adaptive hopping mode
-  * ``CONFIG_ALIRO_UWB_HOPPING_MODE_CONTINUOUS`` - Continuous hopping mode (default)
-  * ``CONFIG_ALIRO_UWB_HOPPING_MODE_NONE`` - No hopping
-
-* ``CONFIG_ALIRO_UWB_HOPPING_SEQUENCE_AES`` - This option enables AES-based hopping sequence for continous or adaptive hopping modes.
-
 * ``CONFIG_ALIRO_UWB_MAC_MODE_OFFSET`` - This option sets the offset between the 2 ranging blocks in MAC mode.
   The range is from 0 to 63, with a default value of ``0``.
 
@@ -109,9 +100,6 @@ You can configure the Qorvo QM35 interface implementation using the following Kc
 
 * ``CONFIG_ALIRO_UWB_SESSION_LOGGING`` - This option enables logging for UWB session states including status codes.
   Use it for debugging and monitoring UWB session behavior.
-
-* ``CONFIG_ALIRO_UWB_RANGING_SESSION_INIT_DELAY_MS`` - This option specifies the time (in milliseconds) a Reader Device waits before it initiates the ranging session on its own.
-  The range is from 10 to 5000 ms, with a default value of ``100`` ms.
 
 .. note::
    The number of simultaneous UWB ranging sessions is currently not limited by the application.

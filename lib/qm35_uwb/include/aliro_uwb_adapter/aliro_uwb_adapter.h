@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cherry/cherry.h>
+#include <cherry/cherry_ccc.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -17,7 +18,7 @@ extern "C" {
 /**
  * define ALIRO_UWB_PREFERRED_HOP_CONFIG_MAX: Maximum number of preferred hopping configuration.
  */
-#define ALIRO_UWB_ADAPTER_PREFERRED_HOP_CONFIG_MAX 5
+#define ALIRO_UWB_ADAPTER_PREFERRED_HOP_CONFIG_MAX 3
 
 /**
  * DOC: struct aliro_uwb_adapter
@@ -87,6 +88,41 @@ enum aliro_uwb_err {
 };
 
 /**
+ * enum aliro_hopping_config - Hopping configuration for Aliro UWB.
+ */
+enum aliro_hopping_config {
+	/**
+	 * @ALIRO_HOPPING_CONFIG_DISABLED: Hopping is disabled.
+	 */
+	ALIRO_HOPPING_CONFIG_DISABLED = CHERRY_CCC_HOPPING_MODE_DISABLE,
+	/**
+	 * @ALIRO_HOPPING_CONFIG_CONTINUOUS_DEFAULT: Continuous hopping with default sequence.
+	 */
+	ALIRO_HOPPING_CONFIG_CONTINUOUS_DEFAULT = CHERRY_CCC_HOPPING_MODE_CONTINUOUS_DEFAULT,
+	/**
+	 * @ALIRO_HOPPING_CONFIG_ADAPTIVE_DEFAULT: Adaptive hopping with default sequence.
+	 */
+	ALIRO_HOPPING_CONFIG_ADAPTIVE_DEFAULT = CHERRY_CCC_HOPPING_MODE_ADAPTATIVE_DEFAULT,
+};
+
+/**
+ * struct aliro_uwb_preferred_hopping_configs - Preferred hopping configurations for Aliro UWB.
+ */
+struct aliro_uwb_preferred_hopping_configs {
+	/**
+	 * @configs: Array of preferred hopping configurations. This list must at least contain
+	 * one hopping configuration using the default hopping sequence:
+	 * ALIRO_HOPPING_CONFIG_CONTINUOUS_DEFAULT or ALIRO_HOPPING_CONFIG_ADAPTIVE_DEFAULT as it is
+	 * mandatory according to Aliro specification.
+	 */
+	enum aliro_hopping_config configs[ALIRO_UWB_ADAPTER_PREFERRED_HOP_CONFIG_MAX];
+	/**
+	 * @count: Number of preferred hopping configurations.
+	 */
+	size_t count;
+};
+
+/**
  * struct aliro_uwb_adapter_reader_config - Configuration parameters for Aliro UWB reader.
  *
  * The Aliro reader device behaves as a UWB Responder. It selects some of the UWB session parameters
@@ -119,18 +155,9 @@ struct aliro_uwb_adapter_reader_config {
 	 */
 	uint8_t min_ran_multiplier;
 	/**
-	 * @preferred_hopping_config: Order list of preferred hopping configuration.
-	 *
-	 * Hopping config values:
-	 *  - 0x00: No hopping
-	 *  - 0xA1: Continuous default hopping
-	 *  - 0xA3: Adaptive default hopping
-	 *
-	 * Remaining element of the list should be set to 0. The list should always contains the
-	 * continuous default hopping sequence, it's mandatory according to the Aliro UWB
-	 * specification.
+	 * @preferred_hopping_config: Ordered list of preferred hopping configuration.
 	 */
-	uint8_t preferred_hopping_config[ALIRO_UWB_ADAPTER_PREFERRED_HOP_CONFIG_MAX];
+	struct aliro_uwb_preferred_hopping_configs preferred_hopping_configs;
 	/**
 	 * @mac_mode: Specify if one or multiple ranging round are used in a ranging block.
 	 *

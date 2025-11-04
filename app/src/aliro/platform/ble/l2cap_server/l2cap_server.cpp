@@ -25,6 +25,9 @@ struct L2CapChanNode {
 
 static_assert(offsetof(L2CapChanNode, node) == 0);
 
+static_assert(BT_L2CAP_TX_MTU >= 267, "BT_L2CAP_TX_MTU must be at least 267 bytes");
+static_assert(BT_L2CAP_RX_MTU >= 264, "BT_L2CAP_RX_MTU must be at least 264 bytes");
+
 NET_BUF_POOL_DEFINE(sNetBufPool, CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS, BT_L2CAP_SDU_BUF_SIZE(BT_L2CAP_SDU_TX_MTU),
 		    CONFIG_BT_CONN_TX_USER_DATA_SIZE, nullptr);
 

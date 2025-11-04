@@ -915,13 +915,23 @@ Complete the following steps for the required tests:
 Additional CLI commands
 =======================
 
-To check the revision of the Aliro library on your device, run the following command in the device shell:
+* To check the revision of the Aliro library on your device, run the following command in the device shell:
 
 .. code-block:: console
 
    uart:~$ dl info
    Aliro version: v0.2.0-22-g7da4b2e
    NFC reader: ST25R100
+
+* To check the QM35825 SoC firmware version, run the following command in the device shell:
+
+.. code-block:: console
+
+   uart:~$ uwb qm35_fw_version
+   13.1.0rc5_lu
+
+.. note::
+   This command is available only if you build the application with the ``uwb_qm35`` snippet.
 
 Bluetooth LE Nordic UART Service (NUS)
 ***************************************

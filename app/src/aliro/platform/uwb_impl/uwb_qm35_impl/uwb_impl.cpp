@@ -28,16 +28,7 @@ namespace {
 
 K_EVENT_DEFINE(sUwbEvents);
 
-constexpr uint32_t kUwbWaitCapabilitiesTimeoutMs{ 1000 };
-
-/**
- * @brief Helper enum class for UWB events.
- */
-enum class UwbEvents : uint32_t {
-	Timeout = 0x00,
-	Error = 0x01,
-	DeviceCaps = 0x02,
-};
+constexpr uint32_t kUwbWaitForEventsTimeoutMs{ 1000 };
 
 /**
  * @brief Converts aliro_uwb_err to AliroError.
@@ -78,7 +69,7 @@ constexpr AliroError ConvertUwbError(aliro_uwb_err uwbErr)
  *
  * @return String representation of the session state.
  */
-constexpr const char *CherryCccSessionStateToString(enum cherry_ccc_session_state state)
+constexpr const char *CherryCccSessionStateToString(uint32_t state)
 {
 	switch (state) {
 	case CHERRY_CCC_SESSION_STATE_INIT:
@@ -101,7 +92,7 @@ constexpr const char *CherryCccSessionStateToString(enum cherry_ccc_session_stat
  *
  * @return String representation of the reason code.
  */
-constexpr const char *CherryCccReasonCodeToString(enum cherry_ccc_state_change_reason reasonCode)
+constexpr const char *CherryCccReasonCodeToString(uint32_t reasonCode)
 {
 	switch (reasonCode) {
 	case CHERRY_CCC_STATE_CHANGE_REASON_MGMT_CMD:
@@ -123,20 +114,38 @@ namespace Aliro::Uwb {
 
 void UltraWideBandImpl::UwbCoreCallback(cherry_core_event *event, void *userData)
 {
+	using DeviceCaps = cherry_core_event_device_capabilities;
+	using DeviceInfo = cherry_core_event_device_info;
+
 	VerifyOrExit(event && userData, LOG_ERR("Invalid event or user data."));
 
 	{
 		auto *uwbImpl = static_cast<UltraWideBandImpl *>(userData);
 
-		if (event->type == CHERRY_CORE_EVENT_TYPE_ERROR) {
-			k_event_set(&sUwbEvents, ToUnderlying(UwbEvents::Error));
-		} else if (event->type == CHERRY_CORE_EVENT_TYPE_DEVICE_CAPS) {
-			auto *caps = event->data.device_caps;
+		switch (event->type) {
+		case CHERRY_CORE_EVENT_TYPE_ERROR:
+			k_event_set(&sUwbEvents, UwbEvents::Error);
+			break;
+		case CHERRY_CORE_EVENT_TYPE_DEVICE_CAPS: {
+			const DeviceCaps *caps = event->data.device_caps;
 			if (caps->status_err == CHERRY_ERR_NONE && caps->ccc_capabilities) {
 				uwbImpl->mCoreEvent = event;
-				k_event_set(&sUwbEvents, ToUnderlying(UwbEvents::DeviceCaps));
+				k_event_set(&sUwbEvents, UwbEvents::DeviceCaps);
 				return;
 			}
+			break;
+		}
+		case CHERRY_CORE_EVENT_TYPE_DEVICE_INFO: {
+			const DeviceInfo *info = event->data.device_info;
+			if (info->status_err == CHERRY_ERR_NONE && info->fw_version) {
+				uwbImpl->mCoreEvent = event;
+				k_event_set(&sUwbEvents, UwbEvents::DeviceInfo);
+				return;
+			}
+			break;
+		}
+		default:
+			break;
 		}
 	}
 
@@ -231,27 +240,70 @@ exit:
 	aliro_uwb_session_event_free(event);
 }
 
-void UltraWideBandImpl::DelayedInitWorkCallback(k_work *work)
+AliroError UltraWideBandImpl::HandleDeviceCapsEvent(CoreEvent *event)
 {
-	auto *delayedWork = k_work_delayable_from_work(work);
-	VerifyOrReturn(delayedWork, LOG_ERR("Work pointer is null."));
-	auto *sessionCtx = CONTAINER_OF(delayedWork, SessionContext, mInitiateRangingWork);
+	VerifyOrReturnStatus(event && event->data.device_caps, ALIRO_INVALID_ARGUMENT,
+			     LOG_ERR("Invalid event object (device capabilities)."));
+	mAliroCtx = aliro_uwb_adapter_create_reader(mCtx, event->data.device_caps, &mReaderConfig);
+	VerifyOrReturnStatus(mAliroCtx, ALIRO_ERROR_INTERNAL, LOG_ERR("Failed to create UWB adapter reader."));
 
-	auto &uwbImpl = UltraWideBandImpl::Instance();
+	return ALIRO_NO_ERROR;
+}
 
-	const auto *foundSession = uwbImpl.FindSession(sessionCtx->mSessionContextData);
-	VerifyOrReturn(foundSession, LOG_ERR("Session context not found."));
+AliroError UltraWideBandImpl::HandleDeviceInfoEvent(CoreEvent *event)
+{
+	VerifyOrReturnStatus(event && event->data.device_info, ALIRO_INVALID_ARGUMENT,
+			     LOG_ERR("Invalid event object (device info)."));
+	const char *fwVersion = event->data.device_info->fw_version;
+	const size_t fwVersionLen = std::strlen(fwVersion) + 1;
 
-	AliroError result = uwbImpl._InitiateRangingSession(sessionCtx->mSessionContextData);
-	VerifyOrReturn(result == ALIRO_NO_ERROR, LOG_ERR("Failed to initiate ranging session: %d", result.ToInt()));
+	mQm35FirmwareVersion = Aliro::make_unique_array_nothrow<char>(fwVersionLen);
+	VerifyOrReturnStatus(mQm35FirmwareVersion, ALIRO_NO_MEMORY,
+			     LOG_ERR("Memory allocation failed for QM35 firmware version."));
 
-	LOG_DBG("Reader initialized ranging session for handle: %p", sessionCtx->mSessionContextData);
+	std::strcpy(mQm35FirmwareVersion.get(), fwVersion);
+	LOG_INF("QM35 FW revision: %s", mQm35FirmwareVersion.get());
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError UltraWideBandImpl::HandleUwbEvent(UwbEvents expectedEvent, EventHandler eventHandler)
+{
+	// Wait for the expected event or error to be received.
+	uint32_t event = k_event_wait(&sUwbEvents, UwbEvents::All, false, K_MSEC(kUwbWaitForEventsTimeoutMs));
+
+	AliroError result{ ALIRO_ERROR_INTERNAL };
+	// Check for timeout
+	VerifyOrExit(event != UwbEvents::Timeout,
+		     LOG_ERR("Timeout waiting for UWB event (expected: 0x%x).", expectedEvent);
+		     result = ALIRO_TIMEOUT;);
+
+	// Check for error event
+	VerifyOrExit(event != UwbEvents::Error,
+		     LOG_ERR("Error occurred while waiting for UWB event (expected: 0x%x).", expectedEvent));
+
+	// Check if we received the expected event
+	VerifyOrExit(event == expectedEvent,
+		     LOG_ERR("Unexpected UWB event (received: 0x%x, expected: 0x%x).", event, expectedEvent));
+
+	LOG_DBG("UWB event received (0x%x).", event);
+
+	// Call the event handler
+	result = eventHandler(mCoreEvent);
+
+exit:
+	// Clean up: free the event and clear flags
+	cherry_core_event_free(mCoreEvent);
+	k_event_clear(&sUwbEvents, UwbEvents::All);
+	mCoreEvent = nullptr;
+
+	return result;
 }
 
 AliroError UltraWideBandImpl::_Init(const Callbacks &callbacks)
 {
 	cherry_err cErr{};
-	uint32_t event{};
+	AliroError err{};
 
 	mCallbacks = callbacks;
 
@@ -266,27 +318,26 @@ AliroError UltraWideBandImpl::_Init(const Callbacks &callbacks)
 	// Use full calibration data for the QM35825 device.
 	// This needs to be done only once during initialization, or after a power cycle.
 	const auto calibData = &util_calib_qm35825;
-	int err = cherry_set_calib(mCtx, calibData);
-	VerifyOrExit(err == CHERRY_ERR_NONE, LOG_ERR("Failed to set calibration data: %d", err));
+	int status = cherry_set_calib(mCtx, calibData);
+	VerifyOrExit(status == CHERRY_ERR_NONE, LOG_ERR("Failed to set calibration data: %d", status));
 
-	// Initialize Cherry device capabilities.
+	// Read Cherry device capabilities.
 	cErr = cherry_get_device_capabilities(mCtx);
 	VerifyOrExit(cErr == CHERRY_ERR_NONE, LOG_ERR("Failed to get device capabilities: %s", cherry_err_str(cErr)));
 
-	// Wait for device capabilities or error to be received.
-	event = k_event_wait(&sUwbEvents, 0xFFFF, false, K_MSEC(kUwbWaitCapabilitiesTimeoutMs));
-	VerifyAndExit(event == ToUnderlying(UwbEvents::Timeout), LOG_ERR("Timeout, capabilities not received."));
-	VerifyAndExit(event == ToUnderlying(UwbEvents::Error),
-		      LOG_ERR("Error occurred while waiting for device capabilities."));
-	VerifyOrExit(event == ToUnderlying(UwbEvents::DeviceCaps),
-		     LOG_ERR("Unexpected event while waiting for device capabilities (%d).", event));
+	// Wait for and handle device capabilities event.
+	err = HandleUwbEvent(UwbEvents::DeviceCaps,
+			     [](CoreEvent *event) -> AliroError { return Instance().HandleDeviceCapsEvent(event); });
+	VerifyOrExit(err == ALIRO_NO_ERROR);
 
-	LOG_DBG("CCC capabilities available.");
-	mAliroCtx = aliro_uwb_adapter_create_reader(mCtx, mCoreEvent->data.device_caps, &mReaderConfig);
-	cherry_core_event_free(mCoreEvent);
-	mCoreEvent = nullptr;
+	// Read Cherry device info.
+	cErr = cherry_get_device_info(mCtx);
+	VerifyOrExit(cErr == CHERRY_ERR_NONE, LOG_ERR("Failed to get device info: %s", cherry_err_str(cErr)));
 
-	VerifyOrExit(mAliroCtx, LOG_ERR("Failed to create UWB adapter reader."));
+	// Wait for and handle device info event.
+	err = HandleUwbEvent(UwbEvents::DeviceInfo,
+			     [](CoreEvent *event) -> AliroError { return Instance().HandleDeviceInfoEvent(event); });
+	VerifyOrExit(err == ALIRO_NO_ERROR);
 
 	LOG_INF("UWB device initialized successfully.");
 
@@ -441,23 +492,12 @@ AliroError UltraWideBandImpl::AddSession(const SessionContext &sessionCtx)
 
 	newCtx->mUwbSessionContext = sessionCtx.mUwbSessionContext;
 	newCtx->mSessionContextData = sessionCtx.mSessionContextData;
-	k_work_init_delayable(&newCtx->mInitiateRangingWork, DelayedInitWorkCallback);
 
 	MutexGuard lock{ mMutex };
-	constexpr k_timeout_t kUwbRangingSessionInitiationDelay =
-		K_MSEC(CONFIG_ALIRO_UWB_RANGING_SESSION_INIT_DELAY_MS);
-	int scheduleResult = k_work_schedule(&newCtx->mInitiateRangingWork, kUwbRangingSessionInitiationDelay);
-	VerifyOrExit(scheduleResult,
-		     LOG_ERR("Failed to schedule delayed work for session initiation: %d", scheduleResult));
 
 	sys_slist_append(&mActiveSessionsList, &newCtx->mSessionContextNode);
 
 	return ALIRO_NO_ERROR;
-
-exit:
-	delete newCtx;
-
-	return ALIRO_ERROR_INTERNAL;
 }
 
 void UltraWideBandImpl::RemoveSession(SessionContext *sessionCtx)
@@ -519,9 +559,6 @@ UltraWideBandImpl::SessionContext *UltraWideBandImpl::FindSession(SessionContext
 
 void UltraWideBandImpl::DestroySession(SessionContext *sessionCtx)
 {
-	k_work_sync sync{};
-	k_work_cancel_delayable_sync(&sessionCtx->mInitiateRangingWork, &sync);
-
 	if (sessionCtx->mUwbSessionContext) {
 		aliro_uwb_session_destroy(sessionCtx->mUwbSessionContext);
 		sessionCtx->mUwbSessionContext = nullptr;

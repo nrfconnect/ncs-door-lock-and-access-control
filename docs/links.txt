@@ -10,59 +10,59 @@
 .. _`test harness hardware requirements`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#requirements
 .. _`test harness usage instructions`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#usage-instructions
 .. _`running test scripts`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#c---creating-a-test-run-running-test-scripts
-.. _`Setting up the command-line build environment`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/installation/install_ncs.html#set_up_the_command-line_build_environment
-.. _`Zephyr CMake package`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/build/zephyr_cmake_package.html#cmake-pkg
+.. _`Setting up the command-line build environment`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/installation/install_ncs.html#set_up_the_command-line_build_environment
+.. _`Zephyr CMake package`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/zephyr/build/zephyr_cmake_package.html#cmake-pkg
 .. _`Test Harness issue #191`: https://github.com/csa-access-control/aliro-certification-tool/issues/191
 
 .. ### Source: docs.nordicsemi.com
        Requires manual update to align it with the NCS version.
 
-.. ### ========================= nRF Connect SDK - v3.1.0 =========================
+.. ### ========================= nRF Connect SDK - v3.2.0-preview2 =========================
 
-.. _`Installing the nRF Connect SDK`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/installation/install_ncs.html
-.. _`Get the nRF Connect SDK code`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/installation/install_ncs.html#get_the_nrf_connect_sdk_code
+.. _`Installing the nRF Connect SDK`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/installation/install_ncs.html
+.. _`Get the nRF Connect SDK code`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/installation/install_ncs.html#get_the_nrf_connect_sdk_code
 
-.. _`Platform Security Architecture (PSA)`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/libraries/security/nrf_security/doc/configuration.html#psa_crypto_support
+.. _`Platform Security Architecture (PSA)`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/libraries/security/nrf_security/doc/configuration.html#psa_crypto_support
 
-.. _`Bluetooth LE Controller` : https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/bt/bt_stack_arch.html
+.. _`Bluetooth LE Controller` : https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/bt/bt_stack_arch.html
 
-.. _`West`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/dev_model_and_contributions/code_base.html#ncs-west-intro
+.. _`West`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/dev_model_and_contributions/code_base.html#ncs-west-intro
 
-.. _`nRF54LM20 DK`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/boards/nordic/nrf54lm20dk/doc/index.html
-.. _`nrf54lm20dk`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/app_dev/device_guides/nrf54l/index.html
+.. _`nRF54LM20 DK`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/zephyr/boards/nordic/nrf54lm20dk/doc/index.html
+.. _`nrf54lm20dk`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/app_dev/device_guides/nrf54l/index.html
 
-.. _`nRF54L15 DK`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/boards/nordic/nrf54l15dk/doc/index.html#nrf54l15dk-nrf54l15
-.. _`nrf54l15dk`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/app_dev/device_guides/nrf54l/index.html
+.. _`nRF54L15 DK`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/zephyr/boards/nordic/nrf54l15dk/doc/index.html#nrf54l15dk-nrf54l15
+.. _`nrf54l15dk`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/app_dev/device_guides/nrf54l/index.html
 
-.. _`nRF5340 DK`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/boards/nordic/nrf5340dk/doc/index.html
-.. _`nrf5340dk`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/app_dev/device_guides/nrf53/index.html
+.. _`nRF5340 DK`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/zephyr/boards/nordic/nrf5340dk/doc/index.html
+.. _`nrf5340dk`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/app_dev/device_guides/nrf53/index.html
 .. _`nRF5340 DK connector interface`: https://docs.nordicsemi.com/bundle/ug_nrf5340_dk/page/UG/dk/connector_if.html
 
-.. _`nRF52840 DK`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/zephyr/boards/nordic/nrf52840dk/doc/index.html
-.. _`nrf52840dk`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/app_dev/device_guides/nrf52/index.html
+.. _`nRF52840 DK`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/zephyr/boards/nordic/nrf52840dk/doc/index.html
+.. _`nrf52840dk`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/app_dev/device_guides/nrf52/index.html
 .. _`nRF52840 DK connector interface`: https://docs.nordicsemi.com/bundle/ug_nrf52840_dk/page/UG/dk/connector_if.html
 
-.. _`Testing and optimization`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/test_and_optimize.html
-.. _`Software maturity`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/releases_and_maturity/software_maturity.html
+.. _`Testing and optimization`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/test_and_optimize.html
+.. _`Software maturity`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/releases_and_maturity/software_maturity.html
 
-.. _`Matter`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/index.html
-.. _`Matter overview`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/overview/index.html
-.. _`Matter getting started`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/getting_started/index.html
-.. _`Matter tools`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/getting_started/tools.html
-.. _`Matter controller tools`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/getting_started/tools.html#matter_controller_tools
-.. _`Matter over Thread tools`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/getting_started/tools.html#matter_over_thread_tools
-.. _`Matter chip-tool guide`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/matter/chip_tool_guide.html
-.. _`Matter testing`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/getting_started/testing/index.html#ug-matter-configuring
+.. _`Matter`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/matter/index.html
+.. _`Matter overview`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/matter/overview/index.html
+.. _`Matter getting started`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/matter/getting_started/index.html
+.. _`Matter tools`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/matter/getting_started/tools.html
+.. _`Matter controller tools`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/matter/getting_started/tools.html#matter_controller_tools
+.. _`Matter over Thread tools`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/matter/getting_started/tools.html#matter_over_thread_tools
+.. _`Matter chip-tool guide`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/matter/chip_tool_guide.html
+.. _`Matter testing`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/matter/getting_started/testing/index.html#ug-matter-configuring
 .. _`Matter testing with Apple, Google, and Samsung ecosystems`: https://devzone.nordicsemi.com/nordic/nordic-blog/b/blog/posts/matter-testing-nrf-connect-sdk-platform-with-apple-google-and-samsung-ecosystems-218911247
-.. _`Matter end product`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/end_product/index.html
-.. _`Matter door lock`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/lock/README.html
-.. _`Matter door lock remote access`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/lock/README.html#testing_remote_access_with_pin_code_credential
-.. _`Matter door lock NUS`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/samples/matter/lock/README.html#matter_bluetooth_le_with_nordic_uart_service
+.. _`Matter end product`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/matter/end_product/index.html
+.. _`Matter door lock`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/samples/matter/lock/README.html
+.. _`Matter door lock remote access`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/samples/matter/lock/README.html#testing_remote_access_with_pin_code_credential
+.. _`Matter door lock NUS`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/samples/matter/lock/README.html#matter_bluetooth_le_with_nordic_uart_service
 .. _`Matter marketing note`: https://www.nordicsemi.com/Products/Technologies/Matter
 .. _`Matter fork release`: https://github.com/nrfconnect/sdk-connectedhomeip/releases/tag/v3.1.0
-.. _`Thread Border Router`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#thread_border_router
-.. _`Thread radio co-processor`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#configuring_a_radio_co-processor
-.. _`Running OTBR using Docker`: https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/thread/tools.html#running_otbr_using_docker
+.. _`Thread Border Router`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/thread/tools.html#thread_border_router
+.. _`Thread radio co-processor`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/thread/tools.html#configuring_a_radio_co-processor
+.. _`Running OTBR using Docker`: https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/protocols/thread/tools.html#running_otbr_using_docker
 .. _`nRF Toolbox mobile application`: https://www.nordicsemi.com/Products/Development-tools/nRF-Toolbox
 
 .. _`DFU over Bluetooth LE using device manager app` : https://academy.nordicsemi.com/courses/nrf-connect-sdk-intermediate/lessons/lesson-9-bootloaders-and-dfu-fota/topic/exercise-5-fota-over-bluetooth-low-energy/

@@ -64,6 +64,35 @@ struct ConstData {
  */
 using UwbRangingData = ConstData;
 
+/**
+ * @enum ReaderStateByte
+ * @brief Enumerates the possible states of a reader written as a single byte.
+ */
+enum class ReaderStateByte : uint8_t {
+	Secured = 0x00,
+	Unsecured = 0x01,
+	Blocked = 0x02,
+	EnteringSecured = 0x80,
+	EnteringUnsecured = 0x81,
+	Unknown = 0x82
+};
+
+/**
+ * @enum OperationSource
+ * @brief Defines the operation source information in State Attribute ID.
+ */
+enum class OperationSource : uint8_t {
+	Unspecified = 0x00,
+	Manual,
+	Auto,
+	Schedule,
+	ThisUserDeviceInBluetoothLeUwbAliroFlow,
+	ThisUserDeviceInNfc,
+	ThisUserDeviceInBluetoothLeOnlyFlow,
+	Matter,
+	// RFU 8 - 255
+};
+
 } // namespace Aliro
 
 namespace Aliro::CryptoTypes {

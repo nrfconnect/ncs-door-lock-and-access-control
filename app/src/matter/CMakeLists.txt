@@ -40,16 +40,16 @@ SET(access_srcs
 )
 
 if(CONFIG_LOCK_SCHEDULES)
-    LIST(APPEND access_srcs access/access_manager_schedules.cpp)
+  LIST(APPEND access_srcs access/access_manager_schedules.cpp)
 endif()
 
 target_sources(app PRIVATE
-    app_task.cpp
-    bolt_lock_manager.cpp
-    door_lock_delegate.cpp
-    init.cpp
-    zcl_callbacks.cpp
-    ${access_srcs}
+  app_task.cpp
+  bolt_lock_manager.cpp
+  door_lock_delegate.cpp
+  init.cpp
+  zcl_callbacks.cpp
+  ${access_srcs}
 )
 
 # Do not treat warnings as errors while the variable may be uninitialized for this sample data model.

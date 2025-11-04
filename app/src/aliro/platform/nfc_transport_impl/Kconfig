@@ -23,4 +23,4 @@ module = NCS_ALIRO_RFAL
 module-str = ALIRO_RFAL
 module-dep = LOG
 module-help = Enables Aliro NFC RFAL log messages.
-source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"

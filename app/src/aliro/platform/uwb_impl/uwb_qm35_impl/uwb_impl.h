@@ -17,6 +17,7 @@
 #include <zephyr/sys/slist.h>
 
 #include <cstddef>
+#include <memory>
 
 namespace Aliro::Uwb {
 
@@ -29,6 +30,12 @@ namespace Aliro::Uwb {
  */
 class UltraWideBandImpl : public UltraWideBand<UltraWideBandImpl> {
 	using CoreEvent = cherry_core_event;
+	using EventHandler = AliroError (*)(CoreEvent *);
+
+	/**
+	 * @brief Helper enum class for UWB events.
+	 */
+	enum UwbEvents : uint32_t { Timeout = 0x00, Error = 0x01, DeviceCaps = 0x02, DeviceInfo = 0x04, All = 0xFFFF };
 
 public:
 	/**
@@ -53,6 +60,13 @@ public:
 	AliroError _SuspendRangingSession(SessionContextHandle sessionContextData);
 	AliroError _ResumeRangingSession(SessionContextHandle sessionContextData);
 
+	/**
+	 * @brief Gets the QM35 firmware version string.
+	 *
+	 * @return Pointer to the firmware version string, or nullptr if not available.
+	 */
+	const char *GetQm35FirmwareVersion() const { return mQm35FirmwareVersion.get(); }
+
 	// Delete copy and move constructors and assignment operators.
 	UltraWideBandImpl(const UltraWideBandImpl &) = delete;
 	UltraWideBandImpl &operator=(const UltraWideBandImpl &) = delete;
@@ -73,23 +87,9 @@ private:
 		sys_snode_t mSessionContextNode{};
 		UwbSessionContext mUwbSessionContext{};
 		SessionContextHandle mSessionContextData{};
-		k_work_delayable mInitiateRangingWork{};
 	};
 
 private:
-// TODO: Use proper CCC hopping bitmask once the Test Harness and QM35 FW are fixed.
-#if 0
-	static constexpr uint8_t kPreferredHoppingConfigBitmask{ CONFIG_ALIRO_UWB_HOPPING_MODE_VALUE
-#ifndef CONFIG_ALIRO_UWB_HOPPING_MODE_NONE
-								 | CONFIG_ALIRO_UWB_HOPPING_SEQUENCE_DEFAULT_VALUE |
-								 CONFIG_ALIRO_UWB_HOPPING_SEQUENCE_AES_VALUE
-#endif
-	};
-#else
-	// This is the only value supported currently by both QM35 FW and Aliro Test Harness.
-	static constexpr uint8_t kPreferredHoppingConfigBitmask{ 0x08 };
-#endif
-
 	static constexpr size_t kCurrentDistanceBufferSize{ sizeof(
 		cherry_ccc_session_controlee_measurements::distance_cm) };
 
@@ -130,14 +130,33 @@ private:
 	static void SessionHandlerCallback(aliro_uwb_session_event *event, void *userData);
 
 	/**
-	 * @brief Callback function for delayed work to initiate a UWB ranging session.
+	 * @brief Event handler for device capabilities event.
 	 *
-	 * This function is called when the delayed work timer expires to automatically
-	 * initiate the UWB ranging session.
-	 *
-	 * @param work Pointer to the delayed work structure.
+	 * @param event Pointer to the core event containing device capabilities data.
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	static void DelayedInitWorkCallback(k_work *work);
+	AliroError HandleDeviceCapsEvent(CoreEvent *event);
+
+	/**
+	 * @brief Event handler for device info event.
+	 *
+	 * @param event Pointer to the core event containing device info data.
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError HandleDeviceInfoEvent(CoreEvent *event);
+
+	/**
+	 * @brief Common helper function to wait for and handle UWB events.
+	 *
+	 * This function encapsulates the common pattern of waiting for a UWB event,
+	 * checking for timeout/error conditions, and processing the event via a callback.
+	 *
+	 * @param expectedEvent The event type to wait for.
+	 * @param eventHandler Function pointer to process the event data when received.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError HandleUwbEvent(UwbEvents expectedEvent, EventHandler eventHandler);
 
 	/**
 	 * @brief Finds a session context by session identifier.
@@ -192,14 +211,16 @@ private:
 	Callbacks mCallbacks{};
 	cherry *mCtx{};
 	aliro_uwb_adapter *mAliroCtx{};
-
+	std::unique_ptr<char[]> mQm35FirmwareVersion{ nullptr };
 	ActiveSessionsList mActiveSessionsList{};
 	k_mutex mMutex{};
-
 	std::array<uint8_t, kCurrentDistanceBufferSize> mCurrentDistanceCm{};
+
 	aliro_uwb_adapter_reader_config mReaderConfig = {
 		.min_ran_multiplier = CONFIG_ALIRO_UWB_MIN_RAN_MULTIPLIER,
-		.preferred_hopping_config = { kPreferredHoppingConfigBitmask, 0x00, 0x00, 0x00, 0x00 },
+		.preferred_hopping_configs = { .configs = { ALIRO_HOPPING_CONFIG_DISABLED,
+							    ALIRO_HOPPING_CONFIG_CONTINUOUS_DEFAULT },
+					       .count = 2 },
 		.mac_mode = static_cast<uint8_t>(CONFIG_ALIRO_UWB_MAC_MODE_OFFSET |
 						 (CONFIG_ALIRO_UWB_MAC_MODE_RANGING_ROUNDS << 6)),
 	};

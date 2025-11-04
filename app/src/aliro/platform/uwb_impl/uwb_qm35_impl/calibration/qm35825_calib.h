@@ -17,7 +17,7 @@ static const uint8_t util_calib_qm35825_ant_set0_tx_ant_paths[] = { 0x00,
 static const uint8_t util_calib_qm35825_ant_set3_tx_ant_paths[] = { 0x00,
 								    0xFF };
 static const uint8_t util_calib_qm35825_ant_set0_rx_ants[] = { 0x00, 0x01,
-							       0x00 };
+							       0xFF };
 static const uint8_t util_calib_qm35825_ant_set3_rx_ants[] = { 0x02, 0xFF,
 							       0xFF };
 
@@ -192,7 +192,7 @@ static const struct cherry_calib_key util_partial_calib_qm35825_keys[] = {
 
 static const struct cherry_calib_key util_calib_qm35825_keys[] = {
 	/* Global Calibration. */
-	CHERRY_CALIB_UINT8("xtal_trim", 0x32),
+	CHERRY_CALIB_UINT8("ip_sts_sanity_thres_q2", 0x0a),
 
 	/* PDOA LUT Configuration. */
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut0.data",
@@ -270,7 +270,6 @@ static const struct cherry_calib_key util_calib_qm35825_keys[] = {
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set0.rx_ants",
 				     util_calib_qm35825_ant_set0_rx_ants),
 	CHERRY_CALIB_UINT8("ant_set0.tx_power_control", 0x01),
-        CHERRY_CALIB_BOOL("legacy_android_ccc", 0),
 
 	/* Ant Set3 : for radar. */
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set3.tx_ant_paths",

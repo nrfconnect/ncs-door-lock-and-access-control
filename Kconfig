@@ -19,7 +19,7 @@ menuconfig NCS_ALIRO
 	imply FLASH_MAP
 	imply REQUIRES_FULL_LIBCPP
 	imply REQUIRES_FULL_LIBC
-	imply NEWLIB_LIBC_NANO
+	imply NEWLIB_LIBC_NANO if NEWLIB_LIBC
 	help
 	  This option enables the Aliro reader stack.
 

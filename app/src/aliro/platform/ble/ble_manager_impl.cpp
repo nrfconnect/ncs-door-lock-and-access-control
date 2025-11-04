@@ -230,12 +230,20 @@ AliroError BleManagerImpl::Disconnect(ConnectionHandle handle)
 	VerifyOrReturnStatus(IsInitialized(), ALIRO_INVALID_STATE, LOG_ERR("BLE manager not initialized"));
 	VerifyOrReturnStatus(handle, ALIRO_INVALID_ARGUMENT, LOG_ERR("Invalid connection handle"));
 
-	LOG_DBG("Disconnecting (handle: %p)", handle);
+	bt_conn_info info{};
+	VerifyOrReturnStatus(bt_conn_get_info(static_cast<bt_conn *>(handle), &info) == 0, ALIRO_ERROR_INTERNAL,
+			     LOG_ERR("Failed to get connection info"));
 
-	int error = bt_conn_disconnect(static_cast<bt_conn *>(handle), BT_HCI_ERR_REMOTE_USER_TERM_CONN);
-	VerifyOrReturnStatus(error == 0 || error == -ENOTCONN, ALIRO_ERROR_INTERNAL,
-			     LOG_ERR("Failed to disconnect (error: %d)", error));
+	VerifyAndExit(info.state != BT_CONN_STATE_CONNECTED, LOG_DBG("No active connection found"));
+	LOG_INF("Disconnecting (handle: %p)", handle);
 
+	{
+		int error = bt_conn_disconnect(static_cast<bt_conn *>(handle), BT_HCI_ERR_REMOTE_USER_TERM_CONN);
+		VerifyOrReturnStatus(error == 0 || error == -ENOTCONN, ALIRO_ERROR_INTERNAL,
+				     LOG_ERR("Failed to disconnect (error: %d)", error));
+	}
+
+exit:
 	return ALIRO_NO_ERROR;
 }
 

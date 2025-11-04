@@ -29,10 +29,34 @@ extern "C" {
  *  - minor: CHERRY_VERSION / 100 % 100,
  *  - patch: CHERRY_VERSION % 100.
  */
-#define CHERRY_VERSION 021400
+#define CHERRY_VERSION 021703
 
 /**
  * DOC: Changelog
+ *
+ * Version 2.17.03:
+ *  - Notify an error when STOP or DEINIT failed after a
+ *    cherry_xxx_session_destroy() call.
+ *    If a timeout occured the sessions are forced stopped to notify the DEINIT
+ *    to the applicative.
+ *
+ * Version 2.17.02:
+ *  - Set UCI RSP timeout to 2s.
+ *
+ * Version 2.17.01:
+ *  - Disable API for CIR window size and offset configuration until
+ *    supported in FW.
+ *  - Fix CIR parsing in diagnostics handler.
+ *
+ * Version 2.17.00:
+ *  - Implement unified diagnostic notification:
+ *	  new fields in @cherry_common_diag_frame structure.
+ *	  new fields in @cherry_common_segment_metrics structure.
+ *  - Add @cherry_session_set_diagnostics API.
+ *
+ * Version 2.16.00:
+ *  - Add API to set dltdoa hop count:
+ *    @cherry_fira_session_set_dltdoa_hop_count.
  *
  * Version 2.15.00:
  *  - Add API for punctured HPRF radar:

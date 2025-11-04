@@ -5,7 +5,7 @@
  */
 
 &spi21 {
-	// CS array: @0: NFC reader             @1 : QM35 UWB module
+	/* CS array: @0: NFC reader             @1: QM35 UWB module */
 	cs-gpios = <&gpio1 24 GPIO_ACTIVE_LOW>, <&gpio3 11 GPIO_ACTIVE_LOW>;
 
 	qm35: hsspi@1 {

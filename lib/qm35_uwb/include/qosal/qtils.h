@@ -9,9 +9,9 @@
 #ifndef __KERNEL__
 #ifndef CONFIG_NEWLIB_LIBC_NANO
 #include <endian.h>
+#endif /* CONFIG_NEWLIB_LIBC_NANO */
 #include <stddef.h>
-#endif // CONFIG_NEWLIB_LIBC_NANO
-#endif
+#endif /* __KERNEL__ */
 
 /**
  * qparent_of() - Given a pointer to a member, return a pointer to a structure

@@ -50,7 +50,8 @@
 
 	aliases {
 		/delete-property/ sw0;
-		access-decision-indicator = &led1; // green LED1 on nRF54LM20DK
+		mcuboot-button0 = &button1;
+		access-decision-indicator = &led1; /* green LED1 on nRF54LM20DK */
 	};
 
 	chosen {

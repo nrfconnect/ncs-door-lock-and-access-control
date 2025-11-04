@@ -23,7 +23,11 @@
 #include "access_manager/access_manager.h"
 #include "crypto_key_ids.h"
 #include "kpersistent_manager/kpersistent_manager_impl.h"
+
+#ifdef CONFIG_DOOR_LOCK_CLI
 #include "shell.h"
+#endif // CONFIG_DOOR_LOCK_CLI
+
 #include "storage.h"
 #include "storage_keys.h"
 
@@ -275,7 +279,9 @@ int AliroInit()
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack start failed"));
 #endif // CONFIG_CHIP
 
+#ifdef CONFIG_DOOR_LOCK_CLI
 	InitShellCommands();
+#endif // CONFIG_DOOR_LOCK_CLI
 
 	LOG_INF("Aliro stack initialized");
 
