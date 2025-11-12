@@ -19,7 +19,7 @@
 
 #define QOSAL_IMPL_THREAD_STACK_DEFINE(name, stack_size) K_THREAD_STACK_DEFINE(name, stack_size)
 
-#if defined(CONFIG_LOG) && !defined(CONFIG_LOG_MODE_MINIMAL)
+#ifdef CONFIG_LOG
 
 #ifdef CONFIG_LOG_RUNTIME_FILTERING
 /* Use dynamic log_source. */
@@ -35,6 +35,9 @@
 #if (KERNEL_VERSION_MAJOR >= 4) || (KERNEL_VERSION_MAJOR >= 3) && (KERNEL_VERSION_MINOR >= 6)
 #define CONFIG_LOG_DOMAIN_ID Z_LOG_LOCAL_DOMAIN_ID
 #endif
+
+/* Only redefine logging functions if mode is not minimal */
+#ifndef CONFIG_LOG_MODE_MINIMAL
 
 /*
  * The reason of redefining the log function inside QOSAL_IMPL_PRINT_LEVEL_MOD
@@ -160,6 +163,18 @@
 
 #endif /* Zephyr version. */
 
+#else
+/* Minimal logging mode, in this mode logs are just forwarded
+to printk so there is nothing to optimize. Just use the standard Zephyr
+logging APIs to still benefit from module system and log level filtering.*/
+#define QOSAL_IMPL_PRINT_LEVEL_MOD(level, module, ...) \
+	do {                                           \
+		LOG_MODULE_DECLARE(module);            \
+		LOG_##level(__VA_ARGS__);              \
+	} while (0)
+
+#endif /* CONFIG_LOG_MODE_MINIMAL */
+
 #define QOSAL_IMPL_PRINT_LEVEL(level, ...) QOSAL_IMPL_PRINT_LEVEL_MOD(level, qlog, __VA_ARGS__)
 
 #define QOSAL_IMPL_PRINT_FORMAT(level, tag, fmt, ...)                                \
@@ -171,10 +186,11 @@
 		}                                                                    \
 	} while (0)
 
+/* CONFIG_LOG not enabled, log macros don't do anything */
 #else
 #define QOSAL_IMPL_PRINT_LEVEL_MOD(...)
 #define QOSAL_IMPL_PRINT_FORMAT(...)
-#endif
+#endif /* CONFIG_LOG */
 
 #define QOSAL_IMPL_LOG_INFO(...) QOSAL_IMPL_PRINT_FORMAT(INF, LOG_TAG, __VA_ARGS__)
 #define QOSAL_IMPL_LOG_ERR(...) QOSAL_IMPL_PRINT_FORMAT(ERR, LOG_TAG, __VA_ARGS__)
@@ -193,4 +209,4 @@
 #define QOSAL_PRINT_TRACE(...) QOSAL_IMPL_PRINT_LEVEL_MOD(INF, uwbstack, __VA_ARGS__)
 #elif !defined(CONFIG_LOG)
 #define QOSAL_PRINT_TRACE(...)
-#endif /* CONFIG_UWB_ZEPHYR_SPECIFIC & CONFIG_LOG */
+#endif /* CONFIG_UWB_ZEPHYR_SPECIFIC */

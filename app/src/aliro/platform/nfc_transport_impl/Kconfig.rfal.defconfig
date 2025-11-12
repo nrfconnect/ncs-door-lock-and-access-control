@@ -10,6 +10,9 @@ config NFC_DRIVER_STM
 config RFAL_FEATURE_NFCA
 	default y
 
+config RFAL_FEATURE_LOWPOWER_MODE
+	default y
+
 config RFAL_FEATURE_WAKEUP_MODE
 	default y
 

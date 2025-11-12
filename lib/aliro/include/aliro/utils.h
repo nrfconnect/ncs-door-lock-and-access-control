@@ -162,14 +162,3 @@ inline bool IsBufferEmpty(const uint8_t *data, size_t length)
 {
 	return (data == nullptr) || (length == 0);
 }
-
-/**
- * @brief Custom type trait to detect std::array
- *
- * @tparam T The type to check
- *
- * @return true if the type is a std::array, false otherwise
- */
-template <typename T> struct IsStdArrayType : std::false_type {};
-template <typename T, size_t N> struct IsStdArrayType<std::array<T, N>> : std::true_type {};
-template <typename T> constexpr bool IsStdArray = IsStdArrayType<T>::value;

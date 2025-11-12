@@ -6,8 +6,6 @@
 
 zephyr_include_directories(.)
 
-file(GLOB uwb_src CONFIGURE_DEPENDS *.cpp)
+file(GLOB uwb_shell_src CONFIGURE_DEPENDS *.cpp)
 
-zephyr_library_sources(${uwb_src})
-
-add_subdirectory_ifdef(CONFIG_SHELL cli)
+zephyr_library_sources(${uwb_shell_src})

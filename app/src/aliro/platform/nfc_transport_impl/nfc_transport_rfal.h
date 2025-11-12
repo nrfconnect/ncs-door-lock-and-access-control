@@ -65,8 +65,6 @@ private:
 
 	bool mRecoverPolling{ false };
 	bool mSendInProgress{ false };
-
-	static constexpr uint32_t sIdleTimerTimeoutMs{ CONFIG_RFAL_IDLE_TIMEOUT_MS };
 };
 
 } // namespace Aliro

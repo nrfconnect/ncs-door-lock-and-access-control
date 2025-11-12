@@ -44,6 +44,7 @@ private:
 	void _SetMaxAllowedDistance(uint32_t maxDistance);
 	uint32_t _GetMaxAllowedDistance();
 	void _HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData);
+	void _HandleRangingSessionStateChanged(SessionContext sessionContext, RangingSessionState state);
 	void _HandleSessionTermination(SessionContext sessionContext);
 };
 

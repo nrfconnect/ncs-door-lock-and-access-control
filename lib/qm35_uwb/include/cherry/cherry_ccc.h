@@ -140,6 +140,11 @@ struct cherry_ccc_capabilities {
 	 * T_Block RAN = RAN_Multiplier × 96 ms and Time Range = 96 ms to 24480 ms.
 	 */
 	uint8_t minimum_ran_multiplier;
+
+	/**
+	 * @qorvo_vendor_feature_1_supported: Indicates if the device supports Qorvo vendor feature 1.
+	 */
+	bool qorvo_vendor_feature_1_supported;
 };
 
 /**
@@ -168,6 +173,10 @@ enum cherry_ccc_event_type {
 	 * This event is produced by session for CCC vehicle and Aliro responder device.
 	 */
 	CHERRY_CCC_EVENT_TYPE_SESSION_CONTROLEE_REPORT,
+	/**
+	 * @CHERRY_CCC_EVENT_TYPE_SESSION_DIAGNOSTIC_REPORT: Report of CCC diagnostic.
+	 */
+	CHERRY_CCC_EVENT_TYPE_SESSION_DIAGNOSTIC_REPORT,
 };
 
 /**
@@ -411,6 +420,11 @@ struct cherry_ccc_event {
 		 * This event is produced by session for CCC vehicle and Aliro responder device.
 		 */
 		struct cherry_ccc_controlee_session_report *controlee_report;
+		/**
+		 * @data.diagnostics the
+		 * CHERRY_CCC_EVENT_TYPE_SESSION_DIAGNOSTIC_REPORT event.
+		 */
+		struct cherry_common_diag_report *diagnostics;
 	} data;
 };
 
@@ -812,6 +826,31 @@ cherry_ccc_session_set_sts_index(struct cherry_ccc_session *session,
 enum cherry_err
 cherry_ccc_session_set_initiation_time(struct cherry_ccc_session *session,
 				       uint64_t initiation_time_us);
+
+/**
+ * cherry_ccc_session_set_diagnostics() - Enable or disable session
+ * diagnostics.
+ * @session: Session object.
+ * @config: Define which kind of diagnostics to enable.
+ *
+ * This function may be called at any time, as long as the session is not
+ * active. It does not have to be called if no change is needed from default
+ * parameters.
+ *
+ * This function returns immediately.
+ *
+ * Returns:
+ *  - &CHERRY_ERR_NONE if accepted
+ *  - &CHERRY_ERR_INVALID_PARAMETER on any invalid parameter or not supported
+ *    diagnostics
+ */
+static inline enum cherry_err
+cherry_ccc_session_set_diagnostics(struct cherry_ccc_session *session,
+				   struct cherry_common_diag_cfg config)
+{
+	return cherry_session_set_diagnostics(
+		cherry_ccc_session_to_base(session), config, false);
+}
 
 #ifdef __cplusplus
 }

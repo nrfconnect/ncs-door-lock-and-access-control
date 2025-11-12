@@ -221,6 +221,34 @@ struct cherry_common_diag_cfg {
 	 * report event for each ranging frame received.
 	 */
 	bool cirs;
+	/**
+	 * @timestamp: Enable the reporting of timestamp metrics group in Segment Metrics field.
+	 */
+	bool timestamp;
+	/**
+	 * @rssi: Enable the reporting of rssi metrics group in Segment Metrics field.
+	 */
+	bool rssi;
+	/**
+	 * @rx_path: Enable the reporting of Rx path metrics group in Segment Metrics field.
+	 */
+	bool rx_path;
+	/**
+	 * @rx_debugging: Enable the reporting of Rx debugging metrics group in Segment Metrics field.
+	 */
+	bool rx_debugging;
+	/**
+	 * @fira_msg_id: Enable the reporting of FiRa message Id.
+	 */
+	bool fira_msg_id;
+	/**
+	 * @cir_windows_size: Size of CIR window to set for diagnostics.
+	 */
+	uint8_t cir_window_size;
+	/**
+	 * @cir_window_fp_offset: Set CIR window's FP offset for diagnostics.
+	 */
+	uint8_t cir_window_fp_offset;
 };
 
 /**
@@ -265,12 +293,12 @@ struct cherry_common_aoa_measurement {
 	int16_t tdoa;
 	/**
 	 * @pdoa: Computed Phase Difference of Arrival between 2 antennas.
-	 * Signed Q11.4 fixed point format in radian.
+	 * Signed Q4.11 fixed point format in radian.
 	 */
 	int16_t pdoa;
 	/**
 	 * @aoa: Computed Angle Difference of Arrival between 2 antennas.
-	 * Signed Q11.4 fixed point format in radian.
+	 * Signed Q4.11 fixed point format in radian.
 	 */
 	int16_t aoa;
 	/**
@@ -343,6 +371,34 @@ struct cherry_common_segment_metrics {
 	 *   b7-b4: Id of the receiver from 0x0 to 0xF
 	 */
 	uint8_t receiver_segment;
+	/**
+	 * @control: Control field for present groups.
+	 */
+	uint8_t control;
+	/**
+	 * @timestamp: Timestamp in RCTUs.
+	 */
+	uint32_t timestamp;
+	/**
+	 * @early_fp_index: Early first path index.
+	 */
+	uint16_t early_fp_index;
+	/**
+	 * @early_fp_ns_q6: Early first path position in ns as Q6 real.
+	 */
+	uint16_t early_fp_ns_q6;
+	/**
+	 * @dgc_decision: DGC decision level [0-7].
+	 */
+	uint8_t dgc_decision;
+	/**
+	 * @fp_noise_threshold: First path noise threshold.
+	 */
+	uint32_t fp_noise_threshold;
+	/**
+	 * @fp_confidence: First path confidence level [0-8].
+	 */
+	uint8_t fp_confidence;
 };
 
 /**
@@ -408,9 +464,29 @@ struct cherry_common_diag_frame {
 	 */
 	bool extra_status_present;
 	/**
+	 * @timestamp_confidence_present: Whether timestamp confidence is present.
+
+	 */
+	bool timestamp_confidence_present;
+	/**
+	 * @fira_message_id_present: Whether FiRa message ID is present.
+
+	 */
+	bool fira_message_id_present;
+	/**
 	 * @msg_id: Message ID of the frame.
 	 */
 	uint8_t msg_id;
+	/**
+	 * @timestamp_confidence: Timestamp confidence [0-255].
+
+	 */
+	uint8_t timestamp_confidence;
+	/**
+	 * @fira_message_id: FiRa message ID.
+
+	 */
+	uint8_t fira_message_id;
 	/**
 	 * @action: 0 For RX and 1 for TX.
 	 */
@@ -526,6 +602,42 @@ static inline uint64_t
 cherry_common_addr_get_extended(struct cherry_common_addr addr)
 {
 	return addr.val;
+}
+
+/**
+ * cherry_common_pdoa_to_double() - Convert PDOA from Q4.11 fixed point format to double.
+ * @pdoa: PDOA value in Q4.11 fixed point format in radians.
+ *
+ * Converts the Phase Difference of Arrival value from Q4.11 fixed point format to a
+ * double precision floating point value in radians.
+ *
+ * In Q4.11 format:
+ * - 4 bits represent the integer part (including sign bit)
+ * - 11 bits represent the fractional part
+ *
+ * Returns: PDOA value in radians as double.
+ */
+static inline double cherry_common_pdoa_to_double(int16_t pdoa)
+{
+	/* Check if the number is negative. */
+	int32_t value = pdoa;
+	int32_t is_negative = value & 0x8000; /* Check sign bit (bit 15) */
+	double result;
+
+	/* If negative, convert to positive using two's complement. */
+	if (is_negative) {
+		value = ~value + 1; /* Two's complement */
+	}
+
+	/* Convert to floating-point by dividing by 2^11 */
+	result = value / (double)(1 << 11);
+
+	/* Apply the sign. */
+	if (is_negative) {
+		result = -result;
+	}
+
+	return result;
 }
 
 #ifdef __cplusplus

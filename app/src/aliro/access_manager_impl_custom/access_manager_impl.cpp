@@ -101,6 +101,11 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext, const UwbRangi
 	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
+void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext, RangingSessionState)
+{
+	LOG_INF("Custom %s function", __FUNCTION__);
+}
+
 void AccessManagerImpl::_HandleSessionTermination(SessionContext)
 {
 	LOG_INF("Custom %s function", __FUNCTION__);

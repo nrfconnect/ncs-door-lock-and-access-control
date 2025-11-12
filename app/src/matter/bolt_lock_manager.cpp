@@ -6,6 +6,7 @@
 
 #include "bolt_lock_manager.h"
 #include "access_manager/access_manager.h"
+#include "aliro/aliro.h"
 #include "app/task_executor.h"
 
 #include "app_task.h"
@@ -13,6 +14,30 @@
 using namespace chip;
 
 BoltLockManager BoltLockManager::sLock;
+
+namespace {
+
+[[maybe_unused]] Aliro::OperationSource ToAliroOperationSource(BoltLockManager::OperationSource operationSource)
+{
+	switch (operationSource) {
+	case BoltLockManager::OperationSource::kManual:
+	case BoltLockManager::OperationSource::kKeypad:
+	case BoltLockManager::OperationSource::kButton:
+	case BoltLockManager::OperationSource::kRfid:
+	case BoltLockManager::OperationSource::kBiometric:
+		return Aliro::OperationSource::Manual;
+	case BoltLockManager::OperationSource::kRemote:
+		return Aliro::OperationSource::Matter;
+	case BoltLockManager::OperationSource::kAuto:
+		return Aliro::OperationSource::Auto;
+	case BoltLockManager::OperationSource::kSchedule:
+		return Aliro::OperationSource::Schedule;
+	default:
+		return Aliro::OperationSource::Unspecified;
+	}
+}
+
+} // namespace
 
 void BoltLockManager::Init(StateChangeCallback callback)
 {
@@ -188,9 +213,25 @@ void BoltLockManager::ActuatorAppEventHandler(const BoltLockManagerEvent &event)
 	switch (lock->mStateData.mState) {
 	case State::kLockingInitiated:
 		lock->SetState(State::kLockingCompleted);
+#ifdef CONFIG_ALIRO_BLE_UWB
+
+		if (lock->mStateData.mSource != OperationSource::kAliro) {
+			Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
+				ToAliroOperationSource(lock->mStateData.mSource), Aliro::ReaderStateByte::Secured);
+		}
+
+#endif
 		break;
 	case State::kUnlockingInitiated:
 		lock->SetState(State::kUnlockingCompleted);
+#ifdef CONFIG_ALIRO_BLE_UWB
+
+		if (lock->mStateData.mSource != OperationSource::kAliro) {
+			Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
+				ToAliroOperationSource(lock->mStateData.mSource), Aliro::ReaderStateByte::Unsecured);
+		}
+
+#endif
 		break;
 	default:
 		break;

@@ -222,6 +222,14 @@ public:
 	void HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData);
 
 	/**
+	 * @brief Handles the ranging session state change.
+	 *
+	 * @param sessionContext The session context.
+	 * @param state The ranging session state.
+	 */
+	void HandleRangingSessionStateChanged(SessionContext sessionContext, RangingSessionState state);
+
+	/**
 	 * @brief Handles the session termination.
 	 *
 	 * @param sessionContext The session context.

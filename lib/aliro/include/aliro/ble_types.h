@@ -91,7 +91,7 @@ using TxPowerLevel = int8_t;
  * according to the Aliro specification.
  */
 struct AdvertisingServiceData {
-	// Constants defining the sizes and masks for different fields according to the Aliro Spec. Table 11-2
+	// Constants defining the sizes and masks for different fields according to the Aliro spec.
 	constexpr static std::byte kAdvertisingVersionMask{ 0x07 };
 	constexpr static std::byte kNotificationMask{ 0x03 };
 	constexpr static uint8_t kMaxReaderGroupIdSize{ 8 };

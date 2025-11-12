@@ -108,10 +108,8 @@ private:
 
 	static constexpr bt_uuid_16 kServiceUuid = BT_UUID_INIT_16(BleTypes::kAliroServiceUuid);
 
-	// Aliro spec. 11.5.2 Table 11-4:
 	static constexpr bt_uuid_128 kReaderCharacteristic =
 		BT_UUID_INIT_128(BT_UUID_128_ENCODE(0xD3B5A130, 0x9E23, 0x4B3A, 0x8BE4, 0x6B1EE5F980A3));
-	// Aliro spec. 11.5.2 Table 11-6:
 	static constexpr bt_uuid_128 kUserDeviceSelectedCharacteristic =
 		BT_UUID_INIT_128(BT_UUID_128_ENCODE(0xBD4B9502, 0x3F54, 0x11EC, 0xB919, 0x0242AC120005));
 };

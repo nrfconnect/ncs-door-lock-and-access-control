@@ -14,6 +14,8 @@ void rfalNfcWakeupConfig(rfalNfcDiscoverParam *conf)
 #ifdef CONFIG_RFAL_FEATURE_WAKEUP_MODE
 
 	conf->wakeupEnabled = true;
+	conf->wakeupPollBefore = IS_ENABLED(CONFIG_RFAL_WAKEUP_POLL_BEFORE);
+	conf->wakeupNPolls = CONFIG_RFAL_WAKEUP_NPOLLS;
 
 #ifdef CONFIG_ST25R200_DRV
 

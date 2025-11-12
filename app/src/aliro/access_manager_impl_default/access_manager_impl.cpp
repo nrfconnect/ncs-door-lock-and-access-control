@@ -5,6 +5,7 @@
  */
 
 #include "access_manager_impl.h"
+#include "aliro/aliro.h"
 #include "aliro/mutex_guard.h"
 #include "aliro/utils.h"
 #include "crypto/crypto.h"
@@ -200,8 +201,9 @@ bool ValidateAccessData(const Data &accessDataBytes)
 					vendorRegisteredId
 						.AccessData_AccessExtensions_Vendor_RegisteredID_AccessExtension_m[j];
 
-				const auto criticalExtension = (accessExtension.AccessExtension_Criticality &
-								Criticality_Bits::Criticality_Bits_Critical_c) == 0;
+				const auto criticalExtension =
+					!IS_BIT_SET(accessExtension.AccessExtension_Criticality,
+						    Criticality_Bits::Criticality_Bits_Critical_c);
 				VerifyOrReturnFalse(
 					!criticalExtension,
 					LOG_ERR("AccessData AccessExtensions, critical extensions are not supported"));
@@ -403,6 +405,26 @@ uint32_t AccessManagerImpl::_GetMaxAllowedDistance()
 #endif // CONFIG_ALIRO_BLE_UWB
 }
 
+void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext sessionContext, RangingSessionState state)
+{
+	switch (state) {
+	case RangingSessionState::Ranging:
+		LOG_INF("Ranging state changed to Ranging (session: %p)", sessionContext);
+		break;
+	case RangingSessionState::RangingSuspended:
+		LOG_INF("Ranging state changed to Ranging Suspended (session: %p)", sessionContext);
+		break;
+	case RangingSessionState::RangingResumed:
+		LOG_INF("Ranging state changed to Ranging Resumed (session: %p)", sessionContext);
+		break;
+	case RangingSessionState::Destroyed:
+		LOG_INF("Ranging state changed to Destroyed (session: %p)", sessionContext);
+		break;
+	default:
+		break;
+	}
+}
+
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData)
 {
 	LOG_DBG("Handling ranging session data - length: %u for session: %p", uwbData.mLength, sessionContext);
@@ -431,6 +453,12 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext,
 	// Only detect access status changes
 	VerifyOrReturn(userDeviceInRange != mInRange);
 	mInRange = userDeviceInRange;
+
+	auto readerState = mInRange ? ReaderStateByte::Unsecured : ReaderStateByte::Secured;
+
+	Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
+		OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow, readerState);
+
 	if (mInRange) {
 		UnlockAction();
 #ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
@@ -543,6 +571,12 @@ bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
 	VerifyOrReturnFalse(isNfcSession);
 
 #ifdef CONFIG_ALIRO_BLE_UWB
+
+	// Skip Reader Status Changed Message for NFC sessions when Reader is opened via BLE+UWB
+	if (!mInRange) {
+		Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(OperationSource::ThisUserDeviceInNfc,
+									     ReaderStateByte::Unsecured);
+	}
 
 	// For NFC sessions with UWB enabled, only unlock if not already in range
 	// This prevents double-unlocking when user is already detected via UWB
@@ -767,8 +801,8 @@ AliroError AccessManagerImpl::_GetCredentialIssuerPublicKey(const CryptoTypes::K
 		VerifyOrReturnStatus(error == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL,
 				     LOG_ERR("SHA256 hash computation failed"));
 
-		// Aliro Specification 7.2.1 Cryptographic requirements: compare the key identifier with the first
-		// 8 bytes of the SHA256 hash output
+		// Aliro Specification 7.2.1 Cryptographic requirements: compare the key identifier with the
+		// first 8 bytes of the SHA256 hash output
 		if (std::equal(keyIdentifier.begin(), keyIdentifier.end(), sha256Output.begin())) {
 			publicKey = key.value();
 			return ALIRO_NO_ERROR;
