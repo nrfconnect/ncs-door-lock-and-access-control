@@ -64,6 +64,49 @@ struct ConstData {
  */
 using UwbRangingData = ConstData;
 
+/**
+ * @enum RangingSessionState
+ * @brief Enumerates the possible states of a ranging session.
+ */
+enum class RangingSessionState : uint8_t {
+	Uninitialized = 0x00,
+	Initialized,
+	Idle,
+	Ranging,
+	RangingSuspended,
+	RangingResumed,
+	Destroyed,
+};
+
+/**
+ * @enum ReaderStateByte
+ * @brief Enumerates the possible states of a reader written as a single byte.
+ */
+enum class ReaderStateByte : uint8_t {
+	Secured = 0x00,
+	Unsecured = 0x01,
+	Blocked = 0x02,
+	EnteringSecured = 0x80,
+	EnteringUnsecured = 0x81,
+	Unknown = 0x82
+};
+
+/**
+ * @enum OperationSource
+ * @brief Defines the operation source information in State Attribute ID.
+ */
+enum class OperationSource : uint8_t {
+	Unspecified = 0x00,
+	Manual,
+	Auto,
+	Schedule,
+	ThisUserDeviceInBluetoothLeUwbAliroFlow,
+	ThisUserDeviceInNfc,
+	ThisUserDeviceInBluetoothLeOnlyFlow,
+	Matter,
+	// RFU 8 - 255
+};
+
 } // namespace Aliro
 
 namespace Aliro::CryptoTypes {
@@ -114,7 +157,7 @@ constexpr size_t kEccP256KeySingleCoordinateLength{ 32 };
 /**
  * @brief Length of the ECC P-256 signature.
  *
- * Aliro spec. 8.3.1.2 Generate transaction data signature procedure.
+ * Generate transaction data signature procedure.
  */
 constexpr size_t kEccP256SignatureLength{ 64 };
 
@@ -142,7 +185,7 @@ constexpr size_t kEncryptionDecryptionCounterLength{ 4 };
 /**
  * @brief Length of the nonce.
  *
- * IV <= 0x0000000000000001 || device_counter (unsigned big endian, 4 bytes) - spec 8.3.1.6
+ * IV <= 0x0000000000000001 || device_counter (unsigned big endian, 4 bytes)
  */
 constexpr size_t kNonceLength{ sizeof(uint64_t) + kEncryptionDecryptionCounterLength };
 
@@ -255,7 +298,7 @@ struct SessionBoundKeys {
 	KeyId mSkDevice{};
 	std::optional<KeyId> mStepUpSk{};
 	std::optional<KeyId> mBleSk{};
-	std::optional<Ursk> mUrsk{};
+	Ursk *mUrsk{};
 };
 
 } // namespace Aliro::CryptoTypes

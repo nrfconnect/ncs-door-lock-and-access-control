@@ -34,7 +34,7 @@
 	nucleo_nfc@0 {
 		compatible = "x-nucleo-nfc";
 		reg = <0>;
-		spi-max-frequency = <DT_FREQ_M(4)>;
+		spi-max-frequency = <DT_FREQ_M(8)>;
 		irq-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
 		reset-gpios = <&gpio1 10 (GPIO_ACTIVE_LOW | GPIO_PULL_DOWN)>;
 	};
@@ -63,7 +63,7 @@
 	};
 
 	aliases {
-		access-decision-indicator = &led1; // green LED2 on nRF52840DK
+		access-decision-indicator = &led1; /* green LED2 on nRF52840DK */
 	};
 };
 

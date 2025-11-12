@@ -101,17 +101,9 @@ config CHIP_ENABLE_ICD_SUPPORT
 
 # Reduce Thread TX output power to 0 dBm for SED device
 config OPENTHREAD_DEFAULT_TX_POWER
-	int
 	default 0
 
 endif # OPENTHREAD
-
-if CHIP_WIFI
-
-config NRF_WIFI_LOW_POWER
-	default y
-
-endif # CHIP_WIFI
 
 config NCS_SAMPLE_MATTER_PERSISTENT_STORAGE
 	default y

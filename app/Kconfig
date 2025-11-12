@@ -8,7 +8,7 @@ module = NCS_DOOR_LOCK_APP
 module-str = NCS_DOOR_LOCK_APP
 module-dep = LOG
 module-help = Enables nRF Connect SDK Door Lock Application log messages.
-source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
 
 choice ACCESS_MANAGER_IMPLEMENTATION
 	prompt "Access Manager implementation"
@@ -63,9 +63,9 @@ endif # DOOR_LOCK_BLE_NUS
 if CHIP
 
 rsource "src/matter/Kconfig"
-source "${ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR}/config/nrfconnect/chip-module/Kconfig.features"
-source "${ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR}/config/nrfconnect/chip-module/Kconfig.defaults"
-source "${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/src/Kconfig"
+source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.features"
+source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.defaults"
+source "$(ZEPHYR_NRF_MODULE_DIR)/samples/matter/common/src/Kconfig"
 
 endif # CHIP
 

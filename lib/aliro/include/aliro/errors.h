@@ -29,6 +29,7 @@ enum AliroErrorCode : uint8_t {
 	ALIRO_UWB_INIT_FAILED,
 	ALIRO_ERROR_UNKNOWN,
 	ALIRO_SESSION_NOT_FOUND,
+	ALIRO_SESSION_TERMINATE,
 	ALIRO_ERROR_MAX,
 };
 
@@ -40,11 +41,16 @@ public:
 	AliroError() = default;
 	constexpr AliroError(AliroErrorCode code) : mCode(code) {}
 
-	/* Converting constructors. */
-	bool operator==(AliroErrorCode code) const { return code == mCode; }
-	bool operator==(AliroError other) const { return other.mCode == mCode; }
+	friend bool operator==(AliroError lhs, AliroError rhs) { return lhs.ToErrorCode() == rhs.ToErrorCode(); }
+	friend bool operator!=(AliroError lhs, AliroErrorCode rhs) { return lhs.ToErrorCode() != rhs; }
+	friend bool operator!=(AliroErrorCode lhs, AliroError rhs) { return lhs != rhs.ToErrorCode(); }
 
-	operator AliroErrorCode() const { return mCode; }
+	/**
+	 * @brief Convert to error code.
+	 *
+	 * @return Error code.
+	 */
+	AliroErrorCode ToErrorCode() const { return mCode; }
 
 	/**
 	 * @brief Convert to undelying integer representation.

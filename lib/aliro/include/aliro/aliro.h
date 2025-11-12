@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "access_manager/access_manager.h"
 #include "aliro/errors.h"
 #include "aliro/protocol_version.h"
 #include "aliro/types.h"
@@ -138,6 +139,19 @@ public:
 	const ProtocolVersion *GetExpeditedStandardProtocolVersions(size_t &versionCount) const;
 
 #ifdef CONFIG_ALIRO_BLE_UWB
+
+	/**
+	 * @brief Sends the Reader Status Changed Message ID.
+	 *
+	 * @param operationSource The operation source that caused the state change.
+	 * @param readerState The current reader state.
+	 * @param sessionContext Optionally the session context for specific User Device.
+	 *
+	 * @return ALIRO_NO_ERROR if the Reader Status Changed Message ID is sent successfully, an error code otherwise.
+	 */
+	AliroError SendReaderStatusChangedMessage(
+		OperationSource operationSource, ReaderStateByte readerState,
+		std::optional<AccessManager::SessionContext> sessionContext = std::nullopt) const;
 
 	/**
 	 * @brief Sets the BLE notification which will be advertised.

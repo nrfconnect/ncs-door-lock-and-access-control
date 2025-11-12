@@ -96,6 +96,11 @@ bool emberAfPluginDoorLockOnDoorUnlockCommand(EndpointId endpointId, const Nulla
 	return success;
 }
 
+void emberAfPluginDoorLockOnAutoRelock(chip::EndpointId)
+{
+	BoltLockMgr().Lock(BoltLockManager::OperationSource::kAuto);
+}
+
 void emberAfDoorLockClusterInitCallback(EndpointId endpoint)
 {
 	DoorLockServer::Instance().InitServer(endpoint);
@@ -116,7 +121,6 @@ void emberAfDoorLockClusterInitCallback(EndpointId endpoint)
 	logOnFailure(DoorLock::Attributes::NumberOfPINUsersSupported::Set(endpoint,
 									  CONFIG_LOCK_MAX_NUM_CREDENTIALS_PER_TYPE),
 		     "number of PIN users");
-	logOnFailure(DoorLock::Attributes::NumberOfRFIDUsersSupported::Set(endpoint, 0), "number of RFID users");
 	logOnFailure(DoorLock::Attributes::NumberOfCredentialsSupportedPerUser::Set(
 			     endpoint, CONFIG_LOCK_MAX_NUM_CREDENTIALS_PER_USER),
 		     "number of credentials per user");

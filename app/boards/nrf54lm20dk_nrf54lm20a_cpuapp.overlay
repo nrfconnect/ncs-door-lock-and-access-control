@@ -26,7 +26,7 @@
 &spi21 {
 	compatible = "nordic,nrf-spim";
 	status = "okay";
-	cs-gpios = <&gpio1 24 GPIO_ACTIVE_LOW>;
+	cs-gpios = <&gpio1 10 GPIO_ACTIVE_LOW>;
 
 	pinctrl-0 = <&spi21_default>;
 	pinctrl-1 = <&spi21_sleep>;
@@ -34,8 +34,8 @@
 	nucleo_nfc@0 {
 		compatible = "x-nucleo-nfc";
 		reg = <0>;
-		spi-max-frequency = <DT_FREQ_M(4)>;
-		irq-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+		spi-max-frequency = <DT_FREQ_M(8)>;
+		irq-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
 	};
 };
 
@@ -47,10 +47,17 @@
 		/delete-node/ button_0;
 	};
 
+	leds {
+		/delete-node/ led_0;
+	};
+
 
 	aliases {
 		/delete-property/ sw0;
-		access-decision-indicator = &led1; // green LED1 on nRF54LM20DK
+		/delete-property/ led0;
+		/delete-property/ mcuboot-led0;
+		mcuboot-button0 = &button1;
+		access-decision-indicator = &led2; /* green LED2 on nRF54LM20DK */
 	};
 
 	chosen {

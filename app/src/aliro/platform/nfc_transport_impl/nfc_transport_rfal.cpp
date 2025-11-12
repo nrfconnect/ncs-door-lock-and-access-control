@@ -12,6 +12,10 @@
 #include "aliro/utils.h"
 #include "ncs_pal_nfc_worker.h"
 
+#ifdef CONFIG_NCS_ALIRO_NFC_PROP
+#include "nfc_transport_rfal_prop.h"
+#endif // CONFIG_NCS_ALIRO_NFC_PROP
+
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(nfc_st_rfal_impl, CONFIG_NCS_ALIRO_RFAL_LOG_LEVEL);
@@ -89,12 +93,38 @@ ReturnCode NfcTransportRfal::RfalNfcInit()
 	ReturnCode err = rfalNfcInitialize();
 	VerifyOrExit(err == RFAL_ERR_NONE);
 
-	// Set default discovery parameters.
 	rfalNfcDefaultDiscParams(&mNfcConfig);
-	// Set wake-up configuration.
+
 	rfalNfcWakeupConfig(&mNfcConfig);
-	// Set only NFC-A technology Flag.
-	mNfcConfig.techs2Find |= RFAL_NFC_POLL_TECH_A;
+
+	mNfcConfig.devLimit = CONFIG_RFAL_DISCOVERY_DEV_LIMIT;
+	mNfcConfig.totalDuration = CONFIG_RFAL_DISCOVERY_TOTAL_DURATION_MS;
+	mNfcConfig.GBLen = CONFIG_RFAL_DISCOVERY_GBLEN;
+	mNfcConfig.maxBR = static_cast<rfalBitRate>(CONFIG_RFAL_DISCOVERY_MAX_BR);
+
+#if defined(CONFIG_RFAL_DISCOVERY_COMP_MODE_EMV)
+	mNfcConfig.compMode = RFAL_COMPLIANCE_MODE_EMV;
+#elif defined(CONFIG_RFAL_DISCOVERY_COMP_MODE_ISO)
+	mNfcConfig.compMode = RFAL_COMPLIANCE_MODE_ISO;
+#endif
+
+	mNfcConfig.techs2Find = RFAL_NFC_POLL_TECH_A;
+
+#ifdef CONFIG_NCS_ALIRO_NFC_PROP
+	{
+		mNfcConfig.techs2Find |= RFAL_NFC_POLL_TECH_PROP;
+
+		const rfalNfcPropCallbacks *propCallbacks = NfcPropGetCallbacks();
+		if (propCallbacks) {
+			mNfcConfig.propNfc = *propCallbacks;
+			NfcPropInit();
+			LOG_DBG("RFAL: Proprietary technology registered");
+		}
+	}
+#endif // CONFIG_NCS_ALIRO_NFC_PROP
+
+	LOG_DBG("RFAL: Discovery configured (devLimit=%d, duration=%dms, maxBR=%d, compMode=%d)", mNfcConfig.devLimit,
+		mNfcConfig.totalDuration, mNfcConfig.maxBR, mNfcConfig.compMode);
 
 	mNfcConfig.notifyCb = [](rfalNfcState state) { Instance().RfalNotifyCallback(state); };
 exit:

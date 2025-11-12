@@ -137,7 +137,11 @@ choice SETTINGS_LOG_LEVEL_CHOICE
 endchoice
 
 choice LIBC_IMPLEMENTATION
-	default NEWLIB_LIBC
+    default PICOLIBC
+endchoice
+
+choice POSIX_SYSCONF_IMPL_CHOICE
+    default POSIX_SYSCONF_IMPL_MACRO if PICOLIBC
 endchoice
 
 config SHELL_CMD_BUFF_SIZE

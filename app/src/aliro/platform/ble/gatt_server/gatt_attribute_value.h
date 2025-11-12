@@ -27,7 +27,7 @@ struct GattAttributeValue {
 	// Type alias for the unique_ptr
 	using GattAttributePtr = std::unique_ptr<uint8_t[]>;
 
-	// Table 11-9: Supported features bitmap
+	// Supported features bitmap
 	struct SupportedFeatures {
 		uint8_t TimesyncProcedure0 : 1;
 		uint8_t TimesyncProcedure1 : 1;

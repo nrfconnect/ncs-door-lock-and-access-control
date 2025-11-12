@@ -5,11 +5,11 @@ NCS manifest repo for the door lock reference application.
 
 Before getting started, set up the nRF Connect SDK development environment.
 
-Follow the official [Installing the nRF Connect SDK](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/installation/install_ncs.html) guide and complete the following steps:
+Follow the official [Installing the nRF Connect SDK](https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/installation/install_ncs.html) guide and complete the following steps:
 
-- [Update operating system](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/installation/install_ncs.html#update_operating_system)
-- [Install prerequisites](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/installation/install_ncs.html#install_prerequisites)
-- [Install the nRF Connect SDK toolchain](https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/installation/install_ncs.html#install_the_nrf_connect_sdk_toolchain)
+- [Update operating system](https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/installation/install_ncs.html#update_operating_system)
+- [Install prerequisites](https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/installation/install_ncs.html#install_prerequisites)
+- [Install the nRF Connect SDK toolchain](https://docs.nordicsemi.com/bundle/ncs-3.2.0-preview2/page/nrf/installation/install_ncs.html#install_the_nrf_connect_sdk_toolchain)
 
 ### Initialization
 
@@ -19,13 +19,13 @@ the ``ncs-door-lock-app`` and all nRF Connect SDK modules will be cloned.
 Run the following commands:
 
 ```shell
-# launch nRF Connect toolchain for v3.1.0 release
-nrfutil sdk-manager toolchain launch --ncs-version v3.1.0 --shell
+# launch nRF Connect toolchain for v3.2.0-preview2 release
+nrfutil sdk-manager toolchain launch --ncs-version v3.2.0-preview2 --shell
 ```
 
 ```shell
-# initialize workspace for the ncs-door-lock-app (v0.4.0 release)
-west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr v0.4.0 door-lock-workspace
+# initialize workspace for the ncs-door-lock-app (v0.5.0 release)
+west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr v0.5.0 door-lock-workspace
 ```
 
 ```shell

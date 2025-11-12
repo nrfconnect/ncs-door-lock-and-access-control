@@ -38,7 +38,7 @@ public:
 		 *
 		 * This callback is invoked when the UWB module needs to send a BLE message
 		 * as part of the Aliro protocol flow. The message must conform to the format
-		 * specified in Table 11-10 of the Aliro specification, and the payload must stay
+		 * specified in the Aliro spec., and the payload must stay
 		 * unencrypted.
 		 *
 		 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
@@ -56,6 +56,17 @@ public:
 		 * @param uwbData Ultra Wide Band ranging data.
 		 */
 		void (*mRangingData)(SessionContextHandle sessionContextData, const UwbRangingData &uwbData){ nullptr };
+
+		/**
+		 * @brief Callback to receive UWB ranging session state change.
+		 *
+		 * This callback is invoked when the UWB ranging session state changes.
+		 *
+		 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
+		 * @param state The new UWB ranging session state.
+		 */
+		void (*mRangingSessionStateChanged)(SessionContextHandle sessionContextData,
+						    RangingSessionState state){ nullptr };
 	};
 
 	/**
@@ -96,7 +107,7 @@ public:
 	 * @brief Transmits deserialized and decrypted Aliro BLE messages to the UWB module.
 	 *
 	 * This method sends the UWB Ranging Service and Notifications (with ID == Ranging) to the UWB module.
-	 * The message conform to the format specified in Table 11-10 of the Aliro specification, and the payload is
+	 * The message conforms to the format specified in the Aliro spec, and the payload is
 	 * decrypted.
 	 *
 	 * @param data Pointer to data to be transmitted.
@@ -115,7 +126,7 @@ public:
 	 *
 	 * This method sets up the ranging session using the provided URSK (UWB Ranging Secret Key).
 	 *
-	 * @param sessionId The session identifier for the ranging session (Chapter 11.7.2.1.3 in the Aliro spec.).
+	 * @param sessionId The session identifier for the ranging session.
 	 * @param ursk Reference to the URSK.
 	 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
 	 *

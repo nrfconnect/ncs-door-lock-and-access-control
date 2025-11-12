@@ -214,6 +214,42 @@ With the Qorvo Arduino Interface Board, you can use the UWB module with the `nRF
    Additionally, you can use the ``uwb_qm35`` snippet to build the application with the UWB module enabled and the NFC reader disabled.
    All necessary DTS configurations are applied by the snippet.
 
+.. _hw_requirements_uwb_compatibility:
+
+UWB compatibility matrix
+========================
+
+The following table shows the compatibility between the versions of the |APP_NAME|, UWB Aliro SDK, UWB FW, and |NCS|:
+
+.. list-table:: UWB compatibility matrix
+   :header-rows: 1
+   :widths: 20 20 20 20
+
+   * - |APP_NAME| version
+     - UWB Aliro SDK version
+     - UWB FW version
+     - |NCS| version
+   * - 0.3.0
+     - 0.3.0
+     - 0.3.0
+     - 2.9.0
+   * - 0.4.0
+     - 0.4.0
+     - 0.4.0
+     - 3.1.0
+   * - 0.5.0
+     - 0.4.0
+     - 0.4.0
+     - 3.1.0
+   * - 0.6.0-rc1
+     - 0.5.0
+     - 0.5.0
+     - 3.2.0-preview2
+
+.. note::
+   The compatibility matrix shows tested and verified combinations of |APP_NAME| version, UWB Aliro SDK, UWB firmware, and |NCS| version.
+
+
 .. _hw_requirements_test_harness:
 
 Test harness hardware

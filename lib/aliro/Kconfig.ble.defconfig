@@ -20,16 +20,13 @@ config BT_PHY_UPDATE
 	default n
 
 config BT_BUF_ACL_RX_SIZE
-	default 552 if DOOR_LOCK_STEP_UP_PHASE
-	default 251
+	default 271
 
 config BT_BUF_ACL_TX_SIZE
-	default 552 if DOOR_LOCK_STEP_UP_PHASE
-	default 251
+	default 271
 
 config BT_L2CAP_TX_MTU
-	default 548 if DOOR_LOCK_STEP_UP_PHASE
-	default 247
+	default 267
 
 config BT_GATT_DYNAMIC_DB
 	default y

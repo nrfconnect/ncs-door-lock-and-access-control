@@ -154,7 +154,7 @@ public:
 
 	/**
 	 * Comupte shared key with ECDH procedure.
-	 * Aliro spec chapter 8.3.1.4.
+	 * Aliro spec.
 	 * The function agrees common key using the ECDH procedure and derives shared key.
 	 *
 	 * @param privKeyId input identifier of private key id to use in procedure.
@@ -170,7 +170,7 @@ public:
 
 	/**
 	 * Derive session keys using Kdh.
-	 * Aliro spec chapter 8.3.1.11.
+	 * Aliro spec.
 	 * This function generates 160 bytes of derived key material and extracts from it symmetric keys:
 	 * - ExpeditedSKReader
 	 * - ExpeditedSKDevice

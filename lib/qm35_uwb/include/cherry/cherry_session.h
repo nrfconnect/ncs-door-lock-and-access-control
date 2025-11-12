@@ -186,6 +186,29 @@ cherry_session_set_ref_time_base(struct cherry_session *session,
 				 struct cherry_session *session_reference,
 				 uint32_t offset_us);
 
+/**
+ * cherry_session_set_diagnostics() - Enable or disable session
+ * diagnostics.
+ * @session: Session object.
+ * @config: Define which kind of diagnostics to enable.
+ * @enable_fallback: If true, enable fallback mechanism if needed.
+ *
+ * This function may be called at any time, as long as the session is not
+ * active. It does not have to be called if no change is needed from default
+ * parameters.
+ *
+ * This function returns immediately.
+ *
+ * Returns:
+ *  - &CHERRY_ERR_NONE if accepted
+ *  - &CHERRY_ERR_INVALID_PARAMETER on any invalid parameter or not supported
+ *    diagnostics
+ */
+enum cherry_err
+cherry_session_set_diagnostics(struct cherry_session *session,
+			       struct cherry_common_diag_cfg config,
+			       bool enable_fallback);
+
 #ifdef __cplusplus
 }
 #endif

@@ -23,4 +23,4 @@ module = NCS_ALIRO_UWB
 module-str = ALIRO_UWB
 module-dep = LOG
 module-help = Enables Aliro UWB platform log messages.
-source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"

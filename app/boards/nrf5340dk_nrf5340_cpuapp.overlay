@@ -10,7 +10,7 @@
 	};
 
 	aliases {
-		access-decision-indicator = &led1; // green LED2 on nRF5340DK
+		access-decision-indicator = &led1; /* green LED2 on nRF5340DK */
 	};
 };
 
@@ -45,7 +45,7 @@
 	nucleo_nfc@0 {
 		compatible = "x-nucleo-nfc";
 		reg = <0>;
-		spi-max-frequency = <DT_FREQ_M(5)>;
+		spi-max-frequency = <DT_FREQ_M(8)>;
 		irq-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
 		reset-gpios = <&gpio1 10 (GPIO_ACTIVE_LOW | GPIO_PULL_DOWN)>;
 	};
