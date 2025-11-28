@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "aliro/protocol_version.h"
+
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/util.h>
 
@@ -21,6 +23,11 @@
  * used for BLE transport implementation in the Aliro stack.
  */
 namespace Aliro::BleTypes {
+
+/**
+ * @brief Constant representing an invalid BLE UWB protocol version.
+ */
+constexpr ProtocolVersion kInvalidProtocolVersion{ 0x0000 };
 
 /**
  * @brief Enumeration for the type of advertising data field.

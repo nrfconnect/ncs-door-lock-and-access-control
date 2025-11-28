@@ -76,7 +76,7 @@ public:
 	 * @param validateCredentialCallback user callback triggered whenever the credential is being validated.
 	 * @param loadCredentialClbk user callback triggered whenever the credential is being loaded from storage.
 	 */
-	void Init(SetOrLoadCredentialCallback setOrLoadCredentialClbk = nullptr,
+	void Init(SetOrLoadCredentialCallback setCredentialClbk = nullptr,
 		  ClearCredentialCallback clearCredentialClbk = nullptr,
 		  ValidateCredentialCallback validateCredentialClbk = nullptr,
 		  SetOrLoadCredentialCallback loadCredentialClbk = nullptr);

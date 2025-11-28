@@ -12,10 +12,10 @@
 #include "aliro/types.h"
 #include "kpersistent_manager/kpersistent_manager.h"
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "aliro/ble_types.h"
 #include "transport/ble/ble_iface.h"
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include <cstddef>
 
@@ -32,14 +32,14 @@ struct AliroConfig {
 	 */
 	[[maybe_unused]] KpersistentManager *mKpersistentManager{};
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	/**
 	 * @brief The BLE interface.
 	 */
 	BleInterface::BleIfc *mBle{};
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 };
 
 /**
@@ -88,11 +88,12 @@ public:
 	 * @param privateKeyId The private key ID.
 	 * @param groupResolvingKeyId The group resolving key ID.
 	 * @param identifier The reader identifier.
+	 * @param credentialIssuerCAPublicKeyId The credential issuer CA public key ID.
 	 *
 	 * @return ALIRO_NO_ERROR if the Reader was provisioned successfully, an error code otherwise.
 	 */
 	AliroError Provision(CryptoTypes::KeyId privateKeyId, CryptoTypes::KeyId groupResolvingKeyId,
-			     const Identifier &identifier);
+			     const Identifier &identifier, CryptoTypes::KeyId credentialIssuerCAPublicKeyId);
 
 	/**
 	 * @brief Sets the reader identifier.
@@ -100,6 +101,13 @@ public:
 	 * @param identifier The reader identifier.
 	 */
 	AliroError SetReaderIdentifier(const Identifier &identifier);
+
+	/**
+	 * @brief Sets the credential issuer CA public key ID.
+	 *
+	 * @param credentialIssuerCAPublicKeyId The credential issuer CA public key ID.
+	 */
+	void SetCredentialIssuerCAPublicKeyId(CryptoTypes::KeyId credentialIssuerCAPublicKeyId) const;
 
 	/**
 	 * @brief Starts the Aliro stack.
@@ -138,7 +146,7 @@ public:
 	 */
 	const ProtocolVersion *GetExpeditedStandardProtocolVersions(size_t &versionCount) const;
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	/**
 	 * @brief Sends the Reader Status Changed Message ID.
@@ -178,7 +186,7 @@ public:
 	 */
 	const ProtocolVersion *GetBleUwbProtocolVersions(size_t &versionCount) const;
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 private:
 	Callbacks mCallbacks{};

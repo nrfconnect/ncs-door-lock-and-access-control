@@ -21,7 +21,7 @@ protected:
 	AliroError _GenerateEphemeralKeyPair(CryptoTypes::KeyId &keyId);
 	AliroError _ExportPublicKey(CryptoTypes::KeyId keyId, CryptoTypes::PublicKey &publicKey);
 	AliroError _ExportKey(CryptoTypes::KeyId keyId, uint8_t *key, size_t keyLength);
-	AliroError _ImportPublicKey(const CryptoTypes::PublicKey &key, CryptoTypes::KeyId &keyId);
+	AliroError _ImportPublicKey(const CryptoTypes::PublicKey &key, CryptoTypes::KeyId &keyId, bool isPersistent);
 	AliroError _ImportPrivateKey(const CryptoTypes::PrivateKey &key, CryptoTypes::KeyId &keyId, bool isPersistent);
 	AliroError _PreserveKey(CryptoTypes::KeyId &volatileKeyId, CryptoTypes::KeyId persistentKeyId);
 	AliroError _DestroyKey(CryptoTypes::KeyId &keyId) const;

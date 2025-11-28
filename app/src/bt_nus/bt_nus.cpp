@@ -16,7 +16,7 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/settings/settings.h>
 
-LOG_MODULE_REGISTER(NusService, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(NusService, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace Aliro::BtNus {
 
@@ -31,9 +31,9 @@ AliroError NUSService::Start()
 			     LOG_ERR("Failed to set fixed passkey"));
 #endif // CONFIG_BT_FIXED_PASSKEY
 
-#if !defined(CONFIG_DOOR_LOCK_DFU_BLE_SMP) && !defined(CONFIG_ALIRO_BLE_UWB)
+#if !defined(CONFIG_DOOR_LOCK_DFU_BLE_SMP) && !defined(CONFIG_DOOR_LOCK_BLE_UWB)
 	VerifyOrReturnStatus(BleManagerImpl::Instance().Init({}) == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
-#endif // !CONFIG_DOOR_LOCK_DFU_BLE_SMP && !CONFIG_ALIRO_BLE_UWB
+#endif // !CONFIG_DOOR_LOCK_DFU_BLE_SMP && !CONFIG_DOOR_LOCK_BLE_UWB
 
 	static bt_conn_auth_cb sConnAuthCallbacks = {
 		.passkey_display = [](bt_conn *conn,
@@ -59,7 +59,7 @@ AliroError NUSService::Start()
 	VerifyOrReturnStatus(bt_nus_init(&sNusCallbacks) == 0, ALIRO_ERROR_INTERNAL,
 			     LOG_ERR("Failed to initialize NUS service"));
 
-#ifndef CONFIG_ALIRO_BLE_UWB
+#ifndef CONFIG_DOOR_LOCK_BLE_UWB
 
 	AliroError err = BleManagerImpl::Instance().StartAdvertising({ kNusUuid.data(), kNusUuid.size() },
 								     BleTypes::AdvertisingDataFieldType::Uuid128All);
@@ -67,7 +67,7 @@ AliroError NUSService::Start()
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err,
 			     LOG_ERR("NUS advertising failed to start (rc %d)", err.ToInt()));
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	mIsStarted = true;
 	LOG_INF("NUS service started");

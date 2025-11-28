@@ -12,7 +12,7 @@
 #include "aliro/utils.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(L2CAPServer, CONFIG_NCS_ALIRO_BLE_LOG_LEVEL);
+LOG_MODULE_REGISTER(L2CAPServer, CONFIG_DOOR_LOCK_BLE_LOG_LEVEL);
 
 namespace {
 
@@ -21,6 +21,7 @@ struct L2CapChanNode {
 
 	bt_conn *conn{ nullptr };
 	bt_l2cap_le_chan chan{};
+	Aliro::ProtocolVersion bleUwbProtocolVersion{};
 };
 
 static_assert(offsetof(L2CapChanNode, node) == 0);
@@ -28,25 +29,22 @@ static_assert(offsetof(L2CapChanNode, node) == 0);
 static_assert(BT_L2CAP_TX_MTU >= 267, "BT_L2CAP_TX_MTU must be at least 267 bytes");
 static_assert(BT_L2CAP_RX_MTU >= 264, "BT_L2CAP_RX_MTU must be at least 264 bytes");
 
-NET_BUF_POOL_DEFINE(sNetBufPool, CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS, BT_L2CAP_SDU_BUF_SIZE(BT_L2CAP_SDU_TX_MTU),
+NET_BUF_POOL_DEFINE(sNetBufPool, CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS, BT_L2CAP_SDU_BUF_SIZE(BT_L2CAP_SDU_TX_MTU),
 		    CONFIG_BT_CONN_TX_USER_DATA_SIZE, nullptr);
 
 K_MUTEX_DEFINE(sL2CapChanMutex);
 sys_slist_t sL2CapChanList{};
 
-bt_l2cap_le_chan *AllocateL2capChan(bt_conn *conn)
+bt_l2cap_le_chan *AllocateNewL2capChan(bt_conn *conn, Aliro::ProtocolVersion version)
 {
 	auto *ref = bt_conn_ref(conn);
-	if (!ref) {
-		return nullptr;
-	}
+	VerifyOrReturnValue(ref, nullptr, LOG_ERR("Cannot reference connection (conn: %p)", conn));
 
-	auto node = Aliro::new_nothrow<L2CapChanNode>();
-	if (!node) {
-		return nullptr;
-	}
+	auto *node = Aliro::new_nothrow<L2CapChanNode>();
+	VerifyOrReturnValue(node, nullptr, LOG_ERR("Cannot allocate channel node (conn: %p)", conn));
 
 	node->conn = ref;
+	node->bleUwbProtocolVersion = version;
 
 	{
 		MutexGuard lock{ sL2CapChanMutex };
@@ -97,15 +95,18 @@ int L2capServer::Accept(bt_conn *conn, bt_l2cap_server *server, bt_l2cap_chan **
 {
 	VerifyOrReturnValue(server && channel, -EINVAL, LOG_ERR("Invalid argument"));
 	VerifyOrReturnValue(Instance().mSpsm == server->psm, -ENOENT, LOG_ERR("Invalid PSM value"));
-	VerifyOrReturnValue(Instance().mChannelCount < CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS, -ENOMEM,
+	VerifyOrReturnValue(Instance().mChannelCount < CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS, -ENOMEM,
 			    LOG_ERR("Too many connections"));
 
-	auto newChannel = AllocateL2capChan(conn);
-	VerifyOrReturnValue(newChannel, -ENOMEM, LOG_ERR("Cannot allocate channel (conn: %p)", conn));
+	auto *l2capChan = GetL2capChan(conn);
+	VerifyOrReturnValue(l2capChan, -ENOENT, LOG_ERR("Cannot get allocated channel (conn: %p)", conn));
 
-	newChannel->chan.ops = &Instance().mChannelCallbacks;
+	VerifyOrReturnValue(Instance().GetBleUwbProtocolVersion(conn) != BleTypes::kInvalidProtocolVersion, -ENOENT,
+			    LOG_ERR("BLE UWB protocol version is not set(conn: %p)", conn));
 
-	*channel = &newChannel->chan;
+	l2capChan->chan.ops = &Instance().mChannelCallbacks;
+
+	*channel = &l2capChan->chan;
 
 	Instance().mChannelCount++;
 
@@ -143,7 +144,7 @@ int L2capServer::DataReceived(bt_l2cap_chan *channel, net_buf *buffer)
 
 void L2capServer::Released(bt_l2cap_chan *channel)
 {
-	auto chan = BT_L2CAP_LE_CHAN(channel);
+	auto *chan = BT_L2CAP_LE_CHAN(channel);
 	FreeL2capChan(chan);
 
 	Instance().mChannelCount--;
@@ -174,9 +175,44 @@ bool L2capServer::IsValidDynamicSpsm(Spsm spsm)
 	return IN_RANGE(spsm, kL2capSpsmMin, kL2capSpsmMax);
 }
 
-L2capServer::Spsm L2capServer::GetSpsm() const
+AliroError L2capServer::AllocateL2capChannel(bt_conn *conn, ProtocolVersion version) const
 {
-	return mSpsm;
+	VerifyOrReturnValue(conn, ALIRO_INVALID_ARGUMENT, LOG_ERR("Invalid connection"));
+	VerifyOrExit(GetL2capChan(conn) == nullptr, LOG_DBG("Channel already allocated (conn: %p)", conn));
+
+	VerifyOrReturnValue(AllocateNewL2capChan(conn, version) != nullptr, ALIRO_NO_MEMORY,
+			    LOG_ERR("Cannot allocate channel (conn: %p)", conn));
+
+exit:
+	return ALIRO_NO_ERROR;
+}
+
+void L2capServer::FreeL2capChannel(bt_conn *conn) const
+{
+	VerifyOrReturn(conn, LOG_ERR("Invalid connection"));
+
+	auto *chan = GetL2capChan(conn);
+	VerifyOrReturn(chan, LOG_DBG("Channel not allocated or already freed (conn: %p)", conn));
+
+	FreeL2capChan(chan);
+}
+
+ProtocolVersion L2capServer::GetBleUwbProtocolVersion(bt_conn *conn) const
+{
+	sys_snode_t *node{ nullptr };
+
+	{
+		MutexGuard lock{ sL2CapChanMutex };
+
+		SYS_SLIST_FOR_EACH_NODE (&sL2CapChanList, node) {
+			const auto *nodeObj = CONTAINER_OF(node, L2CapChanNode, node);
+			if (nodeObj->conn == conn) {
+				return nodeObj->bleUwbProtocolVersion;
+			}
+		}
+	}
+
+	return BleTypes::kInvalidProtocolVersion;
 }
 
 AliroError L2capServer::Send(bt_conn *conn, const uint8_t *data, size_t length) const
@@ -185,7 +221,7 @@ AliroError L2capServer::Send(bt_conn *conn, const uint8_t *data, size_t length) 
 
 	LOG_HEXDUMP_DBG(data, length, "L2CAP send: ");
 
-	auto chan = GetL2capChan(conn);
+	auto *chan = GetL2capChan(conn);
 	VerifyOrReturnStatus(chan, ALIRO_INVALID_STATE, LOG_ERR("Cannot get channel (conn: %p)", conn));
 
 	net_buf *buffer = net_buf_alloc(&sNetBufPool, K_FOREVER);

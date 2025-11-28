@@ -5,7 +5,7 @@
 
 .. _`ncs-door-lock-app`: https://github.com/nrfconnect/ncs-door-lock-app
 .. _`Aliro Certification Tool`: https://github.com/csa-access-control/aliro-certification-tool
-.. _`dry-run/sve-2025-v1.4`: https://github.com/csa-access-control/aliro-certification-tool/releases/tag/dry-run%2Fsve-2025-v1.4
+.. _`aliro-sve-v1.0`: https://github.com/csa-access-control/aliro-certification-tool/releases/tag/aliro-sve-v1.0
 .. _`test harness hardware requirements`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#requirements
 .. _`test harness usage instructions`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#usage-instructions
 .. _`running test scripts`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#c---creating-a-test-run-running-test-scripts

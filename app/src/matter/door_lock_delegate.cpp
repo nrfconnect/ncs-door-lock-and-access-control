@@ -70,6 +70,7 @@ CHIP_ERROR DoorLockDelegate::Init()
 		Aliro::CryptoTypes::PublicKey publicKey{};
 		Aliro::Identifier identifier{};
 		Aliro::CryptoTypes::KeyId groupResolvingKeyId{ 0 };
+		Aliro::CryptoTypes::KeyId credentialIssuerCAPublicKeyId{ 0 };
 
 		AliroError ec = Aliro::CryptoInstance().ExportPublicKey(Aliro::kPrivateKeyId, publicKey);
 		VerifyOrReturn(ec == ALIRO_NO_ERROR, /* device not provisioned */);
@@ -78,13 +79,26 @@ CHIP_ERROR DoorLockDelegate::Init()
 							       identifier.data(), identifier.size()) == 0,
 			       LOG_ERR("Failed to get reader group identifier"));
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 		groupResolvingKeyId = Aliro::kGroupResolvingKeyId;
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
-		ec = Aliro::AliroStack::Instance().Provision(Aliro::kPrivateKeyId, groupResolvingKeyId, identifier);
+#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+		ec = Aliro::CryptoInstance().ExportKey(Aliro::kCredentialIssuerCAPublicKeyId, publicKey.data(),
+						       publicKey.size());
+		if (ec == ALIRO_NO_ERROR) {
+			credentialIssuerCAPublicKeyId = Aliro::kCredentialIssuerCAPublicKeyId;
+		} else {
+			LOG_DBG("Credential Issuer CA Public Key is not provisioned");
+		}
+
+#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+		ec = Aliro::AliroStack::Instance().Provision(Aliro::kPrivateKeyId, groupResolvingKeyId, identifier,
+							     credentialIssuerCAPublicKeyId);
 		VerifyOrReturn(ec == ALIRO_NO_ERROR, LOG_ERR("Failed to provision Aliro stack"));
 
 		int err = AliroStart();
@@ -177,7 +191,7 @@ CHIP_ERROR DoorLockDelegate::GetAliroGroupResolvingKey(chip::MutableByteSpan &gr
 
 	VerifyOrReturnError(groupResolvingKey.size() == kAliroGroupResolvingKeySize, CHIP_ERROR_INVALID_ARGUMENT);
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	AliroError ec = Aliro::CryptoInstance().ExportKey(Aliro::kGroupResolvingKeyId, groupResolvingKey.data(),
 							  groupResolvingKey.size());
@@ -188,12 +202,12 @@ CHIP_ERROR DoorLockDelegate::GetAliroGroupResolvingKey(chip::MutableByteSpan &gr
 
 	return CHIP_NO_ERROR;
 
-#else // CONFIG_ALIRO_BLE_UWB
+#else // CONFIG_DOOR_LOCK_BLE_UWB
 
 	groupResolvingKey.reduce_size(0);
 	return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 CHIP_ERROR DoorLockDelegate::GetAliroSupportedBLEUWBProtocolVersionAtIndex(size_t index,
@@ -201,48 +215,48 @@ CHIP_ERROR DoorLockDelegate::GetAliroSupportedBLEUWBProtocolVersionAtIndex(size_
 {
 	LOG_DBG("GetAliroSupportedBLEUWBProtocolVersionAtIndex");
 
-#if CONFIG_ALIRO_BLE_UWB
+#if CONFIG_DOOR_LOCK_BLE_UWB
 
 	size_t versionCount{};
 	const auto *versions = Aliro::AliroStack::Instance().GetBleUwbProtocolVersions(versionCount);
 
 	return EncodeProtocolVersion(index, protocolVersion, versions, versionCount);
 
-#else // CONFIG_ALIRO_BLE_UWB
+#else // CONFIG_DOOR_LOCK_BLE_UWB
 
 	protocolVersion.reduce_size(0);
 	return CHIP_ERROR_NOT_IMPLEMENTED;
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 uint8_t DoorLockDelegate::GetAliroBLEAdvertisingVersion()
 {
 	LOG_DBG("GetAliroBLEAdvertisingVersion");
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	return Aliro::AliroStack::Instance().GetBleAdvertisingVersion();
 
-#else // CONFIG_ALIRO_BLE_UWB
+#else // CONFIG_DOOR_LOCK_BLE_UWB
 
 	return 0;
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 uint16_t DoorLockDelegate::GetNumberOfAliroCredentialIssuerKeysSupported()
 {
 	LOG_DBG("GetNumberOfAliroCredentialIssuerKeysSupported");
 
-	return CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS;
+	return CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS;
 }
 
 uint16_t DoorLockDelegate::GetNumberOfAliroEndpointKeysSupported()
 {
 	LOG_DBG("GetNumberOfAliroEndpointKeysSupported");
 
-	return CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS;
+	return CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS;
 }
 
 CHIP_ERROR DoorLockDelegate::SetAliroReaderConfig(const chip::ByteSpan &signingKey,
@@ -256,19 +270,20 @@ CHIP_ERROR DoorLockDelegate::SetAliroReaderConfig(const chip::ByteSpan &signingK
 	VerifyOrReturnError(verificationKey.size() == kAliroReaderVerificationKeySize, CHIP_ERROR_INVALID_ARGUMENT);
 	VerifyOrReturnError(groupIdentifier.size() == kAliroReaderGroupIdentifierSize, CHIP_ERROR_INVALID_ARGUMENT);
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	VerifyOrReturnError(groupResolvingKey.HasValue() &&
 				    groupResolvingKey.Value().size() == kAliroGroupResolvingKeySize,
 			    CHIP_ERROR_INVALID_ARGUMENT);
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	Aliro::CryptoTypes::PrivateKey privateKey{};
 	Aliro::Identifier identifier{};
 	Aliro::CryptoTypes::GroupResolvingKey groupResKey{};
 	Aliro::CryptoTypes::KeyId privateKeyId{ 0 };
 	Aliro::CryptoTypes::KeyId groupResolvingKeyId{ 0 };
+	Aliro::CryptoTypes::KeyId credentialIssuerCAPublicKeyId{ 0 };
 
 	std::copy(signingKey.begin(), signingKey.end(), privateKey.data());
 	std::copy_n(groupIdentifier.data(), kAliroReaderGroupIdentifierSize, identifier.data());
@@ -298,16 +313,30 @@ CHIP_ERROR DoorLockDelegate::SetAliroReaderConfig(const chip::ByteSpan &signingK
 	AliroError ec = Aliro::CryptoInstance().ImportPrivateKey(privateKey, privateKeyId, true);
 	VerifyOrReturnError(ec == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL);
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	groupResolvingKeyId = Aliro::kGroupResolvingKeyId;
 	ec = Aliro::CryptoInstance().ProvisionSymmetricKey(groupResKey.data(), groupResKey.size(), groupResolvingKeyId,
 							   true);
 	VerifyOrReturnError(ec == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL);
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
-	ec = Aliro::AliroStack::Instance().Provision(privateKeyId, groupResolvingKeyId, identifier);
+#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+	Aliro::CryptoTypes::PublicKey publicKey{};
+	ec = Aliro::CryptoInstance().ExportKey(Aliro::kCredentialIssuerCAPublicKeyId, publicKey.data(),
+					       publicKey.size());
+	if (ec == ALIRO_NO_ERROR) {
+		credentialIssuerCAPublicKeyId = Aliro::kCredentialIssuerCAPublicKeyId;
+	} else {
+		LOG_DBG("Credential Issuer CA Public Key is not provisioned");
+	}
+
+#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+	ec = Aliro::AliroStack::Instance().Provision(privateKeyId, groupResolvingKeyId, identifier,
+						     credentialIssuerCAPublicKeyId);
 	VerifyOrReturnError(ec == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to provision Aliro stack"));
 
 	VerifyOrReturnError(AliroStart() == EXIT_SUCCESS, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to start Aliro"););
@@ -326,12 +355,12 @@ CHIP_ERROR DoorLockDelegate::ClearAliroReaderConfig()
 	Aliro::CryptoTypes::KeyId keyId{ Aliro::kPrivateKeyId };
 	Aliro::CryptoInstance().DestroyKey(keyId);
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	keyId = Aliro::kGroupResolvingKeyId;
 	Aliro::CryptoInstance().DestroyKey(keyId);
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	return CHIP_NO_ERROR;
 }

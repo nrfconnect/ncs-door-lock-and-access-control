@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config ALIRO_BLE_UWB
+	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
+	default y if DOOR_LOCK_BLE_UWB
+	help
+	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
+	  used by the Reader to communicate with the User Device. It is used to send and
+	  receive packets over BLE. Additionally the UWB is enabled in order to manage the
+	  ranging between the Reader and the User Device.

@@ -4,23 +4,23 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-module = NCS_DOOR_LOCK_APP
+module = DOOR_LOCK_APP
 module-str = NCS_DOOR_LOCK_APP
 module-dep = LOG
 module-help = Enables nRF Connect SDK Door Lock Application log messages.
 source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
 
-choice ACCESS_MANAGER_IMPLEMENTATION
+choice DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION
 	prompt "Access Manager implementation"
-	default ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
+	default DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
 
-	config ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
+	config DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
 		bool "Access Manager default implementation"
 		help
 		  Uses the default implementation of the Access Manager
 		  provided by the Door Lock Reference Application.
 
-	config ACCESS_MANAGER_IMPLEMENTATION_CUSTOM
+	config DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM
 		bool "Access Manager custom implementation"
 		help
 		  Uses a custom implementation of the Access Manager.
@@ -59,6 +59,10 @@ rsource "src/aliro/Kconfig"
 if DOOR_LOCK_BLE_NUS
 rsource "src/bt_nus/Kconfig"
 endif # DOOR_LOCK_BLE_NUS
+
+if DOOR_LOCK_DFU_BLE_SMP
+rsource "src/dfu_smp/Kconfig"
+endif # DOOR_LOCK_DFU_BLE_SMP
 
 if CHIP
 

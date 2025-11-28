@@ -53,9 +53,9 @@ The payload updates automatically whenever these values change, ensuring that th
 When a Bluetooth LE central device connects, the Aliro stack manages the Bluetooth LE session, handling connection events, security, and data exchange over a dedicated L2CAP channel with Aliro-specific GATT services.
 Each session uses unique keys, which are destroyed after termination.
 In case of NFC transport, only one session can be active at a time.
-For Bluetooth LE transport, the maximum number of concurrent sessions is limited by the ``CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS`` Kconfig option and defaults to the value of ``CONFIG_BT_MAX_CONN``.
+For Bluetooth LE transport, the maximum number of concurrent sessions is limited by the ``CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS`` Kconfig option and defaults to the value of ``CONFIG_BT_MAX_CONN``.
 
-To configure number of Bluetooth LE sessions, set the ``CONFIG_BT_MAX_CONN`` to maximum number of connections and optionally use the ``CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS`` to limit the number of sessions.
+To configure number of Bluetooth LE sessions, set the ``CONFIG_BT_MAX_CONN`` to maximum number of connections and optionally use the ``CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS`` to limit the number of sessions.
 
 .. note::
    Each session consumes resources, such as RAM and PSA key slots, therefore the maximum number of the active sessions should be determined empirically based on the requirements of the final application.
@@ -84,21 +84,21 @@ Kconfig options
 
 You can configure the Qorvo QM35 interface implementation using the following Kconfig options located under the :file:`app/src/platform/uwb_impl/uwb_qm35_impl/Kconfig` path:
 
-* ``CONFIG_ALIRO_UWB_MIN_RAN_MULTIPLIER`` - This option specifies the minimum RAN multiplier for UWB ranging blocks.
+* ``CONFIG_DOOR_LOCK_UWB_MIN_RAN_MULTIPLIER`` - This option specifies the minimum RAN multiplier for UWB ranging blocks.
   In practice, this option allows you to configure the frequency of UWB ranging measurements received by the Reader.
   The time range is between 96 ms (RAN multiplier is 1) and 24480 ms (RAN multiplier is 255).
   Default value is ``2`` which corresponds to a measurement frequency of approximately 5 Hz.
 
-* ``CONFIG_ALIRO_UWB_MAC_MODE_OFFSET`` - This option sets the offset between the 2 ranging blocks in MAC mode.
+* ``CONFIG_DOOR_LOCK_UWB_MAC_MODE_OFFSET`` - This option sets the offset between the 2 ranging blocks in MAC mode.
   The range is from 0 to 63, with a default value of ``0``.
 
-* ``CONFIG_ALIRO_UWB_MAC_MODE_RANGING_ROUNDS`` - This option specifies the number of ranging rounds used in a ranging block.
+* ``CONFIG_DOOR_LOCK_UWB_MAC_MODE_RANGING_ROUNDS`` - This option specifies the number of ranging rounds used in a ranging block.
   Available values are:
 
   * ``0`` - 1 ranging round (default)
   * ``1`` - 2 ranging rounds
 
-* ``CONFIG_ALIRO_UWB_SESSION_LOGGING`` - This option enables logging for UWB session states including status codes.
+* ``CONFIG_DOOR_LOCK_UWB_SESSION_LOGGING`` - This option enables logging for UWB session states including status codes.
   Use it for debugging and monitoring UWB session behavior.
 
 .. note::
@@ -139,13 +139,13 @@ Selecting implementation
 
 You can select an Access Manager implementation by enabling one of the following Kconfig options:
 
-* ``CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT`` (:file:`access_manager_impl_default`) - This option is the default implementation, designed to cover typical access control scenarios.
+* ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT`` (:file:`access_manager_impl_default`) - This option is the default implementation, designed to cover typical access control scenarios.
   It makes access decisions based on the proximity of the Aliro User Device (as measured by UWB ranging) and the stored public keys.
   You can adjust this implementation to your needs through Kconfig options.
   This implementation is integrated with the Access Decision Indicator module, which provides visual feedback about the result of access decisions (for example, LED indicator).
   To see available Kconfig options, refer to the :ref:`addon_architecture_kconfig_default` subsection.
 
-* ``CONFIG_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM`` (:file:`access_manager_impl_custom`) - This option allows you to provide your own logic by implementing the interface defined in the :file:`access_manager.h` file.
+* ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM`` (:file:`access_manager_impl_custom`) - This option allows you to provide your own logic by implementing the interface defined in the :file:`access_manager.h` file.
   Use this if you need to integrate the |APP_NAME| with custom access policies.
 
 .. _addon_architecture_kconfig_default:
@@ -159,19 +159,19 @@ You can configure the default implementation through Kconfig options located und
   If the distance exceeds this value, access is denied.
   If the Aliro User Device is within this distance, access is granted.
 
-* ``CONFIG_ACCESS_MANAGER_MAX_STORED_KEYS`` - This option sets the maximum number of public keys that can be stored in the Access Manager.
+* ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS`` - This option sets the maximum number of public keys that can be stored in the Access Manager.
   It determines the size of the statically allocated memory for Access Manager cache.
 
-* ``CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION`` - This Kconfig choice allows you to select the method of terminating the UWB ranging session by the Aliro Reader.
+* ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION`` - This Kconfig choice allows you to select the method of terminating the UWB ranging session by the Aliro Reader.
   Such mechanism is important if the User Device does not terminate the ranging session on its own.
   You can choose between the following options:
 
-   * ``CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT`` - The session is terminated after a specified timeout.
+   * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT`` - The session is terminated after a specified timeout.
      This is a default option.
-     The timeout, in milliseconds, is defined by the ``CONFIG_ALIRO_ACCESS_MANAGER_SESSION_TIMEOUT_MS`` Kconfig option.
+     The timeout, in milliseconds, is defined by the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS`` Kconfig option.
      By default, the timeout is set to ``10000`` ms (10 seconds).
 
-   * ``CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED`` - The session is terminated immediately after access is granted for a given ranging session.
+   * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED`` - The session is terminated immediately after access is granted for a given ranging session.
 
 Configuring Access Manager
 ==========================
@@ -183,13 +183,13 @@ For example, to allow a maximum distance of 50 cm, add the following line to you
 
    CONFIG_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM=50
 
-To use a custom implementation, provide your own implementation by modifying the files in the :file:`access_manager_impl_custom` file, and build the application with the ``CONFIG_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM`` Kconfig option enabled.
+To use a custom implementation, provide your own implementation by modifying the files in the :file:`access_manager_impl_custom` file, and build the application with the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM`` Kconfig option enabled.
 
 For instance:
 
 .. code-block::
 
-   west build -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM=y
+   west build -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM=y
 
 Matter support
 **************
@@ -247,7 +247,7 @@ Configuration
 =============
 
 You can change the maximum number of Kpersistent keys that can be stored by adjusting the ``CONFIG_MAX_NUMBER_OF_KPERSISTENT`` Kconfig option.
-When using the default Access Manager implementation (``CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT``), this value is constrained by the ``CONFIG_ACCESS_MANAGER_MAX_STORED_KEYS`` option, which defines the maximum number of Access Credential public keys that can be stored.
+When using the default Access Manager implementation (``CONFIG_DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT``), this value is constrained by the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS`` option, which defines the maximum number of Access Credential public keys that can be stored.
 
 .. important::
    The maximum number of Kpersistent keys must match the maximum number of stored Access Credential public keys.
@@ -295,10 +295,10 @@ Configuration
 =============
 
 The Step-up phase uses the Access Manager interface to make authorization decisions based on the verified Access Document.
-When using the default Access Manager implementation (``CONFIG_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT``), the maximum number of stored Access Credential public keys is controlled by the ``CONFIG_ACCESS_MANAGER_MAX_STORED_KEYS`` option.
+When using the default Access Manager implementation (``CONFIG_DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT``), the maximum number of stored Access Credential public keys is controlled by the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS`` option.
 
 The Step-up phase requires Credential Issuer public keys to verify the digital signature of Access Documents.
-You can configure the maximum number of Credential Issuer public keys that can be stored using the ``CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS`` Kconfig option (see :file:`app/src/aliro/access_manager_impl_default/Kconfig`).
+You can configure the maximum number of Credential Issuer public keys that can be stored using the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS`` Kconfig option (see :file:`app/src/aliro/access_manager_impl_default/Kconfig`).
 
 The Credential Issuer public keys must be provisioned into the Reader before the Step-up phase can be used.
 
