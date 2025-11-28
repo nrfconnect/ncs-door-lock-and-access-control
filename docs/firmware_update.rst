@@ -163,7 +163,7 @@ By building the application with the ``-Dapp_SNIPPET=dfu_smp`` option, you can e
 Enabling Bluetooth LE SMP advertising
 =====================================
 
-When the application is built with the ``-DCONFIG_ALIRO_BLE_UWB=y`` option, the Bluetooth LE SMP advertising is enabled by default.
+When the application is built with the ``-DCONFIG_DOOR_LOCK_BLE_UWB=y`` option, the Bluetooth LE SMP advertising is enabled by default.
 
 For the NFC-only applications, you can enable the Bluetooth LE SMP advertising by pressing a **Button 1** on the device to start or stop SMP advertising.
 

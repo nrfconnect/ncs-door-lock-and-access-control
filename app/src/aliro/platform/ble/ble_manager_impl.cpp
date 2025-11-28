@@ -8,12 +8,12 @@
 
 #include "aliro/mutex_guard.h"
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "gatt_server/gatt_server.h"
 #include "l2cap_server/l2cap_server.h"
 #include "uwb/uwb.h"
 #include "uwb_impl.h"
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #ifdef CONFIG_DOOR_LOCK_BLE_NUS
 #include "bt_nus/bt_nus.h"
@@ -53,7 +53,7 @@ using namespace Aliro::BtNus;
 
 #include "aliro/utils.h"
 
-LOG_MODULE_REGISTER(BLEManagerImpl, CONFIG_NCS_ALIRO_BLE_LOG_LEVEL);
+LOG_MODULE_REGISTER(BLEManagerImpl, CONFIG_DOOR_LOCK_BLE_LOG_LEVEL);
 
 #ifdef CONFIG_CHIP
 
@@ -119,9 +119,9 @@ void BleManagerImpl::Connected(bt_conn *connId, uint8_t error)
 	VerifyOrReturn(error == 0, LOG_ERR("Connection failed (error: %d, conn: %p)", error, connId));
 
 	LOG_DBG("Connected (conn: %p)", connId);
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	Uwb::UltraWideBandImpl::Instance().BleTimeSync();
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #ifdef CONFIG_DOOR_LOCK_BLE_NUS
 	NUSService::Instance().Connected(connId, error);
@@ -134,6 +134,13 @@ void BleManagerImpl::Connected(bt_conn *connId, uint8_t error)
 void BleManagerImpl::Disconnected(bt_conn *connId, uint8_t reason)
 {
 	mConnectionCount--;
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+
+	L2capServer::Instance().FreeL2capChannel(connId);
+
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
 	bt_conn_unref(connId);
 
 #ifdef CONFIG_DOOR_LOCK_BLE_NUS
@@ -216,18 +223,18 @@ AliroError BleManagerImpl::SetAdvertisingData(const ConstData &data, BleTypes::A
 
 AliroError BleManagerImpl::Send(ConnectionHandle handle, Data data) const
 {
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	VerifyOrReturnStatus(IsInitialized(), ALIRO_INVALID_STATE, LOG_ERR("BLE manager not initialized"));
 	VerifyOrReturnStatus(handle, ALIRO_INVALID_ARGUMENT, LOG_ERR("Invalid connection handle"));
 
 	return L2capServer::Instance().Send(static_cast<bt_conn *>(handle), data.mData, data.mLength);
 
-#else // CONFIG_ALIRO_BLE_UWB
+#else // CONFIG_DOOR_LOCK_BLE_UWB
 
 	return ALIRO_NO_ERROR;
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 AliroError BleManagerImpl::Disconnect(ConnectionHandle handle)
@@ -316,13 +323,10 @@ AliroError BleManagerImpl::Init(const PlatformTransportCallbacks &callbacks)
 
 #endif // CONFIG_CHIP
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	AliroError error = L2capServer::Instance().Init();
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, error, LOG_ERR("Cannot initialize L2CAP server"));
-
-	error = mGattServer.Init(L2capServer::Instance().GetSpsm());
-	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, error, LOG_ERR("Cannot initialize GATT server"));
 
 	L2capServer::Callbacks l2capCallbacks = {
 		.mOnConnected =
@@ -341,9 +345,13 @@ AliroError BleManagerImpl::Init(const PlatformTransportCallbacks &callbacks)
 					      static_cast<ConnectionHandle>(conn), { data, length });
 			},
 	};
+
 	L2capServer::Instance().SetCallbacks(l2capCallbacks);
 
-#endif // CONFIG_ALIRO_BLE_UWB
+	error = mGattServer.Init(L2capServer::Instance());
+	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, error, LOG_ERR("Cannot initialize GATT server"));
+
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	SetState(BleManagerState::Initialized);
 
@@ -401,15 +409,15 @@ AliroError BleManagerImpl::GetTxPowerLevel(BleTypes::TxPowerLevel &txPowerLevel)
 
 size_t BleManagerImpl::GetMaxSessions() const
 {
-#ifdef CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS
 
-	return CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS;
+	return CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS;
 
-#else // CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS
+#else // CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS
 
 	return 0;
 
-#endif // CONFIG_ALIRO_BLE_UWB_MAX_SESSIONS
+#endif // CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS
 }
 
 AliroError BleManagerImpl::StartAdvertising(const ConstData &data, BleTypes::AdvertisingDataFieldType type)
@@ -539,6 +547,22 @@ AliroError BleManagerImpl::StopAdvertising()
 	LOG_INF("BLE advertising stopped");
 
 	return ALIRO_NO_ERROR;
+}
+
+ProtocolVersion BleManagerImpl::GetProtocolVersion(ConnectionHandle handle) const
+{
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+
+	VerifyOrReturnValue(IsInitialized(), BleTypes::kInvalidProtocolVersion, LOG_ERR("BLE manager not initialized"));
+	VerifyOrReturnValue(handle, BleTypes::kInvalidProtocolVersion, LOG_ERR("Invalid connection handle"));
+
+	return L2capServer::Instance().GetBleUwbProtocolVersion(static_cast<bt_conn *>(handle));
+
+#else // CONFIG_DOOR_LOCK_BLE_UWB
+
+	return BleTypes::kInvalidProtocolVersion;
+
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 } // namespace Aliro::BleInterface

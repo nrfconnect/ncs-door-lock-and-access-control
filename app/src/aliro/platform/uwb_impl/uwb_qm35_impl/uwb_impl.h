@@ -218,12 +218,12 @@ private:
 	std::array<uint8_t, kCurrentDistanceBufferSize> mCurrentDistanceCm{};
 
 	aliro_uwb_adapter_reader_config mReaderConfig = {
-		.min_ran_multiplier = CONFIG_ALIRO_UWB_MIN_RAN_MULTIPLIER,
+		.min_ran_multiplier = CONFIG_DOOR_LOCK_UWB_MIN_RAN_MULTIPLIER,
 		.preferred_hopping_configs = { .configs = { ALIRO_HOPPING_CONFIG_DISABLED,
 							    ALIRO_HOPPING_CONFIG_CONTINUOUS_DEFAULT },
 					       .count = 2 },
-		.mac_mode = static_cast<uint8_t>(CONFIG_ALIRO_UWB_MAC_MODE_OFFSET |
-						 (CONFIG_ALIRO_UWB_MAC_MODE_RANGING_ROUNDS << 6)),
+		.mac_mode = static_cast<uint8_t>(CONFIG_DOOR_LOCK_UWB_MAC_MODE_OFFSET |
+						 (CONFIG_DOOR_LOCK_UWB_MAC_MODE_RANGING_ROUNDS << 6)),
 	};
 };
 

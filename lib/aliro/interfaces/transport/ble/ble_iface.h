@@ -8,6 +8,7 @@
 
 #include "aliro/ble_types.h"
 #include "aliro/errors.h"
+#include "aliro/protocol_version.h"
 #include "aliro/transport_callbacks.h"
 #include "aliro/types.h"
 
@@ -107,6 +108,15 @@ public:
 	 * @return The maximum number of concurrent BLE sessions supported.
 	 */
 	virtual size_t GetMaxSessions() const = 0;
+
+	/**
+	 * @brief Get the BLE UWB protocol version for the given connection.
+	 *
+	 * @param handle The connection handle to get the protocol version for.
+	 *
+	 * @return The protocol version.
+	 */
+	virtual ProtocolVersion GetProtocolVersion(ConnectionHandle handle) const = 0;
 };
 
 } // namespace Aliro::BleInterface

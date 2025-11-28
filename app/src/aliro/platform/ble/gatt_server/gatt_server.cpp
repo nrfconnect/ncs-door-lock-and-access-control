@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <cstring>
 
-LOG_MODULE_REGISTER(GattServer, CONFIG_NCS_ALIRO_BLE_LOG_LEVEL);
+LOG_MODULE_REGISTER(GattServer, CONFIG_DOOR_LOCK_BLE_LOG_LEVEL);
 
 namespace Aliro {
 
@@ -41,10 +41,9 @@ ssize_t GattServer::ReaderDeclaredSpsmBleUwbProtocolversion(bt_conn *connectionI
 				 gattServer->mGattAttributeValue.GetBufferSize());
 }
 
-ssize_t GattServer::UserDeviceSelectedSpsmBleUwbProtocolversion([[maybe_unused]] bt_conn *,
-								const bt_gatt_attr *attribute, const void *data,
-								uint16_t dataLength, [[maybe_unused]] uint16_t,
-								[[maybe_unused]] uint8_t)
+ssize_t GattServer::UserDeviceSelectedSpsmBleUwbProtocolversion(bt_conn *connectionId, const bt_gatt_attr *attribute,
+								const void *data, uint16_t dataLength,
+								[[maybe_unused]] uint16_t, [[maybe_unused]] uint8_t)
 {
 	LOG_DBG("%s", __func__);
 
@@ -85,22 +84,29 @@ ssize_t GattServer::UserDeviceSelectedSpsmBleUwbProtocolversion([[maybe_unused]]
 		std::any_of(supportedVersions, supportedVersions + supportedVersionsCount,
 			    [version](ProtocolVersion supportedVersion) { return supportedVersion == version; });
 
-	VerifyOrReturnValue(versionFound, BT_GATT_ERR(BT_ATT_ERR_VALUE_NOT_ALLOWED),
-			    LOG_ERR("Unsupported Protocol Version selected"));
+	VerifyOrReturnValue(versionFound, dataLength, LOG_DBG("Unsupported protocol version: 0x%04x", version));
+
+	const auto *l2capServerPtr = static_cast<L2capServer *>(attribute->user_data);
+	VerifyOrReturnValue(l2capServerPtr, BT_GATT_ERR(BT_ATT_ERR_INVALID_HANDLE),
+			    LOG_ERR("Invalid L2CAP server pointer"));
+
+	// Ignore the error code, as it is not critical.
+	std::ignore = l2capServerPtr->AllocateL2capChannel(connectionId, version);
 
 	return dataLength;
 }
 
-AliroError GattServer::Init(L2capServer::Spsm spsm)
+AliroError GattServer::Init(L2capServer &l2capServer)
 {
-	VerifyOrReturnStatus(L2capServer::IsValidDynamicSpsm(spsm), ALIRO_INVALID_ARGUMENT,
+	VerifyOrReturnStatus(L2capServer::IsValidDynamicSpsm(l2capServer.GetSpsm()), ALIRO_INVALID_ARGUMENT,
 			     LOG_ERR("Invalid SPSM value"));
 
 	size_t supportedVersionsCount{};
 	const auto *supportedVersions = AliroStack::Instance().GetBleUwbProtocolVersions(supportedVersionsCount);
 
 	// Generate the GATT attributes buffer once during initialization
-	AliroError generateError = mGattAttributeValue.Generate(spsm, supportedVersions, supportedVersionsCount);
+	AliroError generateError =
+		mGattAttributeValue.Generate(l2capServer.GetSpsm(), supportedVersions, supportedVersionsCount);
 	VerifyOrReturnStatus(generateError == ALIRO_NO_ERROR, generateError,
 			     LOG_ERR("Failed to generate GATT attribute buffer"));
 
@@ -117,7 +123,7 @@ AliroError GattServer::Init(L2capServer::Spsm spsm)
 					      &kUserDeviceSelectedCharacteristicAttributeValue));
 	InitializeAttribute(GattAttributeIndex::kUserDeviceSelectedCharacteristicValue,
 			    BT_GATT_ATTRIBUTE(&kUserDeviceSelectedCharacteristic.uuid, BT_GATT_PERM_WRITE, nullptr,
-					      UserDeviceSelectedSpsmBleUwbProtocolversion, this));
+					      UserDeviceSelectedSpsmBleUwbProtocolversion, &l2capServer));
 
 	// Register the GATT service
 	mGattService = {

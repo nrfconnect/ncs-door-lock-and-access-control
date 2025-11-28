@@ -55,7 +55,7 @@ config RFAL_DISCOVERY_GBLEN
 # Proprietary NFC Technology add-on
 #
 
-config NCS_ALIRO_NFC_PROP
+config DOOR_LOCK_NFC_PROP
 	bool "Enable support for proprietary NFC Technology"
 	help
 	  Enable proprietary NFC technology module using RFAL PROP API.
@@ -63,8 +63,8 @@ config NCS_ALIRO_NFC_PROP
 	  enhances device detection capabilities. When disabled, only
 	  standard NFC-A technology is used.
 
-module = NCS_ALIRO_RFAL
-module-str = ALIRO_RFAL
+module = DOOR_LOCK_RFAL
+module-str = DOOR_LOCK_RFAL
 module-dep = LOG
-module-help = Enables Aliro NFC RFAL log messages.
+module-help = Enables Door Lock NFC RFAL log messages.
 source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"

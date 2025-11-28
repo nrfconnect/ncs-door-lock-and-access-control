@@ -8,12 +8,15 @@
 
 #include "kpersistent_manager/kpersistent_manager.h"
 
+#include <bitset>
 #include <cstddef>
 
 namespace Aliro {
 
 class KpersistentManagerImpl : public KpersistentManager {
 public:
+	void Init();
+
 	AliroError GetKpersistentCount(size_t &count) override;
 
 	AliroError GetKpersistentKeyIds(CryptoTypes::KeyId *keyIds, size_t &count) override;
@@ -29,6 +32,9 @@ public:
 						CryptoTypes::PublicKey &publicKey) override;
 
 private:
+	static constexpr size_t kMaxKpersistentCount{ CONFIG_MAX_NUMBER_OF_KPERSISTENT };
+
+	std::bitset<kMaxKpersistentCount> mKpersistentMap{};
 	size_t mKpersistentCount{};
 };
 

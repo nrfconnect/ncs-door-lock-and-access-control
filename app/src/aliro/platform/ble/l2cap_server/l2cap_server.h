@@ -7,6 +7,7 @@
 #pragma once
 
 #include "aliro/errors.h"
+#include "aliro/protocol_version.h"
 
 #include <zephyr/bluetooth/l2cap.h>
 
@@ -67,13 +68,48 @@ public:
 	AliroError Init();
 
 	/**
+	 * @brief Allocates a new L2CAP channel for the given connection.
+	 *
+	 * This function allocates a new L2CAP channel that will be used when the L2CAP connection is accepted.
+	 * The channel must be pre-allocated after protocol BLE UWB version validation via GATT. Additionally, the
+	 * channel is pre-allocated for the given protocol version.
+	 * If the channel is already pre-allocated, this function returns success without re-allocating.
+	 *
+	 * @param conn The connection to preallocate the channel for.
+	 * @param version The BLE UWB protocol version to use for the channel.
+	 *
+	 * @return ALIRO_NO_ERROR on success, or an error code on failure.
+	 */
+	AliroError AllocateL2capChannel(bt_conn *conn, ProtocolVersion version) const;
+
+	/**
+	 * @brief Frees a L2CAP channel for the given connection.
+	 *
+	 * This function frees a L2CAP channel that was previously allocated using the AllocateL2capChannel function.
+	 *
+	 * @param conn The connection to free the L2CAP channel for.
+	 */
+	void FreeL2capChannel(bt_conn *conn) const;
+
+	/**
+	 * @brief Gets the BLE UWB protocol version for the given connection.
+	 *
+	 * This function returns the BLE UWB protocol version for the given connection.
+	 *
+	 * @param conn The connection to get the BLE UWB protocol version for.
+	 *
+	 * @return The BLE UWB protocol version.
+	 */
+	ProtocolVersion GetBleUwbProtocolVersion(bt_conn *conn) const;
+
+	/**
 	 * @brief Get the L2CAP Simplified Protocol/Service Multiplexing (SPSM) value.
 	 *
 	 * This function returns the L2CAP SPSM value assigned by the L2CAP server.
 	 *
 	 * @return The L2CAP SPSM value.
 	 */
-	Spsm GetSpsm() const;
+	Spsm GetSpsm() const { return mSpsm; }
 
 	/**
 	 * @brief Checks if the given SPSM value is valid for dynamic allocation.
@@ -153,8 +189,8 @@ private:
 	size_t mChannelCount{ 0 };
 
 	// Use a non-SIG assigned SPSM value for the L2CAP server.
-	constexpr static uint16_t kL2capSpsmMin = 0x0080;
-	constexpr static uint16_t kL2capSpsmMax = 0x00FF;
+	static constexpr uint16_t kL2capSpsmMin{ 0x0080 };
+	static constexpr uint16_t kL2capSpsmMax{ 0x00FF };
 };
 
 } // namespace Aliro

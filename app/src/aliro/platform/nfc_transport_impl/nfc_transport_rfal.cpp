@@ -12,13 +12,13 @@
 #include "aliro/utils.h"
 #include "ncs_pal_nfc_worker.h"
 
-#ifdef CONFIG_NCS_ALIRO_NFC_PROP
+#ifdef CONFIG_DOOR_LOCK_NFC_PROP
 #include "nfc_transport_rfal_prop.h"
-#endif // CONFIG_NCS_ALIRO_NFC_PROP
+#endif // CONFIG_DOOR_LOCK_NFC_PROP
 
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(nfc_st_rfal_impl, CONFIG_NCS_ALIRO_RFAL_LOG_LEVEL);
+LOG_MODULE_REGISTER(nfc_st_rfal_impl, CONFIG_DOOR_LOCK_RFAL_LOG_LEVEL);
 
 namespace Aliro {
 
@@ -110,7 +110,7 @@ ReturnCode NfcTransportRfal::RfalNfcInit()
 
 	mNfcConfig.techs2Find = RFAL_NFC_POLL_TECH_A;
 
-#ifdef CONFIG_NCS_ALIRO_NFC_PROP
+#ifdef CONFIG_DOOR_LOCK_NFC_PROP
 	{
 		mNfcConfig.techs2Find |= RFAL_NFC_POLL_TECH_PROP;
 
@@ -121,7 +121,7 @@ ReturnCode NfcTransportRfal::RfalNfcInit()
 			LOG_DBG("RFAL: Proprietary technology registered");
 		}
 	}
-#endif // CONFIG_NCS_ALIRO_NFC_PROP
+#endif // CONFIG_DOOR_LOCK_NFC_PROP
 
 	LOG_DBG("RFAL: Discovery configured (devLimit=%d, duration=%dms, maxBR=%d, compMode=%d)", mNfcConfig.devLimit,
 		mNfcConfig.totalDuration, mNfcConfig.maxBR, mNfcConfig.compMode);

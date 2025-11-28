@@ -8,7 +8,7 @@
 
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(access_manager_impl_custom, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(access_manager_impl_custom, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace Aliro {
 
@@ -41,15 +41,15 @@ AliroError AccessManagerImpl::_VerifyKPersistentKey(CryptoTypes::KeyId, bool, Se
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 AliroError AccessManagerImpl::_StartRangingSession(uint32_t, const CryptoTypes::Ursk &, SessionContext)
 {
 	LOG_INF("Custom %s function", __FUNCTION__);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
-AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &, PublicKeyType, std::optional<size_t>)
+AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &, PublicKeyType, size_t)
 {
 	LOG_INF("Custom %s function", __FUNCTION__);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
@@ -74,7 +74,7 @@ AliroError AccessManagerImpl::_GetPublicKey(size_t, CryptoTypes::PublicKey &)
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-AliroError AccessManagerImpl::_RemovePublicKey(const CryptoTypes::PublicKey &, PublicKeyType)
+AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType, size_t)
 {
 	LOG_INF("Custom %s function", __FUNCTION__);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;

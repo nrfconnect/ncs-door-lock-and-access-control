@@ -82,10 +82,12 @@ public:
 	 *
 	 * @param key input buffer with public key.
 	 * @param keyId output identifier of the imported key.
+	 * @param isPersistent flag indicating whether the key should be persistent or temporary.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error status otherwise.
 	 */
-	AliroError ImportPublicKey(const CryptoTypes::PublicKey &key, CryptoTypes::KeyId &keyId);
+	AliroError ImportPublicKey(const CryptoTypes::PublicKey &key, CryptoTypes::KeyId &keyId,
+				   bool isPersistent = false);
 
 	/**
 	 * Import EC private key.

@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-module = NCS_ALIRO_BLE
-module-str = ALIRO_BLE
+module = DOOR_LOCK_BLE
+module-str = DOOR_LOCK_BLE
 module-dep = LOG
-module-help = Enables Aliro BLE platform log messages.
+module-help = Enables Door Lock BLE platform log messages.
 source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"

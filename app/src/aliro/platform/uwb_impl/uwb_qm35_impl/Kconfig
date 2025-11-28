@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-config ALIRO_UWB_MIN_RAN_MULTIPLIER
+config DOOR_LOCK_UWB_MIN_RAN_MULTIPLIER
 	int "Minimum RAN multiplier for UWB ranging blocks"
 	default 2
 	range 1 255
@@ -13,14 +13,14 @@ config ALIRO_UWB_MIN_RAN_MULTIPLIER
 	  The time range is between 96 ms (RAN multiplier is 1) and 24480 ms
 	  (RAN multiplier is 255).
 
-config ALIRO_UWB_MAC_MODE_OFFSET
+config DOOR_LOCK_UWB_MAC_MODE_OFFSET
 	int "Offset between ranging blocks in MAC mode"
 	default 0
 	range 0 63
 	help
 	  Offset between the 2 ranging blocks.
 
-config ALIRO_UWB_MAC_MODE_RANGING_ROUNDS
+config DOOR_LOCK_UWB_MAC_MODE_RANGING_ROUNDS
 	int "Number of ranging rounds per ranging block"
 	default 0
 	range 0 1
@@ -30,7 +30,7 @@ config ALIRO_UWB_MAC_MODE_RANGING_ROUNDS
 	  - 0: 1 ranging round
 	  - 1: 2 ranging round
 
-config ALIRO_UWB_SESSION_LOGGING
+config DOOR_LOCK_UWB_SESSION_LOGGING
 	bool "Enable UWB session state logging"
 	help
 	  Enable logging for UWB session states and reason codes.

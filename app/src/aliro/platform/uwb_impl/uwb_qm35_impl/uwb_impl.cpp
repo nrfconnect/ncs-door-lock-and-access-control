@@ -22,7 +22,7 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/byteorder.h>
 
-LOG_MODULE_REGISTER(UwbImpl, CONFIG_NCS_ALIRO_UWB_LOG_LEVEL);
+LOG_MODULE_REGISTER(UwbImpl, CONFIG_DOOR_LOCK_UWB_LOG_LEVEL);
 
 namespace {
 
@@ -62,7 +62,7 @@ constexpr AliroError ConvertUwbError(aliro_uwb_err uwbErr)
 	}
 }
 
-#ifdef CONFIG_ALIRO_UWB_SESSION_LOGGING
+#ifdef CONFIG_DOOR_LOCK_UWB_SESSION_LOGGING
 
 /**
  * @brief Converts Cherry CCC session state to readable string.
@@ -130,7 +130,7 @@ constexpr const char *RangingSessionStateToString(RangingSessionState state)
 	}
 }
 
-#endif // CONFIG_ALIRO_UWB_SESSION_LOGGING
+#endif // CONFIG_DOOR_LOCK_UWB_SESSION_LOGGING
 
 } // namespace
 
@@ -246,7 +246,7 @@ void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, v
 				sessionCtx->mRangingSessionState = RangingSessionState::Uninitialized;
 			}
 
-#ifdef CONFIG_ALIRO_UWB_SESSION_LOGGING
+#ifdef CONFIG_DOOR_LOCK_UWB_SESSION_LOGGING
 
 			LOG_INF("Session status changed: %s (%u) | %s (%u) -> %s (%u) [reason: %s (%u)]",
 				RangingSessionStateToString(sessionCtx->mRangingSessionState),
@@ -255,12 +255,12 @@ void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, v
 				CherryCccSessionStateToString(newState), static_cast<uint32_t>(newState),
 				CherryCccReasonCodeToString(reason), static_cast<uint32_t>(reason));
 
-#else // CONFIG_ALIRO_UWB_SESSION_LOGGING
+#else // CONFIG_DOOR_LOCK_UWB_SESSION_LOGGING
 
 			LOG_DBG("Session status changed: %u -> %u [reason: %u]", static_cast<uint32_t>(oldState),
 				static_cast<uint32_t>(newState), static_cast<uint32_t>(reason));
 
-#endif // CONFIG_ALIRO_UWB_SESSION_LOGGING
+#endif // CONFIG_DOOR_LOCK_UWB_SESSION_LOGGING
 
 			sessionCtx->mSessionState = newState;
 			VerifyAndCall(uwbImpl->mCallbacks.mRangingSessionStateChanged, sessionCtx->mSessionContextData,
