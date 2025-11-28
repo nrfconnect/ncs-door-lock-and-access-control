@@ -15,7 +15,7 @@ config MBEDTLS_HEAP_SIZE
 	default 8192
 
 config MBEDTLS_X509_LIBRARY
-	default y if !CHIP
+	default y
 
 config PSA_WANT_ALG_ECDSA
 	default y
