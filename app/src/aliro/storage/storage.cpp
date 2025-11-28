@@ -11,7 +11,7 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/settings/settings.h>
 
-LOG_MODULE_REGISTER(storage, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(storage, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace {
 

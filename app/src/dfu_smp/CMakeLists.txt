@@ -8,7 +8,7 @@ zephyr_include_directories(.)
 
 zephyr_library_sources(dfu_smp_manager.cpp)
 
-if(NOT CONFIG_ALIRO_BLE_UWB AND NOT CONFIG_DOOR_LOCK_BLE_NUS  AND CONFIG_SHELL)
+if(NOT CONFIG_DOOR_LOCK_BLE_UWB AND NOT CONFIG_DOOR_LOCK_BLE_NUS  AND CONFIG_SHELL)
   zephyr_library_sources(dfu_smp_shell.cpp)
 endif()
 

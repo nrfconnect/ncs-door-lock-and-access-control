@@ -17,13 +17,13 @@ using namespace chip;
 using namespace DoorLockData;
 
 template <CredentialsBits CRED_BIT_MASK>
-void AccessManager<CRED_BIT_MASK>::Init(SetOrLoadCredentialCallback setOrLoadCredentialClbk,
+void AccessManager<CRED_BIT_MASK>::Init(SetOrLoadCredentialCallback setCredentialClbk,
 					ClearCredentialCallback clearCredentialClbk,
 					ValidateCredentialCallback validateCredentialClbk,
 					SetOrLoadCredentialCallback loadCredentialClbk)
 {
 	InitializeAllCredentials();
-	mSetCredentialCallback = setOrLoadCredentialClbk;
+	mSetCredentialCallback = setCredentialClbk;
 	mClearCredentialCallback = clearCredentialClbk;
 	mValidateCredentialCallback = validateCredentialClbk;
 	mLoadCredentialCallback = loadCredentialClbk;

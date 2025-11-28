@@ -1,0 +1,1038 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+Generated date:2024-06-18
+ACWG CSG TT Test Plan v0.9.0k
+XML PICS -Ref Document:
+
+Draft
+2024-06-18
+r0
+2025-06-23
+r1
+2025-07-01
+r2
+2025-10-07
+--><clusterPICS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Generic-PICS-XML-Schema.xsd">
+	<!--General cluster information-->
+	<name>Aliro</name>
+	<clusterId> </clusterId>
+	<picsRoot> </picsRoot>
+	<!--Cluster role information-->
+	<usage>
+		<picsItem>
+			<itemNumber>UD</itemNumber>
+			<feature>Does the device implement Aliro as a User Device?</feature>
+			<reference>spec reference needed</reference>
+			<status cond="NOT(RD)">M</status>
+			<support>false</support>
+		</picsItem>
+		<picsItem>
+			<itemNumber>RD</itemNumber>
+			<feature>Does the device implement Aliro as a Reader?</feature>
+			<reference>spec reference needed</reference>
+			<status cond="NOT(UD)">M</status>
+			<support>true</support>
+		</picsItem>
+		<picsItem>
+			<itemNumber>NFC</itemNumber>
+			<feature>Does the device implement NFC Interface?</feature>
+			<reference>spec reference needed</reference>
+			<status cond="UD OR RD">M</status>
+			<support>true</support>
+		</picsItem>
+		<picsItem>
+			<itemNumber>BLERKE</itemNumber>
+			<feature>Does the device implement Bluetooth LE-Only Flow?</feature>
+			<reference>spec reference needed</reference>
+			<status>O</status>
+			<support>false</support>
+		</picsItem>
+		<picsItem>
+			<itemNumber>BLEUWB</itemNumber>
+			<feature>Does the device implement Bluetooth LE + UWB Flow?</feature>
+			<reference>spec reference needed</reference>
+			<status>O</status>
+			<support>true</support>
+		</picsItem>
+
+	</usage>
+
+	<!--User Device side PICS-->
+	<clusterSide type="User Device">
+		<!--Attributes PICS features-->
+		<features>
+			<picsItem>
+				<itemNumber>UD1</itemNumber>
+				<feature>Expedited-Standard Phase</feature>
+				<reference>NFC_UD_STANDARD_NO_CERT,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_AUTH0_RESPONSE_CHAINING,
+						NFC_UD_NEG_AUTH0_UNKNOWN_READER_ID,
+						NFC_UD_NEG_AUTH0_UNSUPPORTED_PROTOCOL_VERSION,
+						NFC_UD_NEG_AUTH0_EXTRA_TAG,
+						NFC_UD_NEG_AUTH0_WRONG_VALUE,
+						NFC_UD_NEG_AUTH0_WRONG_P1P2,
+						NFC_UD_NEG_AUTH0_CHAINING_NOT_COMPLETED,
+						NFC_UD_NEG_AUTH1_WRONG_READER_SIGNATURE,
+						NFC_UD_NEG_AUTH1_EXTRA_TAG,
+						NFC_UD_NEG_AUTH1_WRONG_P1P2,
+						NFC_UD_NEG_AUTH1_WRONG_VALUES
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD2</itemNumber>
+				<feature>Reader signature generation and validation using reader_PubK</feature>
+				<reference>NFC_UD_STANDARD_NO_CERT,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD3</itemNumber>
+				<feature>Reader signature generation and validation using intermediate_reader_PubK (from reader_Cert)</feature>
+				<reference>NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD4</itemNumber>
+				<feature>Device signature generation and validation</feature>
+				<reference>NFC_UD_STANDARD_NO_CERT,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD5</itemNumber>
+				<feature>Verification of reader_Cert with the CA public key</feature>
+				<reference>NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING,
+						NFC_UD_NEG_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING_INCORRECT_SIGNATURE,
+						NFC_UD_NEG_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING_INCORRECT_FORMAT
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD6</itemNumber>
+				<feature>Verification of reader_Cert with CA public key- reader_Cert expiration time validation</feature>
+				<reference/>
+				<status cond="UD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD7</itemNumber>
+				<feature>Lookup of the reader key through reader_group_identifier</feature>
+				<reference>NFC_UD_STANDARD_NO_CERT,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD8</itemNumber>
+				<feature>Lookup of reader CA public key through reader_group_identifier</feature>
+				<reference>NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD9</itemNumber>
+				<feature>Presentation and validation of reader_Cert</feature>
+				<reference>NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD10</itemNumber>
+				<feature>Presentation and validation of reader_Cert in AUTH1 command</feature>
+				<reference>NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD11</itemNumber>
+				<feature>Presentation and validation of reader_Cert in LOAD_CERT command</feature>
+				<reference>NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD12</itemNumber>
+				<feature>AUTH1 command command_parameter</feature>
+				<reference>NFC_UD_STANDARD_NO_CERT,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD13</itemNumber>
+				<feature>AUTH1 command command_parameter- Key slot</feature>
+				<reference>NFC_UD_STANDARD_NO_CERT,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD14</itemNumber>
+				<feature>AUTH1 command command_parameter- Access Credential Public Key</feature>
+				<reference>NFC_UD_STANDARD_NO_CERT,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD15</itemNumber>
+				<feature>Subset of mailbox in AUTH1 command response</feature>
+				<reference/>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD16</itemNumber>
+				<feature>Expedited-Fast Phase</feature>
+				<reference>NFC_UD_FAST,
+						NFC_UD_NEG_AUTH0_DIFFERENT_CRYPTOGRAM_CONSECUTIVE_FAST
+				</reference>
+				<status cond="UD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD17</itemNumber>
+				<feature>Expedited-Fast Phase- Cryptogram generation and validation</feature>
+				<reference>NFC_UD_FAST,
+						NFC_UD_NEG_AUTH0_DIFFERENT_CRYPTOGRAM_CONSECUTIVE_FAST
+				</reference>
+				<status cond="UD16">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD18</itemNumber>
+				<feature>Command chaining</feature>
+				<reference>NFC_UD_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_UD_AUTH0_RESPONSE_CHAINING,
+						NFC_UD_NEG_AUTH1_CHAINING_NOT_COMPLTED,
+						NFC_UD_NEG_EXCHANGE_WITH_CHAINING_NOT_COMPLETED
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD19</itemNumber>
+				<feature>Extended length</feature>
+				<reference>NFC_UD_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_UD_STANDARD_CERT_IN_AUTH1_NO_CHAINING,
+						NFC_UD_EXCHANGE
+				</reference>
+				<status cond="UD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD20</itemNumber>
+				<feature>User authentication policy enforcement</feature>
+				<reference>NFC_UD_STANDARD_NO_CERT</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD21</itemNumber>
+				<feature>Support for credential_signed_timestamp in AUTH0/AUTH1</feature>
+				<reference/>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD22</itemNumber>
+				<feature>Support for revocation_signed_timestamp in AUTH0/AUTH1</feature>
+				<reference/>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD23</itemNumber>
+				<feature>Allow at least 16 reader_group_identifier per Access Credential</feature>
+				<reference>NFC_UD_STANDARD_SIXTEEN_GROUPPIDENTIFIER_ONE_AC</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD24</itemNumber>
+				<feature>User Device has a method to use all Access Credentials bound to the reader identifier</feature>
+				<reference/>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD25</itemNumber>
+				<feature>EXCHANGE command</feature>
+				<reference>NFC_UD_EXCHANGE_WITH_CHAINING,
+						NFC_UD_NEG_EXCHANGE_WITH_EXTRA_TAG,
+						NFC_UD_NEG_EXCHANGE_WITH_WRONG_LENGTH
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD26</itemNumber>
+				<feature>EXCHANGE command – notify credential issuer in EXCHANGE</feature>
+				<reference/>
+				<status cond="UD25">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD27</itemNumber>
+				<feature>EXCHANGE command – notify bound application in EXCHANGE</feature>
+				<reference/>
+				<status cond="UD25">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD28</itemNumber>
+				<feature>EXCHANGE command – Update document in EXCHANGE</feature>
+				<reference/>
+				<status cond="UD25">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD29</itemNumber>
+				<feature>Mailbox</feature>
+				<reference>NFC_UD_EXCHANGE_SET_REQUEST,
+					NFC_UD_NEG_EXCHANGE_MAILBOX_OUT_OF_BOUNDS
+				</reference>
+				<status cond="UD25">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD30</itemNumber>
+				<feature>Read from Mailbox</feature>
+				<reference>NFC_UD_EXCHANGE_READ_REQUEST</reference>
+				<status cond="UD29">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD31</itemNumber>
+				<feature>Write to Mailbox</feature>
+				<reference>NFC_UD_EXCHANGE_WRITE_REQUEST</reference>
+				<status cond="UD29">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD32</itemNumber>
+				<feature>User Device Descriptor Tag</feature>
+				<reference>NFC_UD_SELECT_RESPONSE_UD_DESCRIPTOR_TAG,
+						BLEUWB_UD_UD_DESCRIPTOR_TAG,
+						BLERKE_UD_UD_DESCRIPTOR_TAG
+				</reference>
+				<status cond="UD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD33</itemNumber>
+				<feature>Step-Up Phase</feature>
+				<reference>NFC_UD_STEPUP_AD,
+					NFC_UD_STEPUP_RD
+				</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD34</itemNumber>
+				<feature>Step-Up Phase- Access document storage and retrieval</feature>
+				<reference>NFC_UD_STEPUP_AD</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD35</itemNumber>
+				<feature>Step-Up Phase- Revocation document storage and retrieval</feature>
+				<reference>NFC_UD_STEPUP_RD</reference>
+				<status cond="UD">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD36</itemNumber>
+				<feature>NFC-Step-Up AID SELECT</feature>
+				<reference/>
+				<status cond="UD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD37</itemNumber>
+				<feature>Bluetooth LE- send sensor triggered bit</feature>
+				<reference/>
+				<status cond="UD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD38</itemNumber>
+				<feature>Bluetooth LE- Dynamic advertisement tag</feature>
+				<reference/>
+				<status cond="UD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD39</itemNumber>
+				<feature>Bluetooth LE- Pass Through Message</feature>
+				<reference/>
+				<status cond="UD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD40</itemNumber>
+				<feature>Bluetooth LE + UWB Flow </feature>
+				<reference>BLEUWB_UD_EXPEDITED_STANDARD_PHASE,
+						BLEUWB_UD_EXPEDITED_FAST_PHASE,
+						BLEUWB_UD_STEPUP_PHASE,
+						BLEUWB_UD_RANGING_SUSPEND,
+						BLEUWB_UD_RANGING_RESUME,
+						BLEUWB_UD_UD_DESCRIPTOR_TAG,
+						BLEUWB_UD_NEG_WRONG_ADV,
+						BLEUWB_UD_NEG_FAILED_L2CAP,
+						BLEUWB_UD_NEG_TIMEOUT_BEFORE_AUTH0,
+						BLEUWB_UD_TIMEOUT_EXTENSION,
+						BLEUWB_UD_NEG_URSK_NOT_FOUND,
+						BLEUWB_UD_NEG_M1_MISMATCH_PARAMETER,
+						BLEUWB_UD_NEG_M3_MISMATCH_PARAMETER
+				</reference>
+				<status cond="UD AND BLEUWB">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD41</itemNumber>
+				<feature>UWB Ranging</feature>
+				<reference>BLEUWB_UD_EXPEDITED_STANDARD_PHASE,
+					BLEUWB_UD_EXPEDITED_FAST_PHASE,
+					BLEUWB_UD_STEPUP_PHASE
+				</reference>
+				<status cond="UD40 AND BLEUWB">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD42</itemNumber>
+				<feature>UWB ranging suspend</feature>
+				<reference>BLEUWB_UD_RANGING_SUSPEND,
+					BLEUWB_UD_NEG_SUSPEND_MISMATCH_PARAMETER
+				</reference>
+				<status cond="UD40 AND BLEUWB">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD43</itemNumber>
+				<feature>UWB ranging resume</feature>
+				<reference>BLEUWB_UD_RANGING_RESUME,
+					BLEUWB_UD_NEG_RESUME_MISMATCH_PARAMETER
+				</reference>
+				<status cond="UD40 AND BLEUWB">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD44</itemNumber>
+				<feature>One ranging round</feature>
+				<reference>BLEUWB_UD_EXPEDITED_STANDARD_PHASE,
+					BLEUWB_UD_EXPEDITED_FAST_PHASE,
+					BLEUWB_UD_STEPUP_PHASE
+				</reference>
+				<status cond="UD40 AND BLEUWB">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD45</itemNumber>
+				<feature>Two ranging rounds</feature>
+				<reference>BLEUWB_UD_EXPEDITED_STANDARD_PHASE,
+					BLEUWB_UD_EXPEDITED_FAST_PHASE,
+					BLEUWB_UD_STEPUP_PHASE
+				</reference>
+				<status cond="UD40 AND BLEUWB">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD46</itemNumber>
+				<feature>BLE UWB Time Synchronization</feature>
+				<reference>BLEUWB_UD_EXPEDITED_STANDARD_PHASE,
+						BLEUWB_UD_EXPEDITED_FAST_PHASE,
+						BLEUWB_UD_STEPUP_PHASE
+				</reference>
+				<status cond="UD40 AND BLEUWB">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD47</itemNumber>
+				<feature>Bluetooth LE-Only Flow</feature>
+				<reference>BLERKE_UD_EXPEDITED_STANDARD_PHASE,
+						BLERKE_UD_UD_DESCRIPTOR_TAG,
+						BLERKE_UD_NEG_FAILED_L2CAP	
+				</reference>
+				<status cond="UD AND BLERKE">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>UD48</itemNumber>
+				<feature>Explicit Reader Selection</feature>
+				<reference>BLERKE_UD_EXPEDITED_STANDARD_PHASE</reference>
+				<status cond="UD47 AND BLERKE">M</status>
+				<support>false</support>
+			</picsItem>
+		</features>
+		<!--Events PICS write-->
+	</clusterSide>
+
+	<!--Reader Device side PICS-->
+	<clusterSide type="Reader Device">
+		<!--Attributes PICS features-->
+		<features>
+			<picsItem>
+				<itemNumber>RD1</itemNumber>
+				<feature>Expedited-Standard Phase</feature>
+				<reference>NFC_RDR_STANDARD_NO_CERT,
+					NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING,
+					NFC_RDR_NEG_SEL_RSP_NO_COMMON_EXPEDITED_PROTOCOL_VERSION,
+					NFC_RDR_NEG_AUTH0_EXTRA_TAG,
+					NFC_RDR_NEG_AUTH0_WRONG_VALUE,
+					NFC_RDR_NEG_AUTH1_WRONG_UD_SIGNATURE,
+					NFC_RDR_NEG_AUTH1_EXTRA_TAG,
+					NFC_RDR_NEG_AUTH1_WRONG_VALUES
+				</reference>
+				<status cond="RD">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD2</itemNumber>
+				<feature>Reader signature generation and validation using reader_PubK</feature>
+				<reference>NFC_RDR_STANDARD_NO_CERT</reference>
+				<status cond="RD">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD3</itemNumber>
+				<feature>Reader signature generation and validation using intermediate_reader_PubK (from reader_Cert)
+				</feature>
+				<reference>NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="RD">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD4</itemNumber>
+				<feature>Device signature generation and validation</feature>
+				<reference>NFC_RDR_STANDARD_NO_CERT,
+						NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="RD">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD5</itemNumber>
+				<feature>Presentation and validation of reader_Cert</feature>
+				<reference>NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="RD">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD6</itemNumber>
+				<feature>Presentation and validation of reader_Cert in AUTH1 command</feature>
+				<reference>NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="RD AND NOT(RD7)">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD7</itemNumber>
+				<feature>Presentation and validation of reader_Cert in LOAD_CERT command</feature>
+				<reference>NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING
+				</reference>
+				<status cond="RD AND NOT(RD6)">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD8</itemNumber>
+				<feature>AUTH1 command command_parameter</feature>
+				<reference>NFC_RDR_STANDARD_NO_CERT,
+						NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="RD">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD9</itemNumber>
+				<feature>AUTH1 command command_parameter – key slot</feature>
+				<reference>NFC_RDR_STANDARD_NO_CERT,
+					NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+					NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="RD AND NOT(RD10)">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD10</itemNumber>
+				<feature>AUTH1 command command_parameter – Access Credential Public Key</feature>
+				<reference>NFC_RDR_STANDARD_NO_CERT,
+						NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="RD AND NOT(RD9)">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD11</itemNumber>
+				<feature>Expedited-Fast Phase</feature>
+				<reference>NFC_RDR_FAST</reference>
+				<status cond="RD">O</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD12</itemNumber>
+				<feature>Cryptogram generation and validation</feature>
+				<reference>NFC_RDR_FAST</reference>
+				<status cond="RD11">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD13</itemNumber>
+				<feature>Command chaining</feature>
+				<reference>NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_WITH_CHAINING
+				</reference>
+				<status cond="RD">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD14</itemNumber>
+				<feature>Extended length</feature>
+				<reference>NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_NO_CHAINING,
+						NFC_RDR_STANDARD_CERT_IN_AUTH1_NO_CHAINING
+				</reference>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD15</itemNumber>
+				<feature>EXCHANGE command</feature>
+				<reference/>
+				<status cond="RD">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD16</itemNumber>
+				<feature>EXCHANGE command – notify credential issuer in EXCHANGE</feature>
+				<reference/>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD17</itemNumber>
+				<feature>EXCHANGE command – notify bound application in EXCHANGE</feature>
+				<reference/>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD18</itemNumber>
+				<feature>EXCHANGE command – Update document in EXCHANGE</feature>
+				<reference/>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD19</itemNumber>
+				<feature>Mailbox</feature>
+				<reference>NFC_RDR_EXCHANGE_MAILBOX</reference>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD20</itemNumber>
+				<feature>Read from Mailbox</feature>
+				<reference/>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD21</itemNumber>
+				<feature>Write to Mailbox</feature>
+				<reference/>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD22</itemNumber>
+				<feature>Reader Descriptor tag</feature>
+				<reference>NFC_RDR_EXCHANGE_RDR_DESCRIPTOR_TAG,
+						NFC_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG,
+						BLEUWB_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG
+				</reference>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD23</itemNumber>
+				<feature>Step-Up phase</feature>
+				<reference>NFC_RDR_STEPUP_AD_KEY_ID,
+							NFC_RDR_STEPUP_AD_ISSUER_CERT,
+							NFC_RDR_STEPUP_AD_ISSUER_CERT_KEY_ID,
+							NFC_RDR_STEPUP_AD_ACCESS_RULE,
+							NFC_RDR_STEPUP_AD_ACCESS_RULE_SCHEDULES,
+							NFC_RDR_STEPUP_AD_UNKNOWN_NON_ACCESS_EXTENSION,
+							NFC_RDR_STEPUP_AD_UNKNOWN_NON_CRITICAL_ACCESS_EXTENSION,
+							NFC_RDR_NEG_STEPUP_AD_NO_ISSUER_CERT_NO_KEY_ID,
+							NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_INVALID_SIGNATURE,
+							NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_EXPIRED,
+							NFC_RDR_NEG_STEPUP_AD_INVALID_SIGNATURE_ISSUER_AUTH,
+							NFC_RDR_NEG_STEPUP_AD_INVALID_HASH_ISSUER_AUTH,
+							NFC_RDR_NEG_STEPUP_AD_EXPIRED_ISSUER_AUTH,
+							NFC_RDR_NEG_STEPUP_AD_EARLY_ISSUER_AUTH,
+							NFC_RDR_NEG_STEPUP_AD_ISSUER_CERTIFICATE_TIME_MISMATCH,
+							NFC_RDR_NEG_STEPUP_AD_VALIDITY_ITERATION,
+							NFC_RDR_NEG_STEPUP_AD_TIME_VERIFICATION_REQUIRED,
+							NFC_RDR_NEG_STEPUP_AD_NO_DATA_ELEMENTS,
+							NFC_RDR_NEG_STEPUP_AD_ISSUER_DOCTYPE_MISMATCH,
+							NFC_RDR_NEG_STEPUP_AD_DEVICE_KEY_INFO_MISMATCH,
+							NFC_RDR_NEG_STEPUP_AD_INVALID_ACCESS_DATA_ELEMENT_VERSION,
+							NFC_RDR_NEG_STEPUP_AD_NO_ACCESS_RULE_FOR_READER_ACTION,
+							NFC_RDR_NEG_STEPUP_AD_NO_VALID_SCHEDULE_ALLOW_SCHEDULEID,
+							NFC_RDR_NEG_STEPUP_AD_VALID_SCHEDULE_DENY_SCHEDULEID,
+							NFC_RDR_NEG_STEPUP_AD_SCHEDULE_TIME_VERIFY_REQUIRED,
+							NFC_RDR_NEG_STEPUP_AD_SCHEDULE_IN_ACCESS_RULE_AND_READER,
+							NFC_RDR_NEG_STEPUP_AD_UNKNOWN_READER_RULE,
+							NFC_RDR_NEG_STEPUP_AD_UNKNOWN_CRITICAL_ACCESS_EXTENSION,
+							NFC_RDR_STEPUP_RD,
+							NFC_RDR_NEG_STEPUP_RD_INVALID_ELEMENT_VERSION
+				</reference>
+				<status cond="RD">O</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD24</itemNumber>
+				<feature>Step-Up phase – Access document storage and retrieval</feature>
+				<reference>NFC_RDR_STEPUP_AD_KEY_ID</reference>
+				<status cond="RD">O</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD25</itemNumber>
+				<feature>Step-Up phase – Revocation document storage and retrieval</feature>
+				<reference>NFC_RDR_STEPUP_RD,
+						NFC_RDR_NEG_STEPUP_RD_INVALID_ELEMENT_VERSION
+				</reference>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD26</itemNumber>
+				<feature>Access document processing</feature>
+				<reference>NFC_RDR_STEPUP_AD_ISSUER_CERT,
+						NFC_RDR_STEPUP_AD_ISSUER_CERT_KEY_ID,
+						NFC_RDR_STEPUP_AD_UNKNOWN_NON_ACCESS_EXTENSION,
+						NFC_RDR_STEPUP_AD_UNKNOWN_NON_CRITICAL_ACCESS_EXTENSION,
+						NFC_RDR_NEG_STEPUP_AD_NO_ISSUER_CERT_NO_KEY_ID,
+						NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_INVALID_SIGNATURE,
+						NFC_RDR_NEG_STEPUP_AD_INVALID_SIGNATURE_ISSUER_AUTH,
+						NFC_RDR_NEG_STEPUP_AD_INVALID_HASH_ISSUER_AUTH,
+						NFC_RDR_NEG_STEPUP_AD_ISSUER_CERTIFICATE_TIME_MISMATCH,
+						NFC_RDR_NEG_STEPUP_AD_NO_DATA_ELEMENTS,
+						NFC_RDR_NEG_STEPUP_AD_ISSUER_DOCTYPE_MISMATCH,
+						NFC_RDR_NEG_STEPUP_AD_DEVICE_KEY_INFO_MISMATCH,
+						NFC_RDR_NEG_STEPUP_AD_INVALID_ACCESS_DATA_ELEMENT_VERSION,
+						NFC_RDR_NEG_STEPUP_AD_NO_ACCESS_RULE_FOR_READER_ACTION,
+						NFC_RDR_NEG_STEPUP_AD_UNKNOWN_READER_RULE,
+						NFC_RDR_NEG_STEPUP_AD_UNKNOWN_CRITICAL_ACCESS_EXTENSION
+				</reference>
+				<status cond="RD">O</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD27</itemNumber>
+				<feature>Access document verification</feature>
+				<reference>NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_EXPIRED,
+						NFC_RDR_NEG_STEPUP_AD_EXPIRED_ISSUER_AUTH,
+						NFC_RDR_NEG_STEPUP_AD_EARLY_ISSUER_AUTH,
+						NFC_RDR_NEG_STEPUP_AD_VALIDITY_ITERATION,
+						NFC_RDR_NEG_STEPUP_AD_TIME_VERIFICATION_REQUIRED
+				</reference>
+				<status cond="RD26">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD28</itemNumber>
+				<feature>Access document verification – Validity iteration</feature>
+				<reference>NFC_RDR_NEG_STEPUP_AD_VALIDITY_ITERATION
+				</reference>
+				<status cond="RD26">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD29</itemNumber>
+				<feature>Access document verification – Validity time-based elements</feature>
+				<reference>NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_EXPIRED,
+						NFC_RDR_NEG_STEPUP_AD_EXPIRED_ISSUER_AUTH,
+						NFC_RDR_NEG_STEPUP_AD_EARLY_ISSUER_AUTH,
+						NFC_RDR_NEG_STEPUP_AD_TIME_VERIFICATION_REQUIRED,
+						NFC_RDR_NEG_STEPUP_AD_SCHEDULE_TIME_VERIFY_REQUIRED
+				</reference>
+				<status cond="RD26">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD30</itemNumber>
+				<feature>Access data element verification </feature>
+				<reference>NFC_RDR_STEPUP_AD_ACCESS_RULE,
+						NFC_RDR_STEPUP_AD_ACCESS_RULE_SCHEDULES
+				</reference>
+				<status cond="RD26">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD31</itemNumber>
+				<feature>Access data element verification – Access Rules </feature>
+				<reference>NFC_RDR_STEPUP_AD_ACCESS_RULE</reference>
+				<status cond="RD26">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD32</itemNumber>
+				<feature>Access data element verification – Schedules</feature>
+				<reference>NFC_RDR_STEPUP_AD_ACCESS_RULE_SCHEDULES,
+					NFC_RDR_NEG_STEPUP_AD_NO_VALID_SCHEDULE_ALLOW_SCHEDULEID,
+					NFC_RDR_NEG_STEPUP_AD_VALID_SCHEDULE_DENY_SCHEDULEID,
+					NFC_RDR_NEG_STEPUP_AD_SCHEDULE_IN_ACCESS_RULE_AND_READER
+				</reference>
+				<status cond="RD26">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD33</itemNumber>
+				<feature>Access data element verification – Access extension criticality</feature>
+				<reference/>
+				<status cond="RD26">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD34</itemNumber>
+				<feature>Access data element verification – Reader rules</feature>
+				<reference>NFC_RDR_NEG_STEPUP_AD_UNKNOWN_READER_RULE</reference>
+				<status cond="RD26">O</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD35</itemNumber>
+				<feature>Revocation document processing</feature>
+				<reference>NFC_RDR_STEPUP_RD,
+					NFC_RDR_NEG_STEPUP_RD_INVALID_ELEMENT_VERSION
+				</reference>
+				<status cond="RD">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD36</itemNumber>
+				<feature>Revocation document verification</feature>
+				<reference>NFC_RDR_STEPUP_RD,
+					NFC_RDR_NEG_STEPUP_RD_INVALID_ELEMENT_VERSION
+				</reference>
+				<status cond="RD35">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD37</itemNumber>
+				<feature>Revocation element verification </feature>
+				<reference>NFC_RDR_STEPUP_RD,
+						NFC_RDR_NEG_STEPUP_RD_INVALID_ELEMENT_VERSION
+				</reference>
+				<status cond="RD35">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD38</itemNumber>
+				<feature>NFC – Step-Up AID SELECT</feature>
+				<reference>NFC_RDR_STEPUP_AD_KEY_ID</reference>
+				<status cond="RD35">M</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD39</itemNumber>
+				<feature>BLE – send sensor triggered bit</feature>
+				<reference/>
+				<status cond="RD AND BLEUWB">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD40</itemNumber>
+				<feature>Dynamic advertisement tag </feature>
+				<reference>BLEUWB_RDR_EXPEDITED_STANDARD_PHASE,
+						BLEUWB_RDR_EXPEDITED_FAST_PHASE,
+						BLEUWB_RDR_STEPUP_PHASE,
+						BLEUWB_RDR_ADVERTISEMENT_FORMAT
+				</reference>
+				<status cond="RD AND BLEUWB">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD41</itemNumber>
+				<feature>Pass Through</feature>
+				<reference/>
+				<status cond="RD AND BLEUWB">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD42</itemNumber>
+				<feature>Unsolicited Reader status reporting</feature>
+				<reference>BLEUWB_RDR_EXPEDITED_STANDARD_PHASE,
+						BLEUWB_RDR_EXPEDITED_FAST_PHASE,
+						BLEUWB_RDR_STEPUP_PHASE,
+						BLERKE_RDR_UNSECURE,
+						BLERKE_RDR_SECURE
+				</reference>
+				<status cond="RD AND BLEUWB">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD43</itemNumber>
+				<feature>Bluetooth LE + UWB Flow</feature>
+				<reference>BLEUWB_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG,
+						BLEUWB_RDR_EXPEDITED_STANDARD_PHASE,
+						BLEUWB_RDR_EXPEDITED_FAST_PHASE,
+						BLEUWB_RDR_STEPUP_PHASE,
+						BLEUWB_RDR_RANGING_SUSPEND,
+						BLEUWB_RDR_RANGING_RESUME,
+						BLEUWB_RDR_NEG_FAILED_L2CAP,
+						BLEUWB_RDR_NEG_FAILED_SPSM_L2CAP,
+						BLEUWB_RDR_NEG_TIMEOUT_BEFORE_AUTH0,
+						BLEUWB_RDR_TIMEOUT_EXTENSION,
+						BLEUWB_RDR_NEG_M2_MISMATCH_PARAMETER,
+						BLEUWB_RDR_NEG_M4_MISMATCH_PARAMETER,
+						BLEUWB_RDR_NEG_SUSPEND_MISMATCH_PARAMETER,
+						BLEUWB_RDR_ADVERTISEMENT_FORMAT
+				</reference>
+				<status cond="RD AND BLEUWB">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD44</itemNumber>
+				<feature>UWB ranging</feature>
+				<reference>BLEUWB_RDR_EXPEDITED_STANDARD_PHASE,
+						BLEUWB_RDR_EXPEDITED_FAST_PHASE,
+						BLEUWB_RDR_STEPUP_PHASE
+				</reference>
+				<status cond="RD43 AND BLEUWB">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD45</itemNumber>
+				<feature>UWB ranging suspend </feature>
+				<reference>BLEUWB_RDR_RANGING_SUSPEND,
+					BLEUWB_RDR_NEG_SUSPEND_MISMATCH_PARAMETER
+				</reference>
+				<status cond="RD43 AND BLEUWB">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD46</itemNumber>
+				<feature>UWB ranging resume </feature>
+				<reference>BLEUWB_RDR_RANGING_RESUME</reference>
+				<status cond="RD43 AND BLEUWB">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD47</itemNumber>
+				<feature>One ranging round </feature>
+				<reference>BLEUWB_RDR_EXPEDITED_STANDARD_PHASE,
+					BLEUWB_RDR_EXPEDITED_FAST_PHASE,
+					BLEUWB_RDR_STEPUP_PHASE
+				</reference>
+				<status cond="RD43 AND BLEUWB">M</status>
+				<support>true</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD48</itemNumber>
+				<feature>Two ranging round </feature>
+				<reference>BLEUWB_RDR_EXPEDITED_STANDARD_PHASE,
+					BLEUWB_RDR_EXPEDITED_FAST_PHASE,
+					BLEUWB_RDR_STEPUP_PHASE
+				</reference>
+				<status cond="RD43 AND BLEUWB">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD49</itemNumber>
+				<feature>BLE UWB Time synchronization</feature>
+				<reference>BLEUWB_RDR_EXPEDITED_STANDARD_PHASE,
+						BLEUWB_RDR_EXPEDITED_FAST_PHASE,
+						BLEUWB_RDR_STEPUP_PHASE
+				</reference>
+				<status cond="RD43 AND BLEUWB">O</status>
+				<support>false</support>
+			</picsItem>
+			<picsItem>
+				<itemNumber>RD50</itemNumber>
+				<feature>BLE-Only Flow </feature>
+				<reference>BLERKE_RDR_UNSECURE,
+						BLERKE_RDR_SECURE,
+						BLERKE_RDR_NEG_FAST,
+						BLERKE_RDR_NEG_FAILED_L2CAP,
+						BLERKE_RDR_NEG_FAILED_SPSM_L2CAP,
+						BLERKE_RDR_STEPUP_PHASE
+				</reference>
+				<status cond="RD AND BLERKE">M</status>
+				<support>false</support>
+			</picsItem>
+		</features>
+		<!--Events PICS write-->
+	</clusterSide>
+</clusterPICS>

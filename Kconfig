@@ -7,8 +7,8 @@
 rsource "drivers/Kconfig"
 rsource "lib/Kconfig"
 
-menuconfig NCS_ALIRO
-	bool "NCS Aliro reader [EXPERIMENTAL]"
+menuconfig NCS_DOOR_LOCK
+	bool "NCS Door Lock Application [EXPERIMENTAL]"
 	depends on (SOC_SERIES_NRF54LX || SOC_SERIES_NRF53X || SOC_SERIES_NRF52X)
 	select EXPERIMENTAL
 	imply NFC_T4T_APDU
@@ -21,13 +21,13 @@ menuconfig NCS_ALIRO
 	imply REQUIRES_FULL_LIBC
 	imply NEWLIB_LIBC_NANO if NEWLIB_LIBC
 	help
-	  This option enables the Aliro reader stack.
+	  This option enables the Door Lock Application which uses the Aliro reader stack.
 
-if NCS_ALIRO
+if NCS_DOOR_LOCK
 
 orsource "lib/aliro/interfaces/logger/Kconfig"
 
-config ALIRO_BLE_UWB
+config DOOR_LOCK_BLE_UWB
 	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
 	help
 	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
@@ -40,26 +40,31 @@ config DISABLE_ALIRO_NFC_TP
 	help
 	  Disable the NFC transport protocol. This is useful if you want to use Aliro with BLE only.
 
-if ALIRO_BLE_UWB
+if DOOR_LOCK_BLE_UWB
 
-config ALIRO_BLE_UWB_MAX_SESSIONS
+config DOOR_LOCK_BLE_UWB_MAX_SESSIONS
 	int "Maximum number of BLE and UWB sessions"
 	range 1 BT_MAX_CONN
 	default BT_MAX_CONN
 	help
 	  The maximum number of BLE and UWB sessions that can be established.
 
-rsource "lib/aliro/Kconfig.ble.defconfig"
-
-endif # ALIRO_BLE_UWB
+endif # DOOR_LOCK_BLE_UWB
 
 rsource "lib/aliro/Kconfig.defconfig"
 
-config DOOR_LOCK_DFU_BLE_SMP 
+config DOOR_LOCK_DFU_BLE_SMP
     bool "Enable DFU over SMP"
     depends on !CHIP
     help
       Enables Device Firmware Upgrade over Bluetooth LE.
+
+config DOOR_LOCK_DFU_BLE_SMP_STANDALONE
+    bool
+    default y if DOOR_LOCK_DFU_BLE_SMP && !DOOR_LOCK_BLE_UWB && !DOOR_LOCK_BLE_NUS
+    help
+      Automatically enabled when DFU over SMP is enabled standalone (without DOOR_LOCK_BLE_UWB or DOOR_LOCK_BLE_NUS).
+      This simplifies conditional compilation checks in the code.
 
 config DOOR_LOCK_BLE_NUS
     bool "Enable Nordic Uart Service (NUS)"
@@ -67,4 +72,11 @@ config DOOR_LOCK_BLE_NUS
     help
       Enables the Bluetooth LE Nordic Uart Service (NUS). Using NUS service you can control a door lock using pre-defined BLE commands.
 
-endif # NCS_ALIRO
+# Source BLE defconfig when any BLE feature is enabled
+if DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS
+
+rsource "lib/aliro/Kconfig.ble.defconfig"
+
+endif # DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS
+
+endif # NCS_DOOR_LOCK

@@ -7,10 +7,10 @@
 rsource "access_decision_indicator/Kconfig"
 rsource "nfc_transport_impl/Kconfig"
 
-if ALIRO_BLE_UWB
+if DOOR_LOCK_BLE_UWB
 rsource "uwb_impl/Kconfig"
-endif # ALIRO_BLE_UWB
+endif # DOOR_LOCK_BLE_UWB
 
-if ALIRO_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS
+if DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS
 rsource "ble/Kconfig"
-endif #  ALIRO_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS
+endif #  DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS

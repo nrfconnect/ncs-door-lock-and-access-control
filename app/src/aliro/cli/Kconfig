@@ -1,0 +1,10 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config SHELL_CMD_BUFF_SIZE
+    # Shell buffer must fit: "dl provisioning reader_cert set " (28 chars) + hex string (2 * cert size)
+    # For 512 byte cert: 28 + 1024 = 1052
+    default 1052 if (SHELL && DOOR_LOCK_READER_CERTIFICATE)

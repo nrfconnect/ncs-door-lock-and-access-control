@@ -12,12 +12,13 @@
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 #include "cbor/access_document_decode.h"
+#include "validity_iterations.h"
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "aliro/memory.h"
 #include "uwb_impl.h"
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -26,7 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 
-LOG_MODULE_REGISTER(access_manager, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(access_manager, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace Aliro {
 
@@ -143,7 +144,7 @@ void LogAccessData(const AccessData &accessData)
 	}
 }
 
-bool ValidateAccessData(const Data &accessDataBytes)
+bool ValidateAccessData(const ConstData &accessDataBytes)
 {
 	VerifyOrReturnFalse(accessDataBytes.mData && accessDataBytes.mLength, LOG_ERR("AccessData is empty"));
 
@@ -216,6 +217,50 @@ bool ValidateAccessData(const Data &accessDataBytes)
 	return true;
 }
 
+AliroError GetCurrentValidityIterations(size_t credentialIssuerKeyIndex, ValidityIterations &iterations)
+{
+	ReturnErrorOnFailure(ReadValidityIterations(credentialIssuerKeyIndex, iterations));
+
+	LOG_DBG("Credential Issuer Key Index: %u, Current Access Iteration: %" PRIu64, credentialIssuerKeyIndex,
+		iterations.mAccessIteration);
+
+	return ALIRO_NO_ERROR;
+}
+
+bool VerifyValidityIteration(const ValidityIterations &currentIterations, ValidityIteration validityIteration)
+{
+	constexpr ValidityIteration kMaxValidityIterationDiff{ 8 };
+
+	LOG_DBG("Access Document Validity Iteration: %" PRIu64, validityIteration);
+
+	if (validityIteration < currentIterations.mAccessIteration) {
+		const auto diff = currentIterations.mAccessIteration - validityIteration;
+		VerifyOrReturnFalse(diff < kMaxValidityIterationDiff,
+				    LOG_WRN("Validity Iteration is too old (diff: %" PRIu64 ")", diff););
+	}
+
+	return true;
+}
+
+AliroError UpdateValidityIteration(size_t credentialIssuerKeyIndex, const ValidityIterations &currentIterations,
+				   ValidityIteration validityIteration)
+{
+	ValidityIterations iterations = currentIterations;
+
+	if (validityIteration > iterations.mAccessIteration) {
+		iterations.mAccessIteration = validityIteration;
+	}
+
+	if (iterations != currentIterations) {
+		LOG_DBG("Updating Validity Iterations for Credential Issuer Key Index: %u, New Access Iteration: %" PRIu64,
+			credentialIssuerKeyIndex, iterations.mAccessIteration);
+
+		ReturnErrorOnFailure(StoreValidityIterations(credentialIssuerKeyIndex, iterations));
+	}
+
+	return ALIRO_NO_ERROR;
+}
+
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 } // namespace
@@ -256,16 +301,8 @@ AliroError AccessManagerImpl::_VerifyAccessCredential(
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 	if (status != ALIRO_NO_ERROR && accessDocument.has_value()) {
-		const auto accessDocumentValid = ValidateAccessData(accessDocument.value().mDataElement);
-
-		if (accessDocumentValid) {
-			LOG_DBG("Verify AC based on Access Document");
-			status = accessDocument.value().mPublicKey == userPublicKey ? ALIRO_NO_ERROR :
-										      ALIRO_INVALID_PUBLIC_KEY;
-		} else {
-			LOG_WRN("Access Document is not valid, ignoring it for access decision");
-			status = ALIRO_INVALID_ACCESS_DOCUMENT;
-		}
+		const auto &ad = accessDocument.value();
+		status = ProcessAccessDocument(userPublicKey, ad);
 	}
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
@@ -297,41 +334,40 @@ AliroError AccessManagerImpl::_VerifyKPersistentKey([[maybe_unused]] CryptoTypes
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 }
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 AliroError AccessManagerImpl::_StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 						   SessionContext sessionContext)
 {
 	return AddRangingSession(rangingSessionId, ursk, sessionContext);
 }
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType,
-					    std::optional<size_t> keyIndex)
+					    size_t keyIndex)
 {
 	if (publicKeyType == PublicKeyType::AccessCredential) {
 		LOG_DBG("Adding Access Credential public key to storage");
 		return AddKeyToContainer(mAcKeys, publicKey, keyIndex);
 	}
-#if CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 
 	else if (publicKeyType == PublicKeyType::CredentialIssuer) {
 		LOG_DBG("Adding Credential Issuer public key to storage");
 		return AddKeyToContainer(mCiKeys, publicKey, keyIndex);
 	}
 
-#endif // CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 
 	LOG_WRN("Invalid public key type");
 	return ALIRO_INVALID_ARGUMENT;
 }
 
-AliroError AccessManagerImpl::_RemovePublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType)
+AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex)
 {
-	size_t keyIndex{};
 	if (publicKeyType == PublicKeyType::AccessCredential) {
 		LOG_DBG("Removing Access Credential public key from storage");
-		ReturnErrorOnFailure(RemoveKeyFromContainer(mAcKeys, publicKey, keyIndex));
+		ReturnErrorOnFailure(RemoveKeyFromContainer(mAcKeys, keyIndex));
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
@@ -344,13 +380,13 @@ AliroError AccessManagerImpl::_RemovePublicKey(const CryptoTypes::PublicKey &pub
 		return ALIRO_NO_ERROR;
 
 	}
-#if CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 	else if (publicKeyType == PublicKeyType::CredentialIssuer) {
 		LOG_DBG("Removing Credential Issuer public key from storage");
-		return RemoveKeyFromContainer(mCiKeys, publicKey, keyIndex);
+		return RemoveKeyFromContainer(mCiKeys, keyIndex);
 	}
 
-#endif // CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 
 	LOG_WRN("Invalid public key type");
 	return ALIRO_INVALID_ARGUMENT;
@@ -383,26 +419,26 @@ void AccessManagerImpl::_ClearStoredKeys()
 
 void AccessManagerImpl::_SetMaxAllowedDistance(uint32_t maxDistance)
 {
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	MutexGuard lock{ sMutex };
 
 	mMaxAllowedDistance = maxDistance;
 	LOG_INF("Set maximum allowed distance to %u cm", maxDistance);
-#else // CONFIG_ALIRO_BLE_UWB
+#else // CONFIG_DOOR_LOCK_BLE_UWB
 
 	ARG_UNUSED(maxDistance);
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 uint32_t AccessManagerImpl::_GetMaxAllowedDistance()
 {
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	MutexGuard lock{ sMutex };
 
 	return mMaxAllowedDistance;
 #else
 	return 0;
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext sessionContext, RangingSessionState state)
@@ -429,26 +465,26 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext,
 {
 	LOG_DBG("Handling ranging session data - length: %u for session: %p", uwbData.mLength, sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	const auto currentSessionInRange = AnalyzeUwbRangingData(uwbData);
 	{
 		MutexGuard lock{ sMutex };
 		auto *sessionCtx = FindRangingSession(sessionContext);
 		VerifyOrReturn(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext));
 		sessionCtx->mInRange = currentSessionInRange;
-#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		if (!sessionCtx->mRangingSessionTimer.IsRunning()) {
 			sessionCtx->mRangingSessionTimer.Start();
 		}
-#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 	}
 	const bool userDeviceInRange = IsUserDeviceInRange();
 
-#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 	if (mInRange && currentSessionInRange) {
 		TerminateAliroSession(sessionContext);
 	}
-#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 
 	// Only detect access status changes
 	VerifyOrReturn(userDeviceInRange != mInRange);
@@ -461,11 +497,11 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext,
 
 	if (mInRange) {
 		UnlockAction();
-#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 		TerminateAliroSession(sessionContext);
-#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 	} else
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 	{
 		LockAction();
 	}
@@ -477,12 +513,12 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 
 	LOG_INF("Handling session termination");
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	RemoveRangingSession(sessionContext);
 
 	// If any ranging session is still in range, then keep this flag true.
 	mInRange = IsUserDeviceInRange();
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey) const
@@ -570,7 +606,7 @@ bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
 {
 	VerifyOrReturnFalse(isNfcSession);
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	// Skip Reader Status Changed Message for NFC sessions when Reader is opened via BLE+UWB
 	if (!mInRange) {
@@ -582,15 +618,15 @@ bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
 	// This prevents double-unlocking when user is already detected via UWB
 	return !mInRange;
 
-#else // CONFIG_ALIRO_BLE_UWB
+#else // CONFIG_DOOR_LOCK_BLE_UWB
 
 	// For NFC sessions without UWB, always unlock immediately
 	return true;
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData)
 {
 	LOG_DBG("Analyzing UWB ranging data - length: %u", uwbData.mLength);
@@ -627,11 +663,11 @@ AliroError AccessManagerImpl::AddRangingSession(uint32_t rangingSessionId, const
 						const SessionContext sessionCtx)
 {
 	auto *newCtx = Aliro::new_nothrow<RangingSessionContext>(
-#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-		CONFIG_ALIRO_ACCESS_MANAGER_SESSION_TIMEOUT_MS,
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+		CONFIG_DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS,
 		[](Timer::Context ctx) { AccessManagerImpl::Instance().TerminateAliroSession(ctx); },
 		const_cast<Timer::Context>(sessionCtx)
-#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 	);
 	VerifyOrReturnStatus(newCtx, ALIRO_NO_MEMORY, LOG_ERR("Cannot allocate context for UWB session."));
 
@@ -649,9 +685,9 @@ AliroError AccessManagerImpl::AddRangingSession(uint32_t rangingSessionId, const
 	return ALIRO_NO_ERROR;
 
 exit:
-#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 	newCtx->mRangingSessionTimer.Stop();
-#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 	delete newCtx;
 
 	return status;
@@ -673,9 +709,9 @@ void AccessManagerImpl::RemoveRangingSession(SessionContext sessionCtx)
 		auto *ctx = CONTAINER_OF(node, RangingSessionContext, mNode);
 		if (ctx->mSessionContext == sessionCtx) {
 			sys_slist_remove(&mActiveSessions, prevNode, &ctx->mNode);
-#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 			ctx->mRangingSessionTimer.Stop();
-#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 			delete ctx;
 			break;
 		}
@@ -716,64 +752,44 @@ void AccessManagerImpl::TerminateAliroSession(SessionContext sessionContext)
 	LOG_DBG("Terminating Aliro session for context: %p", sessionContext);
 	VerifyAndCall(mStackCallbacks.mTerminateSessionClb, sessionContext);
 }
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 template <size_t T>
-AliroError AccessManagerImpl::RemoveKeyFromContainer(StoredKeys<T> &container, const CryptoTypes::PublicKey &publicKey,
-						     size_t &keyIndex) const
+AliroError AccessManagerImpl::RemoveKeyFromContainer(StoredKeys<T> &container, size_t keyIndex) const
 {
 	MutexGuard lock{ sMutex };
 
-	for (size_t id = 0; id < container.mKeys.size(); id++) {
-		if (container.mKeys[id] == publicKey) {
-			container.mKeys[id].reset();
-			container.mCount--;
-			keyIndex = id;
+	VerifyOrReturnStatus(keyIndex < container.mKeys.size(), ALIRO_INVALID_ARGUMENT,
+			     LOG_WRN("Key index out of range"));
+	VerifyOrReturnStatus(container.mKeys[keyIndex].has_value(), ALIRO_PUBLIC_KEY_NOT_FOUND,
+			     LOG_WRN("Public key not found in storage"));
 
-			LOG_INF("Removed public key from container. Total keys: %u", container.mCount);
-			return ALIRO_NO_ERROR;
-		}
-	}
+	container.mKeys[keyIndex].reset();
+	container.mCount--;
 
-	LOG_WRN("Public key not found in storage");
-	return ALIRO_PUBLIC_KEY_NOT_FOUND;
+	LOG_INF("Removed public key from container. Total keys: %u", container.mCount);
+
+	return ALIRO_NO_ERROR;
 }
 
 template <size_t T>
 AliroError AccessManagerImpl::AddKeyToContainer(StoredKeys<T> &container, const CryptoTypes::PublicKey &publicKey,
-						std::optional<size_t> keyIndex) const
+						size_t keyIndex) const
 {
 	MutexGuard lock{ sMutex };
 
+	VerifyOrReturnStatus(keyIndex < container.mKeys.size(), ALIRO_INVALID_ARGUMENT,
+			     LOG_WRN("Key index out of range"));
+
 	// Check if key already exists, if so, just do nothing
-	VerifyOrReturnStatus(!IsPublicKeyStored(container, publicKey), ALIRO_NO_ERROR,
+	VerifyOrReturnStatus(!container.mKeys[keyIndex].has_value(), ALIRO_NO_ERROR,
 			     LOG_WRN("Public key already exists in storage"));
 
-	// Check if storage is full
-	VerifyOrReturnStatus(container.mCount < container.mKeys.size(), ALIRO_NO_MEMORY,
-			     LOG_WRN("Cannot add public key - storage is full (%u/%u)", container.mCount,
-				     container.mKeys.size()));
-
-	size_t insertIndex{ 0 };
-	if (!keyIndex.has_value()) {
-		// The keyIndex is not provided, so we need to find the first empty slot in the storage
-		for (size_t id = 0; id < container.mKeys.size(); id++) {
-			if (!container.mKeys[id].has_value()) {
-				insertIndex = id;
-				break;
-			}
-		}
-	} else {
-		insertIndex = keyIndex.value();
-	}
-
-	VerifyOrReturnStatus(insertIndex < container.mKeys.size(), ALIRO_NO_MEMORY,
-			     LOG_WRN("No empty slot found in storage"));
 	// Add the key to storage
-	container.mKeys[insertIndex] = publicKey;
+	container.mKeys[keyIndex] = publicKey;
 	container.mCount++;
 
-	LOG_INF("Added public key to slot %u. Total keys: %u", insertIndex, container.mCount);
+	LOG_INF("Added public key to slot %u. Total keys: %u", keyIndex, container.mCount);
 
 	return ALIRO_NO_ERROR;
 }
@@ -811,5 +827,48 @@ AliroError AccessManagerImpl::_GetCredentialIssuerPublicKey(const CryptoTypes::K
 
 	return ALIRO_PUBLIC_KEY_NOT_FOUND;
 }
+
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+
+AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey &userPublicKey,
+						    const AccessDocumentTypes::AccessDocument &ad)
+{
+	ReturnErrorOnFailure(ProcessValidityIteration(ad.mCredentialIssuerPublicKey, ad.mValidityIteration));
+
+	VerifyOrReturnStatus(ValidateAccessData(ad.mDataElement), ALIRO_INVALID_ACCESS_DOCUMENT,
+			     LOG_WRN("Access Document is not valid, ignoring it for access decision"));
+
+	LOG_DBG("Verify Access Credential based on Access Document");
+	VerifyOrReturnStatus(ad.mPublicKey == userPublicKey, ALIRO_INVALID_PUBLIC_KEY, LOG_WRN("Public key mismatch"));
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError AccessManagerImpl::ProcessValidityIteration(const CryptoTypes::PublicKey &credentialIssuerPublicKey,
+						       const std::optional<ValidityIteration> &validityIteration)
+{
+	VerifyOrReturnStatus(validityIteration.has_value(), ALIRO_NO_ERROR,
+			     LOG_DBG("Validity iteration is not present"));
+
+	// Check if the Credential Issuer public key is stored in the storage.
+	// If not, we can ignore the validity iteration, until storing the Credential Issuer public keys
+	// from certificate is supported.
+	size_t keyIndex{};
+	VerifyOrReturnStatus(IsPublicKeyStored(mCiKeys, credentialIssuerPublicKey, &keyIndex), ALIRO_NO_ERROR,
+			     LOG_INF("Credential Issuer public key not found in storage"));
+
+	ValidityIterations iterations{};
+	ReturnErrorOnFailure(GetCurrentValidityIterations(keyIndex, iterations));
+
+	VerifyOrReturnStatus(VerifyValidityIteration(iterations, validityIteration.value()),
+			     ALIRO_INVALID_ACCESS_DOCUMENT,
+			     LOG_WRN("Validity Iteration is not valid, ignoring Access Document for access decision"));
+
+	ReturnErrorOnFailure(UpdateValidityIteration(keyIndex, iterations, validityIteration.value()));
+
+	return ALIRO_NO_ERROR;
+}
+
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 } // namespace Aliro

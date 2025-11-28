@@ -18,7 +18,7 @@
 #include <zephyr/mgmt/mcumgr/mgmt/callbacks.h>
 #include <zephyr/mgmt/mcumgr/mgmt/mgmt.h>
 
-LOG_MODULE_REGISTER(SmpManager, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(SmpManager, CONFIG_DFU_SMP_LOG_LEVEL);
 
 namespace {
 
@@ -35,7 +35,7 @@ mgmt_cb_return UploadConfirmHandler(uint32_t, mgmt_cb_return, int32_t *, uint16_
 
 namespace Aliro::Dfu {
 
-#ifndef CONFIG_ALIRO_BLE_UWB
+#ifndef CONFIG_DOOR_LOCK_BLE_UWB
 
 using BleInterface::BleManagerImpl;
 
@@ -87,7 +87,7 @@ void SmpManager::Toggle()
 	k_work_submit(&mWork);
 }
 
-#endif // !CONFIG_ALIRO_BLE_UWB
+#endif // !CONFIG_DOOR_LOCK_BLE_UWB
 
 AliroError SmpManager::Init()
 {
@@ -98,7 +98,7 @@ AliroError SmpManager::Init()
 
 	mgmt_callback_register(&sUploadCallback);
 
-#ifndef CONFIG_ALIRO_BLE_UWB
+#ifndef CONFIG_DOOR_LOCK_BLE_UWB
 
 	k_work_init(&mWork, []([[maybe_unused]] k_work *) {
 		if (Instance().IsSmpEnabled()) {
@@ -113,7 +113,7 @@ AliroError SmpManager::Init()
 
 	VerifyOrReturnStatus(InitButton() == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
 
-#endif // !CONFIG_ALIRO_BLE_UWB
+#endif // !CONFIG_DOOR_LOCK_BLE_UWB
 
 	mIsInitialized = true;
 

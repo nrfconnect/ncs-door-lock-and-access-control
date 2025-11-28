@@ -9,6 +9,10 @@
 #include "aliro/aliro.h"
 #include "app/task_executor.h"
 
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+#include "validity_iterations.h"
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
+
 #include "app_task.h"
 
 using namespace chip;
@@ -63,7 +67,7 @@ void BoltLockManager::Init(StateChangeCallback callback)
 				publicKey, Aliro::AccessManager::PublicKeyType::AccessCredential, credentialIndex);
 		} else if (credentialType == CredentialTypeEnum::kAliroCredentialIssuerKey) {
 			Aliro::AccessManagerInstance().AddPublicKey(
-				publicKey, Aliro::AccessManager::PublicKeyType::CredentialIssuer);
+				publicKey, Aliro::AccessManager::PublicKeyType::CredentialIssuer, credentialIndex);
 		}
 	};
 
@@ -75,10 +79,14 @@ void BoltLockManager::Init(StateChangeCallback callback)
 		if (credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey ||
 		    credentialType == CredentialTypeEnum::kAliroNonEvictableEndpointKey) {
 			Aliro::AccessManagerInstance().RemovePublicKey(
-				publicKey, Aliro::AccessManager::PublicKeyType::AccessCredential);
+				Aliro::AccessManager::PublicKeyType::AccessCredential, credentialIndex);
 		} else if (credentialType == CredentialTypeEnum::kAliroCredentialIssuerKey) {
 			Aliro::AccessManagerInstance().RemovePublicKey(
-				publicKey, Aliro::AccessManager::PublicKeyType::CredentialIssuer);
+				Aliro::AccessManager::PublicKeyType::CredentialIssuer, credentialIndex);
+
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+			Aliro::ClearValidityIterations(credentialIndex);
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 		}
 	};
 
@@ -213,7 +221,7 @@ void BoltLockManager::ActuatorAppEventHandler(const BoltLockManagerEvent &event)
 	switch (lock->mStateData.mState) {
 	case State::kLockingInitiated:
 		lock->SetState(State::kLockingCompleted);
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 		if (lock->mStateData.mSource != OperationSource::kAliro) {
 			Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
@@ -224,7 +232,7 @@ void BoltLockManager::ActuatorAppEventHandler(const BoltLockManagerEvent &event)
 		break;
 	case State::kUnlockingInitiated:
 		lock->SetState(State::kUnlockingCompleted);
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 		if (lock->mStateData.mSource != OperationSource::kAliro) {
 			Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(

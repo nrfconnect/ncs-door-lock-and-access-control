@@ -14,6 +14,9 @@ config MBEDTLS_ENABLE_HEAP
 config MBEDTLS_HEAP_SIZE
 	default 8192
 
+config MBEDTLS_X509_LIBRARY
+	default y
+
 config PSA_WANT_ALG_ECDSA
 	default y
 

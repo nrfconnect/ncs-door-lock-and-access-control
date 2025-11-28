@@ -47,11 +47,11 @@ public:
 	 * @brief Initializes the GATT server.
 	 * This function registers the GATT service and its characteristics.
 	 *
-	 * @param spsm The L2CAP SPSM value to be used by the GATT server.
+	 * @param l2capServer The L2CAP server to be used by the GATT server.
 	 *
 	 * @return ALIRO_NO_ERROR on success, an error code otherwise.
 	 */
-	AliroError Init(L2capServer::Spsm spsm);
+	AliroError Init(L2capServer &l2capServer);
 
 	/**
 	 * @brief Deinitializes the GATT server.

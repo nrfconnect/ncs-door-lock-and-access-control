@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 #include "aliro/aliro.h"
+#include "aliro/reader_certificate_cache.h"
 #include "aliro/types.h"
 #include "aliro/utils.h"
 #include "crypto/crypto.h"
@@ -16,13 +17,16 @@
 #include "test_key.h"
 #endif // CONFIG_DOOR_LOCK_USE_TEST_KEYS
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "ble_manager_impl.h"
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include "access_manager/access_manager.h"
 #include "crypto_key_ids.h"
+
+#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 #include "kpersistent_manager/kpersistent_manager_impl.h"
+#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
 #ifdef CONFIG_DOOR_LOCK_CLI
 #include "shell.h"
@@ -37,7 +41,7 @@
 #include <cstdio>
 #include <stdlib.h>
 
-LOG_MODULE_REGISTER(aliro, CONFIG_NCS_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(aliro, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 using namespace Aliro;
 
@@ -80,7 +84,8 @@ AliroError LoadAccessCredentials()
 {
 	size_t keyCount{};
 	ReturnErrorOnFailure(LoadCredentials(StorageKeys::kStorageKeyNameAccessCredentialPublicKey,
-					     CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS, keyCount));
+					     CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS,
+					     keyCount));
 
 	if (keyCount == 0) {
 		LOG_INF("No Access Credential public keys available");
@@ -89,22 +94,104 @@ AliroError LoadAccessCredentials()
 	return ALIRO_NO_ERROR;
 }
 
+void LoadCredentialIssuerCA(CryptoTypes::KeyId &credentialIssuerCAPublicKeyId)
+{
+	credentialIssuerCAPublicKeyId = 0;
+
+#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+	CryptoTypes::PublicKey publicKey{};
+
+	const auto error =
+		CryptoInstance().ExportKey(kCredentialIssuerCAPublicKeyId, publicKey.data(), publicKey.size());
+	VerifyOrReturn(error == ALIRO_NO_ERROR, LOG_DBG("Credential Issuer CA Public Key is not provisioned"));
+
+	credentialIssuerCAPublicKeyId = kCredentialIssuerCAPublicKeyId;
+
+#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+}
+
 AliroError LoadIssuerCredentials()
 {
-#if CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 
 	size_t keyCount{};
-	ReturnErrorOnFailure(LoadCredentials(StorageKeys::kStorageKeyNameIssuerCredentialPublicKey,
-					     CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS, keyCount));
+	ReturnErrorOnFailure(LoadCredentials(StorageKeys::kStorageKeyNameCredentialIssuerPublicKey,
+					     CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS,
+					     keyCount));
 
 	if (keyCount == 0) {
 		LOG_INF("No Credential Issuer public keys available");
 	}
 
-#endif // CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 
 	return ALIRO_NO_ERROR;
 }
+
+#ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
+
+AliroError LoadReaderCertificate()
+{
+	// Load certificate length
+	uint16_t certLength{ 0 };
+	int ec = KeyValueStorage::Instance().Get(StorageKeys::kStorageKeyNameReaderCertificateLength,
+						 reinterpret_cast<uint8_t *>(&certLength), sizeof(certLength));
+
+	VerifyOrReturnStatus(ec == 0 || ec == -ENODATA, ALIRO_ERROR_INTERNAL,
+			     LOG_ERR("Cannot get Reader certificate length, error code: %d", ec));
+
+	if (ec == 0) {
+		VerifyOrReturnStatus(certLength > 0 && certLength <= StorageKeys::kMaxCertificateSize,
+				     ALIRO_ERROR_INTERNAL,
+				     LOG_ERR("Invalid Reader certificate length: %u (max: %zu)", certLength,
+					     StorageKeys::kMaxCertificateSize));
+	}
+
+	// Load certificate data
+	std::array<uint8_t, StorageKeys::kMaxCertificateSize> certData{ 0 };
+	ec = KeyValueStorage::Instance().Get(StorageKeys::kStorageKeyNameReaderCertificate, certData.data(),
+					     certLength);
+
+	VerifyOrReturnStatus(ec == 0 || ec == -ENODATA, ALIRO_ERROR_INTERNAL,
+			     LOG_ERR("Cannot get Reader certificate, error code: %d", ec));
+
+	if (ec == 0) {
+		// Cache the certificate
+		AliroError err = ReaderCertificateCache::Instance().SetCertificate({ certData.data(), certLength });
+		VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot set Reader certificate."));
+
+		LOG_INF("Loaded Reader certificate: %u bytes", certLength);
+	}
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError LoadIssuerPublicKey()
+{
+	CryptoTypes::PublicKey publicKey{};
+	int ec = KeyValueStorage::Instance().Get(StorageKeys::kStorageKeyNameReaderSystemIssuerCAPublicKey,
+						 publicKey.data(), publicKey.size());
+
+	VerifyOrReturnStatus(ec == 0 || ec == -ENODATA, ALIRO_ERROR_INTERNAL,
+			     LOG_ERR("Cannot get Issuer public key, error code: %d", ec));
+
+	if (ec == 0) {
+		// Validate the public key format (should start with 0x04 for uncompressed EC point)
+		VerifyOrReturnStatus(publicKey[0] == CryptoTypes::kEccP256PublicKeyPrefix, ALIRO_ERROR_INTERNAL,
+				     LOG_ERR("Invalid Issuer public key format (expected prefix 0x04)"));
+
+		// Cache the public key
+		AliroError err = ReaderCertificateCache::Instance().SetIssuerPublicKey(publicKey);
+		VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot set Issuer public key."));
+
+		LOG_INF("Loaded Issuer public key: %zu bytes", publicKey.size());
+	}
+
+	return ALIRO_NO_ERROR;
+}
+
+#endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 
 AliroError LoadReaderKeys(CryptoTypes::KeyId &privateKeyId, [[maybe_unused]] CryptoTypes::KeyId &groupResolvingKeyId)
 {
@@ -130,7 +217,7 @@ AliroError LoadReaderKeys(CryptoTypes::KeyId &privateKeyId, [[maybe_unused]] Cry
 		VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot import reader private key"));
 	}
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	groupResolvingKeyId = kGroupResolvingKeyId;
 
@@ -143,7 +230,7 @@ AliroError LoadReaderKeys(CryptoTypes::KeyId &privateKeyId, [[maybe_unused]] Cry
 		VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot provision group resolving key"));
 	}
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	return ALIRO_NO_ERROR;
 }
@@ -191,8 +278,19 @@ AliroError StorageInit()
 	AliroError err = LoadAccessCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Access Credentials"));
 
+	CryptoTypes::KeyId credentialIssuerCAPublicKeyId{ 0 };
+	LoadCredentialIssuerCA(credentialIssuerCAPublicKeyId);
+
 	err = LoadIssuerCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Issuer Credentials"));
+
+#ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
+	err = LoadReaderCertificate();
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Reader certificate"));
+
+	err = LoadIssuerPublicKey();
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Issuer public key"));
+#endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 
 	CryptoTypes::KeyId privateKeyId{ 0 };
 	CryptoTypes::KeyId groupResolvingKeyId{ 0 };
@@ -203,7 +301,8 @@ AliroError StorageInit()
 	err = LoadReaderIdentifier(identifier);
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load reader identifier"));
 
-	err = AliroStack::Instance().Provision(privateKeyId, groupResolvingKeyId, identifier);
+	err = AliroStack::Instance().Provision(privateKeyId, groupResolvingKeyId, identifier,
+					       credentialIssuerCAPublicKeyId);
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot provision Aliro stack"));
 
 	return ALIRO_NO_ERROR;
@@ -240,17 +339,19 @@ int AliroInit()
 
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 		.mBle = &BleInterface::BleManagerImpl::Instance(),
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 	};
 
 	ec = AliroStack::Instance().Init(
 		{ .mOnError = [](AliroError error) { LOG_ERR("Aliro error: %s", error.ToString()); } }, config);
 
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack initialization failed"));
+
+	KpersistentManager *kpersistentManager{ nullptr };
 
 #ifndef CONFIG_CHIP
 	AccessManagerInstance().SetApplicationCallbacks(
@@ -269,7 +370,9 @@ int AliroInit()
 			  } });
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+	sKpersistentManagerImpl.Init();
 	AccessManagerInstanceImpl().SetKpersistentManager(&sKpersistentManagerImpl);
+	kpersistentManager = &sKpersistentManagerImpl;
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
 	ec = StorageInit();
@@ -280,7 +383,7 @@ int AliroInit()
 #endif // CONFIG_CHIP
 
 #ifdef CONFIG_DOOR_LOCK_CLI
-	InitShellCommands();
+	InitShellCommands(kpersistentManager);
 #endif // CONFIG_DOOR_LOCK_CLI
 
 	LOG_INF("Aliro stack initialized");
@@ -322,7 +425,17 @@ void ClearStorageAliro()
 		LOG_ERR("Failed to destroy Reader Private Key: %d", err.ToInt());
 	}
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+	keyId = kCredentialIssuerCAPublicKeyId;
+	err = CryptoInstance().DestroyKey(keyId);
+	if (err != ALIRO_NO_ERROR) {
+		LOG_ERR("Failed to destroy Credential Issuer CA Public Key: %d", err.ToInt());
+	}
+
+#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
 	keyId = kGroupResolvingKeyId;
 	err = CryptoInstance().DestroyKey(keyId);
@@ -330,7 +443,13 @@ void ClearStorageAliro()
 		LOG_ERR("Failed to destroy Group Resolving Key: %d", err.ToInt());
 	}
 
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
+#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
+	sKpersistentManagerImpl.RemoveAllKpersistent();
+
+#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 }
 
 #endif // CONFIG_CHIP

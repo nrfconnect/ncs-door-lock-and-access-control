@@ -13,7 +13,7 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/byteorder.h>
 
-LOG_MODULE_DECLARE(GattServer, CONFIG_NCS_ALIRO_BLE_LOG_LEVEL);
+LOG_MODULE_DECLARE(GattServer, CONFIG_DOOR_LOCK_BLE_LOG_LEVEL);
 
 namespace Aliro {
 

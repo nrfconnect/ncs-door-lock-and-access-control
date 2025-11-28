@@ -125,7 +125,7 @@ public:
 	AliroError VerifyKPersistentKey(CryptoTypes::KeyId kpersistentKeyId, bool isNfcSession,
 					SessionContext sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	/**
 	 * @brief Starts a ranging session based on provided inputs.
 	 *
@@ -137,7 +137,7 @@ public:
 	 */
 	AliroError StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 				       SessionContext sessionContext);
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	/**
 	 * @brief Add a new public key to the AccessManager.
@@ -145,13 +145,10 @@ public:
 	 * @param publicKey The User Device public key to add.
 	 * @param publicKeyType The type of the public key.
 	 * @param keyIndex The index of the public key in the storage.
-	 * @note If provided, the key will be added to the specified index.
-	 * @note If not provided, the key will be added to the first free index.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType,
-				std::optional<size_t> keyIndex = std::nullopt);
+	AliroError AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType, size_t keyIndex);
 
 	/**
 	 * @brief Check if a public key is stored in the AccessManager.
@@ -176,12 +173,12 @@ public:
 	/**
 	 * @brief Remove a public key from the AccessManager.
 	 *
-	 * @param publicKey The User Device public key to remove.
 	 * @param publicKeyType The type of the public key.
+	 * @param keyIndex The index of the public key in the storage.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError RemovePublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType);
+	AliroError RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex);
 
 	/**
 	 * @brief Get a Credential Issuer public key by its identifier.

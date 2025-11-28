@@ -10,9 +10,9 @@
 #include "access_manager/access_manager.h"
 #include "kpersistent_manager/kpersistent_manager.h"
 
-#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 #include "aliro/timer.h"
-#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 
 #include <zephyr/kernel.h>
 
@@ -101,7 +101,7 @@ private:
 	AliroError _VerifyKPersistentKey(CryptoTypes::KeyId kpersistentKeyId, bool isNfcSession,
 					 SessionContext sessionContext);
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	/**
 	 * @brief Starts a ranging session based on provided inputs.
 	 *
@@ -113,7 +113,7 @@ private:
 	 */
 	AliroError _StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 					SessionContext sessionContext);
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	/**
 	 * @brief Add a new public key to the AccessManager.
@@ -124,8 +124,7 @@ private:
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError _AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType,
-				 std::optional<size_t> keyIndex = std::nullopt);
+	AliroError _AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType, size_t keyIndex);
 
 	/**
 	 * @brief Check if a public key is stored in the AccessManager.
@@ -150,12 +149,12 @@ private:
 	/**
 	 * @brief Remove a public key from the AccessManager.
 	 *
-	 * @param publicKey The public key to remove.
 	 * @param publicKeyType The type of the public key.
+	 * @param keyIndex The index of the public key in the storage.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError _RemovePublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType);
+	AliroError _RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex);
 
 	/**
 	 * @brief Get a Credential Issuer public key by its identifier.
@@ -259,14 +258,11 @@ private:
 	 * @brief Template helper function to remove a key from a StoredKeys container.
 	 *
 	 * @param container The container to remove the key from.
-	 * @param publicKey The public key to remove.
 	 * @param keyIndex The index of the public key in the storage.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	template <size_t T>
-	AliroError RemoveKeyFromContainer(StoredKeys<T> &container, const CryptoTypes::PublicKey &publicKey,
-					  size_t &keyIndex) const;
+	template <size_t T> AliroError RemoveKeyFromContainer(StoredKeys<T> &container, size_t keyIndex) const;
 
 	/**
 	 * @brief Add a new public key to a StoredKeys container.
@@ -279,7 +275,7 @@ private:
 	 */
 	template <size_t T>
 	AliroError AddKeyToContainer(StoredKeys<T> &container, const CryptoTypes::PublicKey &publicKey,
-				     std::optional<size_t> keyIndex = std::nullopt) const;
+				     size_t keyIndex) const;
 
 	void HandleAccessGranted(bool isNfcSession, bool granted);
 	bool VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey) const;
@@ -289,16 +285,23 @@ private:
 	bool IsPublicKeyStored(const StoredKeys<T> &container, const CryptoTypes::PublicKey &userPublicKey,
 			       size_t *keyIndex = nullptr) const;
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+	AliroError ProcessAccessDocument(const CryptoTypes::PublicKey &userPublicKey,
+					 const AccessDocumentTypes::AccessDocument &accessDocument);
+	AliroError ProcessValidityIteration(const CryptoTypes::PublicKey &credentialIssuerPublicKey,
+					    const std::optional<ValidityIteration> &validityIteration);
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	struct RangingSessionContext {
 		sys_snode_t mNode{};
-#ifdef CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		RangingSessionContext(uint32_t timeoutMs, Timer::Callback callback, Timer::Context userData)
 			: mRangingSessionTimer(timeoutMs, callback, userData)
 		{
 		}
 		Timer mRangingSessionTimer;
-#endif // CONFIG_ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		SessionContext mSessionContext{};
 		bool mInRange{ false };
 	};
@@ -312,22 +315,22 @@ private:
 	bool IsUserDeviceInRange();
 	void TerminateAliroSession(SessionContext sessionContext);
 
-	static constexpr uint16_t kDefaultMaxAllowedDistance{ CONFIG_ALIRO_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM };
+	static constexpr uint16_t kDefaultMaxAllowedDistance{ CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM };
 
 	// Maximum allowed distance for UWB ranging (in centimeters)
 	uint32_t mMaxAllowedDistance{ kDefaultMaxAllowedDistance };
 	// Session context for the current ranging session.
 	bool mInRange{ false };
 	sys_slist_t mActiveSessions{};
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	ApplicationCallbacks mCallbacks{};
 	StackCallbacks mStackCallbacks{};
 
 	KpersistentManager *mKpersistentManager{ nullptr };
 
-	StoredKeys<CONFIG_ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS> mAcKeys{};
-	StoredKeys<CONFIG_ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS> mCiKeys{};
+	StoredKeys<CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS> mAcKeys{};
+	StoredKeys<CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS> mCiKeys{};
 };
 
 /**

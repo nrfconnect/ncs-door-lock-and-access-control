@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-config ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS
+config DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS
     int "Maximum number of stored Credential Issuer public keys"
     default 5 if DOOR_LOCK_STEP_UP_PHASE
     default 0
@@ -15,7 +15,7 @@ config ALIRO_CREDENTIAL_ISSUER_MAX_STORED_KEYS
       public key is used to verify the signature of the access document.
       If this option is set to 0, the access document is not supported.
 
-config ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS
+config DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS
     int "Maximum number of stored public keys"
     default 5
     help
@@ -23,9 +23,9 @@ config ALIRO_ACCESS_MANAGER_MAX_STORED_KEYS
       stored in the AccessManager. This determines the size of
       the statically allocated array for key storage.
 
-if ALIRO_BLE_UWB
+if DOOR_LOCK_BLE_UWB
 
-config ALIRO_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
+config DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
     int "Maximum allowed distance for granting access (cm)"
     default 100
     help
@@ -34,33 +34,33 @@ config ALIRO_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
       This is used to determine if the Aliro User Device
       is within the allowed proximity range.
 
-choice ALIRO_ACCESS_MANAGER_TERMINATE_SESSION
+choice DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION
     prompt "Terminate session on given condition"
-    default ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+    default DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
     help
       Select the condition under which the AccessManager will
       terminate the current Aliro session.
 
-config ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+config DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
     bool "Terminate the session if the access was granted"
     help
       If enabled, the AccessManager will terminate each
       session immediately when an access is granted.
 
-config ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+config DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
     bool "Terminate session on timeout"
     help
       If enabled, the AccessManager will terminate each ongoing
-      session if it times out according to ALIRO_ACCESS_MANAGER_SESSION_TIMEOUT_MS.
+      session if it times out according to DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS.
 
 endchoice
 
-if ALIRO_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+if DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 
-config ALIRO_ACCESS_MANAGER_SESSION_TIMEOUT_MS
+config DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS
     int "Session timeout in milliseconds"
     default 10000
 
 endif
 
-endif # ALIRO_BLE_UWB
+endif # DOOR_LOCK_BLE_UWB

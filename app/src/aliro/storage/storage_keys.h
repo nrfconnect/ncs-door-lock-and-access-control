@@ -21,8 +21,19 @@ constexpr char kStorageKeyNameIdentifier[] = "identifier";
 #ifndef CONFIG_CHIP
 
 constexpr char kStorageKeyNameAccessCredentialPublicKey[] = "AC_key";
-constexpr char kStorageKeyNameIssuerCredentialPublicKey[] = "CI_key";
+constexpr char kStorageKeyNameCredentialIssuerPublicKey[] = "CI_key";
 
 #endif // CONFIG_CHIP
+
+#ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
+
+constexpr size_t kMaxCertificateSize{ CONFIG_DOOR_LOCK_READER_CERTIFICATE_MAX_SIZE };
+constexpr char kStorageKeyNameReaderCertificate[] = "r_cert";
+constexpr char kStorageKeyNameReaderCertificateLength[] = "r_cert_len";
+constexpr char kStorageKeyNameReaderSystemIssuerCAPublicKey[] = "issuer_pk";
+
+#endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
+
+constexpr char kStorageKeyNameCredentialIssuerValidityIteration[] = "VI";
 
 } // namespace Aliro::StorageKeys

@@ -9,9 +9,9 @@
 #include "aliro/ble_types.h"
 #include "aliro/transport_callbacks.h"
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "gatt_server/gatt_server.h"
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include "transport/ble/ble_iface.h"
 
@@ -47,6 +47,8 @@ public:
 	AliroError GetAddress(BleTypes::BleAddress &address) const override;
 
 	size_t GetMaxSessions() const override;
+
+	ProtocolVersion GetProtocolVersion(ConnectionHandle handle) const override;
 
 private:
 	enum class BleManagerState : uint8_t { Uninitialized, Initialized, Advertising };
@@ -98,9 +100,9 @@ private:
 	uint8_t mAdvertisingServiceDataSize{};
 	BleTypes::AdvertisingDataFieldType mAdvertisingDataFieldType{ BleTypes::AdvertisingDataFieldType::Uuid16 };
 
-#ifdef CONFIG_ALIRO_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	GattServer mGattServer{};
-#endif // CONFIG_ALIRO_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	using AdvertisingData = std::array<bt_data, kAdvertisingDataSize>;
 	using ScanResponseData = std::array<bt_data, kScanResponseSize>;

@@ -107,6 +107,21 @@ enum class OperationSource : uint8_t {
 	// RFU 8 - 255
 };
 
+/**
+ * @brief Type alias for Validity Iteration.
+ */
+using ValidityIteration = uint64_t;
+
+/**
+ * @brief Length of the timestamp.
+ */
+constexpr size_t kTimestampLength{ 20 };
+
+/**
+ * @brief Type alias for timestamp.
+ */
+using Timestamp = std::array<uint8_t, kTimestampLength>;
+
 } // namespace Aliro
 
 namespace Aliro::CryptoTypes {
@@ -319,8 +334,10 @@ enum class DocumentType {
  * The mDataElement contains data elements (IssuerSignedItems) retrieved from the Access Document.
  */
 struct AccessDocument {
-	CryptoTypes::PublicKey mPublicKey;
-	Data mDataElement;
+	const CryptoTypes::PublicKey &mPublicKey;
+	ConstData mDataElement;
+	const CryptoTypes::PublicKey &mCredentialIssuerPublicKey;
+	std::optional<uint64_t> mValidityIteration;
 };
 
 } // namespace Aliro::AccessDocumentTypes

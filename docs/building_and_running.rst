@@ -48,7 +48,7 @@ To build and run the application on one of the :ref:`supported development kits 
 
    .. code-block:: bash
 
-      west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_ALIRO_BLE_UWB=y
+      west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y
 
    .. note::
       Currently, the Bluetooth LE transport is supported only for the nRF5340 device.

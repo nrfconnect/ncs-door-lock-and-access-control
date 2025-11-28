@@ -34,7 +34,7 @@ This section provides instructions on setting up the Test Harness and getting Ac
 In case you do not have access to `Aliro Certification Tool`_ repository, see the :ref:`hw_requirements_test_harness` section for further guidance.
 
 .. note::
-   All examples related to the `Aliro Certification Tool`_ are based on the `dry-run/sve-2025-v1.4`_ tag.
+   All examples related to the `Aliro Certification Tool`_ are based on the `aliro-sve-v1.0`_ tag.
 
 #. Follow the `Test harness usage instructions`_ in the `Aliro Certification Tool`_ repository.
 
@@ -192,6 +192,171 @@ This section provides instructions on setting up the Test Harness, selecting tes
          uart:~$ dl provisioning CI_key list
          [0]: 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137
 
+#. Optionally, set the Credential Issuer Certificate Authority (CA) public key in the DUT using the following ``dl provisioning`` shell command:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning CI_CA_key set <65-byte public key in hex without 0x>
+
+   For example:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning CI_CA_key set 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137
+
+   .. note::
+
+      You can also use the following commands:
+
+      * ``uart:~$ dl provisioning CI_CA_key get`` - This command retrieves the Credential Issuer CA public key stored in the DUT.
+      * ``uart:~$ dl provisioning CI_CA_key clear`` - This command clears the Credential Issuer CA public key stored in the DUT.
+
+      For example:
+
+      .. code-block:: console
+
+         uart:~$ dl provisioning CI_CA_key get
+         047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137
+
+.. _testing_reader_certificates:
+
+Aliro Reader Certificate Testing
+*********************************
+
+The Aliro Reader can optionally use X.509 certificates for authentication during the expedited standard phase.
+When a certificate is provisioned, the Reader sends a ``LOAD_CERT`` command after the ``AUTH0`` exchange, allowing the User Device to verify the Reader's identity.
+
+This feature is controlled by the ``CONFIG_DOOR_LOCK_READER_CERTIFICATE`` Kconfig option (enabled by default for non-Matter builds).
+
+Certificate generation and provisioning
+========================================
+
+Generating certificates
+------------------------
+
+#. Generate an Issuer key pair for signing certificates:
+
+   .. code-block:: console
+
+      cd scripts
+      python3 generate_keypair.py --verbose
+
+   Save the output:
+
+   * ``ISSUER_PRIV`` - Issuer Private Key (32 bytes hex)
+   * ``ISSUER_PUB`` - Issuer Public Key (65 bytes hex)
+
+#. Generate a Reader certificate.
+
+   You can choose between two certificate sizes:
+
+   * **Short certificate** (~152 bytes) - Does not require APDU chaining
+   * **Long certificate** (~270 bytes) - Requires APDU chaining (for testing chaining mechanism)
+
+   **For short certificate:**
+
+   .. code-block:: console
+
+      python3 generate_reader_cert.py \
+        --subject-pubkey <DUT_READER_PUBLIC_KEY> \
+        --issuer-privkey <ISSUER_PRIV> \
+        --output hex | xargs python3 compress_reader_cert.py
+
+   **For long certificate (tests APDU chaining):**
+
+   .. code-block:: console
+
+      ./generate_max_size_cert.sh <DUT_READER_PUBLIC_KEY> <ISSUER_PRIV>
+
+   Save the compressed certificate hex output for provisioning.
+
+Configuring Test Harness
+-------------------------
+
+Update your Test Harness project configuration with the following fields:
+
+* ``dut_reader_issuer_public_key`` - Set to ``ISSUER_PUB`` from step 1
+* ``dut_reader_issuer_group_identifier`` - Must be different from ``dut_reader_group_identifier``
+
+.. code-block:: json
+
+   {
+     "config": {
+       "test_parameters": {
+         "dut_reader_public_key": "<DUT_READER_PUBLIC_KEY>",
+         "dut_reader_group_identifier": "00113344667799AA00113344667799AB",
+         "dut_reader_issuer_group_identifier": "FFEEDDCCBBAA998877665544332211FF",
+         "dut_reader_issuer_public_key": "<ISSUER_PUB>"
+       }
+     }
+   }
+
+.. important::
+   The ``dut_reader_issuer_group_identifier`` must differ from ``dut_reader_group_identifier`` to properly test certificate-based authentication.
+
+Provisioning DUT
+----------------
+
+Connect to the DUT via serial console and provision both the certificate and issuer public key:
+
+#. Install the proper Reader group identifier (``dut_reader_issuer_group_identifier`` value):
+
+   .. code-block:: console
+
+      uart:~$ dl install group_id <dut_reader_issuer_group_identifier>
+
+#. Provision the Issuer Public Key:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning issuer_pk set <ISSUER_PUB>
+
+#. Provision the Reader Certificate (compressed):
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning reader_cert set <COMPRESSED_CERT>
+
+#. Verify provisioning:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning issuer_pk list
+      Issuer public key (65 bytes): <ISSUER_PUB>
+
+      uart:~$ dl provisioning reader_cert list
+      Reader certificate (XXX bytes): <COMPRESSED_CERT>
+
+.. note::
+   The certificate size is limited by ``CONFIG_DOOR_LOCK_READER_CERTIFICATE_MAX_SIZE`` (default: 512 bytes).
+   If you need to provision larger certificates, increase this value in your project configuration.
+
+Running tests with certificates
+================================
+
+Once the certificate is provisioned, execute Test Harness test cases that include the ``LOAD_CERT`` command:
+
+* ``NFC_RDR_STANDARD_CERT_IN_LOAD_CERT`` - Standard certificate test
+* ``NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING`` - Certificate with APDU chaining
+
+Expected behavior:
+
+* DUT sends ``LOAD_CERT`` command with the provisioned certificate
+* If using a long certificate: APDU chaining is used (multiple chunks)
+* Test Harness verifies the certificate signature using ``ISSUER_PUB``
+* Transaction proceeds normally after certificate validation
+
+Clearing certificates
+---------------------
+
+To run standard tests without certificates, clear the provisioned data:
+
+.. code-block:: console
+
+   uart:~$ dl provisioning reader_cert clear
+   uart:~$ dl provisioning issuer_pk clear
+
+After clearing, the DUT will skip the ``LOAD_CERT`` state and proceed directly from ``AUTH0`` response to ``AUTH1`` (expedited standard phase).
 
 .. _testing_verification:
 
@@ -690,6 +855,24 @@ You can see the full list of available tests in the `Aliro Certification Tool`_ 
 From the :guilabel:`Test Suites` list, choose the tests with the `Reader` in the name, for example, :guilabel:`BLE Reader`.
 This will allow you to test the Bluetooth LE transport.
 
+.. note::
+   You can upload the :file:`applications/doorlock/docs/certification_assets/Aliro PICS v0.9.3.r2.xml` file to the Test Harness to automatically select tests for execution.
+   However, **there is a known bug in this Test Harness revision** that causes the PICS file to select some incorrect tests and skip some needed to execute.
+
+   **Tests that should be executed** (but may be skipped):
+
+   * ``NFC_RDR_NEG_STEPUP_AD_SCHEDULE_IN_ACCESS_RULE_AND_READER``
+   * ``NFC_RDR_NEG_STEPUP_AD_SCHEDULE_TIME_VERIFY_REQUIRED``
+   * ``NFC_RDR_NEG_STEPUP_AD_TIME_VERIFICATION_REQUIRED``
+   * ``BLEUWB_RDR_ADVERTISEMENT_FORMAT``
+
+   **Tests that should not be executed** (but may be selected):
+
+   * ``BLEUWB_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG``
+
+   Always verify that the correct tests are chosen before executing them.
+   If you don't upload the PICS file, you can choose the tests manually.
+
 .. figure:: /images/th_test_cases.png
    :scale: 70%
    :alt: Test suites list.
@@ -698,109 +881,117 @@ This will allow you to test the Bluetooth LE transport.
 
 Thanks to this, the Test Harness device will be operating as the Aliro User Device and communicate with the Reader device.
 
-For verification, execute the following tests, based on the `dry-run/sve-2025-v1.4`_ tag:
+For verification, execute the following tests, based on the `aliro-sve-v1.0`_ tag.
 
-      .. tabs::
+The test results shown below were acquired on an nRF5340 DK build using the following command:
 
-         .. tab:: NFC Reader
+.. code-block:: bash
 
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | Test case                                                 | Description                                                                         | Result | Comment      |
-            +===========================================================+=====================================================================================+========+==============+
-            | NFC_RDR_STANDARD_NO_CERT                                  | Verify conformance of Reader UT in AUTH1 command.                                   | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_AUTH0_EXTRA_TAG                               | Verify conformance of Reader UT in AUTH1 command.                                   | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_AUTH1_EXTRA_TAG                               | Verify conformance of Reader UT in AUTH1 command.                                   | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_AUTH0_WRONG_VALUE                             | Verify conformance of Reader UT in AUTH1 command.                                   | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_SEL_RSP_NO_COMMON_EXPEDITED_PROTOCOL_VERSION  | Verify conformance of Reader UT in SELECT command.                                  | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_AUTH1_WRONG_VALUES                            | Verify conformance of Reader UT in AUTH1 command.                                   | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_AUTH1_WRONG_UD_SIGNATURE                      | Verify conformance of Reader UT in AUTH1 command.                                   | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_FAST                                              | Verify conformance of Reader UT in expedited fast phase.                            | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_DEVICE_KEY_INFO_MISMATCH            | Verify rejection of Access Document not associated with the Access Credential.      | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_DOCTYPE_NOT_ALIROA                  | Verify rejection of Access Document with invalid docType.                           | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_INVALID_ACCESS_DATA_ELEMENT_VERSION | Verify rejection of Access Document with incorrect Access Data Element version.     | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_INVALID_HASH_ISSUER_AUTH            | Verify rejection of Access Document with an invalid Data Element digest.            | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_INVALID_SIGNATURE_ISSUER_AUTH       | Verify rejection of Access Document with invalid IssuerAuth signature.              | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_EXPIRED                 | Verify rejection of Access Document with expired issuer certificate.                | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_ISSUER_CERTIFICATE_TIME_MISMATCH    | Verify rejection of Access Document with issuer certificate time mismatch.          | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_INVALID_SIGNATURE       | Verify rejection of Access Document with invalid issuer certificate signature.      | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_ISSUER_DOCTYPE_MISMATCH             | Verify rejection of Access Document with incorrect issuerAuth doctype.              | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_NO_ACCESS_RULE_FOR_READER_ACTION    | Verify rejection of Access Document with no Access Rule for the intended action.    | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_NO_DATA_ELEMENTS                    | Verify rejection of Access Document with no data elements.                          | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_NO_ISSUER_CERT_NO_KEY_ID            | Verify rejection of Access Document with no Issuer Certificate or Key Identifier.   | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_SCHEDULE_IN_ACCESS_RULE_AND_READER  | Verify rejection of Access Document with schedule in access rule and reader.        | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_SCHEDULE_TIME_VERIFY_REQUIRED       | Verify rejection of Access Document requiring schedule time verification.           | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_TIME_VERIFICATION_REQUIRED          | Verify rejection of Access Document requiring time verification.                    | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_UNKNOWN_CRITICAL_ACCESS_EXTENSION   | Verify rejection of Access Document with unknown critical access extension.         | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_UNKNOWN_READER_RULE                 | Verify rejection of Access Document with unknown reader rule.                       | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_NEG_STEPUP_AD_VALIDITY_ITERATION                  | Verify rejection of Access Document with validity iteration.                        | FAIL   | Reader issue |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_STEPUP_AD_ACCESS_RULE                             | Verify parsing of Access Document with Access Rule.                                 | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_STEPUP_AD_ISSUER_CERT_KEY_ID                      | Verify parsing of Access Document with Issuer Certificate Key ID.                   | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_STEPUP_AD_KEY_ID                                  | Verify parsing of Access Document with Key Identifier.                              | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_STEPUP_AD_UNKNOWN_NON_ACCESS_EXTENSION            | Verify parsing of Access Document with unknown non-access extension.                | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
-            | NFC_RDR_STEPUP_AD_UNKNOWN_NON_CRITICAL_ACCESS_EXTENSION   | Verify parsing of Access Document with unknown non-critical access extension.       | PASS   |              |
-            +-----------------------------------------------------------+-------------------------------------------------------------------------------------+--------+--------------+
+   west build -b nrf5340dk/nrf5340/cpuapp -- -Dapp_SNIPPET=nfc_uwb_coex_single_spi -DCONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y -DCONFIG_DOOR_LOCK_STEP_UP_PHASE=y -DCONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
 
-         .. tab:: Bluetooth LE
+.. tabs::
 
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | Test case                                 | Description                                                              | Result | Comment                     |
-            +===========================================+==========================================================================+========+=============================+
-            | BLEUWB_RDR_EXPEDITED_STANDARD_PHASE       | Verify conformance of Reader UT in standard phase expedited transaction. | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_RANGING_SUSPEND                | Verify conformance of Reader UT in ranging suspend functionality.        | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_RANGING_RESUME                 | Verify conformance of Reader UT in ranging resume functionality.         | FAIL   | TH issue, passes with a fix |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_NEG_FAILED_L2CAP               | Verify conformance of Reader UT in L2CAP connection failure handling.    | FAIL   | Reader issue                |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_NEG_FAILED_SPSM_L2CAP          | Verify conformance of Reader UT in SPSM L2CAP failure handling.          | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_NEG_TIMEOUT_BEFORE_AUTH0       | Verify conformance of Reader UT in timeout handling before AUTH0.        | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_TIMEOUT_EXTENSION              | Verify conformance of Reader UT in timeout extension handling.           | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_NEG_M2_MISMATCH_PARAMETER      | Verify conformance of Reader UT in M2 parameter mismatch handling.       | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_NEG_M4_MISMATCH_PARAMETER      | Verify conformance of Reader UT in M4 parameter mismatch handling.       | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_ADVERTISEMENT_FORMAT           | Verify conformance of Reader UT in advertisement format.                 | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_NEG_SUSPEND_MISMATCH_PARAMETER | Verify conformance of Reader UT in suspend parameter mismatch handling.  | FAIL   | TH issue, passes with a fix |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_STEPUP_PHASE                   | Verify conformance of Reader UT in step-up phase.                        | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-            | BLEUWB_RDR_EXPEDITED_FAST_PHASE           | Verify conformance of Reader UT in expedited fast phase.                 | PASS   |                             |
-            +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+   .. tab:: NFC Reader
+
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | Test case                                                 | Description                                                                             | Result | Comment      |
+      +===========================================================+=========================================================================================+========+==============+
+      | NFC_RDR_STANDARD_NO_CERT                                  | Verify conformance of Reader UT in AUTH1 command.                                       | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_AUTH0_EXTRA_TAG                               | Verify conformance of Reader UT in AUTH1 command.                                       | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_AUTH1_EXTRA_TAG                               | Verify conformance of Reader UT in AUTH1 command.                                       | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_AUTH0_WRONG_VALUE                             | Verify conformance of Reader UT in AUTH1 command.                                       | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_SEL_RSP_NO_COMMON_EXPEDITED_PROTOCOL_VERSION  | Verify conformance of Reader UT in SELECT command.                                      | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_AUTH1_WRONG_VALUES                            | Verify conformance of Reader UT in AUTH1 command.                                       | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_AUTH1_WRONG_UD_SIGNATURE                      | Verify conformance of Reader UT in AUTH1 command.                                       | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING          | Verify conformance of Reader during NFC standard "transaction using LOAD CERT protocol".| PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_FAST                                              | Verify conformance of Reader UT in expedited fast phase.                                | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_DEVICE_KEY_INFO_MISMATCH            | Verify rejection of Access Document not associated with the Access Credential.          | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_DOCTYPE_NOT_ALIROA                  | Verify rejection of Access Document with invalid docType.                               | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_INVALID_ACCESS_DATA_ELEMENT_VERSION | Verify rejection of Access Document with incorrect Access Data Element version.         | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_INVALID_HASH_ISSUER_AUTH            | Verify rejection of Access Document with an invalid Data Element digest.                | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_INVALID_SIGNATURE_ISSUER_AUTH       | Verify rejection of Access Document with invalid IssuerAuth signature.                  | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_ISSUER_CERTIFICATE_TIME_MISMATCH    | Verify rejection of Access Document with issuer certificate time mismatch.              | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_INVALID_SIGNATURE       | Verify rejection of Access Document with invalid issuer certificate signature.          | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_ISSUER_DOCTYPE_MISMATCH             | Verify rejection of Access Document with incorrect issuerAuth doctype.                  | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_NO_ACCESS_RULE_FOR_READER_ACTION    | Verify rejection of Access Document with no Access Rule for the intended action.        | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_NO_DATA_ELEMENTS                    | Verify rejection of Access Document with no data elements.                              | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_NO_ISSUER_CERT_NO_KEY_ID            | Verify rejection of Access Document with no Issuer Certificate or Key Identifier.       | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_SCHEDULE_IN_ACCESS_RULE_AND_READER  | Verify rejection of Access Document with schedule in access rule and reader.            | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_SCHEDULE_TIME_VERIFY_REQUIRED       | Verify rejection of Access Document requiring schedule time verification.               | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_TIME_VERIFICATION_REQUIRED          | Verify rejection of Access Document requiring time verification.                        | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_UNKNOWN_CRITICAL_ACCESS_EXTENSION   | Verify rejection of Access Document with unknown critical access extension.             | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_UNKNOWN_READER_RULE                 | Verify rejection of Access Document with unknown reader rule.                           | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_NEG_STEPUP_AD_VALIDITY_ITERATION                  | Verify rejection of Access Document with validity iteration.                            | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_STEPUP_AD_ACCESS_RULE                             | Verify parsing of Access Document with Access Rule.                                     | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_STEPUP_AD_ISSUER_CERT_KEY_ID                      | Verify parsing of Access Document with Issuer Certificate Key ID.                       | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_STEPUP_AD_ISSUER_CERT                             | Verify parsing of Access Document with Issuer Certificate.                              | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_STEPUP_AD_KEY_ID                                  | Verify parsing of Access Document with Key Identifier.                                  | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_STEPUP_AD_UNKNOWN_NON_ACCESS_EXTENSION            | Verify parsing of Access Document with unknown non-access extension.                    | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_STEPUP_AD_UNKNOWN_NON_CRITICAL_ACCESS_EXTENSION   | Verify parsing of Access Document with unknown non-critical access extension.           | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+
+   .. tab:: Bluetooth LE
+
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | Test case                                 | Description                                                              | Result | Comment                     |
+      +===========================================+==========================================================================+========+=============================+
+      | BLEUWB_RDR_EXPEDITED_STANDARD_PHASE       | Verify conformance of Reader UT in standard phase expedited transaction. | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_RANGING_SUSPEND                | Verify conformance of Reader UT in ranging suspend functionality.        | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_RANGING_RESUME                 | Verify conformance of Reader UT in ranging resume functionality.         | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_FAILED_L2CAP               | Verify conformance of Reader UT in L2CAP connection failure handling.    | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_FAILED_SPSM_L2CAP          | Verify conformance of Reader UT in SPSM L2CAP failure handling.          | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_TIMEOUT_BEFORE_AUTH0       | Verify conformance of Reader UT in timeout handling before AUTH0.        | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_TIMEOUT_EXTENSION              | Verify conformance of Reader UT in timeout extension handling.           | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_M2_MISMATCH_PARAMETER      | Verify conformance of Reader UT in M2 parameter mismatch handling.       | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_M4_MISMATCH_PARAMETER      | Verify conformance of Reader UT in M4 parameter mismatch handling.       | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_ADVERTISEMENT_FORMAT           | Verify conformance of Reader UT in advertisement format.                 | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_SUSPEND_MISMATCH_PARAMETER | Verify conformance of Reader UT in suspend parameter mismatch handling.  | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_STEPUP_PHASE                   | Verify conformance of Reader UT in step-up phase.                        | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_EXPEDITED_FAST_PHASE           | Verify conformance of Reader UT in expedited fast phase.                 | PASS   |                             |
+      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
 
 Running the test
 ================
@@ -927,6 +1118,37 @@ Additional CLI commands
 
 .. note::
    This command is available only if you build the application with the ``uwb_qm35`` snippet.
+
+* To list all Kpersistent keys stored in the device, run the following command in the device shell:
+
+.. code-block:: console
+
+   uart:~$ dl kpersistent list
+   Number of Kpersistent keys: 1
+   Index   ID          Public Key
+   --------------------------------
+   0       0x00041000  04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa
+
+* To clear a specific Kpersistent key by its index, run the following command in the device shell:
+
+.. code-block:: console
+
+   uart:~$ dl kpersistent clear <index>
+
+   For example:
+
+.. code-block:: console
+
+   uart:~$ dl kpersistent clear 0
+
+* To clear all Kpersistent keys stored in the device, run the following command in the device shell:
+
+.. code-block:: console
+
+   uart:~$ dl kpersistent clear all
+
+.. note::
+   These commands are available only if you build the application with the Expedited-fast phase support enabled (the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option).
 
 Bluetooth LE Nordic UART Service (NUS)
 ***************************************
