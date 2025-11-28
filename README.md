@@ -24,8 +24,8 @@ nrfutil sdk-manager toolchain launch --ncs-version v3.2.0-preview2 --shell
 ```
 
 ```shell
-# initialize workspace for the ncs-door-lock-app (v0.5.0 release)
-west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr v0.5.0 door-lock-workspace
+# initialize workspace for the ncs-door-lock-app (v0.6.0-rc1 release)
+west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr v0.6.0-rc1 door-lock-workspace
 ```
 
 ```shell
