@@ -21,5 +21,25 @@ manifest:
       revision: QM35ALIRO_ENG-0.5.0
       groups:
         - nrfconnect-sdk-qorvo
+    - name: matter
+      remote: ncs
+      repo-path: sdk-connectedhomeip
+      path: modules/lib/matter
+      revision: ddae8c0666a785add26405eb090b599be660dfa3
+      west-commands: scripts/west/west-commands.yml
+      submodules:
+        - name: nlio
+          path: third_party/nlio/repo
+        - name: nlassert
+          path: third_party/nlassert/repo
+        - name: pigweed
+          path: third_party/pigweed/repo
+        - name: jsoncpp
+          path: third_party/jsoncpp/repo
+      userdata:
+        ncs:
+          upstream-url: https://github.com/project-chip/connectedhomeip
+          upstream-sha: 181b0cb14ff007ec912f2ba6627e05dfb066c008
+          compare-by-default: false
   group-filter:
     - -nrfconnect-sdk-qorvo
