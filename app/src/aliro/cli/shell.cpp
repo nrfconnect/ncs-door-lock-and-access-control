@@ -11,7 +11,7 @@
 #include <aliro/utils.h>
 
 #ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
-#include <aliro/reader_certificate_cache.h>
+#include "reader_certificate_cache.h"
 #endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 
 #include "aliro/crypto_key_ids.h"
@@ -474,53 +474,53 @@ int PrintKpersistentKeys(const struct shell *shell, CryptoTypes::KeyId *kpersist
 	return 0;
 }
 
-int ShellCmdHandleKpersistent(const struct shell *shell, size_t argc, char **argv)
+int ShellCmdHandleKpersistentList(const struct shell *shell, size_t argc, char **argv)
 {
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 	VerifyOrReturnValue(sKpersistentManager, -EIO, shell_warn(shell, "Kpersistent manager not initialized\n"));
-	VerifyOrReturnValue(IN_RANGE(argc, 2, 3), -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
+	VerifyOrReturnValue(argc == 1, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
 
 	constexpr char kList[] = "list";
-	if (CmdMatch(argv[1], kList)) {
-		VerifyOrReturnValue(argc == 2, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
+	VerifyOrReturnValue(CmdMatch(argv[0], kList), -EINVAL, shell_warn(shell, "Invalid command!\n"));
 
-		size_t kpersistentCount{};
-		VerifyOrReturnValue(sKpersistentManager->GetKpersistentCount(kpersistentCount) == ALIRO_NO_ERROR,
-				    -EINVAL, shell_warn(shell, "Cannot get Kpersistent count\n"));
-		VerifyOrReturnValue(kpersistentCount > 0, 0, shell_print(shell, "No Kpersistent keys found\n"));
+	size_t kpersistentCount{};
+	VerifyOrReturnValue(sKpersistentManager->GetKpersistentCount(kpersistentCount) == ALIRO_NO_ERROR, -EINVAL,
+			    shell_warn(shell, "Cannot get Kpersistent count\n"));
+	VerifyOrReturnValue(kpersistentCount > 0, 0, shell_print(shell, "No Kpersistent keys found\n"));
 
-		auto kpersistentKeyIds = Aliro::make_unique_array_nothrow<CryptoTypes::KeyId>(kpersistentCount);
-		VerifyOrReturnValue(kpersistentKeyIds, -ENOMEM,
-				    shell_warn(shell, "Cannot allocate memory for Kpersistent key IDs\n"));
+	auto kpersistentKeyIds = Aliro::make_unique_array_nothrow<CryptoTypes::KeyId>(kpersistentCount);
+	VerifyOrReturnValue(kpersistentKeyIds, -ENOMEM,
+			    shell_warn(shell, "Cannot allocate memory for Kpersistent key IDs\n"));
 
-		VerifyOrReturnValue(sKpersistentManager->GetKpersistentKeyIds(kpersistentKeyIds.get(),
-									      kpersistentCount) == ALIRO_NO_ERROR,
-				    -EINVAL, shell_warn(shell, "Cannot get Kpersistent key IDs\n"));
+	VerifyOrReturnValue(sKpersistentManager->GetKpersistentKeyIds(kpersistentKeyIds.get(), kpersistentCount) ==
+				    ALIRO_NO_ERROR,
+			    -EINVAL, shell_warn(shell, "Cannot get Kpersistent key IDs\n"));
 
-		return PrintKpersistentKeys(shell, kpersistentKeyIds.get(), kpersistentCount);
-	}
+	return PrintKpersistentKeys(shell, kpersistentKeyIds.get(), kpersistentCount);
+}
+
+int ShellCmdHandleKpersistentClear(const struct shell *shell, size_t argc, char **argv)
+{
+	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
+	VerifyOrReturnValue(sKpersistentManager, -EIO, shell_warn(shell, "Kpersistent manager not initialized\n"));
+	VerifyOrReturnValue(argc == 2, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
 
 	constexpr char kRemove[] = "clear";
-	if (CmdMatch(argv[1], kRemove)) {
-		VerifyOrReturnValue(argc == 3, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
+	VerifyOrReturnValue(CmdMatch(argv[0], kRemove), -EINVAL, shell_warn(shell, "Invalid command!\n"));
 
-		constexpr char kAll[] = "all";
-		if (strncmp(argv[2], kAll, CStrLen(kAll)) == 0) {
-			shell_print(shell, "Removing all Kpersistent keys");
-			sKpersistentManager->RemoveAllKpersistent();
-			return 0;
-		}
-
-		size_t index{};
-		VerifyOrReturnValue(ParseIndex(shell, argv[2], index) == 0, -EINVAL);
-		shell_print(shell, "Removing Kpersistent key with index: %u", index);
-		VerifyOrReturnValue(sKpersistentManager->RemoveKpersistent(index) == ALIRO_NO_ERROR, -EINVAL,
-				    shell_warn(shell, "Cannot remove Kpersistent key\n"));
+	constexpr char kAll[] = "all";
+	if (strncmp(argv[1], kAll, CStrLen(kAll)) == 0) {
+		shell_print(shell, "Removing all Kpersistent keys");
+		sKpersistentManager->RemoveAllKpersistent();
 		return 0;
 	}
 
-	shell_warn(shell, "Invalid command!\n");
-	return -EINVAL;
+	size_t index{};
+	VerifyOrReturnValue(ParseIndex(shell, argv[1], index) == 0, -EINVAL);
+	shell_print(shell, "Removing Kpersistent key with index: %u", index);
+	VerifyOrReturnValue(sKpersistentManager->RemoveKpersistent(index) == ALIRO_NO_ERROR, -EINVAL,
+			    shell_warn(shell, "Cannot remove Kpersistent key\n"));
+	return 0;
 }
 
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
@@ -531,8 +531,9 @@ int ShellCmdHandleReaderCertList(const struct shell *shell, size_t, char **)
 {
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 
-	if (auto certOpt = ReaderCertificateCache::Instance().GetCertificate()) {
-		const auto &cert = certOpt.value();
+	ConstData cert{};
+	const auto error = ReaderCertificateCache::Instance().GetCertificate(cert);
+	if (error == ALIRO_NO_ERROR) {
 		std::array<char, StorageKeys::kMaxCertificateSize * 2 + 1> hexString{ 0 };
 		size_t len = bin2hex(cert.mData, cert.mLength, hexString.data(), hexString.size());
 		VerifyOrReturnStatus(len == cert.mLength * 2, -EINVAL,
@@ -606,9 +607,9 @@ int ShellCmdHandleIssuerPublicKeyList(const struct shell *shell, size_t, char **
 {
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Shell not initialized\n"));
 
-	auto publicKeyOpt = ReaderCertificateCache::Instance().GetIssuerPublicKey();
-	if (publicKeyOpt) {
-		const auto &publicKey = publicKeyOpt.value();
+	CryptoTypes::PublicKey publicKey{};
+	const auto error = ReaderCertificateCache::Instance().GetIssuerPublicKey(publicKey);
+	if (error == ALIRO_NO_ERROR) {
 		std::array<char, CryptoTypes::kEccP256PublicKeyLength * 2 + 1> hexString{ 0 };
 		size_t len = bin2hex(publicKey.data(), publicKey.size(), hexString.data(), hexString.size());
 		VerifyOrReturnStatus(len == publicKey.size() * 2, -EINVAL,
@@ -813,6 +814,22 @@ SHELL_STATIC_SUBCMD_SET_CREATE(provisioning_cmd,
 
 #endif // CONFIG_CHIP
 
+#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
+SHELL_STATIC_SUBCMD_SET_CREATE(kpersistent_cmd,
+			       SHELL_CMD(list, NULL,
+					 "List Kpersistent keys\n"
+					 "  Usage: dl kpersistent list",
+					 ShellCmdHandleKpersistentList),
+			       SHELL_CMD(clear, NULL,
+					 "Clear Kpersistent key\n"
+					 "  Usage: dl kpersistent clear <index>\n"
+					 "       dl kpersistent clear all",
+					 ShellCmdHandleKpersistentClear),
+			       SHELL_SUBCMD_SET_END);
+
+#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
 SHELL_STATIC_SUBCMD_SET_CREATE(door_lock_cmd,
 
 			       SHELL_CMD(info, NULL, "Show Aliro lib version and NFC reader chip name",
@@ -820,7 +837,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(door_lock_cmd,
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
-			       SHELL_CMD(kpersistent, NULL, "Manage Kpersistent keys", ShellCmdHandleKpersistent),
+			       SHELL_CMD(kpersistent, &kpersistent_cmd, "Manage Kpersistent keys", NULL),
 
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 

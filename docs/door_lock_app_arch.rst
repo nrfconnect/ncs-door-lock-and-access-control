@@ -153,11 +153,24 @@ You can select an Access Manager implementation by enabling one of the following
 Kconfig options for default implementation
 ------------------------------------------
 
-You can configure the default implementation through Kconfig options located under the following path: :file:`app/src/access_manager_impl_default/Kconfig`:
+You can configure the default implementation through Kconfig options located under the following path: :file:`app/src/aliro/access_manager_impl_default/Kconfig`:
 
-* ``CONFIG_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` - This option specifies the maximum allowed distance (in centimeters) measured by UWB ranging required for granting access to the User Device.
+* ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` - This option specifies the maximum allowed distance (in centimeters) measured by UWB ranging required for granting access to the User Device.
   If the distance exceeds this value, access is denied.
   If the Aliro User Device is within this distance, access is granted.
+
+* ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM`` - This option specifies an additional margin (in centimeters) added to ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` that is used to determine when the door should be locked (exit range).
+  This margin prevents rapid open/close toggling when the measured distance fluctuates around the maximum allowed distance threshold.
+
+  Behavior:
+  - Unlock (enter range): distance <= MAX_ALLOWED_DISTANCE_CM
+  - Lock (exit range): distance > MAX_ALLOWED_DISTANCE_CM + EXIT_MARGIN_CM
+
+  The exit margin is applied per UWB ranging session based on the session's previous state.
+  When a session transitions from "out of range" to "in range", the unlock threshold is MAX_ALLOWED_DISTANCE_CM.
+  Once unlocked, the session must exceed MAX_ALLOWED_DISTANCE_CM + EXIT_MARGIN_CM to trigger locking.
+
+  Set to 0 to disable the exit margin (door will lock immediately when distance exceeds MAX_ALLOWED_DISTANCE_CM).
 
 * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS`` - This option sets the maximum number of public keys that can be stored in the Access Manager.
   It determines the size of the statically allocated memory for Access Manager cache.
@@ -166,12 +179,16 @@ You can configure the default implementation through Kconfig options located und
   Such mechanism is important if the User Device does not terminate the ranging session on its own.
   You can choose between the following options:
 
-   * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT`` - The session is terminated after a specified timeout.
-     This is a default option.
-     The timeout, in milliseconds, is defined by the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS`` Kconfig option.
-     By default, the timeout is set to ``10000`` ms (10 seconds).
+   * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_DISABLED`` - The Access Manager will never automatically terminate UWB ranging sessions.
+     This is the default option.
+     Sessions will only be terminated when explicitly requested by the User Device or when the BLE connection is lost.
+     This option is useful when you want the User Device to have full control over session lifecycle.
 
    * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED`` - The session is terminated immediately after access is granted for a given ranging session.
+
+   * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT`` - The session is terminated after a specified timeout.
+     The timeout, in milliseconds, is defined by the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS`` Kconfig option.
+     By default, the timeout is set to ``10000`` ms (10 seconds).
 
 Configuring Access Manager
 ==========================
@@ -181,7 +198,7 @@ For example, to allow a maximum distance of 50 cm, add the following line to you
 
 .. code-block:: kconfig
 
-   CONFIG_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM=50
+   CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM=50
 
 To use a custom implementation, provide your own implementation by modifying the files in the :file:`access_manager_impl_custom` file, and build the application with the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM`` Kconfig option enabled.
 

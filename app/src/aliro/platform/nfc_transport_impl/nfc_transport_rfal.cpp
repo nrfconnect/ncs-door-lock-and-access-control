@@ -238,11 +238,11 @@ AliroError NfcTransportRfal::_Init(NfcDriver::Callbacks callbacks)
 	int err = rfal_ncs_pal_init();
 	VerifyOrReturnStatus(err == 0, ALIRO_ERROR_INTERNAL, LOG_ERR("RFAL: NFC PAL init failed %d", err));
 
-	const k_tid_t thread = ncs_pal_nfc_worker_start([](void *, void *, void *) { Instance().Run(); });
-
-	VerifyOrReturnStatus(thread, ALIRO_INVALID_STATE, LOG_ERR("RFAL: Cannot spawn the NFC driver thread"));
 	VerifyOrReturnStatus(RfalNfcInit() == RFAL_ERR_NONE, ALIRO_ERROR_INTERNAL,
 			     LOG_ERR("RFAL: NFC initialization failed"));
+
+	const k_tid_t thread = ncs_pal_nfc_worker_start([](void *, void *, void *) { Instance().Run(); });
+	VerifyOrReturnStatus(thread, ALIRO_INVALID_STATE, LOG_ERR("RFAL: Cannot spawn the NFC driver thread"));
 
 	return ALIRO_NO_ERROR;
 }

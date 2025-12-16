@@ -50,19 +50,16 @@ To build and run the application on one of the :ref:`supported development kits 
 
       west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y
 
-   .. note::
-      Currently, the Bluetooth LE transport is supported only for the nRF5340 device.
-
 #. You can also apply optional configurations depending on the modules used:
 
-   * If you are using the `QM35825`_ UWB module with the Qorvo Arduino Interface Board, execute the following command to build the application specifically for this setup:
+   * If you are using the `QM35825`_ UWB module with the Qorvo Arduino Interface Board, execute the following command to build the application with UWB enabled.
 
      .. code-block:: bash
 
       west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35
 
      .. note::
-      The snippet's configuration disables the NFC reader to enable the use of the UWB module with the Qorvo Arduino Interface Board.
+      The ``uwb_qm35`` snippet configures both NFC and UWB modules to share the same SPI bus.
 
    * For Matter over Thread, execute the following command to build the application:
 

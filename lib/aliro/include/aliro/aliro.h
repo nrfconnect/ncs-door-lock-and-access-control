@@ -11,10 +11,10 @@
 #include "aliro/protocol_version.h"
 #include "aliro/types.h"
 #include "kpersistent_manager/kpersistent_manager.h"
+#include "transport/ble/ble_iface.h"
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "aliro/ble_types.h"
-#include "transport/ble/ble_iface.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include <cstddef>
@@ -32,14 +32,10 @@ struct AliroConfig {
 	 */
 	[[maybe_unused]] KpersistentManager *mKpersistentManager{};
 
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
 	/**
 	 * @brief The BLE interface.
 	 */
 	BleInterface::BleIfc *mBle{};
-
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
 };
 
 /**

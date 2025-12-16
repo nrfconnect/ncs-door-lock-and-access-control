@@ -8,6 +8,7 @@ zephyr_include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/include/qosal
   ${CMAKE_CURRENT_SOURCE_DIR}/include/qosal/zephyr
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/qmrom
 )
 
 zephyr_library_import(aliro_uwb_adapter
@@ -44,4 +45,8 @@ zephyr_library_import(qosal
 
 zephyr_library_import(uci
   ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libuci.a
+)
+
+zephyr_library_import(libqmrom
+  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/liblibqmrom.a
 )

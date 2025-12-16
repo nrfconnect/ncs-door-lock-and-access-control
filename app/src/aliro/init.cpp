@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 #include "aliro/aliro.h"
-#include "aliro/reader_certificate_cache.h"
 #include "aliro/types.h"
 #include "aliro/utils.h"
 #include "crypto/crypto.h"
+#include "reader_certificate_cache.h"
 
 #ifdef CONFIG_ACCESS_DECISION_INDICATOR
 #include "access_decision_indicator.h"
@@ -19,6 +19,7 @@
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "ble_manager_impl.h"
+#include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include "access_manager/access_manager.h"
@@ -27,6 +28,10 @@
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 #include "kpersistent_manager/kpersistent_manager_impl.h"
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+#include "access_document.h"
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 #ifdef CONFIG_DOOR_LOCK_CLI
 #include "shell.h"
@@ -346,12 +351,19 @@ int AliroInit()
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 	};
 
+
 	ec = AliroStack::Instance().Init(
 		{ .mOnError = [](AliroError error) { LOG_ERR("Aliro error: %s", error.ToString()); } }, config);
 
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack initialization failed"));
 
 	KpersistentManager *kpersistentManager{ nullptr };
+
+#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+	sKpersistentManagerImpl.Init();
+	AccessManagerInstanceImpl().SetKpersistentManager(&sKpersistentManagerImpl);
+	kpersistentManager = &sKpersistentManagerImpl;
+#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
 #ifndef CONFIG_CHIP
 	AccessManagerInstance().SetApplicationCallbacks(
@@ -369,18 +381,17 @@ int AliroInit()
 					  isNfcSession ? "NFC" : "BLE/UWB");
 			  } });
 
-#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
-	sKpersistentManagerImpl.Init();
-	AccessManagerInstanceImpl().SetKpersistentManager(&sKpersistentManagerImpl);
-	kpersistentManager = &sKpersistentManagerImpl;
-#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
-
 	ec = StorageInit();
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Storage initialization failed"));
 
 	ec = AliroStack::Instance().Start();
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack start failed"));
 #endif // CONFIG_CHIP
+
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+	ec = LoadAccessDocuments();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Cannot load Access Documents"));
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 #ifdef CONFIG_DOOR_LOCK_CLI
 	InitShellCommands(kpersistentManager);

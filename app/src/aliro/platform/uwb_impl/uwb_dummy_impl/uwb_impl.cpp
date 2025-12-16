@@ -13,6 +13,8 @@ AliroError UltraWideBandImpl::_Init([[maybe_unused]] const Callbacks &)
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
+void UltraWideBandImpl::_SetStackCallbacks([[maybe_unused]] const StackCallbacks &) {}
+
 AliroError UltraWideBandImpl::_Deinit()
 {
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
@@ -29,6 +31,7 @@ AliroError UltraWideBandImpl::_HandleBleMessage([[maybe_unused]] const uint8_t *
 
 AliroError UltraWideBandImpl::_ConfigureRangingSession([[maybe_unused]] SessionIdentifier,
 						       [[maybe_unused]] const CryptoTypes::Ursk &,
+						       [[maybe_unused]] ProtocolVersion,
 						       [[maybe_unused]] SessionContextHandle)
 {
 	return ALIRO_ERROR_NOT_IMPLEMENTED;

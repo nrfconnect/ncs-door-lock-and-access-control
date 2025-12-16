@@ -11,6 +11,20 @@
 extern "C" {
 #endif
 
+#ifdef QOSAL_IMPL_LOG_OUTPUT
+/* Selected qosal_impl.h support FILE* log output. */
+
+#ifndef QLOG_OUTPUT
+/* Allows any library to change default log output. */
+#ifndef CONFIG_QLOG_OUTPUT
+#define CONFIG_QLOG_OUTPUT QOSAL_IMPL_LOG_OUTPUT
+#endif
+#define QLOG_OUTPUT CONFIG_QLOG_OUTPUT
+#endif /* QLOG_OUTPUT */
+
+extern FILE *QLOG_OUTPUT;
+#endif /* QOSAL_IMPL_LOG_OUTPUT */
+
 #define QLOG_LEVEL_NONE 0U
 #define QLOG_LEVEL_ERR 1U
 #define QLOG_LEVEL_WARN 2U
@@ -18,7 +32,6 @@ extern "C" {
 #define QLOG_LEVEL_DEBUG 4U
 
 #ifndef QLOG_CURRENT_LEVEL
-
 #ifndef CONFIG_QLOG_LEVEL
 #define CONFIG_QLOG_LEVEL QLOG_LEVEL_WARN
 #endif

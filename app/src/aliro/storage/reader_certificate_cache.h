@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
 #pragma once
@@ -36,6 +36,13 @@ public:
 	static ReaderCertificateCache &Instance();
 
 	/**
+	 * @brief Checks if the Reader certificate is set.
+	 *
+	 * @return True if the Reader certificate is set, false otherwise.
+	 */
+	bool IsCertificateSet() const;
+
+	/**
 	 * @brief Sets the Reader certificate.
 	 *
 	 * @param certificate ConstData containing the certificate data.
@@ -49,11 +56,20 @@ public:
 	void ClearCertificate();
 
 	/**
+	 * @brief Checks if the Issuer public key is set.
+	 *
+	 * @return True if the Issuer public key is set, false otherwise.
+	 */
+	bool IsIssuerPublicKeySet() const;
+
+	/**
 	 * @brief Gets the Reader certificate.
 	 *
-	 * @return Optional structure containing the Certificate, or std::nullopt if not set.
+	 * @param certificate The Reader certificate.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	std::optional<Certificate> GetCertificate() const;
+	AliroError GetCertificate(Certificate &certificate) const;
 
 	/**
 	 * @brief Sets the Issuer public key.
@@ -67,9 +83,11 @@ public:
 	/**
 	 * @brief Gets the Issuer public key.
 	 *
-	 * @return Optional structure containing the Issuer public key, or std::nullopt if not set.
+	 * @param publicKey The Issuer public key.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	std::optional<CryptoTypes::PublicKey> GetIssuerPublicKey() const;
+	AliroError GetIssuerPublicKey(CryptoTypes::PublicKey &publicKey) const;
 
 	/**
 	 * @brief Clears the Issuer public key.
@@ -77,7 +95,7 @@ public:
 	void ClearIssuerPublicKey();
 
 private:
-	ReaderCertificateCache();
+	ReaderCertificateCache() = default;
 	~ReaderCertificateCache() = default;
 
 	ReaderCertificateCache(const ReaderCertificateCache &) = delete;
@@ -85,9 +103,9 @@ private:
 	ReaderCertificateCache(ReaderCertificateCache &&) = delete;
 	ReaderCertificateCache &operator=(ReaderCertificateCache &&) = delete;
 
-	// Forward declaration to hide implementation details
-	class Impl;
-	std::unique_ptr<Impl> mPimpl;
+	std::unique_ptr<uint8_t[]> mCertificate{};
+	size_t mCertificateLength{ 0 };
+	std::optional<CryptoTypes::PublicKey> mIssuerPublicKey{};
 };
 
 } // namespace Aliro

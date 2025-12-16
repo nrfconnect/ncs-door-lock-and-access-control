@@ -13,7 +13,7 @@ manifest:
     - name: nrf
       remote: ncs
       repo-path: sdk-nrf
-      revision: v3.2.0-preview2-branch
+      revision: v3.2.0
       import: true
     - name: nrfconnect-sdk-qorvo
       remote: nrfconnect-uwb-qorvo

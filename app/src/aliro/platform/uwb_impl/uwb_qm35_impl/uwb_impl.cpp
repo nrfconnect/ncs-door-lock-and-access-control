@@ -31,6 +31,7 @@ using RangingSessionState = Aliro::RangingSessionState;
 K_EVENT_DEFINE(sUwbEvents);
 
 constexpr uint32_t kUwbWaitForEventsTimeoutMs{ 1000 };
+constexpr uint16_t kUwbMaximumReportableDistance { 50000 };
 
 /**
  * @brief Converts aliro_uwb_err to AliroError.
@@ -188,8 +189,8 @@ void UltraWideBandImpl::TransmitBleMessage(aliro_uwb_message *message, UwbSessio
 		auto *sessionCtx = uwbImpl->FindSession(uwbSessionCtx);
 		VerifyOrExit(sessionCtx, LOG_ERR("Session context not found"));
 
-		VerifyAndCall(uwbImpl->mCallbacks.mTransmitBleMessage, sessionCtx->mSessionContextData, message->data,
-			      message->len);
+		VerifyAndCall(uwbImpl->mStackCallbacks.mTransmitBleMessage, sessionCtx->mSessionContextData,
+			      message->data, message->len);
 	}
 
 exit:
@@ -281,6 +282,11 @@ void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, v
 			while (currentMeasurement) {
 				if (!currentMeasurement->frame_status) {
 					LOG_INF("Controlee report distance %d [cm]", currentMeasurement->distance_cm);
+
+					if (currentMeasurement->distance_cm > kUwbMaximumReportableDistance) {
+						LOG_INF("Ignoring measured distance");
+						break;
+					}
 
 					sys_put_be16(currentMeasurement->distance_cm,
 						     uwbImpl->mCurrentDistanceCm.data());
@@ -414,6 +420,11 @@ exit:
 	return ALIRO_UWB_INIT_FAILED;
 }
 
+void UltraWideBandImpl::_SetStackCallbacks(const StackCallbacks &callbacks)
+{
+	mStackCallbacks = callbacks;
+}
+
 AliroError UltraWideBandImpl::_Deinit()
 {
 	RemoveAllSessions();
@@ -463,6 +474,7 @@ AliroError UltraWideBandImpl::_HandleBleMessage(const uint8_t *data, size_t leng
 }
 
 AliroError UltraWideBandImpl::_ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
+						       ProtocolVersion protocolVersion,
 						       SessionContextHandle sessionContextData)
 {
 	VerifyOrReturnStatus(mAliroCtx, ALIRO_INVALID_STATE, LOG_ERR("UWB is not initialized."));
@@ -478,6 +490,9 @@ AliroError UltraWideBandImpl::_ConfigureRangingSession(SessionIdentifier session
 
 	AliroError err = ConvertUwbError(aliro_uwb_session_set_ursk(newSessionCtx, ursk.data()));
 	VerifyOrExit(err == ALIRO_NO_ERROR, LOG_ERR("Failed to set URSK in UWB session: %d", err.ToInt()));
+
+	err = ConvertUwbError(aliro_uwb_session_set_protocol_version(newSessionCtx, protocolVersion));
+	VerifyOrExit(err == ALIRO_NO_ERROR, LOG_ERR("Failed to set protocol version in UWB session: %d", err.ToInt()));
 
 	err = AddSession({ .mUwbSessionContext = newSessionCtx, .mSessionContextData = sessionContextData });
 	VerifyOrExit(err == ALIRO_NO_ERROR,

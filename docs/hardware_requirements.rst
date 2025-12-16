@@ -204,16 +204,6 @@ With the Qorvo Arduino Interface Board, you can use the UWB module with the `nRF
    The QM35825 SoC requires Aliro-specific firmware to work with the Aliro access protocol.
    To obtain this firmware, contact your local Qorvo support team.
 
-.. warning::
-
-   You cannot use the `QM35825`_ UWB module and the Qorvo Arduino Interface Board simultaneously with the X-NUCLEO board on the same SPI bus.
-   When both devices are connected to the same SPI bus, the X-NUCLEO board cannot be initialized properly and the application will crash.
-   For test purposes, you can connect the `QM35825`_ module directly to the Arduino header of the `nRF5340 DK`_ using the Qorvo Arduino Interface Board.
-   You must also enable the ``CONFIG_DISABLE_ALIRO_NFC_TP`` Kconfig option in the application's configuration.
-
-   Additionally, you can use the ``uwb_qm35`` snippet to build the application with the UWB module enabled and the NFC reader disabled.
-   All necessary DTS configurations are applied by the snippet.
-
 .. _hw_requirements_uwb_compatibility:
 
 UWB compatibility matrix
@@ -244,7 +234,11 @@ The following table shows the compatibility between the versions of the |APP_NAM
    * - 0.6.0-rc1
      - 0.5.0
      - 0.5.0
-     - 3.2.0-preview2
+     - 3.2.0
+   * - 0.6.0
+     - 0.6.0
+     - 0.6.0
+     - 3.2.0
 
 .. note::
    The compatibility matrix shows tested and verified combinations of |APP_NAME| version, UWB Aliro SDK, UWB firmware, and |NCS| version.

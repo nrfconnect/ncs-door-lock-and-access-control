@@ -7,9 +7,8 @@
 #pragma once
 
 #include "aliro/errors.h"
+#include "aliro/protocol_version.h"
 #include "aliro/types.h"
-
-#include <limits>
 
 namespace Aliro {
 
@@ -33,6 +32,7 @@ public:
 	enum class PublicKeyType : uint8_t {
 		AccessCredential = 0,
 		CredentialIssuer = 1,
+		AccessDocument = 2,
 	};
 
 	/**
@@ -90,13 +90,31 @@ public:
 	void SetStackCallbacks(const StackCallbacks &callbacks);
 
 	/**
-	 * @brief Checks if the document for a given public key should be requested.
-	 *
-	 * @param userPublicKey The User Device public key.
-	 *
-	 * @return True if the access document should be requested, false otherwise.
+	 * @brief Parameters for the Access Document request.
 	 */
-	bool ShouldRequestAccessDocument(const CryptoTypes::PublicKey &userPublicKey);
+	struct AccessDocumentRequestParams {
+		/**
+		 * @brief The data element identifier of the Access Document to be requested.
+		 */
+		ConstData mElementIdentifier;
+		/**
+		 * @brief Indicates the intent to store the Access Document.
+		 */
+		bool mIntentToStore;
+	};
+
+	/**
+	 * @brief Checks if the Access Document for a parameters should be requested.
+	 *
+	 * @param publicKey The public key of the User Device.
+	 * @param credentialSignedTimestamp The credential signed timestamp.
+	 * @param result The parameters for the request.
+	 *
+	 * @return The parameter for the request if the Access Document should be requested, std::nullopt otherwise.
+	 */
+	std::optional<AccessDocumentRequestParams>
+	ShouldRequestAccessDocument(const CryptoTypes::PublicKey &publicKey,
+				    const std::optional<Timestamp> &credentialSignedTimestamp);
 
 	/**
 	 * @brief Verifies the Access Credential based on provided inputs.
@@ -131,12 +149,13 @@ public:
 	 *
 	 * @param rangingSessionId The ranging session ID.
 	 * @param ursk The ranging session key.
+	 * @param protocolVersion The protocol version to use for the ranging session.
 	 * @param sessionContext A pointer to the session context.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
 	AliroError StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
-				       SessionContext sessionContext);
+				       ProtocolVersion protocolVersion, SessionContext sessionContext);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	/**
@@ -230,8 +249,9 @@ public:
 	 * @brief Handles the session termination.
 	 *
 	 * @param sessionContext The session context.
+	 * @param isNfcSession Indicates if the session is a NFC session.
 	 */
-	void HandleSessionTermination(SessionContext sessionContext);
+	void HandleSessionTermination(SessionContext sessionContext, bool isNfcSession);
 
 private:
 	AccessManagerImpl *Impl();

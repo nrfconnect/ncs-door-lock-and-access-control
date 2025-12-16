@@ -6,7 +6,7 @@
 
 config DOOR_LOCK_EXPEDITED_FAST_PHASE
     bool "Support for Aliro Expedited-fast Phase"
-    default n
+    default y if CHIP
     help
         If enabled, the Expedited-fast phase is supported.
         The user authentication is based on the Kpersistent keys.
@@ -53,3 +53,4 @@ rsource "access_manager_impl_default/Kconfig"
 endif
 
 rsource "kpersistent_manager/Kconfig"
+rsource "storage/Kconfig"

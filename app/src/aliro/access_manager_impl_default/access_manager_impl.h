@@ -8,11 +8,16 @@
 #pragma once
 
 #include "access_manager/access_manager.h"
+#include "aliro/types.h"
 #include "kpersistent_manager/kpersistent_manager.h"
 
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 #include "aliro/timer.h"
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+#include "validity_iterations.h"
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 #include <zephyr/kernel.h>
 
@@ -67,13 +72,17 @@ private:
 	void _SetStackCallbacks(const StackCallbacks &callbacks);
 
 	/**
-	 * @brief Checks if the access document should be requested for a given public key.
+	 * @brief Checks if the Access Document for a parameters should be requested.
 	 *
-	 * @param userPublicKey The User Device public key.
+	 * @param publicKey The public key of the User Device.
+	 * @param credentialSignedTimestamp The credential signed timestamp.
+	 * @param result The parameters for the request.
 	 *
-	 * @return True if the access document should be requested, false otherwise.
+	 * @return The parameter for the request if the Access Document should be requested, std::nullopt otherwise.
 	 */
-	bool _ShouldRequestAccessDocument(const CryptoTypes::PublicKey &userPublicKey);
+	std::optional<AccessDocumentRequestParams>
+	_ShouldRequestAccessDocument(const CryptoTypes::PublicKey &publicKey,
+				     const std::optional<Timestamp> &credentialSignedTimestamp);
 
 	/**
 	 * @brief Verifies the Access Credential based on provided inputs.
@@ -107,12 +116,13 @@ private:
 	 *
 	 * @param rangingSessionId The ranging session ID.
 	 * @param ursk The ranging session key.
+	 * @param protocolVersion The protocol version to use for the ranging session.
 	 * @param sessionContext A pointer to the session context.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
 	AliroError _StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
-					SessionContext sessionContext);
+					ProtocolVersion protocolVersion, SessionContext sessionContext);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	/**
@@ -206,8 +216,9 @@ private:
 	 * @brief Handles the session termination.
 	 *
 	 * @param sessionContext The session context.
+	 * @param isNfcSession Indicates if the session is a NFC session.
 	 */
-	void _HandleSessionTermination(SessionContext sessionContext);
+	void _HandleSessionTermination(SessionContext sessionContext, bool isNfcSession);
 
 	AccessManagerImpl() = default;
 	~AccessManagerImpl() = default;
@@ -285,11 +296,17 @@ private:
 	bool IsPublicKeyStored(const StoredKeys<T> &container, const CryptoTypes::PublicKey &userPublicKey,
 			       size_t *keyIndex = nullptr) const;
 
+	template <size_t T> AliroError GetFirstFreeIndex(StoredKeys<T> &container, size_t &keyIndex) const;
+
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 	AliroError ProcessAccessDocument(const CryptoTypes::PublicKey &userPublicKey,
 					 const AccessDocumentTypes::AccessDocument &accessDocument);
 	AliroError ProcessValidityIteration(const CryptoTypes::PublicKey &credentialIssuerPublicKey,
 					    const std::optional<ValidityIteration> &validityIteration);
+	AliroError UpdateValidityIteration(size_t credentialIssuerKeyIndex, const ValidityIterations &currentIterations,
+					   ValidityIteration validityIteration);
+	AliroError RemoveOldCredentials(size_t credentialIssuerKeyIndex, ValidityIteration validityIteration);
+	AliroError RemoveAccessCredentials(size_t credentialIssuerKeyIndex);
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
@@ -306,21 +323,24 @@ private:
 		bool mInRange{ false };
 	};
 
-	bool AnalyzeUwbRangingData(const UwbRangingData &uwbData);
+	bool AnalyzeUwbRangingData(const UwbRangingData &uwbData, SessionContext sessionContext);
 	std::optional<uint16_t> ExtractDistanceFromUwbData(const UwbRangingData &uwbData) const;
 	AliroError AddRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
-				     const SessionContext sessionCtx);
+				     ProtocolVersion protocolVersion, const SessionContext sessionCtx);
 	void RemoveRangingSession(SessionContext sessionCtx);
 	RangingSessionContext *FindRangingSession(const SessionContext sessionCtx);
-	bool IsUserDeviceInRange();
+	bool IsUserDeviceInRange() const;
 	void TerminateAliroSession(SessionContext sessionContext);
+	void SetInRangeState(SessionContext sessionContext, bool sessionInRange, bool updateReaderState = true);
 
 	static constexpr uint16_t kDefaultMaxAllowedDistance{ CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM };
+	static constexpr uint16_t kDefaultMaxAllowedDistanceExitMargin{ CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM };
 
 	// Maximum allowed distance for UWB ranging (in centimeters)
 	uint32_t mMaxAllowedDistance{ kDefaultMaxAllowedDistance };
-	// Session context for the current ranging session.
-	bool mInRange{ false };
+	// Exit margin above max allowed distance when door is unlocked (in centimeters)
+	// Used only when door is unlocked to prevent rapid toggling at the threshold
+	uint32_t mMaxAllowedDistanceExitMargin{ kDefaultMaxAllowedDistanceExitMargin };
 	sys_slist_t mActiveSessions{};
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -331,6 +351,7 @@ private:
 
 	StoredKeys<CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS> mAcKeys{};
 	StoredKeys<CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS> mCiKeys{};
+	StoredKeys<CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS> mAdKeys{};
 };
 
 /**
