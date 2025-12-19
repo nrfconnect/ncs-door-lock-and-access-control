@@ -5,8 +5,8 @@
  */
 
 #include "app_task.h"
-
 #include "bolt_lock_manager.h"
+#include "clusters/identify.h"
 
 #include "app/matter_init.h"
 #include "app/task_executor.h"
@@ -17,10 +17,10 @@
 
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <app/clusters/door-lock-server/door-lock-server.h>
-#include <app/clusters/identify-server/identify-server.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <setup_payload/OnboardingCodesUtil.h>
 
+#include <aliro/aliro.h>
 #include <aliro/init.h>
 
 #include <zephyr/logging/log.h>
@@ -58,21 +58,31 @@ void AppEventHandler(const ChipDeviceEvent *event, [[maybe_unused]] intptr_t)
 }
 #endif /* CONFIG_CHIP_FACTORY_RESET_ERASE_SETTINGS */
 
-} /* namespace */
-
-Identify sIdentify = { kLockEndpointId, AppTask::IdentifyStartHandler, AppTask::IdentifyStopHandler,
-		       Clusters::Identify::IdentifyTypeEnum::kVisibleIndicator };
-
-void AppTask::IdentifyStartHandler(Identify *)
-{
-	Nrf::PostTask(
-		[] { Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Blink(Nrf::LedConsts::kIdentifyBlinkRate_ms); });
-}
-
-void AppTask::IdentifyStopHandler(Identify *)
-{
+Nrf::Matter::IdentifyCluster sIdentifyCluster(kLockEndpointId, false, []() {
 	Nrf::PostTask([] { Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Set(BoltLockMgr().IsLocked()); });
+});
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+
+Aliro::ReaderStateByte ToAliroState(BoltLockManager::State state)
+{
+	switch (state) {
+	case BoltLockManager::State::kLockingInitiated:
+		return Aliro::ReaderStateByte::EnteringSecured;
+	case BoltLockManager::State::kLockingCompleted:
+		return Aliro::ReaderStateByte::Secured;
+	case BoltLockManager::State::kUnlockingInitiated:
+		return Aliro::ReaderStateByte::EnteringUnsecured;
+	case BoltLockManager::State::kUnlockingCompleted:
+		return Aliro::ReaderStateByte::Unsecured;
+	default:
+		return Aliro::ReaderStateByte::Unknown;
+	}
 }
+
+#endif
+
+} /* namespace */
 
 void AppTask::ButtonEventHandler(Nrf::ButtonState state, Nrf::ButtonMask hasChanged)
 {
@@ -122,6 +132,13 @@ void AppTask::LockStateChanged(const BoltLockManager::StateData &stateData)
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Set(false);
 		break;
 	}
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+
+	Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(stateData.mAliroSource,
+								     ToAliroState(stateData.mState));
+
+#endif
 
 	/* Handle changing attribute state in the application */
 	Instance().UpdateClusterState(stateData);
@@ -275,6 +292,8 @@ CHIP_ERROR AppTask::Init()
 		kDoorLockJammedEventTriggerId,
 		Nrf::Matter::TestEventTrigger::EventTrigger{ 0, DoorLockJammedEventCallback }));
 #endif
+
+	ReturnErrorOnFailure(sIdentifyCluster.Init());
 
 	return Nrf::Matter::StartServer();
 }

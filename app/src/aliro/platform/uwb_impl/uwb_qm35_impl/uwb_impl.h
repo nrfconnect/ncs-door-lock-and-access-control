@@ -50,11 +50,12 @@ public:
 	}
 
 	AliroError _Init(const Callbacks &callbacks);
+	void _SetStackCallbacks(const StackCallbacks &callbacks);
 	AliroError _Deinit();
 	void _BleTimeSync();
 	AliroError _HandleBleMessage(const uint8_t *data, size_t length, SessionContextHandle sessionContextData);
 	AliroError _ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
-					    SessionContextHandle sessionContextData);
+					    ProtocolVersion protocolVersion, SessionContextHandle sessionContextData);
 	AliroError _InitiateRangingSession(SessionContextHandle sessionContextData);
 	AliroError _TerminateRangingSession(SessionContextHandle sessionContextData);
 	AliroError _SuspendRangingSession(SessionContextHandle sessionContextData);
@@ -208,14 +209,28 @@ private:
 	 */
 	void DestroySession(SessionContext *sessionCtx);
 
+	/**
+	 * @brief Perform firmware update procedure for QM35 if needed.
+	 *
+	 * This method compares QM35 version to one stored in the primary slot. If the version is
+	 * newer it will restart QM35, perform update, and re-initialize.
+	 *
+	 * @param skipVersionCheck Skip version comparison
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError CheckAndUpdateQm35(bool skipVersionCheck);
+
 	CoreEvent *mCoreEvent{};
 	Callbacks mCallbacks{};
+	StackCallbacks mStackCallbacks{};
 	cherry *mCtx{};
 	aliro_uwb_adapter *mAliroCtx{};
 	std::unique_ptr<char[]> mQm35FirmwareVersion{ nullptr };
 	ActiveSessionsList mActiveSessionsList{};
 	k_mutex mMutex{};
 	std::array<uint8_t, kCurrentDistanceBufferSize> mCurrentDistanceCm{};
+	bool mFwUpdateInProgress{ false };
 
 	aliro_uwb_adapter_reader_config mReaderConfig = {
 		.min_ran_multiplier = CONFIG_DOOR_LOCK_UWB_MIN_RAN_MULTIPLIER,

@@ -34,6 +34,11 @@ constexpr char kStorageKeyNameReaderSystemIssuerCAPublicKey[] = "issuer_pk";
 
 #endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+
 constexpr char kStorageKeyNameCredentialIssuerValidityIteration[] = "VI";
+constexpr char kStorageKeyNameAccessDocument[] = "AD";
+
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 } // namespace Aliro::StorageKeys

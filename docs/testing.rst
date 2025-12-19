@@ -567,15 +567,21 @@ This guide demonstrates how to test the Aliro door lock with Matter support usin
 
 For additional information about Matter testing with various ecosystems, see the `Matter testing with Apple, Google, and Samsung ecosystems`_ guide.
 
-.. note::
-   The Apple's Express Mode feature, which uses UWB ranging, is not currently supported by |APP_NAME|.
-   While |APP_NAME|'s UWB ranging implementation can run with the Aliro Test Harness, it is not compliant with the Apple User Device.
-   Currently, you can only use the NFC transport when testing |APP_NAME| with Apple ecosystem.
+.. warning::
+   Support for testing with Apple ecosystem is considered experimental and is not optimized with respect to performance and power consumption.
+   This feature is intended for development and testing purposes only.
 
 .. note::
-   Testing with Apple ecosystem requires the Step-up phase support to be enabled on the device.
-   This feature is enabled by default.
-   Ensure you are building firmware with the ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig option enabled.
+   When testing |APP_NAME| with Apple ecosystem, you can use either:
+
+   * **NFC** - Tap to unlock using NFC technology
+   * **NFC + Bluetooth LE + UWB** - Unlock on approach using Bluetooth LE + UWB ranging (in addition to NFC)
+
+   Both configurations are supported and can be set up during the commissioning process.
+
+.. note::
+   Testing with Apple ecosystem requires both Step-up phase and Expedited-fast phase support to be enabled on the device.
+   Both ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` and ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig options are enabled by default when building with Matter support.
 
 Prerequisites
 -------------
@@ -589,6 +595,23 @@ Before you begin testing with Apple ecosystem, ensure you have the following:
 * nRF Door Lock App build with Matter support - A development kit from Nordic Semiconductor equipped with Aliro door lock firmware that supports Matter.
   For details, see the :ref:`building_and_running` documentation page.
 
+Building the firmware
+~~~~~~~~~~~~~~~~~~~~~
+
+Build the firmware with the appropriate configuration for your testing scenario, for example:
+
+**For NFC testing:**
+
+.. code-block:: console
+
+   west build -b nrf54lm20dk/nrf54lm20a/cpuapp -- -DSNIPPET='matter'
+
+**For NFC + Bluetooth LE + UWB testing:**
+
+.. code-block:: console
+
+   west build -b nrf54lm20dk/nrf54lm20a/cpuapp -- -DSNIPPET='matter' -Dapp_SNIPPET='uwb_qm35'
+
 .. note::
    Before commissioning the door lock, ensure that the Apple Home Hub is set up and added to your Apple Home.
    It will act as the Thread Border Router and Matter controller for your home network.
@@ -601,11 +624,27 @@ Complete the following steps to commission the device:
 
 1. Prepare the door lock device:
 
-   a. Flash the Aliro door lock firmware with Matter support enabled to your Nordic development kit (see :ref:`building_and_running` with the ``-DSNIPPET='matter'`` option).
-   #. Connect the required hardware (:ref:`NFC reader expansion board<hw_requirements_nfc_reader>`).
-   #. Power on the device and connect to the serial console to monitor the commissioning process.
-   #. Start the commissioning mode on the device.
-      Refer to the :ref:`matter_ui` section for detailed button assignments and LED indicators.
+   .. tabs::
+
+      .. tab:: NFC
+
+         a. Flash the Aliro door lock firmware with Matter support enabled to your Nordic development kit (see :ref:`building_and_running` with the ``-DSNIPPET='matter'`` option).
+         #. Connect the required hardware (:ref:`NFC reader expansion board<hw_requirements_nfc_reader>`).
+         #. Power on the device and connect to the serial console to monitor the commissioning process.
+         #. Start the commissioning mode on the device.
+            Refer to the :ref:`matter_ui` section for detailed button assignments and LED indicators.
+
+      .. tab:: NFC + Bluetooth LE + UWB
+
+         a. Flash the Aliro door lock firmware with Matter and UWB support enabled to your Nordic development kit (see :ref:`building_and_running` with the ``-DSNIPPET='matter'`` and ``-Dapp_SNIPPET='uwb_qm35'`` options).
+         #. Connect the required hardware:
+
+            * :ref:`NFC reader expansion board<hw_requirements_nfc_reader>` (required for NFC unlock)
+            * :ref:`UWB module<hw_requirements_uwb_module>` (required for UWB ranging)
+
+         #. Power on the device and connect to the serial console to monitor the commissioning process.
+         #. Start the commissioning mode on the device.
+            Refer to the :ref:`matter_ui` section for detailed button assignments and LED indicators.
 
 #. Initiate Matter pairing in the Apple Home app:
 
@@ -646,21 +685,44 @@ Complete the following steps to commission the device:
 #. Enable Home Key functionality.
    After successful commissioning, the Home app will automatically prompt you to set up the Home Key feature for Apple Wallet:
 
-   a. Wait for the :guilabel:`Tap to Unlock` setup screen with options for unlock methods.
+   .. tabs::
 
-      .. figure:: /images/apple_tap_to_unlock_setup.png
-         :alt: Tap to Unlock setup screen in Apple Home app
-         :scale: 30%
+      .. tab:: NFC
 
-         Tap to Unlock configuration screen
+         a. Wait for the :guilabel:`Tap to Unlock` setup screen with options for unlock methods.
 
-   #. Tap :guilabel:`Turn On Tap to Unlock` to enable NFC-based unlocking using your iPhone.
-   #. Choose your preferred authentication methods:
+            .. figure:: /images/apple_tap_to_unlock_setup.png
+               :alt: Tap to Unlock setup screen in Apple Home app
+               :scale: 30%
 
-      * :guilabel:`Require Face ID or Passcode` - Adds an additional security layer requiring biometric or PIN authentication before unlocking.
-      * :guilabel:`Access Codes` - Adds an additional security layer requiring a PIN code to unlock the door lock remotely (through the Matter network).
+               Tap to Unlock configuration screen
 
-   #. Tap :guilabel:`Done` to complete the Home Key provisioning.
+         #. Tap :guilabel:`Turn On Tap to Unlock` to enable NFC-based unlocking using your iPhone.
+         #. Choose your preferred authentication methods:
+
+            * :guilabel:`Require Face ID or Passcode` - Adds an additional security layer requiring biometric or PIN authentication before unlocking.
+            * :guilabel:`Access Codes` - Adds an additional security layer requiring a PIN code to unlock the door lock remotely (through the Matter network).
+
+         #. Tap :guilabel:`Done` to complete the Home Key provisioning.
+
+      .. tab:: NFC + Bluetooth LE + UWB
+
+         a. Wait for the :guilabel:`Express Mode` setup screen with options for unlock methods.
+
+            .. figure:: /images/apple_express_mode_setup.png
+               :alt: Express Mode setup screen in Apple Home app
+               :scale: 30%
+
+               Express Mode configuration screen
+
+         #. Tap :guilabel:`Turn On Express Mode` to enable both NFC-based tap to unlock and Bluetooth LE + UWB-based unlock on approach using your iPhone.
+         #. Accept the prompt to enable proximity-based unlocking during commissioning.
+         #. Choose your preferred authentication methods:
+
+            * :guilabel:`Require Face ID or Passcode` - Adds an additional security layer requiring biometric or PIN authentication before unlocking.
+            * :guilabel:`Access Codes` - Adds an additional security layer requiring a PIN code to unlock the door lock remotely (through the Matter network).
+
+         #. Tap :guilabel:`Done` to complete the Home Key provisioning.
 
 #. Verify successful commissioning:
 
@@ -692,7 +754,6 @@ Using the home key for access
 ------------------------------
 
 Once the lock is successfully commissioned to Apple Home, a virtual home key containing Aliro credentials is automatically provisioned and added to your Apple Wallet.
-The home key enables secure, contactless access to the door lock using NFC technology.
 
 Accessing the home key in Apple Wallet
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -703,33 +764,81 @@ To use your digital home key from Apple Wallet, complete the following:
 #. Locate the new home card displaying a house icon.
    This card represents your digital home key and contains the Aliro cryptographic credentials required for secure authentication with the door lock.
 
-Unlocking the door with NFC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unlocking the door
+~~~~~~~~~~~~~~~~~~
 
-To unlock the door using your iPhone, complete the following steps:
+.. tabs::
 
-#. Approach the door lock with your iPhone, ensuring the Apple Wallet app is open and the Home Key card is active.
-   Depending on the security settings you chose during the initial setup, you may be prompted for biometric authentication (Face ID or Touch ID) or passcode entry to make the card active.
+   .. tab:: NFC
 
-#. Hold your device near the NFC reader antenna on the door lock.
-   This is a part of the STM Nucleo NFC reader expansion board attached to the development kit.
+      To unlock the door using your iPhone with NFC, complete the following steps:
 
-   Authentication behavior depends on your chosen security setting:
+      #. Approach the door lock with your iPhone, ensuring the Apple Wallet app is open and the Home Key card is active.
+         Depending on the security settings you chose during the initial setup, you may be prompted for biometric authentication (Face ID or Touch ID) or passcode entry to make the card active.
 
-   * Face ID or Passcode required - Your device will ask for biometric authentication (Face ID or Touch ID) or passcode entry before unlocking.
+      #. Hold your device near the NFC reader antenna on the door lock.
+         This is a part of the STM Nucleo NFC reader expansion board attached to the development kit.
 
-#. Wait for confirmation:
+         Authentication behavior depends on your chosen security setting:
 
-   * The Apple Wallet will display "Done" message.
+         * Face ID or Passcode required - Your device will ask for biometric authentication (Face ID or Touch ID) or passcode entry before unlocking.
 
-     .. figure:: /images/apple_home_key_success.png
-        :alt: Home key successfully added to Apple Wallet
-        :scale: 30%
+      #. Wait for confirmation:
 
-        Apple Wallet displaying confirmation after successful unlock with Home key
+         * The Apple Wallet will display "Done" message.
 
-   * The device serial console outputs an ``ACCESS GRANTED`` log message.
-   * The lock status in the Home app updates to :guilabel:`Unlocked`.
+           .. figure:: /images/apple_home_key_success.png
+              :alt: Home key successfully added to Apple Wallet
+              :scale: 30%
+
+              Apple Wallet displaying confirmation after successful unlock with Home key
+
+         * The device serial console outputs an ``ACCESS GRANTED`` log message.
+         * The lock status in the Home app updates to :guilabel:`Unlocked`.
+
+   .. tab:: NFC + Bluetooth LE + UWB
+
+      To unlock the door using your iPhone with NFC + Bluetooth LE + UWB, you can use either method:
+
+      **Using NFC (tap to unlock):**
+
+      #. Approach the door lock with your iPhone, ensuring the Apple Wallet app is open and the Home Key card is active.
+         Depending on the security settings you chose during the initial setup, you may be prompted for biometric authentication (Face ID or Touch ID) or passcode entry to make the card active.
+
+      #. Hold your device near the NFC reader antenna on the door lock.
+         This is a part of the STM Nucleo NFC reader expansion board attached to the development kit.
+
+      #. Wait for confirmation - The Apple Wallet will display "Done" message, the device serial console outputs an ``ACCESS GRANTED`` log message, and the lock status in the Home app updates to :guilabel:`Unlocked`.
+
+      **Using Bluetooth LE + UWB (unlock on approach):**
+
+      #. Ensure your iPhone has Bluetooth enabled and is within range of the door lock.
+         The door will automatically unlock when your iPhone is within the configured distance threshold.
+
+      #. Approach the door lock with your iPhone.
+         The device will automatically detect your proximity using UWB ranging.
+
+      #. Wait for automatic unlock:
+
+         * The door will unlock when your iPhone is within ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` (default: 100 cm).
+         * The device serial console outputs an ``ACCESS GRANTED`` log message.
+         * The lock status in the Home app updates to :guilabel:`Unlocked`.
+
+      #. To lock the door again:
+
+         * Move your iPhone beyond ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM + CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM`` (default: 100 cm + 50 cm = 150 cm).
+         * The door will automatically lock when all active UWB sessions are out of range.
+         * The device serial console outputs a lock confirmation message.
+         * The lock status in the Home app updates to :guilabel:`Locked`.
+
+      .. note::
+         The exit margin prevents rapid toggling when the distance fluctuates around the threshold.
+         This ensures stable lock/unlock behavior.
+
+      .. note::
+         The behavior of the door lock can be customized and depends on various factors, including the behavior after unlocking.
+         In the example configuration with ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_DISABLED``, the UWB session is terminated by the User Device (iPhone) after a certain period of time.
+         The User Device resumes the session either when the Door Lock changes state from Non-secured to Secured (Unlocked => Locked), which is detected by the iPhone via Bluetooth LE, or through motion detection on the User Device side.
 
 Troubleshooting
 ---------------
@@ -771,17 +880,36 @@ Problems with the Home Key appearing in Apple Wallet or other related issues can
 
 * Home key does not appear in the Apple Wallet:
 
-  * Ensure you have completed the :guilabel:`Tap to Unlock` setup during the initial commissioning process
-  * If you skipped this step, you can enable it later by opening the Home app, tapping the lock, going to the settings icon, and clicking :guilabel:`Tap to Unlock`.
-  * Ensure your iPhone has Apple Wallet enabled and is signed in with your Apple ID.
-  * Check if iCloud Keychain is enabled by going to iPhone :guilabel:`Settings` → :guilabel:`[Your Name]` → :guilabel:`iCloud` → :guilabel:`Passwords and Keychain`.
+  .. tabs::
 
-* The "Hold Near Lock" message appears but nothing happens:
+     .. tab:: NFC
+
+        * Ensure you have completed the :guilabel:`Tap to Unlock` setup during the initial commissioning process
+        * If you skipped this step, you can enable it later by opening the Home app, tapping the lock, going to the settings icon, and clicking :guilabel:`Tap to Unlock`.
+        * Ensure your iPhone has Apple Wallet enabled and is signed in with your Apple ID.
+        * Check if iCloud Keychain is enabled by going to iPhone :guilabel:`Settings` → :guilabel:`[Your Name]` → :guilabel:`iCloud` → :guilabel:`Passwords and Keychain`.
+
+     .. tab:: NFC + Bluetooth LE + UWB
+
+        * Ensure you have completed the :guilabel:`Express Mode` setup during the initial commissioning process
+        * If you skipped this step, you can enable it later by opening the Home app, tapping the lock, going to the settings icon, and clicking :guilabel:`Express Mode`.
+        * Ensure your iPhone has Apple Wallet enabled and is signed in with your Apple ID.
+        * Check if iCloud Keychain is enabled by going to iPhone :guilabel:`Settings` → :guilabel:`[Your Name]` → :guilabel:`iCloud` → :guilabel:`Passwords and Keychain`.
+
+* The "Hold Near Lock" message appears but nothing happens (NFC unlock):
 
   * Verify if the NFC reader hardware is properly connected to the development kit (check physical connections).
   * Ensure the firmware includes the NFC transport support by checking the build configuration.
   * Adjust the position of your iPhone relative to the NFC reader antenna to improve connectivity.
   * Check the device serial console for NFC reader initialization messages and any error logs.
+
+* The door does not unlock automatically when approaching (Bluetooth LE + UWB):
+
+  * Verify if the UWB module is properly connected to the development kit (check physical connections).
+  * Ensure the firmware includes UWB support by checking the build configuration (``-Dapp_SNIPPET='uwb_qm35'``).
+  * Ensure your iPhone is within ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` (default: 100 cm) of the door lock.
+  * Check the device serial console for UWB ranging messages and distance measurements.
+  * Verify that Bluetooth is enabled on your iPhone and that the Home app has permission to access location services.
 
 * Face ID or passcode prompt does not appear when expected:
 
@@ -835,7 +963,7 @@ After executing the command, find the lock state in the response, for example:
 
 The response indicates that the lock is locked.
 
-Next, try to execute, for example, the ``BLEUWB_RDR_EXPEDITED_STANDARD_PHASE`` test with Bluetooth LE transport (see :ref:`testing_verification_th`) using the Test Harness.
+Next, try to execute, for example, the ``BLEUWB_RDR_EXPEDITED_STANDARD_PHASE`` test with Bluetooth LE + UWB transport (see :ref:`testing_verification_th`) using the Test Harness.
 If the test is successful, run again the ``./chip-tool doorlock read lock-state 1 1`` command.
 You should see the following status in the response:
 
@@ -853,7 +981,7 @@ Verification and testing process
 Once you have successfully provisioned Aliro credentials, either through CLI or with Matter, perform tests to ensure your device is functioning correctly.
 You can see the full list of available tests in the `Aliro Certification Tool`_ repository.
 From the :guilabel:`Test Suites` list, choose the tests with the `Reader` in the name, for example, :guilabel:`BLE Reader`.
-This will allow you to test the Bluetooth LE transport.
+This will allow you to test the Bluetooth LE + UWB transport.
 
 .. note::
    You can upload the :file:`applications/doorlock/docs/certification_assets/Aliro PICS v0.9.3.r2.xml` file to the Test Harness to automatically select tests for execution.
@@ -887,7 +1015,7 @@ The test results shown below were acquired on an nRF5340 DK build using the foll
 
 .. code-block:: bash
 
-   west build -b nrf5340dk/nrf5340/cpuapp -- -Dapp_SNIPPET=nfc_uwb_coex_single_spi -DCONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y -DCONFIG_DOOR_LOCK_STEP_UP_PHASE=y -DCONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
+   west build -b nrf5340dk/nrf5340/cpuapp -- -Dapp_SNIPPET=uwb_qm35 -DCONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y -DCONFIG_DOOR_LOCK_STEP_UP_PHASE=y -DCONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
 
 .. tabs::
 
@@ -961,7 +1089,7 @@ The test results shown below were acquired on an nRF5340 DK build using the foll
       | NFC_RDR_STEPUP_AD_UNKNOWN_NON_CRITICAL_ACCESS_EXTENSION   | Verify parsing of Access Document with unknown non-critical access extension.           | PASS   |              |
       +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
 
-   .. tab:: Bluetooth LE
+   .. tab:: Bluetooth LE + UWB
 
       +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
       | Test case                                 | Description                                                              | Result | Comment                     |
@@ -1097,6 +1225,131 @@ Complete the following steps for the required tests:
 .. note::
    If the application is built with Matter support, you can control the door lock remotely.
    For details on how to enable this feature, see the |NCS| door lock sample documentation in the `Matter door lock remote access`_ section.
+
+Guide to execute the Aliro certification tests
+==============================================
+
+This guide assumes PICS file :file:`applications/doorlock/docs/certification_assets/Aliro PICS v0.9.3.r2.xml` was uploaded to the Test Harness.
+The user can also select tests manually.
+
+.. figure:: /images/pics_upload.png
+   :scale: 70%
+   :alt: PICS file upload.
+
+   PICS file upload.
+
+When PICS file is uploaded, all required tests are selected automatically for NFC and BLE Reader suites:
+
+.. figure:: /images/tests_selected_by_pics.png
+   :scale: 70%
+   :alt: BLE selected tests.
+
+   BLE selected tests.
+
+The table explaining what should be configured before specific test is shown below, some tests may also require post actions.
+
+.. tabs::
+
+   .. tab:: NFC Reader
+      
+      +------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | Test case(s)                                               | Door Lock commands to execute                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+      +============================================================+===============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================+
+      | ALL TESTS                                                  | Before test session:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | * dl provisioning AC_key set 0 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      |                                                            | * dl install group_id 37652039312061652031642033642065                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+      +------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_FAST,                                              | Before test:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | NFC_RDR_NEG_AUTH0_EXTRA_TAG,                               +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_NEG_AUTH0_WRONG_VALUE,                             | * dl provisioning AC_key set 0 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      | NFC_RDR_NEG_AUTH1_EXTRA_TAG,                               +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_NEG_AUTH1_WRONG_UD_SIGNATURE,                      | Optional:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+      | NFC_RDR_NEG_AUTH1_WRONG_VALUES,                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_NEG_SEL_RSP_NO_COMMON_EXPEDITED_PROTOCOL_VERSION,  | * dl install group_id 37652039312061652031642033642065                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+      | NFC_RDR_NEG_STEPUP_AD_DEVICE_KEY_INFO_MISMATCH,            | * dl provisioning CI_key set 0 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      | NFC_RDR_NEG_STEPUP_AD_DOCTYPE_NOT_ALIROA,                  | * dl provisioning CI_CA_key set 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137                                                                                                                                                                                                                                                                                                                                                                                                                            |
+      | NFC_RDR_NEG_STEPUP_AD_INVALID_ACCESS_DATA_ELEMENT_VERSION, |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_INVALID_HASH_ISSUER_AUTH,            |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_INVALID_SIGNATURE_ISSUER_AUTH,       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_ISSUER_CERT_INVALID_SIGNATURE,       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_ISSUER_CERTIFICATE_TIME_MISMATCH,    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_ISSUER_DOCTYPE_MISMATCH,             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_NO_ACCESS_RULE_FOR_READ,             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_NO_DATA_ELEMENTS,                    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_NO_ISSUER_CERT_NO_KEY_ID,            |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_UNKNOWN_CRITICAL_ACCESS_EXTENSION,   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      | NFC_RDR_NEG_STEPUP_AD_UNKNOWN_READER_RULE                  |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      +------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_NEG_STEPUP_AD_VALIDITY_ITERATION                   | Before test:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | * dl provisioning AC_key set 0 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      |                                                            | * dl provisioning CI_key set 0 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      |                                                            | * dl provisioning CI_CA_key set 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137                                                                                                                                                                                                                                                                                                                                                                                                                            |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | Optional:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | * dl install group_id 37652039312061652031642033642065                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | After test:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | * dl provisioning CI_key clear 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+      +------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING           | Before test:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | * dl provisioning AC_key clear 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+      |                                                            | * dl provisioning CI_key set 0 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      |                                                            | * dl provisioning CI_CA_key set 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137                                                                                                                                                                                                                                                                                                                                                                                                                            |
+      |                                                            | * dl install group_id 000000000000000000113344667799ab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+      |                                                            | * dl provisioning issuer_pk set 048608ad7d0bf1258ba6249aa3854b43acef9443cce31b617c32503adb959e5ad7d5915a1ff34ab461b46ff598c5fc72c6a6c8787c886741a4029bb3476eceff26                                                                                                                                                                                                                                                                                                                                                                                                                            |
+      |                                                            | * dl provisioning reader_cert set 3082010a040200003082010280145555555555555555555555555555555555555555811e637573746f6d20697373756572206e616d652e2e2e2e2e2e2e2e2e2e2e2e820d3230303130323030303030305a830d3235303530353030303030305a841e637573746f6d207375626a656374206e616d652e2e2e2e2e2e2e2e2e2e2e85420004f27d92b78c0ba00c105dc56b9f5a669d67d44fea5139b85dc5e368c851167c9f40b8d9add7ce7bf846331f1f8fd06e1e15cfd540190f482ec294f52690349f188648003045022051bc8503cc09a80f9f19fa033edcf68fb4c341499d908950de62382e9650ee5b022100a954899fd291c40d4f3f9f749518958678ff5688e7bdaa8a3535faf72450e506|
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | After test:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | * dl provisioning CI_key clear 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+      |                                                            | * dl install group_id 37652039312061652031642033642065                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 
+      |                                                            | * dl provisioning issuer_pk clear                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      |                                                            | * dl provisioning reader_cert clear                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+      +------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_STANDARD_NO_CERT                                   | Before test:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+      |                                                            +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      |                                                            | * dl install group_id 37652039312061652031642033642065                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+      |                                                            | * dl provisioning AC_key set 0 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      |                                                            |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      +------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_STEPUP_AD_ACCESS_RULE,                             | Before test:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | NFC_RDR_STEPUP_AD_ISSUER_CERT,                             +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | NFC_RDR_STEPUP_AD_ISSUER_CERT_KEY_ID,                      | * dl provisioning CI_key set 0 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137                                                                                                                                                                                                                                                                                                                                                                                                                             |
+      | NFC_RDR_STEPUP_AD_KEY_ID,                                  | * dl provisioning CI_CA_key set 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137                                                                                                                                                                                                                                                                                                                                                                                                                            |
+      | NFC_RDR_STEPUP_AD_UNKNOWN_NON_ACCESS_EXTENSION,            | * dl install group_id 37652039312061652031642033642065                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+      | NFC_RDR_STEPUP_AD_UNKNOWN_NON_CRITICAL_ACCESS_EXTENSION    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+      +------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+   .. tab:: BLEUWB Reader
+
+      +---------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | Test case(s)                    | Door Lock commands to execute                                                                                                                                      |
+      +=================================+====================================================================================================================================================================+
+      | ALL TESTS                       | Before test session:                                                                                                                                               |
+      |                                 |                                                                                                                                                                    |
+      |                                 | * dl provisioning AC_key set 0 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa  |
+      |                                 | * dl install group_id 37652039312061652031642033642065                                                                                                             |
+      +---------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | BLEUWB_RDR_EXPEDITED_FAST_PHASE | After test:                                                                                                                                                        |
+      |                                 |                                                                                                                                                                    |
+      |                                 | * dl kpersistent clear 0                                                                                                                                           |
+      +---------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      | BLEUWB_RDR_STEPUP_PHASE         | Before test:                                                                                                                                                       |
+      |                                 |                                                                                                                                                                    |
+      |                                 | * dl provisioning CI_key set 0 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137  |
+      |                                 | * dl provisioning CI_CA_key set 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137 |
+      |                                 |                                                                                                                                                                    |
+      |                                 | After test:                                                                                                                                                        |
+      |                                 |                                                                                                                                                                    |
+      |                                 | * dl install group_id 37652039312061652031642033642065                                                                                                             |
+      |                                 |                                                                                                                                                                    |
+      +---------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
 
 Additional CLI commands
 =======================

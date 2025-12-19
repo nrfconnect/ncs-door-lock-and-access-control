@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 #include "aliro/aliro.h"
-#include "aliro/reader_certificate_cache.h"
 #include "aliro/types.h"
 #include "aliro/utils.h"
 #include "crypto/crypto.h"
+#include "reader_certificate_cache.h"
 
 #ifdef CONFIG_ACCESS_DECISION_INDICATOR
 #include "access_decision_indicator.h"
@@ -19,6 +19,7 @@
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "ble_manager_impl.h"
+#include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include "access_manager/access_manager.h"
@@ -28,9 +29,17 @@
 #include "kpersistent_manager/kpersistent_manager_impl.h"
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+#include "access_document.h"
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
+
 #ifdef CONFIG_DOOR_LOCK_CLI
 #include "shell.h"
 #endif // CONFIG_DOOR_LOCK_CLI
+
+#ifndef CONFIG_CHIP
+#include "lock_sim/lock_sim.h"
+#endif // CONFIG_CHIP
 
 #include "storage.h"
 #include "storage_keys.h"
@@ -48,6 +57,8 @@ using namespace Aliro;
 namespace {
 
 #ifndef CONFIG_CHIP
+
+LockSim sLockSim;
 
 #ifdef CONFIG_DOOR_LOCK_USE_TEST_READER_IDENTIFIER
 
@@ -353,27 +364,46 @@ int AliroInit()
 
 	KpersistentManager *kpersistentManager{ nullptr };
 
-#ifndef CONFIG_CHIP
-	AccessManagerInstance().SetApplicationCallbacks(
-		{ .mUnlockIndicatorClb =
-			  []() {
-				  LOG_DBG("Door unlocked");
-#ifdef CONFIG_ACCESS_DECISION_INDICATOR
-				  Access::Indicator::SignalAccessGranted();
-#endif // CONFIG_ACCESS_DECISION_INDICATOR
-			  },
-		  .mLockIndicatorClb = []() { LOG_DBG("Door locked"); },
-		  .mAccessIndicatorClb =
-			  [](bool isAccessGranted, bool isNfcSession) {
-				  LOG_INF("Access %s via %s session", isAccessGranted ? "granted" : "denied",
-					  isNfcSession ? "NFC" : "BLE/UWB");
-			  } });
-
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 	sKpersistentManagerImpl.Init();
 	AccessManagerInstanceImpl().SetKpersistentManager(&sKpersistentManagerImpl);
 	kpersistentManager = &sKpersistentManagerImpl;
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
+#ifndef CONFIG_CHIP
+	sLockSim.Init([]([[maybe_unused]] OperationSource source, [[maybe_unused]] ReaderStateByte state) {
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+		Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(source, state);
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+	});
+
+	AccessManagerInstance().SetApplicationCallbacks(
+		{ .mUnlockIndicatorClb =
+			  [](OperationSource source) {
+				  const auto isNfcSession = source == OperationSource::ThisUserDeviceInNfc;
+				  LOG_DBG("Door unlocked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
+#ifdef CONFIG_ACCESS_DECISION_INDICATOR
+				  Access::Indicator::SignalAccessGranted();
+#endif // CONFIG_ACCESS_DECISION_INDICATOR
+				  if (!sLockSim.Unlock(source)) {
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+					  // The lock is already unlocked, so we can send the Unsecured state
+					  Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
+						  source, ReaderStateByte::Unsecured);
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+				  }
+			  },
+		  .mLockIndicatorClb =
+			  [](OperationSource source) {
+				  const auto isNfcSession = source == OperationSource::ThisUserDeviceInNfc;
+				  LOG_DBG("Door locked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
+				  sLockSim.Lock(source);
+			  },
+		  .mAccessIndicatorClb =
+			  [](bool isAccessGranted, bool isNfcSession) {
+				  LOG_INF("Access %s via %s session", isAccessGranted ? "granted" : "denied",
+					  isNfcSession ? "NFC" : "BLE/UWB");
+			  } });
 
 	ec = StorageInit();
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Storage initialization failed"));
@@ -381,6 +411,11 @@ int AliroInit()
 	ec = AliroStack::Instance().Start();
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack start failed"));
 #endif // CONFIG_CHIP
+
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+	ec = LoadAccessDocuments();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Cannot load Access Documents"));
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 #ifdef CONFIG_DOOR_LOCK_CLI
 	InitShellCommands(kpersistentManager);

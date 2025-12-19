@@ -7,6 +7,7 @@
 #pragma once
 
 #include "access/access_manager.h"
+#include "aliro/types.h"
 
 #include <app/clusters/door-lock-server/door-lock-server.h>
 #include <lib/core/ClusterEnums.h>
@@ -46,6 +47,7 @@ public:
 	struct StateData {
 		State mState;
 		OperationSource mSource;
+		Aliro::OperationSource mAliroSource;
 		Nullable<chip::FabricIndex> mFabricIdx;
 		Nullable<chip::NodeId> mNodeId;
 		Nullable<ValidatePINResult> mValidatePINResult;
@@ -97,6 +99,9 @@ public:
 		    const Nullable<chip::NodeId> &nodeId = NullNullable,
 		    const Nullable<ValidatePINResult> &validatePINResult = NullNullable);
 
+	bool Lock(Aliro::OperationSource source);
+	bool Unlock(Aliro::OperationSource source);
+
 	void SetRequirePIN(bool require);
 	bool GetRequirePIN();
 
@@ -112,7 +117,9 @@ private:
 	static void ActuatorAppEventHandler(const BoltLockManagerEvent &event);
 	friend BoltLockManager &BoltLockMgr();
 
-	StateData mStateData = { State::kLockingCompleted, OperationSource::kButton, {}, {}, {} };
+	StateData mStateData = {
+		State::kLockingCompleted, OperationSource::kButton, Aliro::OperationSource::Manual, {}, {}, {}
+	};
 	StateChangeCallback mStateChangeCallback = nullptr;
 	k_timer mActuatorTimer = {};
 

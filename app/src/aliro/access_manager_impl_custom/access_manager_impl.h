@@ -23,7 +23,9 @@ private:
 
 	void _SetApplicationCallbacks(const ApplicationCallbacks &callbacks);
 	void _SetStackCallbacks(const StackCallbacks &callbacks);
-	bool _ShouldRequestAccessDocument(const CryptoTypes::PublicKey &userPublicKey);
+	std::optional<AccessDocumentRequestParams>
+	_ShouldRequestAccessDocument(const CryptoTypes::PublicKey &publicKey,
+				     const std::optional<Timestamp> &credentialSignedTimestamp);
 	AliroError _VerifyAccessCredential(
 		const CryptoTypes::PublicKey &userPublicKey, bool isNfcSession, SessionContext sessionContext,
 		const std::optional<AccessDocumentTypes::AccessDocument> &accessDocument = std::nullopt);
@@ -31,7 +33,7 @@ private:
 					 SessionContext sessionContext);
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	AliroError _StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
-					SessionContext sessionContext);
+					ProtocolVersion protocolVersion, SessionContext sessionContext);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 	AliroError _AddPublicKey(const CryptoTypes::PublicKey &publicKey, PublicKeyType publicKeyType, size_t keyIndex);
 	bool _IsPublicKeyStored(const CryptoTypes::PublicKey &publicKey, size_t *keyIndex);
@@ -44,7 +46,7 @@ private:
 	uint32_t _GetMaxAllowedDistance();
 	void _HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData);
 	void _HandleRangingSessionStateChanged(SessionContext sessionContext, RangingSessionState state);
-	void _HandleSessionTermination(SessionContext sessionContext);
+	void _HandleSessionTermination(SessionContext sessionContext, bool isNfcSession);
 };
 
 inline AccessManager &AccessManagerInstance()

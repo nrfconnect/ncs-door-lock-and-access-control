@@ -22,10 +22,11 @@ void AccessManagerImpl::_SetStackCallbacks(const StackCallbacks &)
 	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
-bool AccessManagerImpl::_ShouldRequestAccessDocument(const CryptoTypes::PublicKey &)
+std::optional<AccessManager::AccessDocumentRequestParams>
+AccessManagerImpl::_ShouldRequestAccessDocument(const CryptoTypes::PublicKey &, const std::optional<Timestamp> &)
 {
 	LOG_INF("Custom %s function", __FUNCTION__);
-	return false;
+	return std::nullopt;
 }
 
 AliroError AccessManagerImpl::_VerifyAccessCredential(const CryptoTypes::PublicKey &, bool, SessionContext,
@@ -42,7 +43,7 @@ AliroError AccessManagerImpl::_VerifyKPersistentKey(CryptoTypes::KeyId, bool, Se
 }
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-AliroError AccessManagerImpl::_StartRangingSession(uint32_t, const CryptoTypes::Ursk &, SessionContext)
+AliroError AccessManagerImpl::_StartRangingSession(uint32_t, const CryptoTypes::Ursk &, ProtocolVersion, SessionContext)
 {
 	LOG_INF("Custom %s function", __FUNCTION__);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
@@ -106,7 +107,7 @@ void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext, Rangin
 	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
-void AccessManagerImpl::_HandleSessionTermination(SessionContext)
+void AccessManagerImpl::_HandleSessionTermination(SessionContext, bool)
 {
 	LOG_INF("Custom %s function", __FUNCTION__);
 }

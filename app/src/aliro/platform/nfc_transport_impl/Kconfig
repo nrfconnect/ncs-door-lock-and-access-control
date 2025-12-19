@@ -9,7 +9,7 @@ rsource "Kconfig.rfal.defconfig"
 # Prompt-less option only for internal tuning of the RFAL worker thread. Do not change it.
 config RFAL_NFC_WORKER_TIMEOUT_MS
 	int
-	default 30
+	default 10
 
 config RFAL_DISCOVERY_DEV_LIMIT
 	int "Maximum number of devices to discover"

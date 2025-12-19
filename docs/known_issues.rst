@@ -21,6 +21,14 @@ A known issue can list one or both of the following entries:
   Some known issues have a workaround.
   Sometimes, they are discovered later and added over time.
 
+The |APP_NAME| v0.6.0
+*********************
+
+The application crashes when using UWB and NFC on the same SPI bus has been resolved.
+  The `QM35825`_ UWB module and the X-NUCLEO NFC reader board can now be used together on the same SPI bus.
+  Use the ``uwb_qm35`` snippet when building the application to configure both NFC and UWB modules to share the same SPI bus.
+  The snippet configures both devices to use different chip select (CS) pins on the same SPI bus.
+
 The |APP_NAME| v0.5.0
 *********************
 

@@ -6,8 +6,9 @@
 
 #include "bolt_lock_manager.h"
 #include "access_manager/access_manager.h"
-#include "aliro/aliro.h"
 #include "app/task_executor.h"
+
+#include "aliro/aliro.h"
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 #include "validity_iterations.h"
@@ -52,8 +53,17 @@ void BoltLockManager::Init(StateChangeCallback callback)
 
 	// Set Aliro AccessManager application callbacks
 	Aliro::AccessManagerInstance().SetApplicationCallbacks({
-		.mUnlockIndicatorClb = [] { BoltLockMgr().Unlock(BoltLockManager::OperationSource::kAliro); },
-		.mLockIndicatorClb = [] { BoltLockMgr().Lock(BoltLockManager::OperationSource::kAliro); },
+		.mUnlockIndicatorClb =
+			[](Aliro::OperationSource source) {
+				if (!BoltLockMgr().Unlock(source)) {
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+					// The lock is already unlocked, so we can send the Unsecured state
+					Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
+						source, Aliro::ReaderStateByte::Unsecured);
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+				}
+			},
+		.mLockIndicatorClb = [](Aliro::OperationSource source) { BoltLockMgr().Lock(source); },
 	});
 
 	auto addPublicKey = [](uint16_t credentialIndex, CredentialTypeEnum credentialType,
@@ -185,7 +195,8 @@ void BoltLockManager::Lock(const OperationSource source, const Nullable<chip::Fa
 			   const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)
 {
 	VerifyOrReturn(mStateData.mState != State::kLockingCompleted);
-	StateData newStateData{ State::kLockingInitiated, source, fabricIdx, nodeId, validatePINResult };
+	StateData newStateData{ State::kLockingInitiated, source, ToAliroOperationSource(source), fabricIdx, nodeId,
+				validatePINResult };
 	SetStateData(newStateData);
 
 	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
@@ -195,10 +206,35 @@ void BoltLockManager::Unlock(const OperationSource source, const Nullable<chip::
 			     const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)
 {
 	VerifyOrReturn(mStateData.mState != State::kUnlockingCompleted);
-	StateData newStateData{ State::kUnlockingInitiated, source, fabricIdx, nodeId, validatePINResult };
+	StateData newStateData{ State::kUnlockingInitiated, source, ToAliroOperationSource(source), fabricIdx, nodeId,
+				validatePINResult };
 	SetStateData(newStateData);
 
 	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
+}
+
+bool BoltLockManager::Lock(Aliro::OperationSource source)
+{
+	VerifyOrReturnValue(mStateData.mState != State::kLockingCompleted, false);
+	StateData newStateData{
+		State::kLockingInitiated, OperationSource::kAliro, source, NullNullable, NullNullable, NullNullable
+	};
+	SetStateData(newStateData);
+
+	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
+	return true;
+}
+
+bool BoltLockManager::Unlock(Aliro::OperationSource source)
+{
+	VerifyOrReturnValue(mStateData.mState != State::kUnlockingCompleted, false);
+	StateData newStateData{
+		State::kUnlockingInitiated, OperationSource::kAliro, source, NullNullable, NullNullable, NullNullable
+	};
+	SetStateData(newStateData);
+
+	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
+	return true;
 }
 
 void BoltLockManager::ActuatorTimerEventHandler(k_timer *timer)
@@ -221,25 +257,9 @@ void BoltLockManager::ActuatorAppEventHandler(const BoltLockManagerEvent &event)
 	switch (lock->mStateData.mState) {
 	case State::kLockingInitiated:
 		lock->SetState(State::kLockingCompleted);
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-		if (lock->mStateData.mSource != OperationSource::kAliro) {
-			Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
-				ToAliroOperationSource(lock->mStateData.mSource), Aliro::ReaderStateByte::Secured);
-		}
-
-#endif
 		break;
 	case State::kUnlockingInitiated:
 		lock->SetState(State::kUnlockingCompleted);
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-		if (lock->mStateData.mSource != OperationSource::kAliro) {
-			Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
-				ToAliroOperationSource(lock->mStateData.mSource), Aliro::ReaderStateByte::Unsecured);
-		}
-
-#endif
 		break;
 	default:
 		break;

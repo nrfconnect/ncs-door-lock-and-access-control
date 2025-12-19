@@ -7,6 +7,7 @@
 #pragma once
 
 #include "aliro/errors.h"
+#include "aliro/protocol_version.h"
 #include "aliro/types.h"
 
 #include <cstddef>
@@ -29,24 +30,9 @@ public:
 	 * @struct Callbacks
 	 * @brief Struct containing callback functions for UWB events.
 	 *
-	 * This struct holds pointers to functions that are called on specific UWB events,
-	 * such as transmitting BLE messages and receiving ranging data.
+	 * This struct holds pointers to functions that are called on specific UWB events.
 	 */
 	struct Callbacks {
-		/**
-		 * @brief Callback to transmit a BLE message.
-		 *
-		 * This callback is invoked when the UWB module needs to send a BLE message
-		 * as part of the Aliro protocol flow. The message must conform to the format
-		 * specified in the Aliro spec., and the payload must stay
-		 * unencrypted.
-		 *
-		 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
-		 * @param data Pointer to the formatted BLE message data.
-		 * @param length Size of the message data in bytes.
-		 */
-		void (*mTransmitBleMessage)(SessionContextHandle sessionContextData, const uint8_t *data,
-					    size_t length){ nullptr };
 		/**
 		 * @brief Callback to receive ranging data.
 		 *
@@ -70,6 +56,29 @@ public:
 	};
 
 	/**
+	 * @struct StackCallbacks
+	 * @brief Struct containing callback functions for interfacing with the Aliro stack.
+	 *
+	 * This struct holds pointers to functions that are used to communicate with the Aliro stack.
+	 */
+	struct StackCallbacks {
+		/**
+		 * @brief Callback to transmit a BLE message.
+		 *
+		 * This callback is invoked when the UWB module needs to send a BLE message
+		 * as part of the Aliro protocol flow. The message must conform to the format
+		 * specified in the Aliro spec., and the payload must stay
+		 * unencrypted.
+		 *
+		 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
+		 * @param data Pointer to the formatted BLE message data.
+		 * @param length Size of the message data in bytes.
+		 */
+		void (*mTransmitBleMessage)(SessionContextHandle sessionContextData, const uint8_t *data,
+					    size_t length){ nullptr };
+	};
+
+	/**
 	 * @brief Initializes the UltraWideBand module.
 	 *
 	 * This method can be used to initialize the UWB module, setting up necessary configurations
@@ -81,6 +90,13 @@ public:
 	 * @return ALIRO_NO_ERROR on success, or an error code on failure.
 	 */
 	AliroError Init(const Callbacks &callbacks) { return Impl()->_Init(callbacks); }
+
+	/**
+	 * @brief Set the stack callbacks.
+	 *
+	 * @param callbacks Stack callbacks.
+	 */
+	void SetStackCallbacks(const StackCallbacks &callbacks) { Impl()->_SetStackCallbacks(callbacks); }
 
 	/**
 	 * @brief Deinitializes the UltraWideBand module.
@@ -128,14 +144,15 @@ public:
 	 *
 	 * @param sessionId The session identifier for the ranging session.
 	 * @param ursk Reference to the URSK.
+	 * @param protocolVersion The protocol version to use for the ranging session.
 	 * @param sessionContextData Pointer to current session context data used by the Aliro stack.
 	 *
 	 * @return ALIRO_NO_ERROR on success, or an error code on failure.
 	 */
 	AliroError ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
-					   SessionContextHandle sessionContextData)
+					   ProtocolVersion protocolVersion, SessionContextHandle sessionContextData)
 	{
-		return Impl()->_ConfigureRangingSession(sessionId, ursk, sessionContextData);
+		return Impl()->_ConfigureRangingSession(sessionId, ursk, protocolVersion, sessionContextData);
 	}
 
 	/**

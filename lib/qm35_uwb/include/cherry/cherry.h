@@ -29,10 +29,55 @@ extern "C" {
  *  - minor: CHERRY_VERSION / 100 % 100,
  *  - patch: CHERRY_VERSION % 100.
  */
-#define CHERRY_VERSION 021703
+#define CHERRY_VERSION 021800
 
 /**
  * DOC: Changelog
+ *
+ * Version 2.18.00:
+ *  - Add parsing of FiRa message ID in unified diagnostics.
+ *  - Remove useless directives in cherry.c and cherry_session_manager.c.
+ *  - Add robustness:
+ *    Add NULL pointer checks in session and core APIs.
+ *    Prevent integer overflow in task params allocation.
+ *    Add NULL check before callback invocation.
+ *    Add NULL checks in session diagnostics and ref time APIS.
+ *    Prevent buffer overflow in dt anchor responders array.
+ *    Handle internal state only in Cherry thread, avoiding concurrency issues
+ *    between threads.
+ *    Add error log in case session pointer is null in some APIs.
+ *    Use missed mutex in @cherry_session_set_diagnostics.
+ *    Prevent buffer overflow in twr controller addresses.
+ *    Prevent null dereference in wait functions.
+ *    Prevent race condition on cherry_ctx access.
+ *    Unlock the mutex before calling @cherry_session_free to ensure proper
+ *    mutex lifecycle management.
+ *    Prevent null dereference in error state update.
+ *    Prevent race condition in force stop all sessions.
+ *    Add null checks for critical session callbacks.
+ *    Clean up thread on UCI init failure error path.
+ *    Prevent unbounded tap data allocation in diagnostic parser.
+ *  - Fix null pointer dereference in @cherry_proxy_signal.
+ *  - Add timestamp to logging.
+ *  - Fix IE discovery V2 parsing in rtls client.
+ *  - Fix segfault when notifications remain in queue:
+ *    Check if a session is registered before sending an event.
+ *    Fix possible memory leak when removing tasks from Cherry thread.
+ *    Fix force stop in case of multi/interleaving sessions.
+ *    Move cherry_fira_get_child() calls in Cherry tasks.
+ *  - Allow logging to go to qm35_daemon through UNIX socket:
+ *    The CHERRY_LOG environment variable specifies a regular file or an
+ *    UNIX socket where to send log. If unset, it default to the default
+ *    path the qm35_daemon use: /run/qm35_daemon/syslog.socket
+ *    If set, the given path is checked to detect its type and if it is an
+ *    UNIX socket, a connection is started and the cherry_log_output is
+ *    created to use the connection file descriptor.
+ *    If given path do not exist or is not an UNIX socket, the given path is
+ *    used as a regular file.
+ *    If given path is empty string, cherry_log_output stays unset and logs
+ *    are sent to stderr.
+ *  - Allocate RTLS v2 elements independently and parse separately:
+ *    Fix memory leaks for allocation/deallocation mismatch.
  *
  * Version 2.17.03:
  *  - Notify an error when STOP or DEINIT failed after a

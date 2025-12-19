@@ -50,19 +50,16 @@ To build and run the application on one of the :ref:`supported development kits 
 
       west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y
 
-   .. note::
-      Currently, the Bluetooth LE transport is supported only for the nRF5340 device.
-
 #. You can also apply optional configurations depending on the modules used:
 
-   * If you are using the `QM35825`_ UWB module with the Qorvo Arduino Interface Board, execute the following command to build the application specifically for this setup:
+   * If you are using the `QM35825`_ UWB module with the Qorvo Arduino Interface Board, execute the following command to build the application with UWB enabled.
 
      .. code-block:: bash
 
       west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35
 
      .. note::
-      The snippet's configuration disables the NFC reader to enable the use of the UWB module with the Qorvo Arduino Interface Board.
+      The ``uwb_qm35`` snippet configures both NFC and UWB modules to share the same SPI bus.
 
    * For Matter over Thread, execute the following command to build the application:
 
@@ -145,3 +142,43 @@ If you have an access to the Qorvo repository with UWB stack and QM35 driver sou
    .. code-block:: bash
 
       west config manifest.group-filter -- -nrfconnect-sdk-qorvo
+
+.. _flashing_qm35_using_nrf53_dk:
+
+Flashing the QM35 firmware using nRF5340 DK
+*******************************************
+
+To flash the QM35 firmware using the nRF5340 DK, complete the following steps:
+
+#. Plug in the QM35 module and connect nRF5340 DK.
+
+#. Navigate to the :file:`nrfconnect-sdk-qorvo/flash_app` directory and build the application:
+
+   .. code-block:: bash
+
+      west build -b nrf5340dk/nrf5340/cpuapp -p
+
+#. Flash the application:
+
+   .. code-block:: bash
+
+      west flash
+
+#. You should see the following output on the serial terminal:
+
+   .. code-block:: console
+
+      *** Booting My Application v2.0.0-07f725e8810a ***
+      *** Using nRF Connect SDK v3.2.0-rc2-45be7e87c461 ***
+      *** Using Zephyr OS v4.2.99-7b2862b457c3 ***
+      [00:00:00.259,094] <inf> main: Zephyr UWB Example Application 07f725e8810a
+      [00:00:00.364,410] <inf> main: Device is ready
+      [00:00:00.366,485] <inf> main: Firmware version: 0.6.0rc1_12208268663
+      [00:00:00.366,516] <inf> main: Firmware flavor: silver_lychee
+      [00:00:00.534,210] <inf> main: Flashing the device...
+      [00:00:04.632,873] <inf> main: Flashing successful
+      [00:00:04.632,873] <inf> main: Resetting the device...
+      [00:00:04.758,819] <inf> main: Reset successful
+      [00:00:04.760,833] <inf> main: Device is ready
+      [00:00:04.763,000] <inf> main: Firmware version: 0.6.0rc1_12208268663
+      [00:00:04.763,031] <inf> main: Firmware flavor: silver_lychee

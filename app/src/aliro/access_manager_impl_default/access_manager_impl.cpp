@@ -5,14 +5,17 @@
  */
 
 #include "access_manager_impl.h"
+#include "access_document.h"
 #include "aliro/aliro.h"
 #include "aliro/mutex_guard.h"
+#include "aliro/time.h"
 #include "aliro/utils.h"
 #include "crypto/crypto.h"
+#include "storage.h"
+#include "storage_keys.h"
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 #include "cbor/access_document_decode.h"
-#include "validity_iterations.h"
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
@@ -24,6 +27,7 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/byteorder.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 
@@ -33,9 +37,26 @@ namespace Aliro {
 
 namespace {
 
+constexpr ValidityIteration kMaxValidityIterationDiff{ 8 };
+
 K_MUTEX_DEFINE(sMutex);
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+
+#ifdef CONFIG_CHIP
+
+constexpr std::array<uint8_t, 7> kElementIdentifier{ 'm', 'a', 't', 't', 'e', 'r', '1' };
+
+#else // CONFIG_CHIP
+
+constexpr std::array<uint8_t, 6> kElementIdentifier{ 'f', 'l', 'o', 'o', 'r', '1' };
+
+#endif // CONFIG_CHIP
+
+constexpr AccessManager::AccessDocumentRequestParams kAccessDocumentRequestParams{
+	.mElementIdentifier = { kElementIdentifier.data(), kElementIdentifier.size() },
+	.mIntentToStore = true,
+};
 
 constexpr auto kRequiredCapabilities =
 	AccessRuleCapabilitiesBits::AccessRuleCapabilitiesBits_Secure_c |
@@ -229,8 +250,6 @@ AliroError GetCurrentValidityIterations(size_t credentialIssuerKeyIndex, Validit
 
 bool VerifyValidityIteration(const ValidityIterations &currentIterations, ValidityIteration validityIteration)
 {
-	constexpr ValidityIteration kMaxValidityIterationDiff{ 8 };
-
 	LOG_DBG("Access Document Validity Iteration: %" PRIu64, validityIteration);
 
 	if (validityIteration < currentIterations.mAccessIteration) {
@@ -242,23 +261,47 @@ bool VerifyValidityIteration(const ValidityIterations &currentIterations, Validi
 	return true;
 }
 
-AliroError UpdateValidityIteration(size_t credentialIssuerKeyIndex, const ValidityIterations &currentIterations,
-				   ValidityIteration validityIteration)
+AliroError StoreAccessDocument(size_t keyIndex, size_t credentialIssuerKeyIndex,
+			       const AccessDocumentTypes::AccessDocument &accessDocument)
 {
-	ValidityIterations iterations = currentIterations;
+	VerifyOrReturnStatus(accessDocument.mDataElement.mLength <= AccessDocument::kAccessDocumentSize,
+			     ALIRO_NO_MEMORY, LOG_ERR("Access Document size is too large"));
 
-	if (validityIteration > iterations.mAccessIteration) {
-		iterations.mAccessIteration = validityIteration;
-	}
+	AccessDocument ad;
+	ad.mVersion = AccessDocument::kVersion;
+	ad.mCredentialIssuerKeyIndex = credentialIssuerKeyIndex;
+	ad.mSignedTimestamp = accessDocument.mSignedTimestamp;
+	ad.mAccessIteration = accessDocument.mValidityIteration.value_or(0);
+	ad.mPublicKey = accessDocument.mPublicKey;
+	ad.mAccessDocumentSize = accessDocument.mDataElement.mLength;
+	std::copy_n(accessDocument.mDataElement.mData, accessDocument.mDataElement.mLength, ad.mAccessDocument.data());
+	std::fill(ad.mAccessDocument.begin() + accessDocument.mDataElement.mLength, ad.mAccessDocument.end(), 0);
 
-	if (iterations != currentIterations) {
-		LOG_DBG("Updating Validity Iterations for Credential Issuer Key Index: %u, New Access Iteration: %" PRIu64,
-			credentialIssuerKeyIndex, iterations.mAccessIteration);
+	LOG_DBG("Storing Access Document at index: %u, Credential Issuer Key Index: %u, Timestamp: %.*s, Validity Iteration: %" PRIu64,
+		keyIndex, credentialIssuerKeyIndex, ad.mSignedTimestamp.size(), ad.mSignedTimestamp.data(),
+		ad.mAccessIteration);
 
-		ReturnErrorOnFailure(StoreValidityIterations(credentialIssuerKeyIndex, iterations));
-	}
+	ReturnErrorOnFailure(StoreAccessDocument(keyIndex, ad));
 
 	return ALIRO_NO_ERROR;
+}
+
+bool IsCurrentAccessDocumentUpToDate(size_t keyIndex, const Timestamp &credentialSignedTimestamp)
+{
+	AccessDocument ad;
+	const auto error = ReadAccessDocument(keyIndex, ad);
+	VerifyOrReturnFalse(error == ALIRO_NO_ERROR);
+
+	LOG_DBG("Saved timestamp: %.*s", ad.mSignedTimestamp.size(), ad.mSignedTimestamp.data());
+	LOG_DBG("New timestamp  : %.*s", credentialSignedTimestamp.size(), credentialSignedTimestamp.data());
+
+	const auto savedTimestamp = Time::FromTimestamp(ad.mSignedTimestamp);
+	VerifyOrReturnFalse(savedTimestamp.has_value(), LOG_ERR("Failed to parse saved timestamp"));
+
+	const auto newTimestamp = Time::FromTimestamp(credentialSignedTimestamp);
+	VerifyOrReturnFalse(newTimestamp.has_value(), LOG_ERR("Failed to parse new timestamp"));
+
+	return savedTimestamp.value() >= newTimestamp.value();
 }
 
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
@@ -275,18 +318,39 @@ void AccessManagerImpl::_SetStackCallbacks(const StackCallbacks &callbacks)
 	mStackCallbacks = callbacks;
 }
 
-bool AccessManagerImpl::_ShouldRequestAccessDocument([[maybe_unused]] const CryptoTypes::PublicKey &userPublicKey)
+std::optional<AccessManager::AccessDocumentRequestParams> AccessManagerImpl::_ShouldRequestAccessDocument(
+	[[maybe_unused]] const CryptoTypes::PublicKey &publicKey,
+	[[maybe_unused]] const std::optional<Timestamp> &credentialSignedTimestamp)
 {
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 	MutexGuard lock{ sMutex };
-	VerifyOrReturnTrue(
-		IsPublicKeyStored(mAcKeys, userPublicKey),
-		LOG_INF("Provided User Device public key not found in Access Manager database, requesting access document"));
+	VerifyOrReturnValue(
+		!IsPublicKeyStored(mAcKeys, publicKey), std::nullopt,
+		LOG_INF("Provided User Device public key found in Access Manager database, not requesting Access Document"));
 
-	LOG_INF("Provided User Device public key found in Access Manager database, not requesting access document");
+	size_t keyIndex{};
+	if (IsPublicKeyStored(mAdKeys, publicKey, &keyIndex)) {
+		if (credentialSignedTimestamp.has_value()) {
+			const auto isUpToDate =
+				IsCurrentAccessDocumentUpToDate(keyIndex, credentialSignedTimestamp.value());
+			if (!isUpToDate) {
+				LOG_INF("User Device has newer Access Document");
+				return kAccessDocumentRequestParams;
+			} else {
+				LOG_INF("Current Access Document is up to date");
+				return std::nullopt;
+			}
+		}
+
+		LOG_INF("Provided User Device public key found in Access Manager database, not requesting Access Document");
+		return std::nullopt;
+	}
+
+	LOG_INF("Provided User Device public key not found in Access Manager database, requesting Access Document");
+	return kAccessDocumentRequestParams;
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
-	return false;
+	return std::nullopt;
 }
 
 AliroError AccessManagerImpl::_VerifyAccessCredential(
@@ -307,7 +371,6 @@ AliroError AccessManagerImpl::_VerifyAccessCredential(
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 	HandleAccessGranted(isNfcSession, status == ALIRO_NO_ERROR);
-
 	return status;
 }
 
@@ -319,13 +382,8 @@ AliroError AccessManagerImpl::_VerifyKPersistentKey([[maybe_unused]] CryptoTypes
 	CryptoTypes::PublicKey publicKey{};
 	VerifyOrReturnStatus(mKpersistentManager, ALIRO_INVALID_STATE, LOG_ERR("Kpersistent manager not set"));
 	AliroError status = mKpersistentManager->GetAccessCredentialPublicKey(kpersistentKeyId, publicKey);
-	if (status == ALIRO_NO_ERROR) {
-		HandleAccessGranted(isNfcSession, true);
-		return ALIRO_NO_ERROR;
-	} else {
-		HandleAccessGranted(isNfcSession, false);
-		return status;
-	}
+	HandleAccessGranted(isNfcSession, status == ALIRO_NO_ERROR);
+	return status;
 
 #else
 
@@ -336,9 +394,9 @@ AliroError AccessManagerImpl::_VerifyKPersistentKey([[maybe_unused]] CryptoTypes
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 AliroError AccessManagerImpl::_StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
-						   SessionContext sessionContext)
+						   ProtocolVersion protocolVersion, SessionContext sessionContext)
 {
-	return AddRangingSession(rangingSessionId, ursk, sessionContext);
+	return AddRangingSession(rangingSessionId, ursk, protocolVersion, sessionContext);
 }
 
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
@@ -351,13 +409,17 @@ AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &public
 		return AddKeyToContainer(mAcKeys, publicKey, keyIndex);
 	}
 #if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
-
 	else if (publicKeyType == PublicKeyType::CredentialIssuer) {
 		LOG_DBG("Adding Credential Issuer public key to storage");
 		return AddKeyToContainer(mCiKeys, publicKey, keyIndex);
 	}
-
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
+	else if (publicKeyType == PublicKeyType::AccessDocument) {
+		LOG_DBG("Adding Access Document public key to storage");
+		return AddKeyToContainer(mAdKeys, publicKey, keyIndex);
+	}
+#endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
 	LOG_WRN("Invalid public key type");
 	return ALIRO_INVALID_ARGUMENT;
@@ -383,10 +445,27 @@ AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size
 #if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 	else if (publicKeyType == PublicKeyType::CredentialIssuer) {
 		LOG_DBG("Removing Credential Issuer public key from storage");
-		return RemoveKeyFromContainer(mCiKeys, keyIndex);
+		ReturnErrorOnFailure(RemoveKeyFromContainer(mCiKeys, keyIndex));
+		ReturnErrorOnFailure(RemoveAccessCredentials(keyIndex));
+		return ALIRO_NO_ERROR;
 	}
-
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
+	else if (publicKeyType == PublicKeyType::AccessDocument) {
+		LOG_DBG("Removing Access Document public key from storage");
+		ReturnErrorOnFailure(RemoveKeyFromContainer(mAdKeys, keyIndex));
+		ReturnErrorOnFailure(ClearAccessDocument(keyIndex));
+
+#ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+		if (mKpersistentManager) {
+			const auto index = keyIndex + CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS;
+			mKpersistentManager->RemoveKpersistent(index);
+		}
+#endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
+
+		return ALIRO_NO_ERROR;
+	}
+#endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
 	LOG_WRN("Invalid public key type");
 	return ALIRO_INVALID_ARGUMENT;
@@ -413,6 +492,11 @@ void AccessManagerImpl::_ClearStoredKeys()
 		key.reset();
 	}
 	mCiKeys.mCount = 0;
+
+	for (auto &key : mAdKeys.mKeys) {
+		key.reset();
+	}
+	mAdKeys.mCount = 0;
 
 	LOG_INF("Cleared all stored public keys");
 }
@@ -443,22 +527,34 @@ uint32_t AccessManagerImpl::_GetMaxAllowedDistance()
 
 void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext sessionContext, RangingSessionState state)
 {
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	switch (state) {
 	case RangingSessionState::Ranging:
 		LOG_INF("Ranging state changed to Ranging (session: %p)", sessionContext);
 		break;
 	case RangingSessionState::RangingSuspended:
 		LOG_INF("Ranging state changed to Ranging Suspended (session: %p)", sessionContext);
+
+		// To prevent rapid toggling after Suspend event, only update ReaderState if no other sessions are in
+		// range
+		SetInRangeState(sessionContext, false, !IsUserDeviceInRange());
 		break;
 	case RangingSessionState::RangingResumed:
 		LOG_INF("Ranging state changed to Ranging Resumed (session: %p)", sessionContext);
 		break;
 	case RangingSessionState::Destroyed:
 		LOG_INF("Ranging state changed to Destroyed (session: %p)", sessionContext);
+		// Only update ReaderState if no other sessions are in range
+		SetInRangeState(sessionContext, false);
 		break;
 	default:
 		break;
 	}
+
+#else // CONFIG_DOOR_LOCK_BLE_UWB
+	ARG_UNUSED(sessionContext);
+	ARG_UNUSED(state);
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData)
@@ -466,58 +562,25 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext,
 	LOG_DBG("Handling ranging session data - length: %u for session: %p", uwbData.mLength, sessionContext);
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-	const auto currentSessionInRange = AnalyzeUwbRangingData(uwbData);
-	{
-		MutexGuard lock{ sMutex };
-		auto *sessionCtx = FindRangingSession(sessionContext);
-		VerifyOrReturn(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext));
-		sessionCtx->mInRange = currentSessionInRange;
-#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-		if (!sessionCtx->mRangingSessionTimer.IsRunning()) {
-			sessionCtx->mRangingSessionTimer.Start();
-		}
-#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-	}
-	const bool userDeviceInRange = IsUserDeviceInRange();
-
-#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
-	if (mInRange && currentSessionInRange) {
-		TerminateAliroSession(sessionContext);
-	}
-#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
-
-	// Only detect access status changes
-	VerifyOrReturn(userDeviceInRange != mInRange);
-	mInRange = userDeviceInRange;
-
-	auto readerState = mInRange ? ReaderStateByte::Unsecured : ReaderStateByte::Secured;
-
-	Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
-		OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow, readerState);
-
-	if (mInRange) {
-		UnlockAction();
-#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
-		TerminateAliroSession(sessionContext);
-#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
-	} else
+	const auto currentSessionInRange = AnalyzeUwbRangingData(uwbData, sessionContext);
+	SetInRangeState(sessionContext, currentSessionInRange);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
-	{
-		LockAction();
-	}
 }
 
-void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
+void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext, [[maybe_unused]] bool isNfcSession)
 {
 	VerifyOrReturn(sessionContext, LOG_ERR("Session context is null"));
 
 	LOG_INF("Handling session termination");
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	if (isNfcSession) {
+		return;
+	}
+
+	SetInRangeState(sessionContext, false);
 	RemoveRangingSession(sessionContext);
 
-	// If any ranging session is still in range, then keep this flag true.
-	mInRange = IsUserDeviceInRange();
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
@@ -536,8 +599,22 @@ bool AccessManagerImpl::_IsPublicKeyStored(const CryptoTypes::PublicKey &userPub
 {
 	MutexGuard lock{ sMutex };
 
-	// Use only AC keys
-	return IsPublicKeyStored(mAcKeys, userPublicKey, keyIndex);
+	auto hasKey = IsPublicKeyStored(mAcKeys, userPublicKey, keyIndex);
+	if (hasKey) {
+		return true;
+	}
+
+	hasKey = IsPublicKeyStored(mAdKeys, userPublicKey, keyIndex);
+	if (!hasKey) {
+		return false;
+	}
+
+	if (keyIndex) {
+		// offset the key index by the number of AC keys
+		*keyIndex += mAcKeys.mKeys.size();
+	}
+
+	return true;
 }
 
 template <size_t T>
@@ -556,26 +633,50 @@ bool AccessManagerImpl::IsPublicKeyStored(const StoredKeys<T> &container, const 
 	return false;
 }
 
+template <size_t T> AliroError AccessManagerImpl::GetFirstFreeIndex(StoredKeys<T> &container, size_t &keyIndex) const
+{
+	for (size_t id = 0; id < container.mKeys.size(); id++) {
+		if (!container.mKeys[id].has_value()) {
+			keyIndex = id;
+			return ALIRO_NO_ERROR;
+		}
+	}
+
+	return ALIRO_NO_MEMORY;
+}
+
 AliroError AccessManagerImpl::_GetPublicKey(size_t keyIndex, CryptoTypes::PublicKey &publicKey)
 {
 	MutexGuard lock{ sMutex };
-	VerifyOrReturnStatus(keyIndex < mAcKeys.mKeys.size(), ALIRO_INVALID_ARGUMENT,
+	VerifyOrReturnStatus(keyIndex < mAcKeys.mKeys.size() + mAdKeys.mKeys.size(), ALIRO_INVALID_ARGUMENT,
 			     LOG_WRN("Key index out of range"));
-	VerifyOrReturnStatus(mAcKeys.mKeys[keyIndex].has_value(), ALIRO_INVALID_ARGUMENT,
-			     LOG_WRN("Key not found in storage"));
 
-	publicKey = mAcKeys.mKeys[keyIndex].value();
+	if (keyIndex < mAcKeys.mKeys.size()) {
+		VerifyOrReturnStatus(mAcKeys.mKeys[keyIndex].has_value(), ALIRO_INVALID_ARGUMENT,
+				     LOG_WRN("Key not found in storage"));
+		publicKey = mAcKeys.mKeys[keyIndex].value();
+	} else {
+		const auto index = keyIndex - mAcKeys.mKeys.size();
+		VerifyOrReturnStatus(mAdKeys.mKeys[index].has_value(), ALIRO_INVALID_ARGUMENT,
+				     LOG_WRN("Key not found in storage"));
+		publicKey = mAdKeys.mKeys[index].value();
+	}
+
 	return ALIRO_NO_ERROR;
 }
 
-void AccessManagerImpl::UnlockAction() const
+void AccessManagerImpl::UnlockAction(bool isNfcSession) const
 {
-	VerifyAndCall(mCallbacks.mUnlockIndicatorClb);
+	const auto source = isNfcSession ? OperationSource::ThisUserDeviceInNfc :
+					   OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow;
+	VerifyAndCall(mCallbacks.mUnlockIndicatorClb, source);
 }
 
-void AccessManagerImpl::LockAction() const
+void AccessManagerImpl::LockAction(bool isNfcSession) const
 {
-	VerifyAndCall(mCallbacks.mLockIndicatorClb);
+	const auto source = isNfcSession ? OperationSource::ThisUserDeviceInNfc :
+					   OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow;
+	VerifyAndCall(mCallbacks.mLockIndicatorClb, source);
 }
 
 void AccessManagerImpl::AccessGrantedAction(bool isNfcSession) const
@@ -595,7 +696,7 @@ void AccessManagerImpl::HandleAccessGranted(bool isNfcSession, bool granted)
 	if (granted) {
 		AccessGrantedAction(isNfcSession);
 		if (ShouldUnlockImmediately(isNfcSession)) {
-			UnlockAction();
+			UnlockAction(isNfcSession);
 		}
 	} else {
 		AccessDeniedAction(isNfcSession);
@@ -608,15 +709,9 @@ bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
-	// Skip Reader Status Changed Message for NFC sessions when Reader is opened via BLE+UWB
-	if (!mInRange) {
-		Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(OperationSource::ThisUserDeviceInNfc,
-									     ReaderStateByte::Unsecured);
-	}
-
 	// For NFC sessions with UWB enabled, only unlock if not already in range
 	// This prevents double-unlocking when user is already detected via UWB
-	return !mInRange;
+	return !IsUserDeviceInRange();
 
 #else // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -627,7 +722,7 @@ bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
 }
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData)
+bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData, SessionContext sessionContext)
 {
 	LOG_DBG("Analyzing UWB ranging data - length: %u", uwbData.mLength);
 
@@ -641,11 +736,27 @@ bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData)
 
 	MutexGuard lock{ sMutex };
 
-	LOG_DBG("Extracted distance: %u cm, max allowed: %u cm", distance.value(), mMaxAllowedDistance);
+	// Find the session
+	auto *sessionCtx = FindRangingSession(sessionContext);
+	VerifyOrReturnFalse(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext));
+
+	// Apply exit margin logic based on session's previous state:
+	// - Unlock (enter range): distance <= mMaxAllowedDistance (when session was out of range)
+	// - Lock (exit range): distance > mMaxAllowedDistance + mMaxAllowedDistanceExitMargin (when session was in
+	// range) Use session's previous state (sessionCtx->mInRange) to determine threshold. This ensures that each
+	// session independently tracks its state transitions and prevents issues when sessions are created/destroyed
+	// (e.g., BLE disconnect/reconnect). The exit margin is only applied when the door is unlocked to prevent rapid
+	// toggling.
+	const bool sessionWasInRange = sessionCtx->mInRange;
+	const uint32_t threshold =
+		sessionWasInRange ? (mMaxAllowedDistance + mMaxAllowedDistanceExitMargin) : mMaxAllowedDistance;
+
+	LOG_DBG("Extracted distance: %u cm, threshold: %u cm (max: %u cm, exit margin: %u cm, sessionWasInRange: %d)",
+		distance.value(), threshold, mMaxAllowedDistance, mMaxAllowedDistanceExitMargin,
+		static_cast<int>(sessionWasInRange));
 
 	// Check if distance is within acceptable range
-	VerifyOrReturnFalse(distance.value() <= mMaxAllowedDistance,
-			    LOG_DBG("Distance check failed - User Device is too far"));
+	VerifyOrReturnFalse(distance.value() <= threshold, LOG_DBG("Distance check failed - User Device is too far"));
 
 	LOG_DBG("Distance check passed, User Device is within range");
 	return true;
@@ -660,7 +771,7 @@ std::optional<uint16_t> AccessManagerImpl::ExtractDistanceFromUwbData(const UwbR
 }
 
 AliroError AccessManagerImpl::AddRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
-						const SessionContext sessionCtx)
+						ProtocolVersion protocolVersion, SessionContext sessionCtx)
 {
 	auto *newCtx = Aliro::new_nothrow<RangingSessionContext>(
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
@@ -676,8 +787,8 @@ AliroError AccessManagerImpl::AddRangingSession(uint32_t rangingSessionId, const
 
 	MutexGuard lock{ sMutex };
 
-	AliroError status =
-		Uwb::UltraWideBandImpl::Instance().ConfigureRangingSession(rangingSessionId, ursk, sessionCtx);
+	AliroError status = Uwb::UltraWideBandImpl::Instance().ConfigureRangingSession(rangingSessionId, ursk,
+										       protocolVersion, sessionCtx);
 	VerifyOrExit(status == ALIRO_NO_ERROR, LOG_ERR("Failed to configure ranging session: %d", status.ToInt()));
 
 	sys_slist_append(&mActiveSessions, &newCtx->mNode);
@@ -733,7 +844,7 @@ AccessManagerImpl::RangingSessionContext *AccessManagerImpl::FindRangingSession(
 	return nullptr;
 }
 
-bool AccessManagerImpl::IsUserDeviceInRange()
+bool AccessManagerImpl::IsUserDeviceInRange() const
 {
 	RangingSessionContext *rangingSessionCtx{};
 
@@ -745,6 +856,59 @@ bool AccessManagerImpl::IsUserDeviceInRange()
 	}
 
 	return false;
+}
+
+void AccessManagerImpl::SetInRangeState(SessionContext sessionContext, bool sessionInRange, bool updateReaderState)
+{
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	RangingSessionContext *sessionCtx{ nullptr };
+	bool wasAnySessionInRange{ false };
+	{
+		MutexGuard lock{ sMutex };
+		// Find the session
+		sessionCtx = FindRangingSession(sessionContext);
+		VerifyOrReturn(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext));
+
+		// Early return if has not changed
+		if (sessionCtx->mInRange == sessionInRange) {
+			return;
+		}
+
+		// Read wasAnySessionInRange before updating session state to get accurate previous state
+		wasAnySessionInRange = IsUserDeviceInRange();
+
+		// Update the session state
+		sessionCtx->mInRange = sessionInRange;
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+		// Start timer if session is in range and timer is not running
+		if (sessionInRange && !sessionCtx->mRangingSessionTimer.IsRunning()) {
+			sessionCtx->mRangingSessionTimer.Start();
+		}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+	}
+
+	bool nowAnySessionInRange{ false };
+	nowAnySessionInRange = sessionInRange || (wasAnySessionInRange && IsUserDeviceInRange());
+
+	// Handle state change and trigger appropriate actions if state changed
+	if (updateReaderState && (nowAnySessionInRange != wasAnySessionInRange)) {
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+		if (wasAnySessionInRange && nowAnySessionInRange) {
+			TerminateAliroSession(sessionContext);
+		}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+
+		if (nowAnySessionInRange) {
+			UnlockAction(false);
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+			TerminateAliroSession(sessionContext);
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
+		} else {
+			LockAction(false);
+		}
+	}
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 void AccessManagerImpl::TerminateAliroSession(SessionContext sessionContext)
@@ -841,7 +1005,68 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 	LOG_DBG("Verify Access Credential based on Access Document");
 	VerifyOrReturnStatus(ad.mPublicKey == userPublicKey, ALIRO_INVALID_PUBLIC_KEY, LOG_WRN("Public key mismatch"));
 
+	MutexGuard lock{ sMutex };
+
+	// Check if there is a free index in the Access Document container to store the Access Document.
+	size_t keyIndex = 0;
+	auto error = GetFirstFreeIndex(mAdKeys, keyIndex);
+
+	if (error == ALIRO_NO_MEMORY) {
+		LOG_DBG("No free index in the Access Document container, removing oldest credential");
+		error = RemoveOldestCredential(keyIndex);
+		VerifyOrReturnStatus(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to remove oldest credential"));
+	}
+
+	if (error == ALIRO_NO_ERROR) {
+		size_t credentialIssuerKeyIndex{};
+		const bool credentialIssuerKeyStored =
+			IsPublicKeyStored(mCiKeys, ad.mCredentialIssuerPublicKey, &credentialIssuerKeyIndex);
+
+		if (credentialIssuerKeyStored) {
+			error = StoreAccessDocument(keyIndex, credentialIssuerKeyIndex, ad);
+			if (error == ALIRO_NO_ERROR) {
+				AddKeyToContainer(mAdKeys, userPublicKey, keyIndex);
+			}
+		}
+	}
+
 	return ALIRO_NO_ERROR;
+}
+
+AliroError AccessManagerImpl::RemoveOldestCredential(size_t &keyIndex)
+{
+	std::optional<size_t> oldestKeyIndex;
+	std::optional<Time> oldestTime;
+
+	for (size_t i = 0; i < mAdKeys.mKeys.size(); i++) {
+		if (mAdKeys.mKeys[i].has_value()) {
+			AccessDocument ad;
+			auto error = ReadAccessDocument(i, ad);
+			if (error != ALIRO_NO_ERROR) {
+				oldestKeyIndex.emplace(i);
+				break;
+			}
+
+			const auto currentTime = Time::FromTimestamp(ad.mSignedTimestamp);
+			if (!currentTime.has_value()) {
+				oldestKeyIndex.emplace(i);
+				break;
+			}
+
+			if (!oldestTime.has_value() || currentTime.value() < oldestTime.value()) {
+				oldestTime = currentTime;
+				oldestKeyIndex.emplace(i);
+			}
+		}
+	}
+
+	if (oldestKeyIndex.has_value()) {
+		ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, oldestKeyIndex.value()));
+		keyIndex = oldestKeyIndex.value();
+		return ALIRO_NO_ERROR;
+	}
+
+	return ALIRO_NO_MEMORY;
 }
 
 AliroError AccessManagerImpl::ProcessValidityIteration(const CryptoTypes::PublicKey &credentialIssuerPublicKey,
@@ -865,6 +1090,82 @@ AliroError AccessManagerImpl::ProcessValidityIteration(const CryptoTypes::Public
 			     LOG_WRN("Validity Iteration is not valid, ignoring Access Document for access decision"));
 
 	ReturnErrorOnFailure(UpdateValidityIteration(keyIndex, iterations, validityIteration.value()));
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError AccessManagerImpl::UpdateValidityIteration(size_t credentialIssuerKeyIndex,
+						      const ValidityIterations &currentIterations,
+						      ValidityIteration validityIteration)
+{
+	ValidityIterations iterations = currentIterations;
+
+	if (validityIteration > iterations.mAccessIteration) {
+		iterations.mAccessIteration = validityIteration;
+	}
+
+	if (iterations != currentIterations) {
+		LOG_DBG("Updating Validity Iterations for Credential Issuer Key Index: %u, New Access Iteration: %" PRIu64,
+			credentialIssuerKeyIndex, iterations.mAccessIteration);
+
+		ReturnErrorOnFailure(StoreValidityIterations(credentialIssuerKeyIndex, iterations));
+	}
+
+	ReturnErrorOnFailure(RemoveOldCredentials(credentialIssuerKeyIndex, iterations.mAccessIteration));
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError AccessManagerImpl::RemoveOldCredentials(size_t credentialIssuerKeyIndex, ValidityIteration validityIteration)
+{
+	for (size_t i = 0; i < mAdKeys.mKeys.size(); i++) {
+		if (mAdKeys.mKeys[i].has_value()) {
+			AccessDocument ad;
+			auto error = ReadAccessDocument(i, ad);
+			if (error != ALIRO_NO_ERROR) {
+				continue;
+			}
+
+			if (ad.mCredentialIssuerKeyIndex != credentialIssuerKeyIndex) {
+				continue;
+			}
+
+			if (ad.mAccessIteration >= validityIteration) {
+				continue;
+			}
+
+			const auto diff = validityIteration - ad.mAccessIteration;
+			if (diff > kMaxValidityIterationDiff) {
+				LOG_DBG("Removing old credentials with index %u due to Validity Iteration difference: %" PRIu64,
+					i, diff);
+				ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i));
+			}
+		}
+	}
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError AccessManagerImpl::RemoveAccessCredentials(size_t credentialIssuerKeyIndex)
+{
+	LOG_DBG("Removing Access Credentials associated with Credential Issuer Key Index: %u",
+		credentialIssuerKeyIndex);
+
+	for (size_t i = 0; i < mAdKeys.mKeys.size(); i++) {
+		if (mAdKeys.mKeys[i].has_value()) {
+			AccessDocument ad;
+			auto error = ReadAccessDocument(i, ad);
+			if (error != ALIRO_NO_ERROR) {
+				continue;
+			}
+
+			if (ad.mCredentialIssuerKeyIndex != credentialIssuerKeyIndex) {
+				continue;
+			}
+
+			ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i));
+		}
+	}
 
 	return ALIRO_NO_ERROR;
 }

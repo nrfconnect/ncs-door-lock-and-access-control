@@ -25,7 +25,8 @@ constexpr CryptoTypes::KeyId kCredentialIssuerCAPublicKeyId{ kKeyIdRangeBegin + 
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 constexpr CryptoTypes::KeyId kKpersistentRangeBegin{ 0x41000 };
-constexpr CryptoTypes::KeyId kKpersistentRangeEnd{ 0x41000 + CONFIG_MAX_NUMBER_OF_KPERSISTENT - 1 };
+constexpr CryptoTypes::KeyId kKpersistentRangeEnd{ 0x41000 + CONFIG_MAX_NUMBER_OF_KPERSISTENT +
+						   CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS - 1 };
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
 } // namespace Aliro

@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+name: uwb_qm35_dfu
+append:
+  SB_EXTRA_CONF_FILE: sb-uwb_qm35_dfu.conf
+
+boards:
+  nrf5340dk/nrf5340/cpuapp:
+    append:
+      SB_EXTRA_CONF_FILE: boards/sb-nrf5340dk_nrf5340_cpuapp.conf

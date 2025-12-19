@@ -759,6 +759,28 @@ enum cherry_err cherry_ccc_session_set_ursk(struct cherry_ccc_session *session,
 					    const uint8_t *ursk);
 
 /**
+ * cherry_ccc_session_set_protocol_version() - Set the UWB Ranging protocol version
+ * @session: Session object.
+ * @selected_protocol_version: UWB_BLE selected protocol version by the user device.
+ *
+ * This function is part of an experimental feature set and may change or be
+ * removed in future releases.
+ *
+ * This function may be called at any time, as long as the session is not
+ * active. It is only applicable to Aliro sessions when the URSK is provided
+ * by the UWBS Host and not by a Secure Element.
+ *
+ * This function returns immediately.
+ *
+ * Returns:
+ *  - &CHERRY_ERR_NONE if accepted
+ *  - &CHERRY_ERR_INVALID_PARAMETER on any invalid parameter
+ */
+enum cherry_err
+cherry_ccc_session_set_protocol_version(struct cherry_ccc_session *session,
+					uint16_t selected_protocol_version);
+
+/**
  * cherry_ccc_session_set_round2_antennas() - Set the antennas to be used for
  * Aliro's 2nd round.
  * @session: Session object.
