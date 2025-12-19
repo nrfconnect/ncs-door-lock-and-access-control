@@ -13,12 +13,12 @@ manifest:
     - name: nrf
       remote: ncs
       repo-path: sdk-nrf
-      revision: v3.2.0-preview2-branch
+      revision: v3.2.0
       import: true
     - name: nrfconnect-sdk-qorvo
       remote: nrfconnect-uwb-qorvo
-      repo-path: nrfconnect-sdk-qorvo
-      revision: QM35ALIRO_ENG-0.5.0
+      repo-path: nrfconnect-uwb-sdk
+      revision: QM35ALIRO_ENG-0.6.1
       groups:
         - nrfconnect-sdk-qorvo
   group-filter:
