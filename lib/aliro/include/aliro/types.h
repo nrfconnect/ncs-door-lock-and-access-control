@@ -337,6 +337,7 @@ struct AccessDocument {
 	const CryptoTypes::PublicKey &mPublicKey;
 	ConstData mDataElement;
 	const CryptoTypes::PublicKey &mCredentialIssuerPublicKey;
+	const Timestamp &mSignedTimestamp;
 	std::optional<uint64_t> mValidityIteration;
 };
 

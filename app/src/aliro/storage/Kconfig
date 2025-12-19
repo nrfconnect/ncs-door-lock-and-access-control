@@ -1,0 +1,21 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS
+    int "Maximum number of stored Access Documents"
+    default 5 if DOOR_LOCK_STEP_UP_PHASE
+    default 0
+    help
+      Specifies the maximum number of Access Documents that can be
+      stored. This determines the size of the statically allocated array
+      for Access Document storage.
+
+config DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENT_SIZE
+    int "Maximum size of the stored Access Document"
+    default 55 if DOOR_LOCK_STEP_UP_PHASE
+    default 0
+    help
+      Specifies the maximum size of the stored Access Document.

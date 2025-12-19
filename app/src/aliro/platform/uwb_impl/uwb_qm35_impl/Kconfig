@@ -34,3 +34,25 @@ config DOOR_LOCK_UWB_SESSION_LOGGING
 	bool "Enable UWB session state logging"
 	help
 	  Enable logging for UWB session states and reason codes.
+
+config DOOR_LOCK_UWB_QM35_DFU
+	bool "Enable firmware upgrade for QM35"
+	default n
+	help
+	  Enable update procedure for QM35 during initalization
+
+if DOOR_LOCK_UWB_QM35_DFU
+
+choice DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON
+	prompt "Method used for QM35 version comparison"
+	default DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER
+
+config DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER
+	bool "Perform DFU only if the version is higher (avoid rollbacks)"
+
+config DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT
+	bool "Perform DFU for any different version"
+
+endchoice # DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON
+
+endif # DOOR_LOCK_UWB_QM35_DFU

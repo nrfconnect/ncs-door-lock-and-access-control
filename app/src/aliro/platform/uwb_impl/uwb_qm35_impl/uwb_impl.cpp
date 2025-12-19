@@ -5,6 +5,7 @@
  */
 
 #include "uwb_impl.h"
+#include "dfu/uwb_dfu.h"
 #include "uwb_message.h"
 
 #include "aliro/memory.h"
@@ -31,6 +32,7 @@ using RangingSessionState = Aliro::RangingSessionState;
 K_EVENT_DEFINE(sUwbEvents);
 
 constexpr uint32_t kUwbWaitForEventsTimeoutMs{ 1000 };
+constexpr uint16_t kUwbMaximumReportableDistance{ 50000 };
 
 /**
  * @brief Converts aliro_uwb_err to AliroError.
@@ -188,8 +190,8 @@ void UltraWideBandImpl::TransmitBleMessage(aliro_uwb_message *message, UwbSessio
 		auto *sessionCtx = uwbImpl->FindSession(uwbSessionCtx);
 		VerifyOrExit(sessionCtx, LOG_ERR("Session context not found"));
 
-		VerifyAndCall(uwbImpl->mCallbacks.mTransmitBleMessage, sessionCtx->mSessionContextData, message->data,
-			      message->len);
+		VerifyAndCall(uwbImpl->mStackCallbacks.mTransmitBleMessage, sessionCtx->mSessionContextData,
+			      message->data, message->len);
 	}
 
 exit:
@@ -282,6 +284,11 @@ void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, v
 				if (!currentMeasurement->frame_status) {
 					LOG_INF("Controlee report distance %d [cm]", currentMeasurement->distance_cm);
 
+					if (currentMeasurement->distance_cm > kUwbMaximumReportableDistance) {
+						LOG_INF("Ignoring measured distance");
+						break;
+					}
+
 					sys_put_be16(currentMeasurement->distance_cm,
 						     uwbImpl->mCurrentDistanceCm.data());
 					VerifyAndCall(uwbImpl->mCallbacks.mRangingData, sessionCtx->mSessionContextData,
@@ -370,10 +377,17 @@ AliroError UltraWideBandImpl::_Init(const Callbacks &callbacks)
 	cherry_err cErr{};
 	AliroError err{};
 
-	mCallbacks = callbacks;
+#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DFU
+	if (!mFwUpdateInProgress) {
+#endif
+		mCallbacks = callbacks;
 
-	VerifyOrReturnStatus(k_mutex_init(&mMutex) == 0, ALIRO_ERROR_INTERNAL, LOG_ERR("Failed to initialize mutex"));
-	sys_slist_init(&mActiveSessionsList);
+		VerifyOrReturnStatus(k_mutex_init(&mMutex) == 0, ALIRO_ERROR_INTERNAL,
+				     LOG_ERR("Failed to initialize mutex"));
+		sys_slist_init(&mActiveSessionsList);
+#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DFU
+	}
+#endif
 
 	LOG_INF("Initializing UWB device...");
 
@@ -406,12 +420,30 @@ AliroError UltraWideBandImpl::_Init(const Callbacks &callbacks)
 
 	LOG_INF("UWB device initialized successfully.");
 
+#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DFU
+	if (!mFwUpdateInProgress) {
+		return CheckAndUpdateQm35(false);
+	}
+#endif
+
 	return ALIRO_NO_ERROR;
 
 exit:
+
+#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DFU
+	if (!mFwUpdateInProgress) {
+		return CheckAndUpdateQm35(true);
+	}
+#else
 	_Deinit();
+#endif
 
 	return ALIRO_UWB_INIT_FAILED;
+}
+
+void UltraWideBandImpl::_SetStackCallbacks(const StackCallbacks &callbacks)
+{
+	mStackCallbacks = callbacks;
 }
 
 AliroError UltraWideBandImpl::_Deinit()
@@ -463,6 +495,7 @@ AliroError UltraWideBandImpl::_HandleBleMessage(const uint8_t *data, size_t leng
 }
 
 AliroError UltraWideBandImpl::_ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
+						       ProtocolVersion protocolVersion,
 						       SessionContextHandle sessionContextData)
 {
 	VerifyOrReturnStatus(mAliroCtx, ALIRO_INVALID_STATE, LOG_ERR("UWB is not initialized."));
@@ -478,6 +511,9 @@ AliroError UltraWideBandImpl::_ConfigureRangingSession(SessionIdentifier session
 
 	AliroError err = ConvertUwbError(aliro_uwb_session_set_ursk(newSessionCtx, ursk.data()));
 	VerifyOrExit(err == ALIRO_NO_ERROR, LOG_ERR("Failed to set URSK in UWB session: %d", err.ToInt()));
+
+	err = ConvertUwbError(aliro_uwb_session_set_protocol_version(newSessionCtx, protocolVersion));
+	VerifyOrExit(err == ALIRO_NO_ERROR, LOG_ERR("Failed to set protocol version in UWB session: %d", err.ToInt()));
 
 	err = AddSession({ .mUwbSessionContext = newSessionCtx, .mSessionContextData = sessionContextData });
 	VerifyOrExit(err == ALIRO_NO_ERROR,
@@ -628,6 +664,39 @@ void UltraWideBandImpl::DestroySession(SessionContext *sessionCtx)
 		aliro_uwb_session_destroy(sessionCtx->mUwbSessionContext);
 		sessionCtx->mUwbSessionContext = nullptr;
 	}
+}
+
+AliroError UltraWideBandImpl::CheckAndUpdateQm35(bool skipVersionCheck)
+{
+	int err;
+	cherry_err cErr{};
+	AliroError aErr{};
+
+	if (!skipVersionCheck && !Dfu::ShouldUpdate(mQm35FirmwareVersion.get())) {
+		return ALIRO_NO_ERROR;
+	}
+
+	LOG_DBG("Starting firmware update, resetting device");
+
+	cErr = cherry_reset_device(mCtx, true);
+	if (cErr != CHERRY_ERR_NONE) {
+		LOG_ERR("cherry_reset failed with error %d", cErr);
+		return ALIRO_ERROR_UNKNOWN;
+	}
+
+	mFwUpdateInProgress = true;
+
+	_Deinit();
+
+	err = Dfu::PerformFirmwareUpdate();
+	aErr = _Init(mCallbacks);
+
+	mFwUpdateInProgress = false;
+
+	LOG_INF("Firmware update %s", (err ? "failed" : "successful"));
+
+	// If DFU was succesful report init's result
+	return (err == 0 ? aErr : ALIRO_UWB_DFU_FAILED);
 }
 
 } // namespace Aliro::Uwb

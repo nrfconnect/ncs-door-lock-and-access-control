@@ -181,7 +181,7 @@ When using the `nRF5340 DK`_ or `nRF52840 DK`_, you can connect the NFC reader e
    These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
    To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
 
-.. _hw_requirements_uwb_reader:
+.. _hw_requirements_uwb_module:
 
 Ultra wideband (UWB) module
 ***************************
@@ -203,16 +203,6 @@ With the Qorvo Arduino Interface Board, you can use the UWB module with the `nRF
 .. note::
    The QM35825 SoC requires Aliro-specific firmware to work with the Aliro access protocol.
    To obtain this firmware, contact your local Qorvo support team.
-
-.. warning::
-
-   You cannot use the `QM35825`_ UWB module and the Qorvo Arduino Interface Board simultaneously with the X-NUCLEO board on the same SPI bus.
-   When both devices are connected to the same SPI bus, the X-NUCLEO board cannot be initialized properly and the application will crash.
-   For test purposes, you can connect the `QM35825`_ module directly to the Arduino header of the `nRF5340 DK`_ using the Qorvo Arduino Interface Board.
-   You must also enable the ``CONFIG_DISABLE_ALIRO_NFC_TP`` Kconfig option in the application's configuration.
-
-   Additionally, you can use the ``uwb_qm35`` snippet to build the application with the UWB module enabled and the NFC reader disabled.
-   All necessary DTS configurations are applied by the snippet.
 
 .. _hw_requirements_uwb_compatibility:
 
@@ -245,6 +235,10 @@ The following table shows the compatibility between the versions of the |APP_NAM
      - 0.5.0
      - 0.5.0
      - 3.2.0-preview2
+   * - 0.6.0
+     - 0.6.0
+     - 0.6.0
+     - 3.2.0
 
 .. note::
    The compatibility matrix shows tested and verified combinations of |APP_NAME| version, UWB Aliro SDK, UWB firmware, and |NCS| version.

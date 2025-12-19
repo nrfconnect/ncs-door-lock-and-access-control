@@ -34,12 +34,43 @@ config DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
       This is used to determine if the Aliro User Device
       is within the allowed proximity range.
 
+config DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM
+    int "Exit margin above max allowed distance for locking (cm)"
+    default 50
+    help
+      Specifies an additional margin (in centimeters) added to
+      DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM that is used to determine
+      when the door should be locked (exit range). This margin prevents rapid
+      open/close toggling when the measured distance fluctuates around the
+      maximum allowed distance threshold.
+
+      Behavior:
+      - Unlock (enter range): distance <= MAX_ALLOWED_DISTANCE_CM
+      - Lock (exit range): distance > MAX_ALLOWED_DISTANCE_CM + EXIT_MARGIN_CM
+
+      The exit margin is applied per UWB ranging session based on the session's
+      previous state. When a session transitions from "out of range" to "in range",
+      the unlock threshold is MAX_ALLOWED_DISTANCE_CM. Once unlocked, the session
+      must exceed MAX_ALLOWED_DISTANCE_CM + EXIT_MARGIN_CM to trigger locking.
+
+      Set to 0 to disable the exit margin (door will lock immediately when
+      distance exceeds MAX_ALLOWED_DISTANCE_CM).
+
 choice DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION
     prompt "Terminate session on given condition"
-    default DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+    default DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_DISABLED
     help
       Select the condition under which the AccessManager will
       terminate the current Aliro session.
+
+config DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_DISABLED
+    bool "Never terminate session automatically"
+    help
+      If enabled, the AccessManager will never automatically terminate
+      UWB ranging sessions. Sessions will only be terminated when explicitly
+      requested by the User Device or when the BLE connection is lost.
+      This option is useful when you want the User Device to have full
+      control over session lifecycle.
 
 config DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
     bool "Terminate the session if the access was granted"

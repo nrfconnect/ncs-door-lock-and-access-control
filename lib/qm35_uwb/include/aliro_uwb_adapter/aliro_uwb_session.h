@@ -72,6 +72,15 @@ enum aliro_uwb_session_event_type {
 	 */
 	ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_CONTROLEE_REPORT =
 		CHERRY_CCC_EVENT_TYPE_SESSION_CONTROLEE_REPORT,
+	/**
+	 * @ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_DIAGNOSTIC_REPORT: Report of Aliro UWB diagnotics
+	 * data.
+	 *
+	 * This event is produced by session for Aliro device as soon as the diagnotics have been
+	 * enabled.
+	 */
+	ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_DIAGNOSTIC_REPORT =
+		CHERRY_CCC_EVENT_TYPE_SESSION_DIAGNOSTIC_REPORT,
 };
 
 /**
@@ -120,6 +129,11 @@ struct aliro_uwb_session_event {
 		 * This event is produced by session for Aliro reader device.
 		 */
 		struct cherry_ccc_controlee_session_report *controlee_report;
+		/**
+		 * @data.diagnostics: data for the
+		 * ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_DIAGNOSTIC_REPORT event.
+		 */
+		struct cherry_common_diag_report *diagnostics;
 	} data;
 };
 
@@ -228,6 +242,20 @@ void aliro_uwb_session_event_free(struct aliro_uwb_session_event *event);
  */
 enum aliro_uwb_err aliro_uwb_session_set_ursk(struct aliro_uwb_session *session,
 					      const uint8_t *ursk);
+
+/**
+ * aliro_uwb_session_set_protocol_version() - Set the UWB Ranging protocol version
+ * @session: Session object.
+ * @selected_protocol_version: uwb selected protocol version
+ *
+ * This function returns immediately.
+ *
+ * Returns:
+ *  - &ALIRO_UWB_ERR_NONE if succeed
+ *  - &ALIRO_UWB_ERR_INTERNAL for other errors
+ */
+enum aliro_uwb_err aliro_uwb_session_set_protocol_version(struct aliro_uwb_session *session,
+							  uint16_t selected_protocol_version);
 
 /**
  * aliro_uwb_session_init_setup() - Start the set up of the Aliro UWB session.

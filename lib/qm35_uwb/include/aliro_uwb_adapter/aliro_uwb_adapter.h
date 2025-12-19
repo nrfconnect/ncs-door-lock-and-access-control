@@ -212,6 +212,17 @@ aliro_uwb_adapter_create_reader(struct cherry *cherry_ctx,
 				struct aliro_uwb_adapter_reader_config *config);
 
 /**
+ * aliro_uwb_adapter_set_diagnostics() - Enable or disable diagnostics reporting for all
+ * sessions.
+ * @aliro_ctx: Aliro UWB context.
+ * @config: Define which kind of diagnostics to enable.
+ *
+ * The new diagnostics configuration will be applied to all new sessions created after this call.
+ */
+void aliro_uwb_adapter_set_diagnostics(struct aliro_uwb_adapter *aliro_ctx,
+				       struct cherry_common_diag_cfg config);
+
+/**
  * aliro_uwb_adapter_destroy() - Destroy the Aliro UWB adapter.
  * @aliro_ctx: Aliro UWB context.
  *

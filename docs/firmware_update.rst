@@ -191,3 +191,68 @@ There following methods are recommended for performing a firmware update over Bl
 
 *  Using the `Newt Manager`_ - This method allows you to perform DFU updates directly from the terminal.
    For details, see `DFU over Bluetooth LE using newt manager tool`_.
+
+QM35 firmware upgrade
+*********************
+
+This section describes how the QM35 UWB module firmware is upgraded in the door lock application.
+The QM35 firmware is handled as an additional MCUboot image stored in external flash.
+
+.. note::
+   The process can be also implemented in another way, for example, without using the MCUboot slot and by performing the whole process inside the application.
+
+Overview
+========
+
+The QM35 firmware upgrade solution is based on MCUboot and the partition manager:
+
+* The QM35 firmware is stored in external flash.
+* The firmware is treated as an extra updatable image.
+* In-field updates are supported over Matter OTA and BLE SMP.
+* The maximum supported firmware size is 512 kB.
+* If QM35 initialization fails the application will try to upgrade the firmware regardless of the current version.
+
+Build configuration
+===================
+
+To enable QM35 firmware upgrade support, build the application with the ``uwb_qm35_dfu`` snippet:
+
+.. note::
+   The ``uwb_qm35_dfu`` snippet requires either the ``uwb_qm35`` or the ``uwb_qm35_src`` snippet to be enabled. Also, for a standalone Aliro application the ``dfu_smp`` must be enabled.
+
+.. code-block:: console
+
+   west build -b nrf5340dk/nrf5340/cpuapp app -- -DSNIPPET='uwb_qm35_dfu' -Dapp_SNIPPET='uwb_qm35_src;dfu_smp'
+
+Flashing
+========
+
+When flashing the application, use the following command:
+
+.. code-block:: console
+
+   west flash --erase
+
+The QM35 firmware is automatically programmed to external flash together with the main application.
+
+Firmware upgrade procedure
+==========================
+
+At runtime, the application performs the following steps:
+
+#. Compare the running QM35 firmware version with the version stored in the primary slot.
+#. If an update is required, reset the QM35 into firmware update mode.
+#. Transfer the new firmware from external flash to the QM35.
+#. Reset the QM35 and re-initialize the UWB stack.
+
+.. note::
+   During the update, the QM35 is temporarily unavailable.
+
+Configuration options
+=====================
+
+The following Kconfig options control QM35 DFU behavior:
+
+* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU`` - Enables QM35 firmware upgrade support.
+* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER`` - Perform an update only if the new version is higher (default).
+* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT`` - Perform an update if the version differs.

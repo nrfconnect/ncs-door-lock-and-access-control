@@ -11,9 +11,9 @@ config DOOR_LOCK_BT_NUS_MAX_COMMAND_LEN
 	  Maximum length of single command. This command will be sent via Bluetooth LE to
 	  a paired smart door lock.
 
-config DOOR_LOCK_BT_NUS_FIXED_PASSKEY
+config DOOR_LOCK_BT_NUS_APP_PASSKEY
 	int "Define the default passkey for NUS"
-	depends on BT_FIXED_PASSKEY
+	depends on BT_APP_PASSKEY
 	default 123456
 	help
 	  Define the default password for pairing with the Bluetooth LE device.

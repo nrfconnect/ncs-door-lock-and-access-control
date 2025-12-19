@@ -32,7 +32,8 @@ public:
 						CryptoTypes::PublicKey &publicKey) override;
 
 private:
-	static constexpr size_t kMaxKpersistentCount{ CONFIG_MAX_NUMBER_OF_KPERSISTENT };
+	static constexpr size_t kMaxKpersistentCount{ CONFIG_MAX_NUMBER_OF_KPERSISTENT +
+						      CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS };
 
 	std::bitset<kMaxKpersistentCount> mKpersistentMap{};
 	size_t mKpersistentCount{};

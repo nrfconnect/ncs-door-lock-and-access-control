@@ -26,11 +26,6 @@ AliroError NUSService::Start()
 {
 	VerifyOrReturnStatus(!mIsStarted, ALIRO_INVALID_STATE, LOG_ERR("NUS service is already started"));
 
-#if defined(CONFIG_BT_FIXED_PASSKEY)
-	VerifyOrReturnStatus(bt_passkey_set(CONFIG_DOOR_LOCK_BT_NUS_FIXED_PASSKEY) == 0, ALIRO_ERROR_INTERNAL,
-			     LOG_ERR("Failed to set fixed passkey"));
-#endif // CONFIG_BT_FIXED_PASSKEY
-
 #if !defined(CONFIG_DOOR_LOCK_DFU_BLE_SMP) && !defined(CONFIG_DOOR_LOCK_BLE_UWB)
 	VerifyOrReturnStatus(BleManagerImpl::Instance().Init({}) == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
 #endif // !CONFIG_DOOR_LOCK_DFU_BLE_SMP && !CONFIG_DOOR_LOCK_BLE_UWB
@@ -39,6 +34,13 @@ AliroError NUSService::Start()
 		.passkey_display = [](bt_conn *conn,
 				      unsigned int passkey) { Instance().AuthPasskeyDisplay(conn, passkey); },
 		.cancel = [](bt_conn *conn) { Instance().AuthCancel(conn); },
+#if defined(CONFIG_BT_APP_PASSKEY)
+		.app_passkey =
+			[](bt_conn *) {
+				const uint32_t passkey{ CONFIG_DOOR_LOCK_BT_NUS_APP_PASSKEY };
+				return passkey;
+			},
+#endif // CONFIG_BT_APP_PASSKEY
 	};
 
 	static bt_conn_auth_info_cb sConnAuthInfoCallbacks = {
