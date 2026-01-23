@@ -156,7 +156,8 @@ AliroError KpersistentManagerImpl::GetAccessCredentialPublicKey(CryptoTypes::Key
 	VerifyOrReturnStatus(mKpersistentMap[index], ALIRO_INVALID_ARGUMENT);
 
 	AliroError status = AccessManagerInstance().GetPublicKey(index, publicKey);
-	VerifyOrReturnStatus(status == ALIRO_NO_ERROR, status, LOG_ERR("Cannot get Access Credential public key"));
+	VerifyOrReturnStatus(status == ALIRO_NO_ERROR, ALIRO_PUBLIC_KEY_NOT_FOUND,
+			     LOG_ERR("Cannot get Access Credential public key"));
 
 	return ALIRO_NO_ERROR;
 }
