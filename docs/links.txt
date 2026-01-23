@@ -80,10 +80,8 @@
 
 .. _`X-NUCLEO-NFC09A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc09a1.html
 .. _`ST25R100`: https://www.st.com/en/nfc/st25r100.html
-.. _`X-NUCLEO-NFC08A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc08a1.html
-.. _`ST25R3916B`: https://www.st.com/en/nfc/st25r3916b.html
-.. _`X-NUCLEO-NFC05A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc05a1.html
-.. _`ST25R3911B`: https://www.st.com/en/nfc/st25r3911b.html
+.. _`X-NUCLEO-NFC12A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc12a1.html
+.. _`ST25R300`: https://www.st.com/en/nfc/st25r300.html
 
 .. _`OM27160B1EVK`: https://www.nxp.com/part/OM27160B1EVK
 .. _`OM27160A1EVK`: https://www.nxp.com/part/OM27160A1EVK

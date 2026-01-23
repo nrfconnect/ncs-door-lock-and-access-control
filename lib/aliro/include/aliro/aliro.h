@@ -9,13 +9,13 @@
 #include "access_manager/access_manager.h"
 #include "aliro/errors.h"
 #include "aliro/protocol_version.h"
+#include "aliro/transport_callbacks.h"
 #include "aliro/types.h"
 #include "kpersistent_manager/kpersistent_manager.h"
-#include "transport/ble/ble_iface.h"
 
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+#ifdef CONFIG_NCS_ALIRO_BLE_UWB
 #include "aliro/ble_types.h"
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
+#endif // CONFIG_NCS_ALIRO_BLE_UWB
 
 #include <cstddef>
 
@@ -31,11 +31,6 @@ struct AliroConfig {
 	 * @brief The Kpersistent manager needed for the Expedited-fast phase.
 	 */
 	[[maybe_unused]] KpersistentManager *mKpersistentManager{};
-
-	/**
-	 * @brief The BLE interface.
-	 */
-	BleInterface::BleIfc *mBle{};
 };
 
 /**
@@ -84,26 +79,31 @@ public:
 	 * @param privateKeyId The private key ID.
 	 * @param groupResolvingKeyId The group resolving key ID.
 	 * @param identifier The reader identifier.
-	 * @param credentialIssuerCAPublicKeyId The credential issuer CA public key ID.
 	 *
 	 * @return ALIRO_NO_ERROR if the Reader was provisioned successfully, an error code otherwise.
 	 */
 	AliroError Provision(CryptoTypes::KeyId privateKeyId, CryptoTypes::KeyId groupResolvingKeyId,
-			     const Identifier &identifier, CryptoTypes::KeyId credentialIssuerCAPublicKeyId);
+			     const Identifier &identifier);
 
 	/**
 	 * @brief Sets the reader identifier.
 	 *
+	 * @note After updating the identifier, the application must refresh the BLE advertising with the data generated
+	 *
 	 * @param identifier The reader identifier.
+	 *
+	 * @return ALIRO_NO_ERROR if the reader is provisioned, an error code otherwise.
 	 */
 	AliroError SetReaderIdentifier(const Identifier &identifier);
 
 	/**
-	 * @brief Sets the credential issuer CA public key ID.
+	 * @brief Gets the reader identifier.
 	 *
-	 * @param credentialIssuerCAPublicKeyId The credential issuer CA public key ID.
+	 * @param identifier The reader identifier.
+	 *
+	 * @return ALIRO_NO_ERROR if the reader identifier was retrieved successfully, an error code otherwise.
 	 */
-	void SetCredentialIssuerCAPublicKeyId(CryptoTypes::KeyId credentialIssuerCAPublicKeyId) const;
+	AliroError GetReaderIdentifier(Identifier &identifier) const;
 
 	/**
 	 * @brief Starts the Aliro stack.
@@ -135,58 +135,120 @@ public:
 
 	/**
 	 * @brief Gets the Expedited Standard protocol version.
-
+	 *
 	 * @param versionCount The number of protocol versions.
 	 *
 	 * @return Pointer to the static Expedited Standard protocol version list.
 	 */
 	const ProtocolVersion *GetExpeditedStandardProtocolVersions(size_t &versionCount) const;
 
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+#ifdef CONFIG_NCS_ALIRO_BLE_UWB
+
+	/* These methods are called by the application to notify the stack about BLE events */
 
 	/**
-	 * @brief Sends the Reader Status Changed Message ID.
+	 * @brief Indicate that a BLE transport is ready for communication.
 	 *
-	 * @param operationSource The operation source that caused the state change.
-	 * @param readerState The current reader state.
-	 * @param sessionContext Optionally the session context for specific User Device.
+	 * Call this when a BLE connection is established and the GATT service
+	 * is ready to exchange data (e.g., after CCCD subscription).
 	 *
-	 * @return ALIRO_NO_ERROR if the Reader Status Changed Message ID is sent successfully, an error code otherwise.
+	 * @param handle The connection handle identifying the BLE connection.
 	 */
-	AliroError SendReaderStatusChangedMessage(
-		OperationSource operationSource, ReaderStateByte readerState,
-		std::optional<AccessManager::SessionContext> sessionContext = std::nullopt) const;
+	void IndicateTransportReady(ConnectionHandle handle);
 
 	/**
-	 * @brief Sets the BLE notification which will be advertised.
+	 * @brief Indicate that a BLE transport connection was lost.
 	 *
-	 * @param notification The BLE notification.
+	 * Call this when a BLE connection is disconnected.
 	 *
-	 * @return ALIRO_NO_ERROR if the notification was set successfully, an error code otherwise.
+	 * @param handle The connection handle identifying the BLE connection.
 	 */
-	AliroError SetBleNotification(BleTypes::AdvertisingServiceData::Notification notification) const;
+	void IndicateTransportLoss(ConnectionHandle handle);
+
+	/**
+	 * @brief Indicate that data was received over BLE transport.
+	 *
+	 * Call this when data is received from a connected BLE device.
+	 *
+	 * @param handle The connection handle identifying the BLE connection.
+	 * @param data The received data.
+	 */
+	void IndicateDataReceived(ConnectionHandle handle, Data data);
+
+	/**
+	 * @brief Generate Aliro BLE advertising service data.
+	 *
+	 * Call this to get the advertising payload when starting or refreshing
+	 * BLE advertising. The application provides BLE-specific parameters
+	 * (address, TX power, notification, expiration time) that it controls.
+	 *
+	 * @param outData The output advertising service data.
+	 * @param address The current BLE advertising address.
+	 * @param txPowerLevel The current TX power level in dBm.
+	 * @param readerIdentifier The reader identifier (32 bytes: reader_group_id | reader_group_sub_id).
+	 * @param notification The notification type.
+	 * @param expirationTime The expiration timestamp.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	static AliroError
+	GenerateAdvertisingData(BleTypes::AdvertisingServiceData &outData, const BleTypes::BleAddress &address,
+				BleTypes::TxPowerLevel txPowerLevel, const Identifier &readerIdentifier,
+				BleTypes::AdvertisingServiceData::Notification notification =
+					BleTypes::AdvertisingServiceData::Notification::NoError,
+				const BleTypes::BleExpiryTimestamp &expirationTime = BleTypes::kExpiryTimeUnavailable);
 
 	/**
 	 * @brief Gets the BLE advertising version.
 	 *
 	 * @return The BLE advertising version.
 	 */
-	uint8_t GetBleAdvertisingVersion() const;
+	static uint8_t GetBleAdvertisingVersion();
+
+	/**
+	 * @brief Sends the Reader Status Changed Message.
+	 *
+	 * @param operationSource The operation source that caused the state change.
+	 * @param readerState The current reader state.
+	 * @param sessionContext Optionally the session context for specific User Device.
+	 *
+	 * @return ALIRO_NO_ERROR if successful, an error code otherwise.
+	 */
+	AliroError SendReaderStatusChangedMessage(
+		OperationSource operationSource, ReaderStateByte readerState,
+		std::optional<AccessManager::SessionContext> sessionContext = std::nullopt) const;
 
 	/**
 	 * @brief Gets the BLE/UWB protocol version.
-
+	 *
 	 * @param versionCount The number of protocol versions.
 	 *
 	 * @return Pointer to the static BLE/UWB protocol version list.
 	 */
 	const ProtocolVersion *GetBleUwbProtocolVersions(size_t &versionCount) const;
 
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
+	/**
+	 * @brief Sends a BLE message from the UWB module to the stack.
+	 *
+	 * This function is called by the application to send messages that require
+	 * stack-level encryption and transmission. The stack encrypts the message payload and
+	 * sends it over the BLE connection.
+	 *
+	 * @note The following message types may be sent through this function:
+	 *       - Notification with Ranging Message ID
+	 *       - UWB Ranging Service
+	 *
+	 * @param connectionHandle The connection handle identifying the BLE connection.
+	 * @param data Pointer to the unencrypted message.
+	 * @param length Length of the message in bytes.
+	 */
+	void SendBleMessage(ConnectionHandle connectionHandle, const uint8_t *data, size_t length) const;
+
+#endif // CONFIG_NCS_ALIRO_BLE_UWB
 
 private:
 	Callbacks mCallbacks{};
-	AliroConfig mConfig;
+	AliroConfig mConfig{};
 	bool mProvisioned{ false };
 };
 
