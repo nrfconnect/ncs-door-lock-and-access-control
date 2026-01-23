@@ -10,6 +10,10 @@
 #include <aliro/memory.h>
 #include <aliro/utils.h>
 
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+#include "ble/ble_manager.h"
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
 #ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
 #include "reader_certificate_cache.h"
 #endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
@@ -135,7 +139,33 @@ int ShellCmdHandleIdentifiers(const struct shell *shell, size_t argc, char **arg
 							       identifier.data(), identifier.size()),
 			     -EINVAL, shell_warn(shell, "Cannot update %s\n", StorageKeys::kStorageKeyNameIdentifier));
 
-	AliroStack::Instance().SetReaderIdentifier(identifier);
+	AliroError aliroError = AliroStack::Instance().SetReaderIdentifier(identifier);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to set reader identifier\n"));
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	// Update BLE advertising data with new reader identifier
+	auto &bleManager = BleManager::Instance();
+
+	BleTypes::BleAddress address{};
+	BleTypes::TxPowerLevel txPower{};
+	BleTypes::AdvertisingServiceData advData{};
+
+	aliroError = bleManager.GetAddress(address);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL, shell_warn(shell, "Failed to get BLE address\n"));
+
+	aliroError = bleManager.GetTxPowerLevel(txPower);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to get TX power level\n"));
+
+	aliroError = AliroStack::Instance().GenerateAdvertisingData(advData, address, txPower, identifier);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to get advertising data\n"));
+
+	aliroError = bleManager.UpdateAdvertisingData(advData);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to update advertising data\n"));
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	return 0;
 }
@@ -374,8 +404,6 @@ int ShellCmdHandleCredentialIssuerCASet(const struct shell *shell, size_t argc, 
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot import Credential Issuer CA public key\n"));
 
-	AliroStack::Instance().SetCredentialIssuerCAPublicKeyId(keyId);
-
 	return 0;
 }
 
@@ -388,8 +416,6 @@ int ShellCmdHandleCredentialIssuerCAClear(const struct shell *shell, size_t argc
 	const auto error = CryptoInstance().DestroyKey(keyId);
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot remove Credential Issuer CA public key\n"));
-
-	AliroStack::Instance().SetCredentialIssuerCAPublicKeyId(keyId);
 
 	return 0;
 }
@@ -421,12 +447,8 @@ const char *GetReaderChipName(void)
 {
 #if defined(CONFIG_ST25R200_DRV)
 	return "ST25R100";
-#elif defined(CONFIG_ST25R3911_DRV)
-	return "ST25R3911";
-#elif defined(CONFIG_ST25R3916_DRV)
-	return "ST25R3916";
-#elif defined(CONFIG_ST25R3916B_DRV)
-	return "ST25R3916B";
+#elif defined(CONFIG_ST25R500_DRV)
+	return "ST25R300";
 #else
 	return "Unknown NFC reader driver";
 #endif
