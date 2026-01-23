@@ -20,7 +20,7 @@ config DOOR_LOCK_STEP_UP_PHASE
 
 config DOOR_LOCK_CREDENTIAL_ISSUER_CA
     bool "Support for Credential Issuer CA public key"
-    default y if DOOR_LOCK_STEP_UP_PHASE
+    default y if DOOR_LOCK_STEP_UP_PHASE && !CHIP
     help
         If enabled, the Credential Issuer CA public key is supported.
         The Credential Issuer CA public key is used to verify the signature of the Credential Issuer certificate.

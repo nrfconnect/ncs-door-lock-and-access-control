@@ -10,7 +10,7 @@
 #include "aliro/ble_types.h"
 #include "aliro/utils.h"
 
-#include "aliro/platform/ble/ble_manager_impl.h"
+#include "aliro/platform/ble/ble_manager.h"
 
 #include <zephyr/dfu/mcuboot.h>
 #include <zephyr/logging/log.h>
@@ -37,8 +37,6 @@ namespace Aliro::Dfu {
 
 #ifndef CONFIG_DOOR_LOCK_BLE_UWB
 
-using BleInterface::BleManagerImpl;
-
 AliroError SmpManager::InitButton()
 {
 	constexpr gpio_dt_spec button = GPIO_DT_SPEC_GET(DT_ALIAS(dfu_smp_button), gpios);
@@ -63,8 +61,8 @@ void SmpManager::StartAdvertising()
 {
 	AliroError err{};
 
-	err = BleManagerImpl::Instance().StartAdvertising({ kSmpUuid.data(), kSmpUuid.size() },
-							  BleTypes::AdvertisingDataFieldType::Uuid128All);
+	err = BleManager::Instance().StartAdvertising({ kSmpUuid.data(), kSmpUuid.size() },
+						      BleTypes::AdvertisingDataFieldType::Uuid128All);
 	VerifyOrReturn(err == ALIRO_NO_ERROR, LOG_ERR("Dfu SMP advertising failed to start (rc %d)", err.ToInt()));
 
 	LOG_INF("DFU SMP advertising started");
@@ -73,7 +71,7 @@ void SmpManager::StartAdvertising()
 
 void SmpManager::StopAdvertising()
 {
-	AliroError err = BleManagerImpl::Instance().StopAdvertising();
+	AliroError err = BleManager::Instance().StopAdvertising();
 	VerifyOrReturn(err == ALIRO_NO_ERROR, LOG_ERR("Dfu SMP advertising failed to stop (rc %d)", err.ToInt()));
 
 	LOG_INF("DFU SMP advertising stopped");
@@ -108,8 +106,7 @@ AliroError SmpManager::Init()
 		}
 	});
 
-	PlatformTransportCallbacks emptyCallbacks{};
-	VerifyOrReturnStatus(BleManagerImpl::Instance().Init(emptyCallbacks) == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
+	VerifyOrReturnStatus(BleManager::Instance().Init() == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
 
 	VerifyOrReturnStatus(InitButton() == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
 

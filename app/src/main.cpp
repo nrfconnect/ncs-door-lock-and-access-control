@@ -80,6 +80,13 @@ int main()
 	int err = AliroInit();
 	VerifyOrDie(err == EXIT_SUCCESS, "Failed to initialize Aliro");
 
+#ifndef CONFIG_CHIP
+	// When using Matter, Aliro is started by the Door Lock Delegate after the credentials are provisioned by Matter
+	// controller. When Matter is disabled, start Aliro here.
+	err = AliroStart();
+	VerifyOrDie(err == EXIT_SUCCESS, "Failed to start Aliro");
+#endif // CONFIG_CHIP
+
 #ifdef CONFIG_DOOR_LOCK_DFU_BLE_SMP
 
 	Aliro::Dfu::SmpManager::Instance().Init();

@@ -316,16 +316,24 @@ private:
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	struct RangingSessionContext {
-		sys_snode_t mNode{};
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-		RangingSessionContext(uint32_t timeoutMs, Timer::Callback callback, Timer::Context userData)
-			: mRangingSessionTimer(timeoutMs, callback, userData)
+		RangingSessionContext(uint32_t timeoutMs, SessionContext sessionContext)
+			: mSessionContext(sessionContext),
+			  mRangingSessionTimer(timeoutMs, RangingSessionTimerCallback, this)
 		{
 		}
+
+		static void RangingSessionTimerCallback(Timer::Context ctx);
+#else
+		RangingSessionContext(SessionContext sessionContext) : mSessionContext(sessionContext) {}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+
+		sys_snode_t mNode{};
+		SessionContext mSessionContext;
+		bool mInRange{ false };
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		Timer mRangingSessionTimer;
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-		SessionContext mSessionContext{};
-		bool mInRange{ false };
 	};
 
 	bool AnalyzeUwbRangingData(const UwbRangingData &uwbData, SessionContext sessionContext);
@@ -334,6 +342,7 @@ private:
 				     ProtocolVersion protocolVersion, const SessionContext sessionCtx);
 	void RemoveRangingSession(SessionContext sessionCtx);
 	RangingSessionContext *FindRangingSession(const SessionContext sessionCtx);
+	std::optional<SessionContext> FindSessionContext(RangingSessionContext *rangingSessionCtx);
 	bool IsUserDeviceInRange() const;
 	void TerminateAliroSession(SessionContext sessionContext);
 	void SetInRangeState(SessionContext sessionContext, bool sessionInRange, bool updateReaderState = true);

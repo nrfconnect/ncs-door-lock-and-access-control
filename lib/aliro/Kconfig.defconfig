@@ -15,7 +15,7 @@ config MBEDTLS_HEAP_SIZE
 	default 8192
 
 config MBEDTLS_X509_LIBRARY
-	default y
+	default y if DOOR_LOCK_CREDENTIAL_ISSUER_CA
 
 config PSA_WANT_ALG_ECDSA
 	default y

@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
+
 #include "aliro/aliro.h"
 #include "aliro/types.h"
 #include "aliro/utils.h"
@@ -18,7 +19,8 @@
 #endif // CONFIG_DOOR_LOCK_USE_TEST_KEYS
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-#include "ble_manager_impl.h"
+#include "aliro/ble_types.h"
+#include "ble_manager.h"
 #include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -103,23 +105,6 @@ AliroError LoadAccessCredentials()
 	}
 
 	return ALIRO_NO_ERROR;
-}
-
-void LoadCredentialIssuerCA(CryptoTypes::KeyId &credentialIssuerCAPublicKeyId)
-{
-	credentialIssuerCAPublicKeyId = 0;
-
-#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-	CryptoTypes::PublicKey publicKey{};
-
-	const auto error =
-		CryptoInstance().ExportKey(kCredentialIssuerCAPublicKeyId, publicKey.data(), publicKey.size());
-	VerifyOrReturn(error == ALIRO_NO_ERROR, LOG_DBG("Credential Issuer CA Public Key is not provisioned"));
-
-	credentialIssuerCAPublicKeyId = kCredentialIssuerCAPublicKeyId;
-
-#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
 }
 
 AliroError LoadIssuerCredentials()
@@ -289,9 +274,6 @@ AliroError StorageInit()
 	AliroError err = LoadAccessCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Access Credentials"));
 
-	CryptoTypes::KeyId credentialIssuerCAPublicKeyId{ 0 };
-	LoadCredentialIssuerCA(credentialIssuerCAPublicKeyId);
-
 	err = LoadIssuerCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Issuer Credentials"));
 
@@ -312,8 +294,7 @@ AliroError StorageInit()
 	err = LoadReaderIdentifier(identifier);
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load reader identifier"));
 
-	err = AliroStack::Instance().Provision(privateKeyId, groupResolvingKeyId, identifier,
-					       credentialIssuerCAPublicKeyId);
+	err = AliroStack::Instance().Provision(privateKeyId, groupResolvingKeyId, identifier);
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot provision Aliro stack"));
 
 	return ALIRO_NO_ERROR;
@@ -339,6 +320,12 @@ int AliroInit()
 			    LOG_ERR("Failed to initialize access decision indicator"));
 #endif // CONFIG_ACCESS_DECISION_INDICATOR
 
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	// Initialize BLE manager first (app-controlled BLE stack)
+	ec = BleManager::Instance().Init();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("BLE manager initialization failed"));
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
 	const AliroConfig config{
 #ifdef CONFIG_DISABLE_ALIRO_NFC_TP
 		.mEnableNfc = false,
@@ -349,12 +336,6 @@ int AliroInit()
 		.mKpersistentManager = &sKpersistentManagerImpl,
 
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
-
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-		.mBle = &BleInterface::BleManagerImpl::Instance(),
-
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
 	};
 
 	ec = AliroStack::Instance().Init(
@@ -408,8 +389,6 @@ int AliroInit()
 	ec = StorageInit();
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Storage initialization failed"));
 
-	ec = AliroStack::Instance().Start();
-	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack start failed"));
 #endif // CONFIG_CHIP
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
@@ -429,8 +408,30 @@ int AliroInit()
 int AliroStart()
 {
 	AliroError ec = AliroStack::Instance().Start();
-
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack start failed"));
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	auto &bleManager = BleManager::Instance();
+
+	Identifier readerIdentifier{};
+	ec = AliroStack::Instance().GetReaderIdentifier(readerIdentifier);
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Failed to get reader identifier"));
+
+	BleTypes::BleAddress address{};
+	ec = bleManager.GetAddress(address);
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Failed to get BLE address"));
+
+	BleTypes::TxPowerLevel txPower{};
+	ec = bleManager.GetTxPowerLevel(txPower);
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Failed to get TX power level"));
+
+	BleTypes::AdvertisingServiceData advData{};
+	ec = AliroStack::Instance().GenerateAdvertisingData(advData, address, txPower, readerIdentifier);
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Failed to get advertising data"));
+
+	ec = bleManager.StartAdvertising(advData);
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Failed to start BLE advertising"));
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	return EXIT_SUCCESS;
 }
@@ -438,8 +439,16 @@ int AliroStart()
 int AliroStop()
 {
 	AliroError ec = AliroStack::Instance().Stop();
-
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack stop failed"));
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	ec = BleManager::Instance().StopAdvertising();
+	if (ec != ALIRO_NO_ERROR) {
+		LOG_ERR("Failed to stop BLE advertising: %d", ec.ToInt());
+	}
+	ec = BleManager::Instance().DisconnectAll();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Failed to disconnect all BLE connections"));
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	return EXIT_SUCCESS;
 }

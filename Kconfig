@@ -11,6 +11,7 @@ menuconfig NCS_DOOR_LOCK
 	bool "NCS Door Lock Application [EXPERIMENTAL]"
 	depends on (SOC_SERIES_NRF54LX || SOC_SERIES_NRF53X || SOC_SERIES_NRF52X)
 	select EXPERIMENTAL
+	select NCS_ALIRO
 	imply NFC_T4T_APDU
 	imply POLL
 	# storage
@@ -29,6 +30,7 @@ orsource "lib/aliro/interfaces/logger/Kconfig"
 
 config DOOR_LOCK_BLE_UWB
 	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
+	select NCS_ALIRO_BLE_UWB
 	help
 	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
 	  used by the Reader to communicate with the User Device. It is used to send and

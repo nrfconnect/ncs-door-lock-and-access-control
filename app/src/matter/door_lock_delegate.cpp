@@ -70,7 +70,6 @@ CHIP_ERROR DoorLockDelegate::Init()
 		Aliro::CryptoTypes::PublicKey publicKey{};
 		Aliro::Identifier identifier{};
 		Aliro::CryptoTypes::KeyId groupResolvingKeyId{ 0 };
-		Aliro::CryptoTypes::KeyId credentialIssuerCAPublicKeyId{ 0 };
 
 		AliroError ec = Aliro::CryptoInstance().ExportPublicKey(Aliro::kPrivateKeyId, publicKey);
 		VerifyOrReturn(ec == ALIRO_NO_ERROR, /* device not provisioned */);
@@ -85,20 +84,7 @@ CHIP_ERROR DoorLockDelegate::Init()
 
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
-#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-		ec = Aliro::CryptoInstance().ExportKey(Aliro::kCredentialIssuerCAPublicKeyId, publicKey.data(),
-						       publicKey.size());
-		if (ec == ALIRO_NO_ERROR) {
-			credentialIssuerCAPublicKeyId = Aliro::kCredentialIssuerCAPublicKeyId;
-		} else {
-			LOG_DBG("Credential Issuer CA Public Key is not provisioned");
-		}
-
-#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-		ec = Aliro::AliroStack::Instance().Provision(Aliro::kPrivateKeyId, groupResolvingKeyId, identifier,
-							     credentialIssuerCAPublicKeyId);
+		ec = Aliro::AliroStack::Instance().Provision(Aliro::kPrivateKeyId, groupResolvingKeyId, identifier);
 		VerifyOrReturn(ec == ALIRO_NO_ERROR, LOG_ERR("Failed to provision Aliro stack"));
 
 		int err = AliroStart();
@@ -283,7 +269,6 @@ CHIP_ERROR DoorLockDelegate::SetAliroReaderConfig(const chip::ByteSpan &signingK
 	Aliro::CryptoTypes::GroupResolvingKey groupResKey{};
 	Aliro::CryptoTypes::KeyId privateKeyId{ 0 };
 	Aliro::CryptoTypes::KeyId groupResolvingKeyId{ 0 };
-	Aliro::CryptoTypes::KeyId credentialIssuerCAPublicKeyId{ 0 };
 
 	std::copy(signingKey.begin(), signingKey.end(), privateKey.data());
 	std::copy_n(groupIdentifier.data(), kAliroReaderGroupIdentifierSize, identifier.data());
@@ -322,21 +307,7 @@ CHIP_ERROR DoorLockDelegate::SetAliroReaderConfig(const chip::ByteSpan &signingK
 
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
-#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-	Aliro::CryptoTypes::PublicKey publicKey{};
-	ec = Aliro::CryptoInstance().ExportKey(Aliro::kCredentialIssuerCAPublicKeyId, publicKey.data(),
-					       publicKey.size());
-	if (ec == ALIRO_NO_ERROR) {
-		credentialIssuerCAPublicKeyId = Aliro::kCredentialIssuerCAPublicKeyId;
-	} else {
-		LOG_DBG("Credential Issuer CA Public Key is not provisioned");
-	}
-
-#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-	ec = Aliro::AliroStack::Instance().Provision(privateKeyId, groupResolvingKeyId, identifier,
-						     credentialIssuerCAPublicKeyId);
+	ec = Aliro::AliroStack::Instance().Provision(privateKeyId, groupResolvingKeyId, identifier);
 	VerifyOrReturnError(ec == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to provision Aliro stack"));
 
 	VerifyOrReturnError(AliroStart() == EXIT_SUCCESS, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to start Aliro"););
