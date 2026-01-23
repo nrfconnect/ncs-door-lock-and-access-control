@@ -23,9 +23,7 @@ To build and run the application on one of the :ref:`supported development kits 
    +=======================+=======================+================================================================================================+
    | Debug (default)       | `X-NUCLEO-NFC09A1`_   | ``west build -p -b build_target app``                                                          |
    |                       +-----------------------+------------------------------------------------------------------------------------------------+
-   |                       | `X-NUCLEO-NFC08A1`_   | ``west build -p -b build_target app -- -DCONFIG_ST25R3916B_DRV=y``                             |
-   |                       +-----------------------+------------------------------------------------------------------------------------------------+
-   |                       | `X-NUCLEO-NFC05A1`_   | ``west build -p -b build_target app -- -DCONFIG_ST25R3911_DRV=y``                              |
+   |                       | `X-NUCLEO-NFC12A1`_   | ``west build -p -b build_target app -- -DCONFIG_ST25R500_DRV=y``                               |
    +-----------------------+-----------------------+------------------------------------------------------------------------------------------------+
 
    You can find the ``build_target`` of your device in the :ref:`hw_requirements_development_kit` section.
@@ -36,11 +34,11 @@ To build and run the application on one of the :ref:`supported development kits 
 
          west build -p -b nrf5340dk/nrf5340/cpuapp app
 
-   For the nRF54L15 DK and `X-NUCLEO-NFC08A1`_, run:
+   For the nRF54L15 DK and `X-NUCLEO-NFC12A1`_, run:
 
       .. code-block:: bash
 
-         west build -p -b nrf54l15dk/nrf54l15/cpuapp app -- -DCONFIG_ST25R3916B_DRV=y
+         west build -p -b nrf54l15dk/nrf54l15/cpuapp app -- -DCONFIG_ST25R500_DRV=y
 
 #. To build the application with Bluetooth LE transport and UWB, run the following command:
 

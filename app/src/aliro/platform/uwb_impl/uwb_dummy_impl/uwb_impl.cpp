@@ -13,8 +13,6 @@ AliroError UltraWideBandImpl::_Init([[maybe_unused]] const Callbacks &)
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
 
-void UltraWideBandImpl::_SetStackCallbacks([[maybe_unused]] const StackCallbacks &) {}
-
 AliroError UltraWideBandImpl::_Deinit()
 {
 	return ALIRO_ERROR_NOT_IMPLEMENTED;

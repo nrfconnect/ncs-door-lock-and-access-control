@@ -5,11 +5,11 @@
 #
 
 if(NOT TARGET aliro)
-  if(CONFIG_DOOR_LOCK_BLE_UWB)
+  if(CONFIG_NCS_ALIRO_BLE_UWB)
     set(ALIRO_LIB_NAME libaliro_ble.a)
-  else(CONFIG_DOOR_LOCK_BLE_UWB)
+  else(CONFIG_NCS_ALIRO_BLE_UWB)
     set(ALIRO_LIB_NAME libaliro.a)
-  endif(CONFIG_DOOR_LOCK_BLE_UWB)
+  endif(CONFIG_NCS_ALIRO_BLE_UWB)
 
   zephyr_library_import(aliro ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/${ALIRO_LIB_NAME})
 endif()

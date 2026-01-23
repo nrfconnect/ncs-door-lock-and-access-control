@@ -6,18 +6,11 @@
 
 #pragma once
 
+#include "aliro/connection_handle.h"
 #include "aliro/errors.h"
 #include "aliro/types.h"
 
 namespace Aliro {
-
-/**
- * @brief Opaque connection handle for platform implementations.
- *
- * This handle represents a connection without exposing internal connection details.
- * Platform implementations should treat this as an opaque pointer.
- */
-using ConnectionHandle = void *;
 
 /**
  * @brief Transport error source identifier.
@@ -25,19 +18,17 @@ using ConnectionHandle = void *;
 using TransportErrorSource = uint8_t;
 
 /**
- * @brief Transport event callbacks template for platform implementations.
+ * @brief Transport event callbacks template for internal stack use.
  *
- * This template provides a generic callback structure that can be specialized
- * for different connection handle types. Platform implementations should use
- * the PlatformTransportCallbacks alias.
- *
- * @tparam T The connection identifier type
+ * This template provides a generic callback structure for NFC transport events.
+ * *
+ * @tparam T The connection handle type
  */
 template <typename T> struct TransportCallbacks {
 	/**
 	 * @brief Called when data is received and can be further processed.
 	 *
-	 * @param connection Connection identifier
+	 * @param connection Connection handle
 	 * @param data The received data
 	 */
 	void (*mOnDataReceived)(T connection, Data data){ nullptr };
@@ -45,14 +36,14 @@ template <typename T> struct TransportCallbacks {
 	/**
 	 * @brief Called when transport is ready and data can be exchanged.
 	 *
-	 * @param connection Connection identifier
+	 * @param connection Connection handle
 	 */
 	void (*mOnTransportReady)(T connection){ nullptr };
 
 	/**
 	 * @brief Called on transport error.
 	 *
-	 * @param connection Connection identifier
+	 * @param connection Connection handle
 	 * @param error The error code
 	 * @param source The error source
 	 */
@@ -61,16 +52,16 @@ template <typename T> struct TransportCallbacks {
 	/**
 	 * @brief Called when transport medium is lost.
 	 *
-	 * @param connection Connection identifier
+	 * @param connection Connection handle
 	 */
 	void (*mOnTransportLoss)(T connection){ nullptr };
 };
 
 /**
- * @brief Platform transport callbacks using opaque ConnectionHandle.
+ * @brief Platform transport callbacks using ConnectionHandle.
  *
- * These callbacks allow platform implementations to communicate
- * transport events back to the Aliro stack.
+ * Note: These callbacks are only used internally by the NFC transport layer.
+ * For BLE transport, the application uses AliroStack::Indicate* methods directly.
  */
 using PlatformTransportCallbacks = TransportCallbacks<ConnectionHandle>;
 

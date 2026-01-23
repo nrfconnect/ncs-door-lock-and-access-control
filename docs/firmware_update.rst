@@ -235,6 +235,14 @@ When flashing the application, use the following command:
 
 The QM35 firmware is automatically programmed to external flash together with the main application.
 
+.. note::
+   For the nRF54LM20 DK, external flash support in ``west flash`` is not in a production state yet.
+   Therefore, using ``nrfutil`` is currently required to program the firmware:
+
+   .. code-block:: console
+
+      nrfutil device --x-ext-mem-config-file applications/doorlock/app/boards/nrf54lm20dk_spi_nrfutil_config.json program --firmware build/merged.hex --options verify=VERIFY_READ,ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE,reset=RESET_SOFT
+
 Firmware upgrade procedure
 ==========================
 

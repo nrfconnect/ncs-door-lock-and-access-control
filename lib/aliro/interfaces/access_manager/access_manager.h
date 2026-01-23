@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "aliro/connection_handle.h"
 #include "aliro/errors.h"
 #include "aliro/protocol_version.h"
 #include "aliro/types.h"
@@ -24,7 +25,7 @@ class AccessManagerImpl;
  */
 class AccessManager {
 public:
-	using SessionContext = const void *;
+	using SessionContext = ConnectionHandle;
 	using LockIndicatorCallback = void (*)(OperationSource source);
 	using AccessIndicatorCallback = void (*)(bool isAccessGranted, bool isNfcSession);
 	using TerminateSessionCallback = void (*)(SessionContext sessionContext);
@@ -143,7 +144,7 @@ public:
 	AliroError VerifyKPersistentKey(CryptoTypes::KeyId kpersistentKeyId, bool isNfcSession,
 					SessionContext sessionContext);
 
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+#ifdef CONFIG_NCS_ALIRO_BLE_UWB
 	/**
 	 * @brief Starts a ranging session based on provided inputs.
 	 *
@@ -156,7 +157,7 @@ public:
 	 */
 	AliroError StartRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 				       ProtocolVersion protocolVersion, SessionContext sessionContext);
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
+#endif // CONFIG_NCS_ALIRO_BLE_UWB
 
 	/**
 	 * @brief Add a new public key to the AccessManager.
