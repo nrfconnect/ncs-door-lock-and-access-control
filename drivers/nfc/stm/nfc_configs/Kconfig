@@ -7,7 +7,7 @@
 choice RFAL_WAKE_UP_MODE
 	prompt "Wake-Up Mode configuration"
 	default RFAL_WAKE_UP_MODE_RELAXED
-	depends on RFAL_FEATURE_WAKEUP_MODE && ST25R200_DRV
+	depends on RFAL_FEATURE_WAKEUP_MODE
 
 config RFAL_WAKE_UP_MODE_STRICT
 	bool "Strict configuration - less sensitive, more robust"

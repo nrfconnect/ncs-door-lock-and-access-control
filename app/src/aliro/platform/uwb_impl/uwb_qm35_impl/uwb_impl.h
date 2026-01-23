@@ -7,7 +7,7 @@
 #pragma once
 
 #include "aliro/errors.h"
-#include "uwb/uwb.h"
+#include "uwb.h"
 
 #include <aliro_uwb_adapter/aliro_uwb_adapter.h>
 #include <aliro_uwb_adapter/aliro_uwb_session.h>
@@ -50,12 +50,11 @@ public:
 	}
 
 	AliroError _Init(const Callbacks &callbacks);
-	void _SetStackCallbacks(const StackCallbacks &callbacks);
 	AliroError _Deinit();
 	void _BleTimeSync();
 	AliroError _HandleBleMessage(const uint8_t *data, size_t length, SessionContextHandle sessionContextData);
 	AliroError _ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
-					    ProtocolVersion protocolVersion, SessionContextHandle sessionContextData);
+					    ProtocolVersion protocolVersion, SessionContextHandle sessionContextHandle);
 	AliroError _InitiateRangingSession(SessionContextHandle sessionContextData);
 	AliroError _TerminateRangingSession(SessionContextHandle sessionContextData);
 	AliroError _SuspendRangingSession(SessionContextHandle sessionContextData);
@@ -85,9 +84,14 @@ private:
 	 * for efficient linked list management following Zephyr patterns.
 	 */
 	struct SessionContext {
+		SessionContext(UwbSessionContext uwbSessionContext, SessionContextHandle sessionContextData)
+			: mUwbSessionContext(uwbSessionContext), mSessionContextData(sessionContextData)
+		{
+		}
+
 		sys_snode_t mSessionContextNode{};
-		UwbSessionContext mUwbSessionContext{};
-		SessionContextHandle mSessionContextData{};
+		UwbSessionContext mUwbSessionContext;
+		SessionContextHandle mSessionContextData;
 		cherry_ccc_session_state mSessionState{ CHERRY_CCC_SESSION_STATE_INIT };
 		RangingSessionState mRangingSessionState{ RangingSessionState::Uninitialized };
 	};
@@ -181,11 +185,12 @@ private:
 	/**
 	 * @brief Adds a session context to the list.
 	 *
-	 * @param sessionCtx The session context to add.
+	 * @param uwbSessionCtx The UWB session context.
+	 * @param sessionContextHandle The session context data.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError AddSession(const SessionContext &sessionCtx);
+	AliroError AddSession(UwbSessionContext uwbSessionContext, SessionContextHandle sessionContextHandle);
 
 	/**
 	 * @brief Removes and destroys a session from the list.
@@ -210,27 +215,34 @@ private:
 	void DestroySession(SessionContext *sessionCtx);
 
 	/**
-	 * @brief Perform firmware update procedure for QM35 if needed.
-	 *
-	 * This method compares QM35 version to one stored in the primary slot. If the version is
-	 * newer it will restart QM35, perform update, and re-initialize.
-	 *
-	 * @param skipVersionCheck Skip version comparison
+	 * @brief Retrieves device information from the QM35 UWB device.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code otherwise.
 	 */
-	AliroError CheckAndUpdateQm35(bool skipVersionCheck);
+	AliroError GetDeviceInfo();
+
+	/**
+	 * @brief Retrieves device capabilities from the QM35 UWB device.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError GetDeviceCapabilities();
+
+	/**
+	 * @brief Sets the calibration data for the QM35825 UWB device.
+	 *
+	 * @return ALIRO_NO_ERROR on success, error code otherwise.
+	 */
+	AliroError SetCalibrationData();
 
 	CoreEvent *mCoreEvent{};
 	Callbacks mCallbacks{};
-	StackCallbacks mStackCallbacks{};
 	cherry *mCtx{};
 	aliro_uwb_adapter *mAliroCtx{};
 	std::unique_ptr<char[]> mQm35FirmwareVersion{ nullptr };
 	ActiveSessionsList mActiveSessionsList{};
 	k_mutex mMutex{};
 	std::array<uint8_t, kCurrentDistanceBufferSize> mCurrentDistanceCm{};
-	bool mFwUpdateInProgress{ false };
 
 	aliro_uwb_adapter_reader_config mReaderConfig = {
 		.min_ran_multiplier = CONFIG_DOOR_LOCK_UWB_MIN_RAN_MULTIPLIER,

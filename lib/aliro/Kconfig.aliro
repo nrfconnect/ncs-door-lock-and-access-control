@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+menuconfig NCS_ALIRO
+	bool "NCS Aliro Stack [EXPERIMENTAL]"
+	select EXPERIMENTAL
+	help
+	  This option enables the Aliro reader stack.
+	  The Aliro stack provides the core functionality for Aliro readers.
+
+if NCS_ALIRO
+
+config NCS_ALIRO_BLE_UWB
+	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
+	help
+	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
+	  used by the Reader to communicate with the User Device. It is used to send and
+	  receive packets over BLE. Additionally the UWB is enabled in order to manage the
+	  ranging between the Reader and the User Device.
+
+endif # NCS_ALIRO
