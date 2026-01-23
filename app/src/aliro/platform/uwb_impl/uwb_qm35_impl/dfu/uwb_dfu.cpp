@@ -87,6 +87,8 @@ int PerformFirmwareUpdate()
 	mcuboot_img_header header;
 	uint8_t firmwareChunkBuffer[kMaxChunkSize];
 
+	LOG_INF("Starting firmware update");
+
 	ret = boot_read_bank_header(QM35_DFU_IMAGE_PARTITION_ID, &header, sizeof(mcuboot_img_header));
 	VerifyOrReturnValue(ret == 0, ret, LOG_WRN("Error when reading QM35 FW primary slot: %d", ret));
 
@@ -157,6 +159,8 @@ exit:
 	}
 
 	qmrom_spi_unregister_drivers();
+
+	LOG_INF("Firmware update %s", (ret ? "failed" : "successful"));
 
 	return ret;
 }

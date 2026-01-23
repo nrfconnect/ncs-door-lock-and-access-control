@@ -9,7 +9,7 @@
 #include "aliro/ble_types.h"
 #include "aliro/utils.h"
 
-#include "aliro/platform/ble/ble_manager_impl.h"
+#include "aliro/platform/ble/ble_manager.h"
 
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/conn.h>
@@ -20,14 +20,12 @@ LOG_MODULE_REGISTER(NusService, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace Aliro::BtNus {
 
-using BleInterface::BleManagerImpl;
-
 AliroError NUSService::Start()
 {
 	VerifyOrReturnStatus(!mIsStarted, ALIRO_INVALID_STATE, LOG_ERR("NUS service is already started"));
 
 #if !defined(CONFIG_DOOR_LOCK_DFU_BLE_SMP) && !defined(CONFIG_DOOR_LOCK_BLE_UWB)
-	VerifyOrReturnStatus(BleManagerImpl::Instance().Init({}) == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
+	VerifyOrReturnStatus(BleManager::Instance().Init() == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
 #endif // !CONFIG_DOOR_LOCK_DFU_BLE_SMP && !CONFIG_DOOR_LOCK_BLE_UWB
 
 	static bt_conn_auth_cb sConnAuthCallbacks = {
@@ -63,8 +61,8 @@ AliroError NUSService::Start()
 
 #ifndef CONFIG_DOOR_LOCK_BLE_UWB
 
-	AliroError err = BleManagerImpl::Instance().StartAdvertising({ kNusUuid.data(), kNusUuid.size() },
-								     BleTypes::AdvertisingDataFieldType::Uuid128All);
+	AliroError err = BleManager::Instance().StartAdvertising({ kNusUuid.data(), kNusUuid.size() },
+								 BleTypes::AdvertisingDataFieldType::Uuid128All);
 
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err,
 			     LOG_ERR("NUS advertising failed to start (rc %d)", err.ToInt()));
@@ -80,7 +78,7 @@ void NUSService::StopServer()
 {
 	VerifyOrReturn(IsNusStarted(), LOG_ERR("NUS service not started"));
 
-	AliroError err = BleManagerImpl::Instance().StopAdvertising();
+	AliroError err = BleManager::Instance().StopAdvertising();
 	VerifyOrReturn(err == ALIRO_NO_ERROR, LOG_ERR("NUS advertising failed to stop (rc %d)", err.ToInt()));
 
 	mIsStarted = false;
