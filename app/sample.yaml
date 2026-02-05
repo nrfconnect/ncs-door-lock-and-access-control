@@ -21,7 +21,7 @@ tests:
     integration_platforms:
       - nrf54lm20dk/nrf54lm20a/cpuapp
     extra_args:
-      - app_SNIPPET="uwb_qm35_src;dfu_smp"
+      - app_SNIPPET="uwb_qm35;dfu_smp"
       - SNIPPET=matter
       - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
@@ -58,7 +58,7 @@ tests:
     integration_platforms:
       - nrf54lm20dk/nrf54lm20a/cpuapp
     extra_args:
-      - app_SNIPPET="uwb_qm35_src;dfu_smp"
+      - app_SNIPPET="uwb_qm35;dfu_smp"
       - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
