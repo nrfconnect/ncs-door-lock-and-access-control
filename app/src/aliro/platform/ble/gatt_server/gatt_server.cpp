@@ -86,12 +86,11 @@ ssize_t GattServer::UserDeviceSelectedSpsmBleUwbProtocolversion(bt_conn *connect
 
 	VerifyOrReturnValue(versionFound, dataLength, LOG_DBG("Unsupported protocol version: 0x%04x", version));
 
-	const auto *l2capServerPtr = static_cast<L2capServer *>(attribute->user_data);
+	auto *l2capServerPtr = static_cast<L2capServer *>(attribute->user_data);
 	VerifyOrReturnValue(l2capServerPtr, BT_GATT_ERR(BT_ATT_ERR_INVALID_HANDLE),
 			    LOG_ERR("Invalid L2CAP server pointer"));
 
-	// Ignore the error code, as it is not critical.
-	std::ignore = l2capServerPtr->AllocateL2capChannel(connectionId, version);
+	l2capServerPtr->SetProtocolVersion(connectionId, version);
 
 	return dataLength;
 }

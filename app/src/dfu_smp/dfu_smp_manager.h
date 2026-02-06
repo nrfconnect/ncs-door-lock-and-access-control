@@ -7,8 +7,10 @@
 #pragma once
 
 #include "aliro/errors.h"
+#include "aliro/platform/ble/ble_advertising_arbiter.h"
 
 #include <bluetooth/services/dfu_smp.h>
+#include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/uuid.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
@@ -88,6 +90,12 @@ private:
 
 	// DFU SMP service UUID.
 	static constexpr std::array<uint8_t, BT_UUID_SIZE_128> kSmpUuid{ BT_UUID_DFU_SMP_SERVICE_VAL };
+
+	// Advertising flags.
+	static constexpr uint8_t kAdvertisingFlags{ BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR };
+
+	// Advertising data storage.
+	DoorLock::Interface::BleAdvertisingArbiter::Request mRequest{};
 };
 
 } // namespace Aliro::Dfu
