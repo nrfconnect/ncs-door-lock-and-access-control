@@ -7,6 +7,7 @@
 #pragma once
 
 #include "aliro/errors.h"
+#include "aliro/platform/ble/ble_advertising_arbiter.h"
 
 #include <bluetooth/services/nus.h>
 #include <zephyr/bluetooth/bluetooth.h>
@@ -102,6 +103,12 @@ private:
 
 	// NUS service UUID.
 	static constexpr std::array<uint8_t, BT_UUID_SIZE_128> kNusUuid{ BT_UUID_NUS_VAL };
+
+	// Advertising flags.
+	static constexpr uint8_t kAdvertisingFlags{ BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR };
+
+	// Advertising data storage.
+	DoorLock::Interface::BleAdvertisingArbiter::Request mRequest{};
 };
 
 } // namespace Aliro::BtNus

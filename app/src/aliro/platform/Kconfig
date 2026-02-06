@@ -5,12 +5,13 @@
 #
 
 rsource "access_decision_indicator/Kconfig"
-rsource "nfc_transport_impl/Kconfig"
+rsource "crypto/Kconfig"
+rsource "nfc/Kconfig"
 
 if DOOR_LOCK_BLE_UWB
 rsource "uwb_impl/Kconfig"
 endif # DOOR_LOCK_BLE_UWB
 
-if DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS
+if BT
 rsource "ble/Kconfig"
-endif #  DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS
+endif # BT

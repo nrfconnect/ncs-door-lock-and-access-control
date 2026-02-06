@@ -21,7 +21,6 @@ struct L2CapChanNode {
 
 	bt_conn *conn{ nullptr };
 	bt_l2cap_le_chan chan{};
-	Aliro::ProtocolVersion bleUwbProtocolVersion{};
 };
 
 static_assert(offsetof(L2CapChanNode, node) == 0);
@@ -35,7 +34,7 @@ NET_BUF_POOL_DEFINE(sNetBufPool, CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS, BT_L2CAP
 K_MUTEX_DEFINE(sL2CapChanMutex);
 sys_slist_t sL2CapChanList{};
 
-bt_l2cap_le_chan *AllocateNewL2capChan(bt_conn *conn, Aliro::ProtocolVersion version)
+bt_l2cap_le_chan *AllocateNewL2capChan(bt_conn *conn)
 {
 	auto *ref = bt_conn_ref(conn);
 	VerifyOrReturnValue(ref, nullptr, LOG_ERR("Cannot reference connection (conn: %p)", conn));
@@ -44,7 +43,6 @@ bt_l2cap_le_chan *AllocateNewL2capChan(bt_conn *conn, Aliro::ProtocolVersion ver
 	VerifyOrReturnValue(node, nullptr, LOG_ERR("Cannot allocate channel node (conn: %p)", conn));
 
 	node->conn = ref;
-	node->bleUwbProtocolVersion = version;
 
 	{
 		MutexGuard lock{ sL2CapChanMutex };
@@ -98,12 +96,11 @@ int L2capServer::Accept(bt_conn *conn, bt_l2cap_server *server, bt_l2cap_chan **
 	VerifyOrReturnValue(Instance().mChannelCount < CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS, -ENOMEM,
 			    LOG_ERR("Too many connections"));
 
-	auto *l2capChan = GetL2capChan(conn);
-	VerifyOrReturnValue(l2capChan, -ENOENT, LOG_ERR("Cannot get allocated channel (conn: %p)", conn));
-
-	VerifyOrReturnValue(Instance().GetBleUwbProtocolVersion(conn) != BleTypes::kInvalidProtocolVersion, -ENOENT,
+	const auto protocolVersion = Instance().GetBleUwbProtocolVersion(conn);
+	VerifyOrReturnValue(protocolVersion != BleTypes::kInvalidProtocolVersion, -ENOENT,
 			    LOG_ERR("BLE UWB protocol version is not set(conn: %p)", conn));
 
+	auto *l2capChan = AllocateNewL2capChan(conn);
 	l2capChan->chan.ops = &Instance().mChannelCallbacks;
 
 	*channel = &l2capChan->chan;
@@ -129,6 +126,8 @@ void L2capServer::Disconnected(bt_l2cap_chan *channel)
 	LOG_INF("L2CAP disconnected: %p", channel);
 
 	VerifyAndCall(Instance().mCallbacks.mOnDisconnected, channel->conn);
+
+	Instance().SetProtocolVersion(channel->conn, BleTypes::kInvalidProtocolVersion);
 }
 
 int L2capServer::DataReceived(bt_l2cap_chan *channel, net_buf *buffer)
@@ -175,44 +174,16 @@ bool L2capServer::IsValidDynamicSpsm(Spsm spsm)
 	return IN_RANGE(spsm, kL2capSpsmMin, kL2capSpsmMax);
 }
 
-AliroError L2capServer::AllocateL2capChannel(bt_conn *conn, ProtocolVersion version) const
+void L2capServer::SetProtocolVersion(bt_conn *conn, ProtocolVersion protocolVersion)
 {
-	VerifyOrReturnValue(conn, ALIRO_INVALID_ARGUMENT, LOG_ERR("Invalid connection"));
-	VerifyOrExit(GetL2capChan(conn) == nullptr, LOG_DBG("Channel already allocated (conn: %p)", conn));
-
-	VerifyOrReturnValue(AllocateNewL2capChan(conn, version) != nullptr, ALIRO_NO_MEMORY,
-			    LOG_ERR("Cannot allocate channel (conn: %p)", conn));
-
-exit:
-	return ALIRO_NO_ERROR;
-}
-
-void L2capServer::FreeL2capChannel(bt_conn *conn) const
-{
-	VerifyOrReturn(conn, LOG_ERR("Invalid connection"));
-
-	auto *chan = GetL2capChan(conn);
-	VerifyOrReturn(chan, LOG_DBG("Channel not allocated or already freed (conn: %p)", conn));
-
-	FreeL2capChan(chan);
+	const auto index = bt_conn_index(conn);
+	mConnectionProtocolVersion[index] = protocolVersion;
 }
 
 ProtocolVersion L2capServer::GetBleUwbProtocolVersion(bt_conn *conn) const
 {
-	sys_snode_t *node{ nullptr };
-
-	{
-		MutexGuard lock{ sL2CapChanMutex };
-
-		SYS_SLIST_FOR_EACH_NODE (&sL2CapChanList, node) {
-			const auto *nodeObj = CONTAINER_OF(node, L2CapChanNode, node);
-			if (nodeObj->conn == conn) {
-				return nodeObj->bleUwbProtocolVersion;
-			}
-		}
-	}
-
-	return BleTypes::kInvalidProtocolVersion;
+	const auto index = bt_conn_index(conn);
+	return mConnectionProtocolVersion[index];
 }
 
 AliroError L2capServer::Send(bt_conn *conn, const uint8_t *data, size_t length) const

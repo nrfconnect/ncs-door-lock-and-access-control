@@ -13,7 +13,7 @@ There are following components of the code structure and their roles within the 
 
 ## Supported configuration
 
-See the list of the currently supported NFC configurations:
+See the list of the NFC drivers currently supported by RFAL:
 
 - ST25R3911
 - ST25R3911B
@@ -21,15 +21,18 @@ See the list of the currently supported NFC configurations:
 - ST25R3916B
 - ST25R100
 - ST25R200
-- ST25R500
 - ST25R300
+- ST25R500
 
 ## Supported shields
 
-See the list of the currently supported NFC shields:
+See the list of the NFC shields currently supported by RFAL:
 - [X-NUCLEO-NFC05A1](https://www.st.com/en/ecosystems/x-nucleo-nfc05a1.html)
 - [X-NUCLEO-NFC08A1](https://www.st.com/en/ecosystems/x-nucleo-nfc08a1.html)
 - [X-NUCLEO-NFC09A1](https://www.st.com/en/ecosystems/x-nucleo-nfc09a1.html)
+- [X-NUCLEO-NFC12A1](https://www.st.com/en/ecosystems/x-nucleo-nfc12a1.html)
+
+> Note: The STM NFC transceivers and shields supported in the nRF Connect Door Lock reference application may not match the full list supported natively by RFAL.
 
 ## Integrating a New ST Low Level Driver for NFC IC
 

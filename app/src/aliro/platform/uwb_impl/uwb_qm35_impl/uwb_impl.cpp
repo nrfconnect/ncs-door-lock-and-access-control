@@ -8,6 +8,7 @@
 #include "dfu/uwb_dfu.h"
 #include "uwb_message.h"
 
+#include "aliro/aliro.h"
 #include "aliro/memory.h"
 #include "aliro/mutex_guard.h"
 #include "aliro/utils.h"
@@ -190,8 +191,7 @@ void UltraWideBandImpl::TransmitBleMessage(aliro_uwb_message *message, UwbSessio
 		auto *sessionCtx = uwbImpl->FindSession(uwbSessionCtx);
 		VerifyOrExit(sessionCtx, LOG_ERR("Session context not found"));
 
-		VerifyAndCall(uwbImpl->mStackCallbacks.mTransmitBleMessage, sessionCtx->mSessionContextData,
-			      message->data, message->len);
+		AliroStack::Instance().SendBleMessage(sessionCtx->mSessionContextData, message->data, message->len);
 	}
 
 exit:
@@ -319,6 +319,16 @@ AliroError UltraWideBandImpl::HandleDeviceCapsEvent(CoreEvent *event)
 	mAliroCtx = aliro_uwb_adapter_create_reader(mCtx, event->data.device_caps, &mReaderConfig);
 	VerifyOrReturnStatus(mAliroCtx, ALIRO_ERROR_INTERNAL, LOG_ERR("Failed to create UWB adapter reader."));
 
+	if (event->data.device_caps->ccc_capabilities) {
+		const auto *src = event->data.device_caps->ccc_capabilities;
+		mCccCaps.mSlotBitmask = src->slot_bitmask;
+		mCccCaps.mChannelBitmask = src->channel_bitmask;
+		mCccCaps.mHoppingConfigBitmask = src->hopping_config_bitmask;
+		mCccCaps.mSyncCodeIndexBitmask = src->sync_code_index_bitmask;
+		mCccCaps.mMinimumRanMultiplier = src->minimum_ran_multiplier;
+		mCccCapsValid = true;
+	}
+
 	return ALIRO_NO_ERROR;
 }
 
@@ -374,80 +384,63 @@ exit:
 
 AliroError UltraWideBandImpl::_Init(const Callbacks &callbacks)
 {
-	cherry_err cErr{};
-	AliroError err{};
-
-#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DFU
-	if (!mFwUpdateInProgress) {
-#endif
-		mCallbacks = callbacks;
-
-		VerifyOrReturnStatus(k_mutex_init(&mMutex) == 0, ALIRO_ERROR_INTERNAL,
-				     LOG_ERR("Failed to initialize mutex"));
-		sys_slist_init(&mActiveSessionsList);
-#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DFU
-	}
-#endif
-
 	LOG_INF("Initializing UWB device...");
+
+	mInitialized = false;
+	mCccCapsValid = false;
+
+	mCallbacks = callbacks;
+
+	VerifyOrReturnStatus(k_mutex_init(&mMutex) == 0, ALIRO_ERROR_INTERNAL, LOG_ERR("Failed to initialize mutex"));
+	sys_slist_init(&mActiveSessionsList);
 
 	mCtx = cherry_create("qm35", &UwbCoreCallback, this);
 	VerifyOrReturnStatus(mCtx, ALIRO_UWB_INIT_FAILED, LOG_ERR("Failed to create Cherry context"));
 
-	// Use full calibration data for the QM35825 device.
-	// This needs to be done only once during initialization, or after a power cycle.
-	const auto calibData = &util_calib_qm35825;
-	int status = cherry_set_calib(mCtx, calibData);
-	VerifyOrExit(status == CHERRY_ERR_NONE, LOG_ERR("Failed to set calibration data: %d", status));
-
-	// Read Cherry device capabilities.
-	cErr = cherry_get_device_capabilities(mCtx);
-	VerifyOrExit(cErr == CHERRY_ERR_NONE, LOG_ERR("Failed to get device capabilities: %s", cherry_err_str(cErr)));
-
-	// Wait for and handle device capabilities event.
-	err = HandleUwbEvent(UwbEvents::DeviceCaps,
-			     [](CoreEvent *event) -> AliroError { return Instance().HandleDeviceCapsEvent(event); });
-	VerifyOrExit(err == ALIRO_NO_ERROR);
-
-	// Read Cherry device info.
-	cErr = cherry_get_device_info(mCtx);
-	VerifyOrExit(cErr == CHERRY_ERR_NONE, LOG_ERR("Failed to get device info: %s", cherry_err_str(cErr)));
-
-	// Wait for and handle device info event.
-	err = HandleUwbEvent(UwbEvents::DeviceInfo,
-			     [](CoreEvent *event) -> AliroError { return Instance().HandleDeviceInfoEvent(event); });
-	VerifyOrExit(err == ALIRO_NO_ERROR);
-
-	LOG_INF("UWB device initialized successfully.");
+	auto err = GetDeviceInfo();
 
 #ifdef CONFIG_DOOR_LOCK_UWB_QM35_DFU
-	if (!mFwUpdateInProgress) {
-		return CheckAndUpdateQm35(false);
+
+	if (err != ALIRO_NO_ERROR || Dfu::ShouldUpdate(mQm35FirmwareVersion.get())) {
+		cherry_destroy_sync(mCtx);
+		mCtx = nullptr;
+
+		const auto ret = Dfu::PerformFirmwareUpdate();
+		VerifyOrReturnStatus(ret == 0, ALIRO_ERROR_INTERNAL, LOG_ERR("Firmware update failed"));
+
+		mCtx = cherry_create("qm35", &UwbCoreCallback, this);
+		VerifyOrReturnStatus(mCtx, ALIRO_UWB_INIT_FAILED, LOG_ERR("Failed to create Cherry context"));
+
+		err = GetDeviceInfo();
 	}
-#endif
+
+#endif // CONFIG_DOOR_LOCK_UWB_QM35_DFU
+
+	VerifyOrExit(err == ALIRO_NO_ERROR);
+
+	err = SetCalibrationData();
+	VerifyOrExit(err == ALIRO_NO_ERROR);
+
+	err = GetDeviceCapabilities();
+	VerifyOrExit(err == ALIRO_NO_ERROR);
+
+	mInitialized = true;
+	LOG_INF("UWB device initialized successfully.");
 
 	return ALIRO_NO_ERROR;
 
 exit:
-
-#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DFU
-	if (!mFwUpdateInProgress) {
-		return CheckAndUpdateQm35(true);
-	}
-#else
+	LOG_ERR("UWB device initialization failed");
 	_Deinit();
-#endif
-
 	return ALIRO_UWB_INIT_FAILED;
-}
-
-void UltraWideBandImpl::_SetStackCallbacks(const StackCallbacks &callbacks)
-{
-	mStackCallbacks = callbacks;
 }
 
 AliroError UltraWideBandImpl::_Deinit()
 {
+	mInitialized = false;
+	mCccCapsValid = false;
+	mQm35FirmwareVersion.reset();
+
 	RemoveAllSessions();
 
 	if (mAliroCtx) {
@@ -474,7 +467,6 @@ void UltraWideBandImpl::_BleTimeSync()
 AliroError UltraWideBandImpl::_HandleBleMessage(const uint8_t *data, size_t length,
 						SessionContextHandle sessionContextData)
 {
-	VerifyOrReturnStatus(sessionContextData, ALIRO_INVALID_ARGUMENT, LOG_ERR("Session context data is null."));
 	VerifyOrReturnStatus(data && length > 0, ALIRO_INVALID_ARGUMENT, LOG_ERR("Invalid BLE message data."));
 
 	aliro_uwb_err err{};
@@ -486,7 +478,7 @@ AliroError UltraWideBandImpl::_HandleBleMessage(const uint8_t *data, size_t leng
 
 	const auto *sessionCtx = FindSession(sessionContextData);
 	VerifyOrReturnStatus(sessionCtx, ALIRO_SESSION_NOT_FOUND,
-			     LOG_ERR("Session context not found for handle: %p", sessionContextData));
+			     LOG_ERR("Session context not found for handle: %p", sessionContextData.GetRaw()));
 	err = aliro_uwb_session_message_handle(sessionCtx->mUwbSessionContext, message.get());
 	VerifyOrReturnStatus(err == ALIRO_UWB_ERR_NONE, ConvertUwbError(err),
 			     LOG_ERR("Cannot handle UWB session message 0x%x", ToUnderlying(err)));
@@ -496,14 +488,13 @@ AliroError UltraWideBandImpl::_HandleBleMessage(const uint8_t *data, size_t leng
 
 AliroError UltraWideBandImpl::_ConfigureRangingSession(SessionIdentifier sessionId, const CryptoTypes::Ursk &ursk,
 						       ProtocolVersion protocolVersion,
-						       SessionContextHandle sessionContextData)
+						       SessionContextHandle sessionContextHandle)
 {
 	VerifyOrReturnStatus(mAliroCtx, ALIRO_INVALID_STATE, LOG_ERR("UWB is not initialized."));
-	VerifyOrReturnStatus(sessionContextData, ALIRO_INVALID_ARGUMENT, LOG_ERR("Session context data is null."));
 
-	auto *sessionCtx = FindSession(sessionContextData);
+	auto *sessionCtx = FindSession(sessionContextHandle);
 	VerifyOrReturnStatus(!sessionCtx, ALIRO_INVALID_STATE,
-			     LOG_ERR("Session context already exists for handle: %p", sessionContextData));
+			     LOG_ERR("Session context already exists for handle: %p", sessionContextHandle.GetRaw()));
 
 	aliro_uwb_session *newSessionCtx =
 		aliro_uwb_session_create(mAliroCtx, sessionId, &SessionHandlerCallback, &TransmitBleMessage, this);
@@ -515,11 +506,11 @@ AliroError UltraWideBandImpl::_ConfigureRangingSession(SessionIdentifier session
 	err = ConvertUwbError(aliro_uwb_session_set_protocol_version(newSessionCtx, protocolVersion));
 	VerifyOrExit(err == ALIRO_NO_ERROR, LOG_ERR("Failed to set protocol version in UWB session: %d", err.ToInt()));
 
-	err = AddSession({ .mUwbSessionContext = newSessionCtx, .mSessionContextData = sessionContextData });
+	err = AddSession(newSessionCtx, sessionContextHandle);
 	VerifyOrExit(err == ALIRO_NO_ERROR,
 		     LOG_ERR("Failed to add session to the active sessions list: %d", err.ToInt()));
 
-	LOG_INF("UWB session created with sessionContextData: %p", sessionContextData);
+	LOG_INF("UWB session created with sessionContextHandle: %p", sessionContextHandle.GetRaw());
 	return ALIRO_NO_ERROR;
 
 exit:
@@ -530,11 +521,9 @@ exit:
 
 AliroError UltraWideBandImpl::_InitiateRangingSession(SessionContextHandle sessionContextData)
 {
-	VerifyOrReturnStatus(sessionContextData, ALIRO_INVALID_ARGUMENT, LOG_ERR("Session context data is null."));
-
 	const auto *sessionCtx = FindSession(sessionContextData);
 	VerifyOrReturnStatus(sessionCtx, ALIRO_SESSION_NOT_FOUND,
-			     LOG_ERR("Session context not found for handle: %p", sessionContextData));
+			     LOG_ERR("Session context not found for handle: %p", sessionContextData.GetRaw()));
 
 	aliro_uwb_err err = aliro_uwb_session_init_setup(sessionCtx->mUwbSessionContext);
 	VerifyOrReturnStatus(err == ALIRO_UWB_ERR_NONE, ConvertUwbError(err),
@@ -545,25 +534,22 @@ AliroError UltraWideBandImpl::_InitiateRangingSession(SessionContextHandle sessi
 
 AliroError UltraWideBandImpl::_TerminateRangingSession(SessionContextHandle sessionContextData)
 {
-	VerifyOrReturnStatus(sessionContextData, ALIRO_INVALID_ARGUMENT, LOG_ERR("Session context data is null."));
-
 	auto *sessionCtx = FindSession(sessionContextData);
 	VerifyOrReturnStatus(sessionCtx, ALIRO_SESSION_NOT_FOUND,
-			     LOG_ERR("Session context not found for handle: %p", sessionContextData));
+			     LOG_ERR("Session context not found for handle: %p", sessionContextData.GetRaw()));
 
 	RemoveSession(sessionCtx);
 
-	LOG_DBG("Terminating UWB session with context: %p", sessionContextData);
+	LOG_DBG("Terminating UWB session with context: %p", sessionContextData.GetRaw());
 
 	return ALIRO_NO_ERROR;
 }
 
 AliroError UltraWideBandImpl::_SuspendRangingSession(SessionContextHandle sessionContextData)
 {
-	VerifyOrReturnStatus(sessionContextData, ALIRO_INVALID_ARGUMENT, LOG_ERR("Session context data is null."));
 	const auto *sessionCtx = FindSession(sessionContextData);
 	VerifyOrReturnStatus(sessionCtx, ALIRO_SESSION_NOT_FOUND,
-			     LOG_ERR("Session context not found for handle: %p", sessionContextData));
+			     LOG_ERR("Session context not found for handle: %p", sessionContextData.GetRaw()));
 
 	aliro_uwb_err err = aliro_uwb_session_suspend(sessionCtx->mUwbSessionContext);
 	VerifyOrReturnStatus(err == ALIRO_UWB_ERR_NONE, ConvertUwbError(err),
@@ -574,10 +560,9 @@ AliroError UltraWideBandImpl::_SuspendRangingSession(SessionContextHandle sessio
 
 AliroError UltraWideBandImpl::_ResumeRangingSession(SessionContextHandle sessionContextData)
 {
-	VerifyOrReturnStatus(sessionContextData, ALIRO_INVALID_ARGUMENT, LOG_ERR("Session context data is null."));
 	const auto *sessionCtx = FindSession(sessionContextData);
 	VerifyOrReturnStatus(sessionCtx, ALIRO_SESSION_NOT_FOUND,
-			     LOG_ERR("Session context not found for handle: %p", sessionContextData));
+			     LOG_ERR("Session context not found for handle: %p", sessionContextData.GetRaw()));
 
 	aliro_uwb_err err = aliro_uwb_session_resume(sessionCtx->mUwbSessionContext);
 	VerifyOrReturnStatus(err == ALIRO_UWB_ERR_NONE, ConvertUwbError(err),
@@ -586,13 +571,10 @@ AliroError UltraWideBandImpl::_ResumeRangingSession(SessionContextHandle session
 	return ALIRO_NO_ERROR;
 }
 
-AliroError UltraWideBandImpl::AddSession(const SessionContext &sessionCtx)
+AliroError UltraWideBandImpl::AddSession(UwbSessionContext uwbSessionContext, SessionContextHandle sessionContextHandle)
 {
-	auto newCtx = Aliro::new_nothrow<SessionContext>();
+	auto newCtx = Aliro::new_nothrow<SessionContext>(uwbSessionContext, sessionContextHandle);
 	VerifyOrReturnStatus(newCtx, ALIRO_NO_MEMORY, LOG_ERR("Memory allocation failed for session context."));
-
-	newCtx->mUwbSessionContext = sessionCtx.mUwbSessionContext;
-	newCtx->mSessionContextData = sessionCtx.mSessionContextData;
 
 	MutexGuard lock{ mMutex };
 
@@ -666,37 +648,40 @@ void UltraWideBandImpl::DestroySession(SessionContext *sessionCtx)
 	}
 }
 
-AliroError UltraWideBandImpl::CheckAndUpdateQm35(bool skipVersionCheck)
+AliroError UltraWideBandImpl::GetDeviceInfo()
 {
-	int err;
-	cherry_err cErr{};
-	AliroError aErr{};
+	// Read Cherry device info.
+	const auto cErr = cherry_get_device_info(mCtx);
+	VerifyOrReturnStatus(cErr == CHERRY_ERR_NONE, ALIRO_ERROR_INTERNAL,
+			     LOG_ERR("Failed to get device info: %s", cherry_err_str(cErr)));
 
-	if (!skipVersionCheck && !Dfu::ShouldUpdate(mQm35FirmwareVersion.get())) {
-		return ALIRO_NO_ERROR;
-	}
+	// Wait for and handle device info event.
+	return HandleUwbEvent(UwbEvents::DeviceInfo,
+			      [](CoreEvent *event) -> AliroError { return Instance().HandleDeviceInfoEvent(event); });
+}
 
-	LOG_DBG("Starting firmware update, resetting device");
+AliroError UltraWideBandImpl::GetDeviceCapabilities()
+{
+	// Read Cherry device capabilities.
+	const auto cErr = cherry_get_device_capabilities(mCtx);
+	VerifyOrReturnStatus(cErr == CHERRY_ERR_NONE, ALIRO_ERROR_INTERNAL,
+			     LOG_ERR("Failed to get device capabilities: %s", cherry_err_str(cErr)));
 
-	cErr = cherry_reset_device(mCtx, true);
-	if (cErr != CHERRY_ERR_NONE) {
-		LOG_ERR("cherry_reset failed with error %d", cErr);
-		return ALIRO_ERROR_UNKNOWN;
-	}
+	// Wait for and handle device capabilities event.
+	return HandleUwbEvent(UwbEvents::DeviceCaps,
+			      [](CoreEvent *event) -> AliroError { return Instance().HandleDeviceCapsEvent(event); });
+}
 
-	mFwUpdateInProgress = true;
+AliroError UltraWideBandImpl::SetCalibrationData()
+{
+	// Use full calibration data for the QM35825 device.
+	// This needs to be done only once during initialization, or after a power cycle.
+	const auto calibData = &util_calib_qm35825;
+	const auto cErr = cherry_set_calib(mCtx, calibData);
+	VerifyOrReturnStatus(cErr == CHERRY_ERR_NONE, ALIRO_ERROR_INTERNAL,
+			     LOG_ERR("Failed to set calibration data: %s", cherry_err_str(cErr)));
 
-	_Deinit();
-
-	err = Dfu::PerformFirmwareUpdate();
-	aErr = _Init(mCallbacks);
-
-	mFwUpdateInProgress = false;
-
-	LOG_INF("Firmware update %s", (err ? "failed" : "successful"));
-
-	// If DFU was succesful report init's result
-	return (err == 0 ? aErr : ALIRO_UWB_DFU_FAILED);
+	return ALIRO_NO_ERROR;
 }
 
 } // namespace Aliro::Uwb

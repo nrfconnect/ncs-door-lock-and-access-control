@@ -14,6 +14,11 @@ using namespace Aliro::Uwb;
 
 int ShellCmdQm35Version(const struct shell *shell, size_t, char **)
 {
+	if (!UltraWideBandImpl::Instance().IsInitialized()) {
+		shell_warn(shell, "UWB not initialized");
+		return 0;
+	}
+
 	const char *version = UltraWideBandImpl::Instance().GetQm35FirmwareVersion();
 
 	if (version) {

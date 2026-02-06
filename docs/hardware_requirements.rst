@@ -14,7 +14,7 @@ To run and test the |APP_NAME|, you must have the required hardware.
 Development kit
 ***************
 
-The application supports the following development kit (DK):
+The application supports the following development kits (DK):
 
 .. list-table::
    :header-rows: 1
@@ -42,8 +42,9 @@ The application supports the following development kit (DK):
 
 .. _hw_requirements_vddio_configuration:
 
-Configuring VDDIO voltage
-=========================
+Configuring VDDIO voltage for nRF54L Series devices
+===================================================
+
 The nRF54L15 DK and the nRF54LM20 DK operate at default voltage level of 1.8V.
 Some expansion boards, especially Arduino-style boards, require higher voltage to operate properly.
 
@@ -107,9 +108,7 @@ The application supports the following NFC readers and their corresponding devel
 +===================+=================================+
 | `ST25R100`_       | `X-NUCLEO-NFC09A1`_             |
 +-------------------+---------------------------------+
-| `ST25R3916B`_     | `X-NUCLEO-NFC08A1`_             |
-+-------------------+---------------------------------+
-| `ST25R3911B`_     | `X-NUCLEO-NFC05A1`_             |
+| `ST25R300`_       | `X-NUCLEO-NFC12A1`_             |
 +-------------------+---------------------------------+
 
 .. note::
@@ -117,13 +116,44 @@ The application supports the following NFC readers and their corresponding devel
    The `X-NUCLEO-NFC09A1`_ board requires a minimum of 2.7V to operate.
    Because of that, you must adjust the GPIO voltage for the `nRF54L15 DK`_ and the `nRF54LM20 DK`_ as outlined in the :ref:`hw_requirements_vddio_configuration` section.
 
-The `nRF54L15 DK`_ and the `nRF54LM20 DK`_ do not have Arduino-compatible header, therefore, you must connect your board using wires.
-To connect the NFC reader expansion board to the DK, refer to the following pin mapping.
-The pinout is applicable for each of the supported NFC reader expansion boards:
+Connecting the NFC reader
+=========================
+
+Follow the guidelines to connect the NFC reader expansion board based on your development kit:
 
 .. tabs::
 
+   .. tab:: nRF54LM20 DK
+
+      The `nRF54LM20 DK`_ does not have Arduino-compatible header, therefore, you must connect your board using wires.
+      To connect the NFC reader expansion board to the DK, refer to the following pin mapping.
+      The pinout is applicable for each of the supported NFC reader expansion boards:
+
+      +-------------------+-----------------------+
+      | nRF54LM20 DK      | X-NUCLEO board        |
+      +===================+=======================+
+      | P1.13             | SCK MCU (D13)         |
+      +-------------------+-----------------------+
+      | P1.12             | MISO MCU (D12)        |
+      +-------------------+-----------------------+
+      | P1.11             | MOSI MCU (D11)        |
+      +-------------------+-----------------------+
+      | P1.24             | /SS MCU (D10)         |
+      +-------------------+-----------------------+
+      | P0.04             | IRQ MCU (A0)          |
+      +-------------------+-----------------------+
+      | VBUS              | +5V                   |
+      +-------------------+-----------------------+
+      | VDDIO             | +3V3                  |
+      +-------------------+-----------------------+
+      | GND               | GND                   |
+      +-------------------+-----------------------+
+
    .. tab:: nRF54L15 DK
+
+      The `nRF54L15 DK`_ does not have Arduino-compatible header, therefore, you must connect your board using wires.
+      To connect the NFC reader expansion board to the DK, refer to the following pin mapping.
+      The pinout is applicable for each of the supported NFC reader expansion boards:
 
       +-------------------+-----------------------+
       | nRF54L15 DK       | X-NUCLEO board        |
@@ -151,42 +181,24 @@ The pinout is applicable for each of the supported NFC reader expansion boards:
 
          X-NUCLEO expansion board connection to the nRF54L15 DK.
 
-   .. tab:: nRF54LM20 DK
+   .. tab:: nRF5340 DK
+      
+      The `nRF5340 DK <nRF5340 DK connector interface_>`_ has **P5** and **P20** connectors located between their Arduino headers.
+      These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
+      To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
 
-      +-------------------+-----------------------+
-      | nRF54LM20 DK      | X-NUCLEO board        |
-      +===================+=======================+
-      | P1.13             | SCK MCU (D13)         |
-      +-------------------+-----------------------+
-      | P1.12             | MISO MCU (D12)        |
-      +-------------------+-----------------------+
-      | P1.11             | MOSI MCU (D11)        |
-      +-------------------+-----------------------+
-      | P1.24             | /SS MCU (D10)         |
-      +-------------------+-----------------------+
-      | P0.04             | IRQ MCU (A0)          |
-      +-------------------+-----------------------+
-      | VBUS              | +5V                   |
-      +-------------------+-----------------------+
-      | VDDIO             | +3V3                  |
-      +-------------------+-----------------------+
-      | GND               | GND                   |
-      +-------------------+-----------------------+
+   .. tab:: nRF52840 DK
 
-When using the `nRF5340 DK`_ or `nRF52840 DK`_, you can connect the NFC reader expansion board directly using the Arduino-compatible header available on the DK.
-
-.. note::
-
-   The `nRF5340 DK <nRF5340 DK connector interface_>`_ and `nRF52840 DK <nRF52840 DK connector interface_>`_ have P5 and P20 connectors located between their Arduino headers.
-   These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
-   To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
+      The `nRF52840 DK <nRF52840 DK connector interface_>`_ has **P5** and **P20** connectors located between their Arduino headers.
+      These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
+      To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
 
 .. _hw_requirements_uwb_module:
 
 Ultra wideband (UWB) module
 ***************************
 
-The application supports the following UWB modules:
+The application supports the following UWB module:
 
 +-------------------+-------------------------------------------------------------+
 | UWB module        | UWB module expansion board                                  |
@@ -197,19 +209,17 @@ The application supports the following UWB modules:
 With the Qorvo Arduino Interface Board, you can use the UWB module with the `nRF5340 DK`_ without requiring any additional hardware, as it connects directly to the Arduino header of the DK.
 
 .. note::
-   To run the application with the QM35825 UWB module, you need the Qorvo Arduino Interface Board with special rework done on the board.
-   To obtain a reworked board, contact your local Qorvo support team.
+   Contact your local Qorvo support team in the following cases:
 
-.. note::
-   The QM35825 SoC requires Aliro-specific firmware to work with the Aliro access protocol.
-   To obtain this firmware, contact your local Qorvo support team.
+   * To obtain the Qorvo Arduino Interface Board with special rework done on the board.
+     You need it to run the application with the QM35825 UWB module.
 
 .. _hw_requirements_uwb_compatibility:
 
 UWB compatibility matrix
 ========================
 
-The following table shows the compatibility between the versions of the |APP_NAME|, UWB Aliro SDK, UWB FW, and |NCS|:
+The following table shows the compatibility between the versions of the |APP_NAME|, UWB Aliro SDK, UWB FW, and the |NCS|:
 
 .. list-table:: UWB compatibility matrix
    :header-rows: 1
@@ -241,8 +251,7 @@ The following table shows the compatibility between the versions of the |APP_NAM
      - 3.2.0
 
 .. note::
-   The compatibility matrix shows tested and verified combinations of |APP_NAME| version, UWB Aliro SDK, UWB firmware, and |NCS| version.
-
+   The compatibility matrix shows tested and verified combinations of |APP_NAME| version, UWB Aliro SDK, UWB firmware, and the |NCS| version.
 
 .. _hw_requirements_test_harness:
 
