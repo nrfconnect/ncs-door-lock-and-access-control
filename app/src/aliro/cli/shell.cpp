@@ -10,11 +10,20 @@
 #include <aliro/memory.h>
 #include <aliro/utils.h>
 
+#ifdef CONFIG_BT
+#include <zephyr/bluetooth/bluetooth.h>
+#endif // CONFIG_BT
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+#include "ble/ble_manager.h"
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
 #ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
 #include "reader_certificate_cache.h"
 #endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 
 #include "aliro/crypto_key_ids.h"
+#include "crypto/utils.h"
 
 #include <zephyr/shell/shell.h>
 
@@ -25,7 +34,7 @@
 #ifndef CONFIG_CHIP
 
 #include "access_manager/access_manager.h"
-#include "crypto/crypto.h"
+#include "aliro/interface.h"
 #include "storage.h"
 #include "storage_keys.h"
 
@@ -135,7 +144,33 @@ int ShellCmdHandleIdentifiers(const struct shell *shell, size_t argc, char **arg
 							       identifier.data(), identifier.size()),
 			     -EINVAL, shell_warn(shell, "Cannot update %s\n", StorageKeys::kStorageKeyNameIdentifier));
 
-	AliroStack::Instance().SetReaderIdentifier(identifier);
+	AliroError aliroError = AliroStack::Instance().SetReaderIdentifier(identifier);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to set reader identifier\n"));
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	// Update BLE advertising data with new reader identifier
+	auto &bleManager = BleManager::Instance();
+
+	BleTypes::BleAddress address{};
+	BleTypes::TxPowerLevel txPower{};
+	BleTypes::AdvertisingServiceData advData{};
+
+	aliroError = bleManager.GetAddress(address);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL, shell_warn(shell, "Failed to get BLE address\n"));
+
+	aliroError = bleManager.GetTxPowerLevel(txPower);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to get TX power level\n"));
+
+	aliroError = AliroStack::Instance().GenerateAdvertisingData(advData, address, txPower, identifier);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to get advertising data\n"));
+
+	aliroError = bleManager.UpdateAdvertisingData(advData);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to update advertising data\n"));
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	return 0;
 }
@@ -341,8 +376,7 @@ int ShellCmdHandleCredentialIssuerCAGet(const struct shell *shell, size_t argc, 
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 
 	CryptoTypes::PublicKey publicKey{};
-	const auto error =
-		CryptoInstance().ExportKey(kCredentialIssuerCAPublicKeyId, publicKey.data(), publicKey.size());
+	const auto error = DoorLock::Crypto::ExportKey(kCredentialIssuerCAPublicKeyId, publicKey.data(), publicKey.size());
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot export Credential Issuer CA public key\n"));
 
@@ -370,11 +404,9 @@ int ShellCmdHandleCredentialIssuerCASet(const struct shell *shell, size_t argc, 
 			     shell_warn(shell, "Invalid key prefix!\n"));
 
 	CryptoTypes::KeyId keyId{ kCredentialIssuerCAPublicKeyId };
-	const auto error = CryptoInstance().ImportPublicKey(publicKey, keyId, true);
+	const auto error = DoorLock::Crypto::ImportPublicKey(publicKey, true, keyId);
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot import Credential Issuer CA public key\n"));
-
-	AliroStack::Instance().SetCredentialIssuerCAPublicKeyId(keyId);
 
 	return 0;
 }
@@ -385,11 +417,9 @@ int ShellCmdHandleCredentialIssuerCAClear(const struct shell *shell, size_t argc
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 
 	CryptoTypes::KeyId keyId{ kCredentialIssuerCAPublicKeyId };
-	const auto error = CryptoInstance().DestroyKey(keyId);
+	const auto error = DoorLock::Crypto::DestroyKey(keyId);
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot remove Credential Issuer CA public key\n"));
-
-	AliroStack::Instance().SetCredentialIssuerCAPublicKeyId(keyId);
 
 	return 0;
 }
@@ -421,12 +451,8 @@ const char *GetReaderChipName(void)
 {
 #if defined(CONFIG_ST25R200_DRV)
 	return "ST25R100";
-#elif defined(CONFIG_ST25R3911_DRV)
-	return "ST25R3911";
-#elif defined(CONFIG_ST25R3916_DRV)
-	return "ST25R3916";
-#elif defined(CONFIG_ST25R3916B_DRV)
-	return "ST25R3916B";
+#elif defined(CONFIG_ST25R500_DRV)
+	return "ST25R300";
 #else
 	return "Unknown NFC reader driver";
 #endif
@@ -438,6 +464,23 @@ int ShellCmdHandleInfo(const struct shell *shell, size_t, char **)
 	shell_print(shell, "NFC reader: %s", GetReaderChipName());
 	return 0;
 }
+
+#ifdef CONFIG_BT
+
+int ShellCmdHandleBtAddr(const struct shell *shell, size_t, char **)
+{
+	bt_addr_le_t address[1];
+	size_t count{ ARRAY_SIZE(address) };
+	bt_id_get(address, &count);
+
+	char addr_str[BT_ADDR_LE_STR_LEN];
+	bt_addr_le_to_str(address, addr_str, sizeof(addr_str));
+
+	shell_print(shell, "%s", addr_str);
+	return 0;
+}
+
+#endif // CONFIG_BT
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
@@ -834,6 +877,12 @@ SHELL_STATIC_SUBCMD_SET_CREATE(door_lock_cmd,
 
 			       SHELL_CMD(info, NULL, "Show Aliro lib version and NFC reader chip name",
 					 ShellCmdHandleInfo),
+
+#ifdef CONFIG_BT
+
+			       SHELL_CMD(btaddr, NULL, "Show BLE address", ShellCmdHandleBtAddr),
+
+#endif // CONFIG_BT
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 

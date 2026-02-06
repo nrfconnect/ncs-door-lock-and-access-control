@@ -1,3 +1,58 @@
+# This file specifies the sample applications that can be built using twister.
+# Sample name consists of fields separated by dots in the following format:
+#   '<kind>.<sample_name>.<protocols>.<features or EMPTY>'
+#   Each field can consist of subfields delimited with '-' character.
+#
+# Regular sample with exp_fast enabled:
+#   app.door_lock.ble-uwb.exp_fast
+# Regular sample with only matter enabled:
+#   app.door_lock.nfc.matter
+# Sample with several features enabled plus matter:
+#   app.door_lock.ble-uwb.exp_fast-dfu_smp-matter
+
+# ---- Summary of samples ----
+#
+# --- Regular samples ---
+# Samples to be built in nightly builds
+#   SRC, 5340,  UWB+NFC, ALIRO_STANDALONE,  NUS+SMP, EXPF+STEPUP
+#   LIB, 5340,  UWB+NFC, ALIRO_STANDALONE,  NUS+SMP, EXPF+STEPUP
+#   SRC, 5340,  UWB+NFC,           MATTER,  NUS+SMP, EXPF+STEPUP
+#   LIB, 5340,  UWB+NFC,           MATTER,  NUS+SMP, EXPF+STEPUP
+
+#   SRC,54LM20, UWB+NFC,           MATTER,      NUS,        EXPF
+#         5340,     NFC,
+#        54L15,     NFC,
+#        52840,     NFC,
+#   SRC,54LM20, UWB+NFC, ALIRO_STANDALONE,      NUS,        EXPF
+#         5340,     NFC,
+#        54L15,     NFC,
+#        52840,     NFC,
+#   LIB,54LM20, UWB+NFC,           MATTER,      SMP,      STEPUP
+#         5340,     NFC,
+#        54L15,     NFC,
+#        52840,     NFC,
+#   LIB,54LM20, UWB+NFC, ALIRO_STANDALONE,      SMP,      STEPUP
+#         5340,     NFC,
+#        54L15,     NFC,
+#        52840,     NFC,
+#
+# --- Smoke samples ---
+# Samples to be built on each PR
+#   SRC,  5340, UWB+NFC, ALIRO_STANDALONE, NUS+SMP, EXPF+STEPUP + CACERT
+#   LIB,  5340, UWB+NFC,           MATTER,    NONE, EXPF+STEPUP
+#   LIB,54LM20, UWB+NFC, ALIRO_STANDALONE,    NONE,        NONE
+#   SRC, 54L15,     NFC,           MATTER,     SMP,        EXPF
+#   LIB, 52840,     NFC, ALIRO_STANDALONE,     NUS,      STEPUP
+#   SRC,  5340,     NFC, ALIRO_STANDALONE,    NONE,        NONE
+#
+# --- Libs samples ---
+# Base apps for all samples only for libs build
+#   SRC,         ALL, ALIRO_STANDALONE,     NONE,       NONE
+#
+# --- Sonarqube sample ---
+# Samples for sonarqube tests
+
+
 sample:
   description: Door lock sample application
   name: ncs-door-lock-sample
@@ -5,66 +60,486 @@ common:
   sysbuild: true
   build_only: true
 tests:
-  app.nfc_door_lock:
+# SRC,  5340,  UWB+NFC, ALIRO_STANDALONE, NUS+SMP, EXPF+STEPUP
+  app.door_lock.nfc-ble-uwb.bt_nus-dfu_smp-exp_fast-step_up:
+    tags:
+      - src
+      - nfc
+      - ble
+      - bt_nus
+      - dfu_smp
+      - exp_fast
+      - step_up
+    platform_allow: &platform_5340
+      - nrf5340dk/nrf5340/cpuapp
+    integration_platforms: *platform_5340
+    extra_args:
+      - app_SNIPPET="uwb_qm35_src;dfu_smp;bt_nus"
+      - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# LIB,  5340,  UWB+NFC, ALIRO_STANDALONE, NUS+SMP, EXPF+STEPUP
+  app.door_lock_src_no.nfc-ble-uwb.bt_nus-dfu_smp-exp_fast-step_up:
+    tags:
+      - src-no
+      - nfc
+      - ble
+      - bt_nus
+      - dfu_smp
+      - exp_fast
+      - step_up
+    platform_allow: *platform_5340
+    integration_platforms: *platform_5340
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - app_SNIPPET="uwb_qm35;dfu_smp;bt_nus"
+      - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# SRC,  54LM20, UWB+NFC,           MATTER, SMP, EXPF+STEPUP
+  app.door_lock.nfc-ble-uwb.dfu_smp-matter-exp_fast-step_up:
+    tags:
+      - src
+      - nfc
+      - ble
+      - dfu_smp
+      - matter
+      - exp_fast
+      - step_up
+    platform_allow: &platform_54lm20
+      - nrf54lm20dk/nrf54lm20a/cpuapp
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - app_SNIPPET="uwb_qm35"
+      - SNIPPET=matter
+      - CONFIG_CHIP_DFU_OVER_BT_SMP=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# LIB, 54LM20, UWB+NFC,           MATTER, SMP, EXPF+STEPUP
+  app.door_lock_src_no.nfc-ble-uwb.dfu_smp-matter-exp_fast-step_up:
+    tags:
+      - src-no
+      - nfc
+      - ble
+      - dfu_smp
+      - matter
+      - exp_fast
+      - step_up
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - app_SNIPPET="uwb_qm35_src"
+      - SNIPPET=matter
+      - CONFIG_CHIP_DFU_OVER_BT_SMP=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# SRC,     54LM20, UWB+NFC,           MATTER, NUS, EXPF, RELEASE
+  app.door_lock.ble-uwb.bt_nus-matter-exp_fast-release:
+    tags:
+      - src
+      - nfc
+      - ble
+      - bt_nus
+      - matter
+      - exp_fast
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - app_SNIPPET=uwb_qm35_src
+      - SNIPPET=matter
+      - CONFIG_CHIP_NUS=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_BT_APP_PASSKEY=y
+      - CONFIG_CHIP_NUS_FIXED_PASSKEY=123456
+      - FILE_SUFFIX=release
+  
+  app.door_lock.ble-uwb.bt_nus-matter-exp_fast:
+    tags:
+      - src
+      - nfc
+      - ble
+      - bt_nus
+      - matter
+      - exp_fast
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - app_SNIPPET=uwb_qm35_src
+      - SNIPPET=matter
+      - CONFIG_CHIP_NUS=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_BT_APP_PASSKEY=y
+      - CONFIG_CHIP_NUS_FIXED_PASSKEY=123456
+
+  app.door_lock.nfc.bt_nus-matter-exp_fast-release:
+    tags:
+      - src
+      - nfc
+      - bt_nus
+      - matter
+      - exp_fast
+    platform_allow: &platform_54l15_52840_5340
+      - nrf54l15dk/nrf54l15/cpuapp
+      - nrf52840dk/nrf52840
+      - nrf5340dk/nrf5340/cpuapp
+    integration_platforms: *platform_54l15_52840_5340
+    extra_args:
+      - SNIPPET=matter
+      - CONFIG_CHIP_NUS=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_BT_APP_PASSKEY=y
+      - CONFIG_CHIP_NUS_FIXED_PASSKEY=123456
+      - FILE_SUFFIX=release
+
+  app.door_lock.nfc.bt_nus-matter-exp_fast:
+    tags:
+      - src
+      - nfc
+      - bt_nus
+      - matter
+      - exp_fast
+    platform_allow: *platform_54l15_52840_5340
+    integration_platforms: *platform_54l15_52840_5340
+    extra_args:
+      - SNIPPET=matter
+      - CONFIG_CHIP_NUS=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_BT_APP_PASSKEY=y
+      - CONFIG_CHIP_NUS_FIXED_PASSKEY=123456
+
+# SRC, 54LM20, UWB+NFC, ALIRO_STANDALONE, NUS, EXPF, RELEASE
+  app.door_lock.ble-uwb.bt_nus-exp_fast-release:
+    tags:
+      - src
+      - nfc
+      - ble
+      - bt_nus
+      - exp_fast
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - app_SNIPPET="uwb_qm35_src;bt_nus"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - FILE_SUFFIX=release
+
+  app.door_lock.ble-uwb.bt_nus-exp_fast:
+    tags:
+      - src
+      - nfc
+      - ble
+      - bt_nus
+      - exp_fast
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - app_SNIPPET="uwb_qm35_src;bt_nus"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+
+# SRC, 5340/54L15/52840, NFC, ALIRO_STANDALONE, NUS, EXPF
+  app.door_lock.nfc.bt_nus-exp_fast-release:
+    tags:
+      - src
+      - nfc
+      - bt_nus
+      - exp_fast
+    platform_allow: *platform_54l15_52840_5340
+    integration_platforms: *platform_54l15_52840_5340
+    extra_args:
+      - app_SNIPPET=bt_nus
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - FILE_SUFFIX=release
+
+  app.door_lock.nfc.bt_nus-exp_fast:
+    tags:
+      - src
+      - nfc
+      - bt_nus
+      - exp_fast
+    platform_allow: *platform_54l15_52840_5340
+    integration_platforms: *platform_54l15_52840_5340
+    extra_args:
+      - app_SNIPPET=bt_nus
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+
+# LIB, 54LM20, UWB+NFC,           MATTER, SMP, STEPUP
+  app.door_lock_src_no.nfc-ble-uwb.dfu_smp-matter-step_up:
+    tags:
+      - src-no
+      - nfc
+      - ble
+      - dfu_smp
+      - matter
+      - step_up
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - app_SNIPPET="uwb_qm35"
+      - SNIPPET=matter
+      - CONFIG_CHIP_DFU_OVER_BT_SMP=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# LIB, 5340/54L15/52840, NFC, MATTER, SMP, STEPUP
+  app.door_lock_src_no.nfc.dfu_smp-matter-step_up:
+    tags:
+      - src-no
+      - nfc
+      - dfu_smp
+      - matter
+      - step_up
+    platform_allow: *platform_54l15_52840_5340
+    integration_platforms: *platform_54l15_52840_5340
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - SNIPPET=matter
+      - CONFIG_CHIP_DFU_OVER_BT_SMP=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# LIB, 54LM20, UWB+NFC, ALIRO_STANDALONE, SMP, STEPUP
+  app.door_lock_src_no.nfc-ble-uwb.dfu_smp-step_up:
+    tags:
+      - src-no
+      - nfc
+      - ble
+      - dfu_smp
+      - step_up
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - app_SNIPPET="uwb_qm35_src;dfu_smp"
+      - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# LIB, 5340/54L15/52840, NFC, ALIRO_STANDALONE, SMP, STEPUP
+  app.door_lock_src_no.nfc.dfu_smp-step_up:
+    tags:
+      - src-no
+      - nfc
+      - dfu_smp
+      - step_up
+    platform_allow: *platform_54l15_52840_5340
+    integration_platforms: *platform_54l15_52840_5340
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - app_SNIPPET=dfu_smp
+      - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# SRC, 5340, UWB+NFC, ALIRO_STANDALONE, SMP, QM35_DFU
+  app.door_lock.nfc-ble-uwb.dfu_smp-qm35_dfu:
+    tags:
+      - src
+      - nfc
+      - ble
+      - dfu_smp
+      - qm35_dfu
+    platform_allow: *platform_5340
+    integration_platforms: *platform_5340
+    extra_args:
+      - SNIPPET="uwb_qm35_dfu"
+      - app_SNIPPET="uwb_qm35_src;dfu_smp"
+      - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+
+# SRC, 5340, UWB+NFC, MATTER, QM35_DFU
+  app.door_lock.nfc-ble-uwb.matter-qm35_dfu:
+    tags:
+      - src
+      - nfc
+      - ble
+      - matter
+      - qm35_dfu
+    platform_allow: *platform_5340
+    integration_platforms: *platform_5340
+    extra_args:
+      - SNIPPET="matter;uwb_qm35_dfu"
+      - app_SNIPPET="uwb_qm35_src"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+
+# ------------------------------------------------------------
+# Samples for building libraries
+# ------------------------------------------------------------
+# SOURCE,         ALL, ALIRO_STANDALONE,     NONE,       NONE , RELEASE
+  libs.door_lock.nfc.release:
+    tags:
+      - libs_build
     platform_allow: &platforms_all
       - nrf52840dk/nrf52840
       - nrf5340dk/nrf5340/cpuapp
       - nrf54l15dk/nrf54l15/cpuapp
       - nrf54lm20dk/nrf54lm20a/cpuapp
     integration_platforms: *platforms_all
-  app.door_lock_ble_uwb:
-    platform_allow: &platforms_uwb
-      - nrf5340dk/nrf5340/cpuapp
-      - nrf54lm20dk/nrf54lm20a/cpuapp
-    integration_platforms: *platforms_uwb
     extra_args:
-      - app_SNIPPET=uwb_qm35
-  app.nfc_door_lock.matter:
+      - SB_CONFIG_BOOTLOADER_NONE=y
+      - SB_CONFIG_NETCORE_NONE=y
+      - FILE_SUFFIX=release
+  
+  libs.door_lock.nfc:
+    tags:
+      - libs_build
     platform_allow: *platforms_all
     integration_platforms: *platforms_all
     extra_args:
-      - SNIPPET=matter
-  app.door_lock_ble_uwb.matter:
-    platform_allow: *platforms_uwb
-    integration_platforms: *platforms_uwb
+      - SB_CONFIG_BOOTLOADER_NONE=y
+      - SB_CONFIG_NETCORE_NONE=y
+
+  libs.door_lock.ble-uwb.release:
+    tags:
+      - libs_build
+    platform_allow: &platforms_5340_54lm20
+      - nrf5340dk/nrf5340/cpuapp
+      - nrf54lm20dk/nrf54lm20a/cpuapp
+    integration_platforms: *platforms_5340_54lm20
     extra_args:
-      - SNIPPET=matter
-      - app_SNIPPET=uwb_qm35
-  app.door_lock_ble_uwb.matter.bt_nus:
-    platform_allow: *platforms_uwb
-    integration_platforms: *platforms_uwb
+      - app_SNIPPET=uwb_qm35_src
+      - SB_CONFIG_BOOTLOADER_NONE=y
+      - SB_CONFIG_NETCORE_NONE=y
+      - FILE_SUFFIX=release
+
+  libs.door_lock.ble-uwb:
+    tags:
+      - libs_build
+    platform_allow: *platforms_5340_54lm20
+    integration_platforms: *platforms_5340_54lm20
     extra_args:
-      - SNIPPET=matter
-      - app_SNIPPET=uwb_qm35
-      - CONFIG_CHIP_NUS=y
-  app.door_lock_ble_uwb.exp_fast:
-    platform_allow: *platforms_uwb
-    integration_platforms: *platforms_uwb
+      - app_SNIPPET=uwb_qm35_src
+      - SB_CONFIG_BOOTLOADER_NONE=y
+      - SB_CONFIG_NETCORE_NONE=y
+  
+# ------------------------------------------------------------
+# Samples for smoke tests
+# ------------------------------------------------------------
+# SRC, 5340, UWB+NFC, ALIRO_STANDALONE, NUS+SMP, EXPF+STEPUP + CACERT
+  smoke.door_lock.nfc-ble-uwb.bt_nus-dfu_smp-exp_fast-step_up:
+    tags:
+      - src
+      - ble
+      - nfc
+      - smoke
+      - bt_nus
+      - dfu_smp
+      - exp_fast
+      - step_up
+      - credential_issuer_ca
+    platform_allow: *platform_5340
+    integration_platforms: *platform_5340
     extra_args:
-      - app_SNIPPET=uwb_qm35
+      - app_SNIPPET="uwb_qm35_src;dfu_smp;bt_nus"
+      - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
-  app.nfc_door_lock.dfu_smp:
-    platform_allow: &platforms_5340_54l15
-      - nrf5340dk/nrf5340/cpuapp
-      - nrf54l15dk/nrf54l15/cpuapp
-    integration_platforms: *platforms_5340_54l15
-    extra_args:
-      - app_SNIPPET=dfu_smp
-  app.nfc_door_lock_ble_uwb.matter.exp_fast.dfu_smp:
-    platform_allow:
-      - nrf5340dk/nrf5340/cpuapp
-    integration_platforms:
-      - nrf5340dk/nrf5340/cpuapp
-    extra_args:
-      - app_SNIPPET=dfu_smp
-      - SNIPPET=matter
-      - app_SNIPPET=uwb_qm35
-      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
-  app.nfc_door_lock_ble_uwb.step_up:
-    platform_allow:
-      - nrf5340dk/nrf5340/cpuapp
-    integration_platforms:
-      - nrf5340dk/nrf5340/cpuapp
-    extra_args:
-      - app_SNIPPET=uwb_qm35
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+      - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
+
+# LIB, 5340, UWB+NFC, MATTER, NONE, EXPF+STEPUP
+  smoke.door_lock_src_no.nfc-ble-uwb.matter-exp_fast-step_up:
+    tags:
+      - src-no
+      - nfc
+      - ble
+      - smoke
+      - matter
+      - exp_fast
+      - step_up
+    platform_allow: *platform_5340
+    integration_platforms: *platform_5340
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - app_SNIPPET="uwb_qm35"
+      - SNIPPET=matter
+      - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# LIB, 54LM20, UWB+NFC, ALIRO_STANDALONE
+  smoke.door_lock_src_no.nfc-ble-uwb:
+    tags:
+      - src-no
+      - nfc
+      - ble
+      - smoke
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - app_SNIPPET=uwb_qm35
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+
+# SRC, 54L15, NFC, MATTER, SMP, EXPF
+  smoke.door_lock.nfc.dfu_smp-matter-exp_fast:
+    tags:
+      - src
+      - nfc
+      - smoke
+      - dfu_smp
+      - matter
+      - exp_fast
+    platform_allow: &platform_54l15
+      - nrf54l15dk/nrf54l15/cpuapp
+    integration_platforms: *platform_54l15
+    extra_args:
+      - SNIPPET=matter
+      - CONFIG_CHIP_DFU_OVER_BT_SMP=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+
+# LIB, 52840, NFC, ALIRO_STANDALONE, NUS, STEPUP
+  smoke.door_lock_src_no.nfc.bt_nus-step_up:
+    tags:
+      - src-no
+      - nfc
+      - smoke
+      - bt_nus
+      - step_up
+    platform_allow: &platform_52840
+      - nrf52840dk/nrf52840
+    integration_platforms: *platform_52840
+    extra_args:
+      - CONFIG_NCS_ALIRO_SRC=n
+      - app_SNIPPET=bt_nus
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+# SRC, 5340, NFC, ALIRO_STANDALONE
+  smoke.door_lock.nfc:
+    tags:
+      - src
+      - nfc
+      - smoke
+    platform_allow: *platform_5340
+    integration_platforms: *platform_5340
+
+# ------------------------------------------------------------
+# Sample for sonarqube
+# ------------------------------------------------------------
+  sonarqube.door_lock:
+    tags:
+      - sonarqube
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - SNIPPET=matter
+      - app_SNIPPET="uwb_qm35"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+      - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y

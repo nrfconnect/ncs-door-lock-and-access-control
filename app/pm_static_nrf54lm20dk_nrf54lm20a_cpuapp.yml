@@ -51,6 +51,6 @@ mcuboot_secondary_app:
   size: 0x1E2800
 external_flash:
   address: 0x1E3000
-  size: 0x5DB000
+  size: 0x61D000
   device: MX25R64
   region: external_flash

@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+rsource "Kconfig.defaults"
+
+config DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART
+    bool "Use PSA AEAD single-part API"
+    default y if SOC_NRF54LM20A
+    help
+      When enabled, the single-part AEAD API is used.
+
+if DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART
+
+config DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART_BUFFER_SIZE
+    int "Maximum size of the buffer used for the single-part AEAD API"
+    default 256
+    help
+      Maximum size of the buffer used for the single-part AEAD API.
+
+endif # DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART

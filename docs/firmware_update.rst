@@ -17,12 +17,8 @@ Matter OTA
 If you build an application with Matter support (see :ref:`building_and_running` and the ``-DSNIPPET='matter'`` option), you can update the firmware of the device using the Matter Over-The-Air (OTA) update mechanism.
 This allows you to remotely upgrade the door lock firmware without physical access to the device.
 
-.. note::
-   This guide uses CHIP Tool as a Matter controller and assumes you have a commissioned Matter device.
-   For details on CHIP Tool usage, see the `Matter chip-tool guide`_.
-
-.. note::
-   Currently, Matter OTA does not support updating the firmware of the QM35 UWB module.
+This guide uses CHIP Tool as a Matter controller and assumes you have a commissioned Matter device.
+For details on CHIP Tool usage, see the `Matter chip-tool guide`_.
 
 Prerequisites
 =============
@@ -33,9 +29,7 @@ Before starting the OTA update process, ensure that:
 * You have built the new Matter application with a higher version number than the one that is currently running on the device to be updated. The version is configured in the :file:`app/VERSION` file.
   The :file:`matter.ota` file generated in the build directory will be used as the OTA firmware image file.
 * You have the Matter OTA provider application available on your PC.
-
-.. note::
-   You can download the precompiled OTA provider application from the `Matter fork release`_ page.
+  You can download the precompiled OTA provider application from the `Matter fork release`_ page.
 
 OTA update process
 ==================
@@ -49,7 +43,6 @@ The following steps will guide you through the complete OTA update process:
       chip-ota-provider-app -f <ota-file-path>
 
    Where ``<ota-file-path>`` is a path to the OTA firmware image file.
-
    For example:
 
    .. code-block:: console
@@ -157,7 +150,6 @@ The DFU over Bluetooth LE Simple Management Protocol (SMP) allows for seamless f
 By building the application with the ``-Dapp_SNIPPET=dfu_smp`` option, you can enable this feature and update your device's firmware wirelessly.
 
 .. note::
-   For applications without Matter support, DFU over Bluetooth LE SMP is supported only on the nRF5340 DK.
    To build Matter applications with DFU over Bluetooth LE SMP, add the ``-DCONFIG_CHIP_DFU_OVER_BT_SMP=y`` option to the build command.
 
 Enabling Bluetooth LE SMP advertising
@@ -224,16 +216,33 @@ To enable QM35 firmware upgrade support, build the application with the ``uwb_qm
 
    west build -b nrf5340dk/nrf5340/cpuapp app -- -DSNIPPET='uwb_qm35_dfu' -Dapp_SNIPPET='uwb_qm35_src;dfu_smp'
 
+Configuration options
+=====================
+
+You can control the QM35 DFU behavior with the following Kconfig options:
+
+* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU`` - Enables QM35 firmware upgrade support.
+* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER`` - Perform an update only if the new version is higher (default).
+* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT`` - Perform an update if the version differs.
+
 Flashing
 ========
 
-When flashing the application, use the following command:
+When flashing the application, run the following command:
 
 .. code-block:: console
 
    west flash --erase
 
 The QM35 firmware is automatically programmed to external flash together with the main application.
+
+.. note::
+   For the nRF54LM20 DK, external flash support in ``west flash`` is not in a production state yet.
+   Therefore, using ``nrfutil`` is currently required to program the firmware:
+
+   .. code-block:: console
+
+      nrfutil device --x-ext-mem-config-file applications/doorlock/app/boards/nrf54lm20dk_spi_nrfutil_config.json program --firmware build/merged.hex --options verify=VERIFY_READ,ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE,reset=RESET_SOFT
 
 Firmware upgrade procedure
 ==========================
@@ -247,12 +256,3 @@ At runtime, the application performs the following steps:
 
 .. note::
    During the update, the QM35 is temporarily unavailable.
-
-Configuration options
-=====================
-
-The following Kconfig options control QM35 DFU behavior:
-
-* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU`` - Enables QM35 firmware upgrade support.
-* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER`` - Perform an update only if the new version is higher (default).
-* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT`` - Perform an update if the version differs.
