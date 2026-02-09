@@ -30,11 +30,13 @@ endchoice
 
 config DOOR_LOCK_CLI
 	bool "Door Lock CLI support"
-	default y
+	default y if (!DOOR_LOCK_RELEASE || !CHIP)
 	select SHELL
 	select REBOOT
 	help
 	  Enable support for Door Lock CLI.
+
+if !DOOR_LOCK_RELEASE
 
 config DOOR_LOCK_PRINT_READER_GROUP_IDENTIFIER
 	bool "Print reader group identifier that should be provisioned into the User Device"
@@ -53,6 +55,8 @@ config DOOR_LOCK_USE_TEST_KEYS
 	default y
 	help
 	  Initialize the reader keys to test values.
+
+endif # DOOR_LOCK_RELEASE
 
 rsource "src/aliro/Kconfig"
 

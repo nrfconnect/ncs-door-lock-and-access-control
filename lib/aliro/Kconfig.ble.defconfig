@@ -7,9 +7,6 @@
 config BT
 	default y
 
-config BT_DEVICE_NAME
-	default "AliroDL"
-
 config BT_PERIPHERAL
 	default y
 
@@ -48,3 +45,7 @@ config BT_BONDABLE
 
 config BT_ID_MAX
 	default 2 if BT_BONDABLE
+
+config BT_MAX_CONN
+	default 2 if DOOR_LOCK_BLE_UWB && (DOOR_LOCK_BLE_NUS || DOOR_LOCK_DFU_BLE_SMP)
+	default 1

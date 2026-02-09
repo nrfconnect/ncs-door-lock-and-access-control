@@ -6,29 +6,26 @@
 
 #include "bt_nus.h"
 
-#include "aliro/ble_types.h"
 #include "aliro/utils.h"
 
-#include "aliro/platform/ble/ble_manager_impl.h"
+#include "aliro/platform/ble/ble_advertising_arbiter.h"
 
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/conn.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/settings/settings.h>
 
+#include <cstring>
+
 LOG_MODULE_REGISTER(NusService, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace Aliro::BtNus {
 
-using BleInterface::BleManagerImpl;
+namespace BleArbiter = DoorLock::Interface::BleAdvertisingArbiter;
 
 AliroError NUSService::Start()
 {
 	VerifyOrReturnStatus(!mIsStarted, ALIRO_INVALID_STATE, LOG_ERR("NUS service is already started"));
-
-#if !defined(CONFIG_DOOR_LOCK_DFU_BLE_SMP) && !defined(CONFIG_DOOR_LOCK_BLE_UWB)
-	VerifyOrReturnStatus(BleManagerImpl::Instance().Init({}) == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
-#endif // !CONFIG_DOOR_LOCK_DFU_BLE_SMP && !CONFIG_DOOR_LOCK_BLE_UWB
 
 	static bt_conn_auth_cb sConnAuthCallbacks = {
 		.passkey_display = [](bt_conn *conn,
@@ -45,8 +42,7 @@ AliroError NUSService::Start()
 
 	static bt_conn_auth_info_cb sConnAuthInfoCallbacks = {
 		.pairing_complete = [](bt_conn *conn, bool bonded) { Instance().PairingComplete(conn, bonded); },
-		.pairing_failed = [](bt_conn *conn,
-				     enum bt_security_err reason) { Instance().PairingFailed(conn, reason); },
+		.pairing_failed = [](bt_conn *conn, bt_security_err reason) { Instance().PairingFailed(conn, reason); },
 	};
 
 	static bt_nus_cb sNusCallbacks = {
@@ -61,15 +57,21 @@ AliroError NUSService::Start()
 	VerifyOrReturnStatus(bt_nus_init(&sNusCallbacks) == 0, ALIRO_ERROR_INTERNAL,
 			     LOG_ERR("Failed to initialize NUS service"));
 
-#ifndef CONFIG_DOOR_LOCK_BLE_UWB
+	mRequest = BleArbiter::Request{ .mOptions = BT_LE_ADV_OPT_CONN,
+					.mMinInterval = BT_GAP_ADV_FAST_INT_MIN_2,
+					.mMaxInterval = BT_GAP_ADV_FAST_INT_MAX_2 };
 
-	AliroError err = BleManagerImpl::Instance().StartAdvertising({ kNusUuid.data(), kNusUuid.size() },
-								     BleTypes::AdvertisingDataFieldType::Uuid128All);
+	// Set advertising data buffers
+	mRequest.mAdvertisingData[0] = BT_DATA(BT_DATA_FLAGS, &kAdvertisingFlags, sizeof(kAdvertisingFlags));
+	mRequest.mAdvertisingData[1] = BT_DATA(BT_DATA_UUID128_ALL, kNusUuid.data(), kNusUuid.size());
 
+	const char *deviceName = bt_get_name();
+	mRequest.mScanResponseData[0] =
+		BT_DATA(BT_DATA_NAME_COMPLETE, deviceName, static_cast<uint8_t>(strlen(deviceName)));
+
+	AliroError err = BleArbiter::InsertRequest(BleArbiter::Component::Nus, mRequest);
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err,
-			     LOG_ERR("NUS advertising failed to start (rc %d)", err.ToInt()));
-
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
+			     LOG_ERR("NUS advertising request failed (rc %d)", err.ToInt()));
 
 	mIsStarted = true;
 	LOG_INF("NUS service started");
@@ -80,8 +82,7 @@ void NUSService::StopServer()
 {
 	VerifyOrReturn(IsNusStarted(), LOG_ERR("NUS service not started"));
 
-	AliroError err = BleManagerImpl::Instance().StopAdvertising();
-	VerifyOrReturn(err == ALIRO_NO_ERROR, LOG_ERR("NUS advertising failed to stop (rc %d)", err.ToInt()));
+	BleArbiter::CancelRequest(BleArbiter::Component::Nus);
 
 	mIsStarted = false;
 	LOG_INF("NUS service stopped");
@@ -169,7 +170,7 @@ void NUSService::Connected(bt_conn *conn, uint8_t err)
 
 	mBTConnection = conn;
 	bt_conn_set_security(conn, BT_SECURITY_L3);
-	LOG_DBG("NUS connected");
+	LOG_INF("NUS connected");
 }
 
 void NUSService::Disconnected(bt_conn *, uint8_t reason)
@@ -177,7 +178,7 @@ void NUSService::Disconnected(bt_conn *, uint8_t reason)
 	VerifyOrReturn(IsNusStarted(), LOG_DBG("NUS service not started, ignoring disconnection"));
 
 	mBTConnection = nullptr;
-	LOG_DBG("NUS disconnected (reason: %u)", reason);
+	LOG_INF("NUS disconnected (reason: %u)", reason);
 }
 
 void NUSService::SecurityChanged(bt_conn *conn, bt_security_t level, bt_security_err err)
@@ -215,7 +216,7 @@ void NUSService::PairingComplete(bt_conn *conn, bool bonded)
 	LOG_DBG("NUS BT Pairing completed: %s, bonded: %d", GetAddressString(conn), bonded);
 }
 
-void NUSService::PairingFailed(bt_conn *conn, enum bt_security_err reason)
+void NUSService::PairingFailed(bt_conn *conn, bt_security_err reason)
 {
 	VerifyOrReturn(IsNusStarted(), LOG_DBG("NUS service not started, ignoring pairing failed"));
 	LOG_ERR("NUS BT Pairing failed to %s : reason %d", GetAddressString(conn), static_cast<uint8_t>(reason));

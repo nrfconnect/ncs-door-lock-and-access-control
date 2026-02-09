@@ -14,6 +14,7 @@ config DOOR_LOCK_LOCK_SIM_MOVEMENT_TIME_MS
 config DOOR_LOCK_LOCK_SIM_AUTO_RELOCK
     bool "Enable auto relock"
     default y
+    depends on !CHIP
     help
       Enable auto relock of the lock. When enabled, the lock will relock itself after a certain time.
 
