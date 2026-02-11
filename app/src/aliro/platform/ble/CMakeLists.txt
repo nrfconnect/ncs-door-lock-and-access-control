@@ -6,10 +6,15 @@
 
 zephyr_include_directories(.)
 
-
 add_subdirectory_ifdef(CONFIG_DOOR_LOCK_BLE_UWB gatt_server)
 add_subdirectory_ifdef(CONFIG_DOOR_LOCK_BLE_UWB l2cap_server)
 
-file(GLOB ble_src CONFIGURE_DEPENDS *.cpp)
+# BLE Manager (always included for BT builds)
+zephyr_library_sources(ble_manager.cpp)
 
-zephyr_library_sources(${ble_src})
+# BLE Advertising Arbiter - select implementation based on Matter support
+if(CONFIG_CHIP)
+    zephyr_library_sources(ble_advertising_arbiter_chip.cpp)
+else()
+    zephyr_library_sources(ble_advertising_arbiter.cpp)
+endif()

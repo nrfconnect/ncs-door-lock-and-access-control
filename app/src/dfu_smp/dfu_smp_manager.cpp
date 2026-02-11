@@ -6,17 +6,18 @@
 
 #include "dfu_smp_manager.h"
 
-#include "aliro/aliro.h"
 #include "aliro/ble_types.h"
 #include "aliro/utils.h"
 
-#include "aliro/platform/ble/ble_manager_impl.h"
+#include "aliro/platform/ble/ble_advertising_arbiter.h"
 
 #include <zephyr/dfu/mcuboot.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/mgmt/mcumgr/grp/img_mgmt/img_mgmt.h>
 #include <zephyr/mgmt/mcumgr/mgmt/callbacks.h>
 #include <zephyr/mgmt/mcumgr/mgmt/mgmt.h>
+
+#include <cstring>
 
 LOG_MODULE_REGISTER(SmpManager, CONFIG_DFU_SMP_LOG_LEVEL);
 
@@ -35,9 +36,7 @@ mgmt_cb_return UploadConfirmHandler(uint32_t, mgmt_cb_return, int32_t *, uint16_
 
 namespace Aliro::Dfu {
 
-#ifndef CONFIG_DOOR_LOCK_BLE_UWB
-
-using BleInterface::BleManagerImpl;
+namespace BleArbiter = DoorLock::Interface::BleAdvertisingArbiter;
 
 AliroError SmpManager::InitButton()
 {
@@ -61,23 +60,28 @@ AliroError SmpManager::InitButton()
 
 void SmpManager::StartAdvertising()
 {
-	AliroError err{};
+	mRequest = BleArbiter::Request{ .mOptions = BT_LE_ADV_OPT_CONN,
+					.mMinInterval = BT_GAP_ADV_FAST_INT_MIN_2,
+					.mMaxInterval = BT_GAP_ADV_FAST_INT_MAX_2 };
 
-	err = BleManagerImpl::Instance().StartAdvertising({ kSmpUuid.data(), kSmpUuid.size() },
-							  BleTypes::AdvertisingDataFieldType::Uuid128All);
-	VerifyOrReturn(err == ALIRO_NO_ERROR, LOG_ERR("Dfu SMP advertising failed to start (rc %d)", err.ToInt()));
+	// Set advertising data buffers
+	mRequest.mAdvertisingData[0] = BT_DATA(BT_DATA_FLAGS, &kAdvertisingFlags, sizeof(kAdvertisingFlags));
+	mRequest.mAdvertisingData[1] = BT_DATA(BT_DATA_UUID128_ALL, kSmpUuid.data(), kSmpUuid.size());
 
-	LOG_INF("DFU SMP advertising started");
+	const char *deviceName = bt_get_name();
+	mRequest.mScanResponseData[0] =
+		BT_DATA(BT_DATA_NAME_COMPLETE, deviceName, static_cast<uint8_t>(strlen(deviceName)));
+
+	AliroError err = BleArbiter::InsertRequest(BleArbiter::Component::Smp, mRequest);
+	VerifyOrReturn(err == ALIRO_NO_ERROR, LOG_ERR("DFU SMP advertising request failed (rc %d)", err.ToInt()));
+
 	mIsAdvEnabled = true;
 }
 
 void SmpManager::StopAdvertising()
 {
-	AliroError err = BleManagerImpl::Instance().StopAdvertising();
-	VerifyOrReturn(err == ALIRO_NO_ERROR, LOG_ERR("Dfu SMP advertising failed to stop (rc %d)", err.ToInt()));
-
+	BleArbiter::CancelRequest(BleArbiter::Component::Smp);
 	LOG_INF("DFU SMP advertising stopped");
-
 	mIsAdvEnabled = false;
 }
 
@@ -86,8 +90,6 @@ void SmpManager::Toggle()
 	VerifyOrReturn(mIsInitialized, LOG_ERR("DFU SMP module not initialized"));
 	k_work_submit(&mWork);
 }
-
-#endif // !CONFIG_DOOR_LOCK_BLE_UWB
 
 AliroError SmpManager::Init()
 {
@@ -98,8 +100,6 @@ AliroError SmpManager::Init()
 
 	mgmt_callback_register(&sUploadCallback);
 
-#ifndef CONFIG_DOOR_LOCK_BLE_UWB
-
 	k_work_init(&mWork, []([[maybe_unused]] k_work *) {
 		if (Instance().IsSmpEnabled()) {
 			Instance().StopAdvertising();
@@ -108,12 +108,7 @@ AliroError SmpManager::Init()
 		}
 	});
 
-	PlatformTransportCallbacks emptyCallbacks{};
-	VerifyOrReturnStatus(BleManagerImpl::Instance().Init(emptyCallbacks) == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
-
 	VerifyOrReturnStatus(InitButton() == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL);
-
-#endif // !CONFIG_DOOR_LOCK_BLE_UWB
 
 	mIsInitialized = true;
 

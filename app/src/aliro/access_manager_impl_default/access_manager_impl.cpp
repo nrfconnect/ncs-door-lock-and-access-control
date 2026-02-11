@@ -7,10 +7,10 @@
 #include "access_manager_impl.h"
 #include "access_document.h"
 #include "aliro/aliro.h"
+#include "aliro/interface.h"
 #include "aliro/mutex_guard.h"
 #include "aliro/time.h"
 #include "aliro/utils.h"
-#include "crypto/crypto.h"
 #include "storage.h"
 #include "storage_keys.h"
 
@@ -165,18 +165,20 @@ void LogAccessData(const AccessData &accessData)
 	}
 }
 
-bool ValidateAccessData(const ConstData &accessDataBytes)
+AliroError ValidateAccessData(const ConstData &accessDataBytes)
 {
-	VerifyOrReturnFalse(accessDataBytes.mData && accessDataBytes.mLength, LOG_ERR("AccessData is empty"));
+	VerifyOrReturnStatus(accessDataBytes.mData && accessDataBytes.mLength, ALIRO_INVALID_ARGUMENT,
+			     LOG_ERR("AccessData is empty"));
 
 	LOG_HEXDUMP_DBG(accessDataBytes.mData, accessDataBytes.mLength, "AccessData");
 
 	AccessData accessData{};
 	const auto err = cbor_decode_AccessData(accessDataBytes.mData, accessDataBytes.mLength, &accessData, nullptr);
-	VerifyOrReturnFalse(err == ZCBOR_SUCCESS, LOG_ERR("Failed to decode AccessData: %d", err));
+	VerifyOrReturnStatus(err == ZCBOR_SUCCESS, ALIRO_INVALID_DATA_FORMAT,
+			     LOG_ERR("Failed to decode AccessData: %d", err));
 
-	VerifyOrReturnFalse(accessData.AccessData_Version == 1,
-			    LOG_ERR("Unsupported AccessData Version: %d", accessData.AccessData_Version));
+	VerifyOrReturnStatus(accessData.AccessData_Version == 1, ALIRO_INVALID_DATA_FORMAT,
+			     LOG_ERR("Unsupported AccessData Version: %d", accessData.AccessData_Version));
 
 	if (accessData.AccessData_AccessRules_present) {
 		bool accessRuleValid{ false };
@@ -201,12 +203,14 @@ bool ValidateAccessData(const ConstData &accessDataBytes)
 			}
 		}
 
-		VerifyOrReturnFalse(accessRuleValid, LOG_ERR("AccessData AccessRules, no valid rule found"));
+		VerifyOrReturnStatus(accessRuleValid, ALIRO_INVALID_DATA_CONTENT,
+				     LOG_ERR("AccessData AccessRules, no valid rule found"));
 	}
 
-	VerifyOrReturnFalse(!accessData.AccessData_Schedules_present, LOG_ERR("AccessData Schedules not supported"));
-	VerifyOrReturnFalse(!accessData.AccessData_ReaderRuleIds_present,
-			    LOG_ERR("AccessData ReaderRuleIds not supported"));
+	VerifyOrReturnStatus(!accessData.AccessData_Schedules_present, ALIRO_INVALID_DATA_CONTENT,
+			     LOG_ERR("AccessData Schedules not supported"));
+	VerifyOrReturnStatus(!accessData.AccessData_ReaderRuleIds_present, ALIRO_INVALID_DATA_CONTENT,
+			     LOG_ERR("AccessData ReaderRuleIds not supported"));
 
 	if (accessData.AccessData_AccessExtensions_present) {
 		const auto &accessExtensions = accessData.AccessData_AccessExtensions;
@@ -226,8 +230,8 @@ bool ValidateAccessData(const ConstData &accessDataBytes)
 				const auto criticalExtension =
 					!IS_BIT_SET(accessExtension.AccessExtension_Criticality,
 						    Criticality_Bits::Criticality_Bits_Critical_c);
-				VerifyOrReturnFalse(
-					!criticalExtension,
+				VerifyOrReturnStatus(
+					!criticalExtension, ALIRO_INVALID_DATA_CONTENT,
 					LOG_ERR("AccessData AccessExtensions, critical extensions are not supported"));
 			}
 		}
@@ -235,7 +239,7 @@ bool ValidateAccessData(const ConstData &accessDataBytes)
 
 	LogAccessData(accessData);
 
-	return true;
+	return ALIRO_NO_ERROR;
 }
 
 AliroError GetCurrentValidityIterations(size_t credentialIssuerKeyIndex, ValidityIterations &iterations)
@@ -308,14 +312,23 @@ bool IsCurrentAccessDocumentUpToDate(size_t keyIndex, const Timestamp &credentia
 
 } // namespace
 
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+
+void AccessManagerImpl::RangingSessionContext::RangingSessionTimerCallback(Timer::Context ctx)
+{
+	auto rangingSessionCtx = static_cast<RangingSessionContext *>(ctx);
+	auto sessionContextOpt = AccessManagerImpl::Instance().FindSessionContext(rangingSessionCtx);
+
+	if (sessionContextOpt.has_value()) {
+		AccessManagerImpl::Instance().TerminateAliroSession(sessionContextOpt.value());
+	}
+}
+
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
+
 void AccessManagerImpl::_SetApplicationCallbacks(const ApplicationCallbacks &callbacks)
 {
 	mCallbacks = callbacks;
-}
-
-void AccessManagerImpl::_SetStackCallbacks(const StackCallbacks &callbacks)
-{
-	mStackCallbacks = callbacks;
 }
 
 std::optional<AccessManager::AccessDocumentRequestParams> AccessManagerImpl::_ShouldRequestAccessDocument(
@@ -360,7 +373,7 @@ AliroError AccessManagerImpl::_VerifyAccessCredential(
 	AliroError status{ ALIRO_NO_ERROR };
 	{
 		MutexGuard lock{ sMutex };
-		status = VerifyPublicKey(userPublicKey) ? ALIRO_NO_ERROR : ALIRO_INVALID_PUBLIC_KEY;
+		status = VerifyPublicKey(userPublicKey) ? ALIRO_NO_ERROR : ALIRO_PUBLIC_KEY_NOT_FOUND;
 	}
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
@@ -530,20 +543,20 @@ void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext session
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	switch (state) {
 	case RangingSessionState::Ranging:
-		LOG_INF("Ranging state changed to Ranging (session: %p)", sessionContext);
+		LOG_INF("Ranging state changed to Ranging (session: %p)", sessionContext.GetRaw());
 		break;
 	case RangingSessionState::RangingSuspended:
-		LOG_INF("Ranging state changed to Ranging Suspended (session: %p)", sessionContext);
+		LOG_INF("Ranging state changed to Ranging Suspended (session: %p)", sessionContext.GetRaw());
 
 		// To prevent rapid toggling after Suspend event, only update ReaderState if no other sessions are in
 		// range
 		SetInRangeState(sessionContext, false, !IsUserDeviceInRange());
 		break;
 	case RangingSessionState::RangingResumed:
-		LOG_INF("Ranging state changed to Ranging Resumed (session: %p)", sessionContext);
+		LOG_INF("Ranging state changed to Ranging Resumed (session: %p)", sessionContext.GetRaw());
 		break;
 	case RangingSessionState::Destroyed:
-		LOG_INF("Ranging state changed to Destroyed (session: %p)", sessionContext);
+		LOG_INF("Ranging state changed to Destroyed (session: %p)", sessionContext.GetRaw());
 		// Only update ReaderState if no other sessions are in range
 		SetInRangeState(sessionContext, false);
 		break;
@@ -559,7 +572,7 @@ void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext session
 
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData)
 {
-	LOG_DBG("Handling ranging session data - length: %u for session: %p", uwbData.mLength, sessionContext);
+	LOG_DBG("Handling ranging session data - length: %u for session: %p", uwbData.mLength, sessionContext.GetRaw());
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	const auto currentSessionInRange = AnalyzeUwbRangingData(uwbData, sessionContext);
@@ -569,8 +582,6 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext,
 
 void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext, [[maybe_unused]] bool isNfcSession)
 {
-	VerifyOrReturn(sessionContext, LOG_ERR("Session context is null"));
-
 	LOG_INF("Handling session termination");
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
@@ -738,7 +749,7 @@ bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData, Ses
 
 	// Find the session
 	auto *sessionCtx = FindRangingSession(sessionContext);
-	VerifyOrReturnFalse(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext));
+	VerifyOrReturnFalse(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext.GetRaw()));
 
 	// Apply exit margin logic based on session's previous state:
 	// - Unlock (enter range): distance <= mMaxAllowedDistance (when session was out of range)
@@ -776,14 +787,9 @@ AliroError AccessManagerImpl::AddRangingSession(uint32_t rangingSessionId, const
 	auto *newCtx = Aliro::new_nothrow<RangingSessionContext>(
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		CONFIG_DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS,
-		[](Timer::Context ctx) { AccessManagerImpl::Instance().TerminateAliroSession(ctx); },
-		const_cast<Timer::Context>(sessionCtx)
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-	);
+		sessionCtx);
 	VerifyOrReturnStatus(newCtx, ALIRO_NO_MEMORY, LOG_ERR("Cannot allocate context for UWB session."));
-
-	newCtx->mInRange = false;
-	newCtx->mSessionContext = sessionCtx;
 
 	MutexGuard lock{ sMutex };
 
@@ -844,6 +850,21 @@ AccessManagerImpl::RangingSessionContext *AccessManagerImpl::FindRangingSession(
 	return nullptr;
 }
 
+std::optional<AccessManager::SessionContext>
+AccessManagerImpl::FindSessionContext(RangingSessionContext *rangingSessionCtx)
+{
+	MutexGuard lock{ sMutex };
+	RangingSessionContext *currentSessionCtx{ nullptr };
+
+	SYS_SLIST_FOR_EACH_CONTAINER (&mActiveSessions, currentSessionCtx, mNode) {
+		if (currentSessionCtx == rangingSessionCtx) {
+			return currentSessionCtx->mSessionContext;
+		}
+	}
+
+	return std::nullopt;
+}
+
 bool AccessManagerImpl::IsUserDeviceInRange() const
 {
 	RangingSessionContext *rangingSessionCtx{};
@@ -867,7 +888,8 @@ void AccessManagerImpl::SetInRangeState(SessionContext sessionContext, bool sess
 		MutexGuard lock{ sMutex };
 		// Find the session
 		sessionCtx = FindRangingSession(sessionContext);
-		VerifyOrReturn(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext));
+		VerifyOrReturn(sessionCtx,
+			       LOG_ERR("Session context not found for handle: %p", sessionContext.GetRaw()));
 
 		// Early return if has not changed
 		if (sessionCtx->mInRange == sessionInRange) {
@@ -905,7 +927,9 @@ void AccessManagerImpl::SetInRangeState(SessionContext sessionContext, bool sess
 			TerminateAliroSession(sessionContext);
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 		} else {
+#ifndef CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK
 			LockAction(false);
+#endif // CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK
 		}
 	}
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
@@ -913,8 +937,8 @@ void AccessManagerImpl::SetInRangeState(SessionContext sessionContext, bool sess
 
 void AccessManagerImpl::TerminateAliroSession(SessionContext sessionContext)
 {
-	LOG_DBG("Terminating Aliro session for context: %p", sessionContext);
-	VerifyAndCall(mStackCallbacks.mTerminateSessionClb, sessionContext);
+	LOG_DBG("Terminating Aliro session for context: %p", sessionContext.GetRaw());
+	AliroStack::Instance().DestroySession(sessionContext);
 }
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -977,7 +1001,7 @@ AliroError AccessManagerImpl::_GetCredentialIssuerPublicKey(const CryptoTypes::K
 
 		std::copy(key.value().begin(), key.value().end(), input.begin() + kKeyIdentifierStringLength);
 
-		AliroError error = CryptoInstance().Sha256(input.data(), input.size(), sha256Output);
+		AliroError error = Interface::Crypto::Sha256(input.data(), input.size(), sha256Output);
 		VerifyOrReturnStatus(error == ALIRO_NO_ERROR, ALIRO_ERROR_INTERNAL,
 				     LOG_ERR("SHA256 hash computation failed"));
 
@@ -999,17 +1023,19 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 {
 	ReturnErrorOnFailure(ProcessValidityIteration(ad.mCredentialIssuerPublicKey, ad.mValidityIteration));
 
-	VerifyOrReturnStatus(ValidateAccessData(ad.mDataElement), ALIRO_INVALID_ACCESS_DOCUMENT,
+	auto error = ValidateAccessData(ad.mDataElement);
+	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, error,
 			     LOG_WRN("Access Document is not valid, ignoring it for access decision"));
 
 	LOG_DBG("Verify Access Credential based on Access Document");
-	VerifyOrReturnStatus(ad.mPublicKey == userPublicKey, ALIRO_INVALID_PUBLIC_KEY, LOG_WRN("Public key mismatch"));
+	VerifyOrReturnStatus(ad.mPublicKey == userPublicKey, ALIRO_PUBLIC_KEY_NOT_TRUSTED,
+			     LOG_WRN("Public key mismatch"));
 
 	MutexGuard lock{ sMutex };
 
 	// Check if there is a free index in the Access Document container to store the Access Document.
 	size_t keyIndex = 0;
-	auto error = GetFirstFreeIndex(mAdKeys, keyIndex);
+	error = GetFirstFreeIndex(mAdKeys, keyIndex);
 
 	if (error == ALIRO_NO_MEMORY) {
 		LOG_DBG("No free index in the Access Document container, removing oldest credential");
@@ -1085,8 +1111,7 @@ AliroError AccessManagerImpl::ProcessValidityIteration(const CryptoTypes::Public
 	ValidityIterations iterations{};
 	ReturnErrorOnFailure(GetCurrentValidityIterations(keyIndex, iterations));
 
-	VerifyOrReturnStatus(VerifyValidityIteration(iterations, validityIteration.value()),
-			     ALIRO_INVALID_ACCESS_DOCUMENT,
+	VerifyOrReturnStatus(VerifyValidityIteration(iterations, validityIteration.value()), ALIRO_PUBLIC_KEY_EXPIRED,
 			     LOG_WRN("Validity Iteration is not valid, ignoring Access Document for access decision"));
 
 	ReturnErrorOnFailure(UpdateValidityIteration(keyIndex, iterations, validityIteration.value()));

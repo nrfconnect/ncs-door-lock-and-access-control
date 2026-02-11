@@ -68,28 +68,15 @@ public:
 	AliroError Init();
 
 	/**
-	 * @brief Allocates a new L2CAP channel for the given connection.
+	 * @brief Sets the BLE UWB protocol version for the given connection.
 	 *
-	 * This function allocates a new L2CAP channel that will be used when the L2CAP connection is accepted.
-	 * The channel must be pre-allocated after protocol BLE UWB version validation via GATT. Additionally, the
-	 * channel is pre-allocated for the given protocol version.
-	 * If the channel is already pre-allocated, this function returns success without re-allocating.
+	 * This function stores the protocol version negotiated for the given
+	 * connection. The version can be retrieved later with GetBleUwbProtocolVersion().
 	 *
-	 * @param conn The connection to preallocate the channel for.
-	 * @param version The BLE UWB protocol version to use for the channel.
-	 *
-	 * @return ALIRO_NO_ERROR on success, or an error code on failure.
+	 * @param conn The connection to set the BLE UWB protocol version for.
+	 * @param protocolVersion The protocol version to store.
 	 */
-	AliroError AllocateL2capChannel(bt_conn *conn, ProtocolVersion version) const;
-
-	/**
-	 * @brief Frees a L2CAP channel for the given connection.
-	 *
-	 * This function frees a L2CAP channel that was previously allocated using the AllocateL2capChannel function.
-	 *
-	 * @param conn The connection to free the L2CAP channel for.
-	 */
-	void FreeL2capChannel(bt_conn *conn) const;
+	void SetProtocolVersion(bt_conn *conn, ProtocolVersion protocolVersion);
 
 	/**
 	 * @brief Gets the BLE UWB protocol version for the given connection.
@@ -179,6 +166,7 @@ private:
 	static void Released(bt_l2cap_chan *channel);
 
 	Spsm mSpsm{};
+	ProtocolVersion mConnectionProtocolVersion[CONFIG_BT_MAX_CONN]{};
 
 	Callbacks mCallbacks{};
 

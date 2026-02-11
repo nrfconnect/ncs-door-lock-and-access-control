@@ -22,7 +22,6 @@ private:
 	friend class AccessManager;
 
 	void _SetApplicationCallbacks(const ApplicationCallbacks &callbacks);
-	void _SetStackCallbacks(const StackCallbacks &callbacks);
 	std::optional<AccessDocumentRequestParams>
 	_ShouldRequestAccessDocument(const CryptoTypes::PublicKey &publicKey,
 				     const std::optional<Timestamp> &credentialSignedTimestamp);

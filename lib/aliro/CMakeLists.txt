@@ -5,13 +5,25 @@
 #
 
 if(NOT TARGET aliro)
-  if(CONFIG_DOOR_LOCK_BLE_UWB)
+  if(CONFIG_NCS_ALIRO_BLE_UWB)
     set(ALIRO_LIB_NAME libaliro_ble.a)
-  else(CONFIG_DOOR_LOCK_BLE_UWB)
+  else(CONFIG_NCS_ALIRO_BLE_UWB)
     set(ALIRO_LIB_NAME libaliro.a)
-  endif(CONFIG_DOOR_LOCK_BLE_UWB)
+  endif(CONFIG_NCS_ALIRO_BLE_UWB)
 
-  zephyr_library_import(aliro ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/${ALIRO_LIB_NAME})
+  if(CONFIG_DOOR_LOCK_RELEASE)
+    set(BUILD_TYPE "release")
+  else()
+    set(BUILD_TYPE "debug")
+  endif()
+
+  set(ALIRO_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${BUILD_TYPE}/${SOC_NAME}/${ALIRO_LIB_NAME})
+
+  if(NOT EXISTS ${ALIRO_LIB_PATH})
+    message(FATAL_ERROR "Aliro library not found. Expected at ${ALIRO_LIB_PATH}")
+  endif()
+
+  zephyr_library_import(aliro ${ALIRO_LIB_PATH})
 endif()
 
 if(NOT DEFINED PUBLIC_API_DIR)
@@ -21,5 +33,4 @@ endif()
 zephyr_include_directories(
   ${PUBLIC_API_DIR}/include
   ${PUBLIC_API_DIR}/interfaces
-  ${PUBLIC_API_DIR}/interfaces/crypto/backend_crypto_psa
 )

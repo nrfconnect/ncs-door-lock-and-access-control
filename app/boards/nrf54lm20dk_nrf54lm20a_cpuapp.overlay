@@ -77,3 +77,9 @@
 &mx25r64 {
 	status = "okay";
 };
+
+&gpio1 {
+	status = "okay";
+	/* Use PORT event rather than GPIOTE IN event, to save power */
+	sense-edge-mask = <0x00004000>; /* P1.14 */
+};

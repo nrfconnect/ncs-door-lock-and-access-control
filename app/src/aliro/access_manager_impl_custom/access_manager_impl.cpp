@@ -17,11 +17,6 @@ void AccessManagerImpl::_SetApplicationCallbacks(const ApplicationCallbacks &)
 	LOG_INF("Custom %s function", __FUNCTION__);
 }
 
-void AccessManagerImpl::_SetStackCallbacks(const StackCallbacks &)
-{
-	LOG_INF("Custom %s function", __FUNCTION__);
-}
-
 std::optional<AccessManager::AccessDocumentRequestParams>
 AccessManagerImpl::_ShouldRequestAccessDocument(const CryptoTypes::PublicKey &, const std::optional<Timestamp> &)
 {

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "access/access_manager.h"
+#include "aliro/lock_sim/lock_sim.h"
 #include "aliro/types.h"
 
 #include <app/clusters/door-lock-server/door-lock-server.h>
@@ -16,36 +17,16 @@
 
 #include <cstdint>
 
-struct BoltLockManagerEvent;
-
 class BoltLockManager {
 	using AccessMgr = AccessManager<DoorLockData::PIN | DoorLockData::ALIRO_CRED_ISSUER |
 					DoorLockData::ALIRO_EV_EP | DoorLockData::ALIRO_NON_EV_EP>;
 
 public:
-	static constexpr size_t kMaxCredentialLength{ 128 };
-
-	enum class State : uint8_t {
-		kLockingInitiated = 0,
-		kLockingCompleted,
-		kUnlockingInitiated,
-		kUnlockingCompleted,
-	};
-
-	struct UserData {
-		char mName[DOOR_LOCK_USER_NAME_BUFFER_SIZE];
-		CredentialStruct mCredentials[CONFIG_LOCK_MAX_NUM_CREDENTIALS_PER_USER];
-	};
-
-	struct CredentialData {
-		chip::Platform::ScopedMemoryBuffer<uint8_t> mSecret;
-	};
-
 	using OperationSource = chip::app::Clusters::DoorLock::OperationSourceEnum;
 	using ValidatePINResult = AccessMgr::ValidatePINResult;
 
 	struct StateData {
-		State mState;
+		Aliro::ReaderStateByte mState;
 		OperationSource mSource;
 		Aliro::OperationSource mAliroSource;
 		Nullable<chip::FabricIndex> mFabricIdx;
@@ -55,12 +36,10 @@ public:
 
 	using StateChangeCallback = void (*)(const StateData &);
 
-	static constexpr uint32_t kActuatorMovementTimeMs{ 2000 };
-
 	void Init(StateChangeCallback callback);
 
 	const StateData &GetState() const { return mStateData; }
-	bool IsLocked() const { return mStateData.mState == State::kLockingCompleted; }
+	bool IsLocked() const { return mStateData.mState == Aliro::ReaderStateByte::Secured; }
 
 	bool GetUser(uint16_t userIndex, EmberAfPluginDoorLockUserInfo &user);
 	bool SetUser(uint16_t userIndex, chip::FabricIndex creator, chip::FabricIndex modifier,
@@ -110,18 +89,16 @@ public:
 private:
 	friend class AppTask;
 
-	void SetState(State state);
-	void SetStateData(const StateData &stateData);
+	void UpdateState(Aliro::ReaderStateByte state);
 
-	static void ActuatorTimerEventHandler(k_timer *timer);
-	static void ActuatorAppEventHandler(const BoltLockManagerEvent &event);
 	friend BoltLockManager &BoltLockMgr();
 
 	StateData mStateData = {
-		State::kLockingCompleted, OperationSource::kButton, Aliro::OperationSource::Manual, {}, {}, {}
+		Aliro::ReaderStateByte::Secured, OperationSource::kButton, Aliro::OperationSource::Manual, {}, {}, {}
 	};
 	StateChangeCallback mStateChangeCallback = nullptr;
-	k_timer mActuatorTimer = {};
+
+	Aliro::LockSim mLockSim;
 
 	static BoltLockManager sLock;
 };
@@ -130,7 +107,3 @@ inline BoltLockManager &BoltLockMgr()
 {
 	return BoltLockManager::sLock;
 }
-
-struct BoltLockManagerEvent {
-	BoltLockManager *manager;
-};
