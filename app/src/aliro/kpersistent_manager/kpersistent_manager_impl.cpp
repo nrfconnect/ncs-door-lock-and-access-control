@@ -6,11 +6,12 @@
 
 #include "kpersistent_manager_impl.h"
 
-#include "access_manager/access_manager.h"
+#include "access_manager.h"
 #include "aliro/crypto_key_ids.h"
 #include "aliro/errors.h"
+#include "aliro/interface.h"
 #include "aliro/utils.h"
-#include "crypto/crypto.h"
+#include "crypto/utils.h"
 
 #include "zephyr/sys/util.h"
 #include <zephyr/logging/log.h>
@@ -42,7 +43,7 @@ void KpersistentManagerImpl::Init()
 	for (size_t i = 0; i < kMaxKpersistentCount; i++) {
 		const auto kpersistentKeyId = ToKpersistentKeyId(i);
 
-		auto error = CryptoInstance().IsKeyValid(kpersistentKeyId);
+		auto error = DoorLock::Crypto::IsKeyAvailable(kpersistentKeyId);
 		if (error != ALIRO_NO_ERROR) {
 			continue;
 		}
@@ -75,7 +76,7 @@ AliroError KpersistentManagerImpl::GetKpersistentKeyIds(KeyId *keyIds, size_t &c
 	return ALIRO_NO_ERROR;
 }
 
-AliroError KpersistentManagerImpl::PreserveKpersistent(const PublicKey &publicKey, KeyId &kpersistentKeyId)
+AliroError KpersistentManagerImpl::PreserveKpersistent(const PublicKey &publicKey, KeyId kpersistentKeyId)
 {
 	size_t index{};
 	VerifyOrReturnStatus(AccessManagerInstance().IsPublicKeyStored(publicKey, &index), ALIRO_PUBLIC_KEY_NOT_FOUND,
@@ -92,17 +93,16 @@ AliroError KpersistentManagerImpl::PreserveKpersistent(const PublicKey &publicKe
 		LOG_DBG("Removing existing Kpersistent key");
 
 		auto tempKpersistentKeyId{ kpersistentKeyIdPersistent };
-		auto status = CryptoInstance().DestroyKey(tempKpersistentKeyId);
+		auto status = DoorLock::Crypto::DestroyKey(tempKpersistentKeyId);
 		VerifyOrReturnStatus(status == ALIRO_NO_ERROR, status, LOG_ERR("Cannot remove existing Kpersistent"));
 
 		mKpersistentMap[index] = false;
 		mKpersistentCount--;
 	}
 
-	AliroError status = CryptoInstance().PreserveKey(kpersistentKeyId, kpersistentKeyIdPersistent);
+	AliroError status = DoorLock::Crypto::PreserveKey(kpersistentKeyId, kpersistentKeyIdPersistent);
 	VerifyOrReturnStatus(status == ALIRO_NO_ERROR, status, LOG_ERR("Cannot preserve new Kpersistent"));
 
-	kpersistentKeyId = kpersistentKeyIdPersistent;
 	mKpersistentMap[index] = true;
 	mKpersistentCount++;
 
@@ -123,7 +123,7 @@ AliroError KpersistentManagerImpl::RemoveKpersistent(size_t kpersistentKeyOffset
 	VerifyOrReturnStatus(IN_RANGE(kPersistentKeyIdPersistent, kKpersistentRangeBegin, kKpersistentRangeEnd),
 			     ALIRO_INVALID_ARGUMENT, LOG_WRN("Kpersistent key ID is out of range"));
 
-	VerifyOrReturnStatus(CryptoInstance().DestroyKey(kPersistentKeyIdPersistent) == ALIRO_NO_ERROR,
+	VerifyOrReturnStatus(DoorLock::Crypto::DestroyKey(kPersistentKeyIdPersistent) == ALIRO_NO_ERROR,
 			     ALIRO_ERROR_INTERNAL,
 			     LOG_WRN("Cannot remove Kpersistent with key ID: 0x%08x", kPersistentKeyIdPersistent));
 
@@ -156,7 +156,8 @@ AliroError KpersistentManagerImpl::GetAccessCredentialPublicKey(CryptoTypes::Key
 	VerifyOrReturnStatus(mKpersistentMap[index], ALIRO_INVALID_ARGUMENT);
 
 	AliroError status = AccessManagerInstance().GetPublicKey(index, publicKey);
-	VerifyOrReturnStatus(status == ALIRO_NO_ERROR, status, LOG_ERR("Cannot get Access Credential public key"));
+	VerifyOrReturnStatus(status == ALIRO_NO_ERROR, ALIRO_PUBLIC_KEY_NOT_FOUND,
+			     LOG_ERR("Cannot get Access Credential public key"));
 
 	return ALIRO_NO_ERROR;
 }

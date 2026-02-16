@@ -1,0 +1,15 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_WORKQUEUE_STACK_SIZE
+	int "Aliro workqueue stack size"
+	default 4096
+	help
+	  Stack size for the dedicated Aliro workqueue.
+
+config DOOR_LOCK_ALIRO_WORKQUEUE_PRIORITY
+	int "Aliro workqueue priority"
+	default 10

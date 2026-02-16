@@ -6,11 +6,13 @@
 
 rsource "drivers/Kconfig"
 rsource "lib/Kconfig"
+rsource "subsys/Kconfig"
 
 menuconfig NCS_DOOR_LOCK
 	bool "NCS Door Lock Application [EXPERIMENTAL]"
 	depends on (SOC_SERIES_NRF54LX || SOC_SERIES_NRF53X || SOC_SERIES_NRF52X)
 	select EXPERIMENTAL
+	select NCS_ALIRO
 	imply NFC_T4T_APDU
 	imply POLL
 	# storage
@@ -29,16 +31,12 @@ orsource "lib/aliro/interfaces/logger/Kconfig"
 
 config DOOR_LOCK_BLE_UWB
 	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
+	select NCS_ALIRO_BLE_UWB
 	help
 	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
 	  used by the Reader to communicate with the User Device. It is used to send and
 	  receive packets over BLE. Additionally the UWB is enabled in order to manage the
 	  ranging between the Reader and the User Device.
-
-config DISABLE_ALIRO_NFC_TP
-	bool "Disable NFC transport protocol for development purposes"
-	help
-	  Disable the NFC transport protocol. This is useful if you want to use Aliro with BLE only.
 
 if DOOR_LOCK_BLE_UWB
 
@@ -79,4 +77,14 @@ rsource "lib/aliro/Kconfig.ble.defconfig"
 
 endif # DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_BLE_SMP || DOOR_LOCK_BLE_NUS
 
+config DOOR_LOCK_RELEASE
+    bool "Enable Aliro release configuration"
+    help
+      In this configuration:
+      Aliro stack logs are disabled.
+      RFAL NFC driver logs are disabled.
+      Shell commands are disabled.
+      Device reset automatically on fatal error.
+
 endif # NCS_DOOR_LOCK
+

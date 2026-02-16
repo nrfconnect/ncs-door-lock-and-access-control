@@ -12,6 +12,7 @@
 .. _`Setting up the command-line build environment`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/installation/install_ncs.html#set_up_the_command-line_build_environment
 .. _`Zephyr CMake package`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/zephyr/build/zephyr_cmake_package.html#cmake-pkg
 .. _`Test Harness issue #191`: https://github.com/csa-access-control/aliro-certification-tool/issues/191
+.. _`ncs app index`: https://nrfconnect.github.io/ncs-app-index/ 
 
 .. ### Source: docs.nordicsemi.com
        Requires manual update to align it with the NCS version.
@@ -36,10 +37,13 @@
 .. _`nRF5340 DK`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/zephyr/boards/nordic/nrf5340dk/doc/index.html
 .. _`nrf5340dk`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/app_dev/device_guides/nrf53/index.html
 .. _`nRF5340 DK connector interface`: https://docs.nordicsemi.com/bundle/ug_nrf5340_dk/page/UG/dk/connector_if.html
+.. _`nRF5340 DK external memory`: https://docs.nordicsemi.com/bundle/ug_nrf5340_dk/page/UG/dk/hw_external_memory.html
 
 .. _`nRF52840 DK`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/zephyr/boards/nordic/nrf52840dk/doc/index.html
 .. _`nrf52840dk`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/app_dev/device_guides/nrf52/index.html
 .. _`nRF52840 DK connector interface`: https://docs.nordicsemi.com/bundle/ug_nrf52840_dk/page/UG/dk/connector_if.html
+
+.. _`Power Profiler Kit II`: https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/PPK_user_guide_Intro.html
 
 .. _`Testing and optimization`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/test_and_optimize.html
 .. _`Software maturity`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/releases_and_maturity/software_maturity.html
@@ -72,6 +76,7 @@
 .. _`Board Configurator app`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/index.html
 .. _`Installing Board Configurator app`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/installing.html
 .. _`Updating the board configuration`: https://docs.nordicsemi.com/bundle/nrf-connect-board-configurator/page/updating.html
+.. _`nRF Connect for Desktop`: https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-Desktop
 .. _`Serial Terminal app`: https://docs.nordicsemi.com/bundle/nrf-connect-serial-terminal/page/index.html
 .. _`nRF device manager`: https://www.nordicsemi.com/Products/Development-tools/nrf-connect-device-manager
 .. _`Newt manager`: https://github.com/apache/mynewt-newtmgr
@@ -80,10 +85,10 @@
 
 .. _`X-NUCLEO-NFC09A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc09a1.html
 .. _`ST25R100`: https://www.st.com/en/nfc/st25r100.html
-.. _`X-NUCLEO-NFC08A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc08a1.html
-.. _`ST25R3916B`: https://www.st.com/en/nfc/st25r3916b.html
-.. _`X-NUCLEO-NFC05A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc05a1.html
-.. _`ST25R3911B`: https://www.st.com/en/nfc/st25r3911b.html
+.. _`X-NUCLEO-NFC12A1`: https://www.st.com/en/ecosystems/x-nucleo-nfc12a1.html
+.. _`ST25R300`: https://www.st.com/en/nfc/st25r300.html
+.. _`ST25R300 datasheet`: https://www.st.com/resource/en/datasheet/st25r300.pdf
+.. _`RFAL documentation`: https://www.st.com/resource/en/user_manual/um2890-rfnfc-abstraction-layer-rfal-stmicroelectronics.pdf
 
 .. _`OM27160B1EVK`: https://www.nxp.com/part/OM27160B1EVK
 .. _`OM27160A1EVK`: https://www.nxp.com/part/OM27160A1EVK

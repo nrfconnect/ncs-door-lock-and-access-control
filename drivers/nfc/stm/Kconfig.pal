@@ -10,27 +10,6 @@ config RFAL_MAX_TIMERS_NUM
     help
         Defines the size of the timer array, setting the maximum number of timers that can be used by RFAL.
 
-config RFAL_ISR_THREAD_PRIORITY
-    int "ISR Thread Priority"
-    default -1
-    help
-        Sets the priority level of the Interrupt Service Routine thread.
-
-config RFAL_ISR_THREAD_STACK_SIZE
-    int "ISR Thread Stack Size"
-    default 1024
-    help
-        Sets the stack size for the Interrupt Service Routine thread.
-
-config RFAL_WORKER_THREAD_PRIORITY
-    int "Priority of the thread that the RFAL worker lives in"
-    range RFAL_ISR_THREAD_PRIORITY NUM_PREEMPT_PRIORITIES
-    default 0
-
-config RFAL_WORKER_THREAD_STACK_SIZE
-    int "Stack size of the thread that the RFAL worker lives in"
-    default 4096
-
 config RFAL_SINGLE_SPI_BUS
     bool "Configure SPI bus to work with multiple devices on the same bus"
     help

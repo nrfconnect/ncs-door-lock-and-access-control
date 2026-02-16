@@ -1,0 +1,58 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_EXTERNAL_NVS
+	bool "External NVS Storage"
+	select NVS
+	select FLASH
+	select FLASH_MAP
+	select PSA_WANT_GENERATE_RANDOM
+	select PSA_WANT_KEY_TYPE_CHACHA20
+	select PSA_WANT_ALG_CHACHA20_POLY1305
+	select HW_UNIQUE_KEY
+	select HW_UNIQUE_KEY_RANDOM
+	select HW_UNIQUE_KEY_WRITE_ON_CRYPTO_INIT
+	depends on !SOC_SERIES_NRF52X
+	help
+	  Enable External NVS Storage.
+
+if DOOR_LOCK_EXTERNAL_NVS
+
+module = DOOR_LOCK_EXTERNAL_NVS
+module-str = Door Lock External NVS Storage
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config  DOOR_LOCK_EXTERNAL_NVS_MAX_DATA_SIZE
+	int "Maximum data size"
+	range 1 65535
+	default 1024
+	help
+	  Maximum data size for the external NVS storage objects.
+
+config DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION
+	bool "Enable rollback protection"
+	depends on SETTINGS
+	default y
+	help
+	  Enable rollback protection for the external NVS storage.
+
+if DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION
+
+config DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION_SETTINGS_PREFIX
+	string "Settings prefix"
+	default "ext"
+	help
+		Prefix for the settings keys for the rollback protection.
+
+config DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION_UNIQUE_ID_SIZE
+	int "Unique ID size"
+	default 8
+	help
+		Size of the unique ID for the rollback protection.
+
+endif # DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION
+
+endif # DOOR_LOCK_EXTERNAL_NVS

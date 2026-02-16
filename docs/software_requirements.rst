@@ -14,16 +14,20 @@ This page summarizes the requirements for setting up and working with the |app_n
 |NCS|
 *****
 
-Before you start working with the application, you must have installed the |NCS| development environment and |NCS| toolchain.
+Before you start working with the application, you must install the |NCS| development environment and |NCS| toolchain.
 
 Prepare the environment:
 
-1. From the `Installing the nRF Connect SDK`_ page, complete the following steps: updating operating system, installing prerequisities, and installing the |NCS| toolchain.
+1. From the `Installing the nRF Connect SDK`_ page, complete the following steps: 
+
+   a. Updating operating system
+   #. Installing prerequisities
+   #. Installing the |NCS| toolchain
 
    .. note::
 
       |VSC| does not support private add-ons.
-      You must use command-line to clone the repository.
+      You must use command-line to clone and manage the repository.
 
 #. Once completed, open the repository and locate the :file:`ncs` directory.
    By default, this is one level up from the location where you installed the toolchain.
@@ -44,7 +48,7 @@ Prepare the environment:
 
    This command will clone the `ncs-door-lock-app`_ add-on manifest repository into :file:`door-lock-workspace`.
 
-#. Enter the following command to clone the project repository:
+#. Enter the following command to clone the project repository and all of its submodules:
 
    .. code-block:: console
 
@@ -80,7 +84,7 @@ Prepare the environment:
 
 #. Complete `setting up the command-line build environment`_.
 
-Once you have completed all the steps, the development environment should be correctly configured.
+   Once you have completed all the steps, the development environment should be correctly configured.
 
 Aliro Certification Tool
 ************************

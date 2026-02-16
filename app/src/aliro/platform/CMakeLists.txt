@@ -6,10 +6,11 @@
 
 zephyr_include_directories(.)
 
-add_subdirectory(nfc_transport_impl)
+add_subdirectory(crypto)
 add_subdirectory(logger)
+add_subdirectory(nfc)
 
-if(CONFIG_DOOR_LOCK_BLE_UWB OR CONFIG_DOOR_LOCK_DFU_BLE_SMP OR CONFIG_DOOR_LOCK_BLE_NUS)
+if(CONFIG_BT)
   add_subdirectory(ble)
 endif()
 

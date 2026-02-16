@@ -7,7 +7,6 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/__assert.h>
 
-#include "ncs_pal_semaphore.h"
 #include "ncs_pal_timer.h"
 
 #include <zephyr/logging/log.h>
@@ -25,16 +24,11 @@ uint32_t ncs_pal_get_sys_tick()
 	return k_uptime_get_32();
 }
 
-static void timer_expiry_callback(struct k_timer *timer)
-{
-	ncs_pal_give_semaphore();
-}
-
 void ncs_pal_timers_init()
 {
 	int timer_id = 0;
 	for (timer_id = 0; timer_id < CONFIG_RFAL_MAX_TIMERS_NUM; timer_id++) {
-		k_timer_init(&timers[timer_id].timer, timer_expiry_callback, NULL);
+		k_timer_init(&timers[timer_id].timer, NULL, NULL);
 		timers[timer_id].in_use = false;
 	}
 	LOG_DBG("%d timers initialized", timer_id + 1);

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "kpersistent_manager/kpersistent_manager.h"
+#include "kpersistent_manager.h"
 
 #include <bitset>
 #include <cstddef>
@@ -22,7 +22,7 @@ public:
 	AliroError GetKpersistentKeyIds(CryptoTypes::KeyId *keyIds, size_t &count) override;
 
 	AliroError PreserveKpersistent(const CryptoTypes::PublicKey &publicKey,
-				       CryptoTypes::KeyId &kpersistentKeyId) override;
+				       CryptoTypes::KeyId kpersistentKeyId) override;
 
 	AliroError RemoveKpersistent(size_t kpersistentKeyOffset) override;
 
