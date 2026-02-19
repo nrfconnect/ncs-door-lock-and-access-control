@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include <aliro/errors.h>
+
 /**
  * @brief Initializes the Aliro stack.
  *
@@ -25,6 +27,24 @@ int AliroStart();
  * @return EXIT_SUCCESS if the Aliro stack was stopped successfully, EXIT_FAILURE otherwise.
  */
 int AliroStop();
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+
+/**
+ * @brief Starts or refreshes Aliro BLE advertising with current reader identity data.
+ *
+ * @return ALIRO_NO_ERROR on success, error status otherwise.
+ */
+AliroError StartAliroAdvertising();
+
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
+/**
+ * @brief Check if Aliro stack is currently running.
+ *
+ * @return true if Aliro stack is running, false otherwise.
+ */
+bool IsAliroRunning();
 
 #ifdef CONFIG_CHIP
 

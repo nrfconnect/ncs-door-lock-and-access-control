@@ -10,11 +10,18 @@
 #include <aliro/memory.h>
 #include <aliro/utils.h>
 
-#ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
-#include "reader_certificate_cache.h"
-#endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
+#ifdef CONFIG_BT
+#include <zephyr/bluetooth/bluetooth.h>
+#endif // CONFIG_BT
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+#include "ble/ble_manager.h"
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include "aliro/crypto_key_ids.h"
+#include "aliro/utils/hex_string.h"
+#include "crypto/utils.h"
+#include "reader_cache.h"
 
 #include <zephyr/shell/shell.h>
 
@@ -24,8 +31,10 @@
 
 #ifndef CONFIG_CHIP
 
-#include "access_manager/access_manager.h"
-#include "crypto/crypto.h"
+#include "../aliro_state_control.h"
+#include "access_manager.h"
+#include "aliro/init.h"
+#include "aliro/interface.h"
 #include "storage.h"
 #include "storage_keys.h"
 
@@ -45,12 +54,15 @@
 
 #endif // CONFIG_CHIP
 
+#include <algorithm>
 #include <cstdlib>
 
 namespace {
 using namespace Aliro;
 
-constexpr size_t kPublicKeyStringLength{ 2 * CryptoTypes::kEccP256PublicKeyLength };
+#ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
+using CertificateData = std::array<uint8_t, StorageKeys::kMaxCertificateSize>;
+#endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 
 // Flag to check if shell is already initialized.
 bool isInitialized{ false };
@@ -78,6 +90,8 @@ constexpr char kCmdReaderGroupIdentifier[] = "group_id";
 constexpr char kCmdReaderGroupSubIdentifier[] = "group_sub_id";
 constexpr size_t kAcMaxKeys{ CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS };
 [[maybe_unused]] constexpr size_t kCiMaxKeys{ CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS };
+constexpr size_t kPublicKeyStringLength{ 2 * CryptoTypes::kEccP256PublicKeyLength };
+constexpr size_t kPrivateKeyStringLength{ 2 * CryptoTypes::kEccP256KeyPrivateKeyLength };
 
 K_WORK_DELAYABLE_DEFINE(sRebootWork, [](k_work *) { sys_reboot(SYS_REBOOT_WARM); });
 
@@ -93,7 +107,6 @@ int ShellCmdHandleIdentifiers(const struct shell *shell, size_t argc, char **arg
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 
 	Identifier identifier{};
-	std::array<char, kReaderIdentifierLength * 2 + 1> identifierStr{};
 
 	int status = KeyValueStorage::Instance().Get(StorageKeys::kStorageKeyNameIdentifier, identifier.data(),
 						     identifier.size());
@@ -119,8 +132,10 @@ int ShellCmdHandleIdentifiers(const struct shell *shell, size_t argc, char **arg
 				     shell_warn(shell, "Cannot get %s, error: %d\n",
 						StorageKeys::kStorageKeyNameIdentifier, status));
 
-		bin2hex(identifier.data() + offset, length, identifierStr.data(), identifierStr.size());
-		shell_print(shell, "%s", identifierStr.data());
+		DoorLock::Utils::HexStringBuffer<Identifier> identifierHex{};
+		VerifyOrReturnStatus(DoorLock::Utils::ArrayToHexString(identifierHex, identifier), -EINVAL,
+				     shell_warn(shell, "Cannot format %s\n", argv[0]));
+		shell_print(shell, "%.*s", static_cast<int>(length * 2), identifierHex.data() + offset * 2);
 
 		return 0;
 	}
@@ -135,10 +150,73 @@ int ShellCmdHandleIdentifiers(const struct shell *shell, size_t argc, char **arg
 							       identifier.data(), identifier.size()),
 			     -EINVAL, shell_warn(shell, "Cannot update %s\n", StorageKeys::kStorageKeyNameIdentifier));
 
-	AliroStack::Instance().SetReaderIdentifier(identifier);
+	AliroError aliroError = ReaderCache::Instance().SetIdentifier(identifier);
+	VerifyOrReturnStatus(aliroError == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to set reader identifier\n"));
+
+#ifndef CONFIG_CHIP
+	AliroError err = DoorLock::AliroStateControl::UpdateAliroState();
+	VerifyOrReturnValue(err == ALIRO_NO_ERROR, -EIO,
+			    shell_warn(shell, "Failed to update Aliro state: %d\n", err.ToInt()));
+#endif // CONFIG_CHIP
 
 	return 0;
 }
+
+#ifndef CONFIG_CHIP
+int ShellCmdHandleReaderPrivateKeySet(const struct shell *shell, size_t argc, char **argv)
+{
+	VerifyOrReturnStatus(argc == 2, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
+	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
+
+	const char *keyStr{ argv[1] };
+	size_t len = strlen(keyStr);
+	VerifyOrReturnStatus(len == kPrivateKeyStringLength, -EINVAL,
+			     shell_warn(shell, "Invalid key length (must be %zu hex chars)\n",
+					kPrivateKeyStringLength));
+
+	CryptoTypes::PrivateKey privateKey{};
+	const size_t decodedLen = hex2bin(keyStr, len, privateKey.data(), privateKey.size());
+	VerifyOrReturnStatus(decodedLen == privateKey.size(), -EINVAL, shell_warn(shell, "Invalid key hex string!\n"));
+
+	CryptoTypes::KeyId keyId{ kPrivateKeyId };
+	const auto err = DoorLock::Crypto::ImportPrivateKey(privateKey, true, keyId);
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, -EIO, shell_warn(shell, "Failed to import private key\n"));
+
+	CryptoTypes::PublicKey publicKey{};
+	const auto exportErr = DoorLock::Crypto::ExportPublicKey(keyId, publicKey);
+	VerifyOrReturnStatus(exportErr == ALIRO_NO_ERROR, -EIO, shell_warn(shell, "Failed to export public key\n"));
+
+	AliroError cacheErr = ReaderCache::Instance().SetPublicKey(publicKey);
+	VerifyOrReturnStatus(cacheErr == ALIRO_NO_ERROR, -EIO, shell_warn(shell, "Failed to cache public key\n"));
+
+	AliroError ec = DoorLock::AliroStateControl::UpdateAliroState();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, -EIO,
+			    shell_warn(shell, "Failed to update Aliro state: %d\n", ec.ToInt()));
+
+	return 0;
+}
+
+int ShellCmdHandleReaderPrivateKeyClear(const struct shell *shell, size_t argc, char **)
+{
+	VerifyOrReturnStatus(argc == 1, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
+	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
+
+	CryptoTypes::KeyId keyId{ kPrivateKeyId };
+	const auto err = DoorLock::Crypto::DestroyKey(keyId);
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, -EIO, shell_warn(shell, "Failed to destroy private key\n"));
+
+	ReaderCache::Instance().ClearPublicKey();
+
+	shell_print(shell, "Reader private key cleared");
+
+	AliroError ec = DoorLock::AliroStateControl::UpdateAliroState();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, -EIO,
+			    shell_warn(shell, "Failed to update Aliro state: %d\n", ec.ToInt()));
+
+	return 0;
+}
+#endif // CONFIG_CHIP
 
 int GetPublicKeyFromStorage(KeyValueStorage::KeyIdString keyNameInStorage, size_t keyId, CryptoTypes::PublicKey &pubKey)
 {
@@ -205,12 +283,14 @@ int CmdHandleAndListKey(const struct shell *shell, KeyValueStorage::KeyIdString 
 {
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 
-	std::array<char, kPublicKeyStringLength + 1> hexString{};
+	DoorLock::Utils::HexStringBuffer<CryptoTypes::PublicKey> hexString{};
 	CryptoTypes::PublicKey publicKey{};
 
 	for (size_t keyId = 0; keyId < numSlots; keyId++) {
 		if (GetPublicKeyFromStorage(keyIdStr, keyId, publicKey) == 0) {
-			bin2hex(publicKey.data(), publicKey.size(), hexString.data(), hexString.size());
+			if (!DoorLock::Utils::ArrayToHexString(hexString, publicKey)) {
+				snprintf(hexString.data(), hexString.size(), "(invalid)");
+			}
 		} else {
 			snprintf(hexString.data(), hexString.size(), "(null)");
 		}
@@ -294,15 +374,21 @@ int ShellCmdHandleAccessCredentialList(const struct shell *shell, size_t, char *
 int ShellCmdHandleAccessCredentialSet(const struct shell *shell, size_t argc, char **argv)
 {
 	size_t keyId{};
-	return CmdHandleAndSetKey(shell, argc, argv, StorageKeys::kStorageKeyNameAccessCredentialPublicKey, kAcMaxKeys,
-				  keyId);
+	const int rc = CmdHandleAndSetKey(shell, argc, argv, StorageKeys::kStorageKeyNameAccessCredentialPublicKey,
+					  kAcMaxKeys, keyId);
+	VerifyOrReturnValue(rc == 0, rc);
+
+	return 0;
 }
 
 int ShellCmdHandleAccessCredentialClear(const struct shell *shell, size_t argc, char **argv)
 {
 	size_t keyId{};
-	return CmdHandleAndClearKey(shell, argc, argv, StorageKeys::kStorageKeyNameAccessCredentialPublicKey,
-				    kAcMaxKeys, keyId);
+	const int rc = CmdHandleAndClearKey(shell, argc, argv, StorageKeys::kStorageKeyNameAccessCredentialPublicKey,
+					    kAcMaxKeys, keyId);
+	VerifyOrReturnValue(rc == 0, rc);
+
+	return 0;
 }
 
 #if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
@@ -342,12 +428,13 @@ int ShellCmdHandleCredentialIssuerCAGet(const struct shell *shell, size_t argc, 
 
 	CryptoTypes::PublicKey publicKey{};
 	const auto error =
-		CryptoInstance().ExportKey(kCredentialIssuerCAPublicKeyId, publicKey.data(), publicKey.size());
+		DoorLock::Crypto::ExportKey(kCredentialIssuerCAPublicKeyId, publicKey.data(), publicKey.size());
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot export Credential Issuer CA public key\n"));
 
-	std::array<char, kPublicKeyStringLength + 1> hexString{};
-	bin2hex(publicKey.data(), publicKey.size(), hexString.data(), hexString.size());
+	DoorLock::Utils::HexStringBuffer<CryptoTypes::PublicKey> hexString{};
+	VerifyOrReturnStatus(DoorLock::Utils::ArrayToHexString(hexString, publicKey), -EINVAL,
+			     shell_warn(shell, "Cannot convert Credential Issuer CA public key to hex\n"));
 	shell_print(shell, "%s", hexString.data());
 
 	return 0;
@@ -370,11 +457,9 @@ int ShellCmdHandleCredentialIssuerCASet(const struct shell *shell, size_t argc, 
 			     shell_warn(shell, "Invalid key prefix!\n"));
 
 	CryptoTypes::KeyId keyId{ kCredentialIssuerCAPublicKeyId };
-	const auto error = CryptoInstance().ImportPublicKey(publicKey, keyId, true);
+	const auto error = DoorLock::Crypto::ImportPublicKey(publicKey, true, keyId);
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot import Credential Issuer CA public key\n"));
-
-	AliroStack::Instance().SetCredentialIssuerCAPublicKeyId(keyId);
 
 	return 0;
 }
@@ -385,11 +470,9 @@ int ShellCmdHandleCredentialIssuerCAClear(const struct shell *shell, size_t argc
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 
 	CryptoTypes::KeyId keyId{ kCredentialIssuerCAPublicKeyId };
-	const auto error = CryptoInstance().DestroyKey(keyId);
+	const auto error = DoorLock::Crypto::DestroyKey(keyId);
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot remove Credential Issuer CA public key\n"));
-
-	AliroStack::Instance().SetCredentialIssuerCAPublicKeyId(keyId);
 
 	return 0;
 }
@@ -421,12 +504,8 @@ const char *GetReaderChipName(void)
 {
 #if defined(CONFIG_ST25R200_DRV)
 	return "ST25R100";
-#elif defined(CONFIG_ST25R3911_DRV)
-	return "ST25R3911";
-#elif defined(CONFIG_ST25R3916_DRV)
-	return "ST25R3916";
-#elif defined(CONFIG_ST25R3916B_DRV)
-	return "ST25R3916B";
+#elif defined(CONFIG_ST25R500_DRV)
+	return "ST25R300";
 #else
 	return "Unknown NFC reader driver";
 #endif
@@ -438,6 +517,23 @@ int ShellCmdHandleInfo(const struct shell *shell, size_t, char **)
 	shell_print(shell, "NFC reader: %s", GetReaderChipName());
 	return 0;
 }
+
+#ifdef CONFIG_BT
+
+int ShellCmdHandleBtAddr(const struct shell *shell, size_t, char **)
+{
+	bt_addr_le_t address[1];
+	size_t count{ ARRAY_SIZE(address) };
+	bt_id_get(address, &count);
+
+	char addr_str[BT_ADDR_LE_STR_LEN];
+	bt_addr_le_to_str(address, addr_str, sizeof(addr_str));
+
+	shell_print(shell, "%s", addr_str);
+	return 0;
+}
+
+#endif // CONFIG_BT
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
@@ -466,8 +562,9 @@ int PrintKpersistentKeys(const struct shell *shell, CryptoTypes::KeyId *kpersist
 		VerifyOrReturnValue(sKpersistentManager->GetAccessCredentialPublicKey(kpersistentKeyId, publicKey) ==
 					    ALIRO_NO_ERROR,
 				    -EINVAL, shell_warn(shell, "Cannot get Access Credential public key\n"));
-		std::array<char, kPublicKeyStringLength + 1> hexString{};
-		bin2hex(publicKey.data(), publicKey.size(), hexString.data(), hexString.size());
+		DoorLock::Utils::HexStringBuffer<CryptoTypes::PublicKey> hexString{};
+		VerifyOrReturnValue(DoorLock::Utils::ArrayToHexString(hexString, publicKey), -EINVAL,
+				    shell_warn(shell, "Cannot convert Access Credential public key to hex\n"));
 		shell_print(shell, "%-2u      0x%08x  %s", kpersistentKeyIndex, kpersistentKeyId, hexString.data());
 	}
 
@@ -532,12 +629,13 @@ int ShellCmdHandleReaderCertList(const struct shell *shell, size_t, char **)
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 
 	ConstData cert{};
-	const auto error = ReaderCertificateCache::Instance().GetCertificate(cert);
+	const auto error = ReaderCache::Instance().GetCertificate(cert);
 	if (error == ALIRO_NO_ERROR) {
-		std::array<char, StorageKeys::kMaxCertificateSize * 2 + 1> hexString{ 0 };
-		size_t len = bin2hex(cert.mData, cert.mLength, hexString.data(), hexString.size());
-		VerifyOrReturnStatus(len == cert.mLength * 2, -EINVAL,
-				     shell_warn(shell, "Invalid certificate hex string!\n"));
+		DoorLock::Utils::HexStringBuffer<CertificateData> hexString{};
+		CertificateData certificateData{};
+		std::copy_n(cert.mData, cert.mLength, certificateData.begin());
+		VerifyOrReturnStatus(DoorLock::Utils::ArrayToHexString(hexString, certificateData, cert.mLength),
+				     -EINVAL, shell_warn(shell, "Invalid certificate hex string!\n"));
 		shell_print(shell, "Reader certificate (%zu bytes): %s", cert.mLength, hexString.data());
 	} else {
 		shell_print(shell, "Reader certificate: (not set)");
@@ -557,13 +655,13 @@ int ShellCmdHandleReaderCertSet(const struct shell *shell, size_t argc, char **a
 	VerifyOrReturnStatus(certStrLen > 0 && certStrLen % 2 == 0, -EINVAL,
 			     shell_warn(shell, "Invalid certificate length (must be even)!\n"));
 
-	std::array<uint8_t, StorageKeys::kMaxCertificateSize> certData{ 0 };
+	CertificateData certData{};
 	size_t decodedLen = hex2bin(certStr, certStrLen, certData.data(), certData.size());
 	VerifyOrReturnStatus(decodedLen == certStrLen / 2, -EINVAL,
 			     shell_warn(shell, "Invalid certificate hex string!\n"));
 
 	// save to cache
-	AliroError error = ReaderCertificateCache::Instance().SetCertificate({ certData.data(), decodedLen });
+	AliroError error = ReaderCache::Instance().SetCertificate({ certData.data(), decodedLen });
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Failed to set certificate: %d\n", error.ToInt()));
 
@@ -589,7 +687,7 @@ int ShellCmdHandleReaderCertClear(const struct shell *shell, size_t argc, char *
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Not initialized yet\n"));
 
 	// clear cache
-	ReaderCertificateCache::Instance().ClearCertificate();
+	ReaderCache::Instance().ClearCertificate();
 
 	// clear certificate data from persistent storage
 	VerifyOrReturnStatus(!KeyValueStorage::Instance().Clear(StorageKeys::kStorageKeyNameReaderCertificate), -EIO,
@@ -608,11 +706,10 @@ int ShellCmdHandleIssuerPublicKeyList(const struct shell *shell, size_t, char **
 	VerifyOrReturnValue(isInitialized, -EIO, shell_warn(shell, "Shell not initialized\n"));
 
 	CryptoTypes::PublicKey publicKey{};
-	const auto error = ReaderCertificateCache::Instance().GetIssuerPublicKey(publicKey);
+	const auto error = ReaderCache::Instance().GetIssuerPublicKey(publicKey);
 	if (error == ALIRO_NO_ERROR) {
-		std::array<char, CryptoTypes::kEccP256PublicKeyLength * 2 + 1> hexString{ 0 };
-		size_t len = bin2hex(publicKey.data(), publicKey.size(), hexString.data(), hexString.size());
-		VerifyOrReturnStatus(len == publicKey.size() * 2, -EINVAL,
+		DoorLock::Utils::HexStringBuffer<CryptoTypes::PublicKey> hexString{};
+		VerifyOrReturnStatus(DoorLock::Utils::ArrayToHexString(hexString, publicKey), -EINVAL,
 				     shell_warn(shell, "Invalid public key hex string!\n"));
 		shell_print(shell, "Issuer public key (%zu bytes): %s", publicKey.size(), hexString.data());
 	} else {
@@ -649,8 +746,8 @@ int ShellCmdHandleIssuerPublicKeySet(const struct shell *shell, size_t argc, cha
 		-EINVAL, shell_warn(shell, "Cannot save issuer public key to persistent storage!\n"));
 
 	// save to cache
-	VerifyOrReturnStatus(ReaderCertificateCache::Instance().SetIssuerPublicKey(publicKey) == ALIRO_NO_ERROR,
-			     -EINVAL, shell_warn(shell, "Failed to set issuer public key!\n"));
+	VerifyOrReturnStatus(ReaderCache::Instance().SetIssuerPublicKey(publicKey) == ALIRO_NO_ERROR, -EINVAL,
+			     shell_warn(shell, "Failed to set issuer public key!\n"));
 
 	shell_print(shell, "Issuer public key set successfully (%zu bytes)", publicKey.size());
 
@@ -668,7 +765,7 @@ int ShellCmdHandleIssuerPublicKeyClear(const struct shell *shell, size_t argc, c
 		shell_warn(shell, "Cannot clear issuer public key from persistent storage!\n"));
 
 	// clear from cache
-	ReaderCertificateCache::Instance().ClearIssuerPublicKey();
+	ReaderCache::Instance().ClearIssuerPublicKey();
 
 	shell_print(shell, "Issuer public key cleared successfully");
 	return 0;
@@ -794,7 +891,19 @@ SHELL_STATIC_SUBCMD_SET_CREATE(issuer_pk_cmd,
 
 #endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 
+SHELL_STATIC_SUBCMD_SET_CREATE(reader_prv_cmd,
+			       SHELL_CMD(set, NULL,
+					 "Set Reader private signing key (32 bytes)\n"
+					 "  Usage: dl provisioning reader_prv set <64-hex-chars>",
+					 ShellCmdHandleReaderPrivateKeySet),
+			       SHELL_CMD(clear, NULL,
+					 "Clear Reader private signing key\n"
+					 "  Usage: dl provisioning reader_prv clear",
+					 ShellCmdHandleReaderPrivateKeyClear),
+			       SHELL_SUBCMD_SET_END);
+
 SHELL_STATIC_SUBCMD_SET_CREATE(provisioning_cmd,
+			       SHELL_CMD(reader_prv, &reader_prv_cmd, "Manage Reader private signing key", NULL),
 			       SHELL_CMD(AC_key, &AC_key_cmd, "Manage Access Credential public keys", NULL),
 
 #if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
@@ -834,6 +943,12 @@ SHELL_STATIC_SUBCMD_SET_CREATE(door_lock_cmd,
 
 			       SHELL_CMD(info, NULL, "Show Aliro lib version and NFC reader chip name",
 					 ShellCmdHandleInfo),
+
+#ifdef CONFIG_BT
+
+			       SHELL_CMD(btaddr, NULL, "Show BLE address", ShellCmdHandleBtAddr),
+
+#endif // CONFIG_BT
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 

@@ -9,7 +9,6 @@
 #include "aliro/protocol_version.h"
 
 #include <zephyr/sys/byteorder.h>
-#include <zephyr/sys/util.h>
 
 #include <array>
 #include <cstddef>

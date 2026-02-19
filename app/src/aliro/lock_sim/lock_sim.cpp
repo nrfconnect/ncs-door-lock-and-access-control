@@ -7,6 +7,9 @@
 #include "lock_sim.h"
 #include "aliro/utils.h"
 
+#include "aliro/aliro_work/aliro_work.h"
+
+#include <tuple>
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(lock_sim, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
@@ -47,7 +50,7 @@ void LockSim::StartOperation(OperationSource source, ReaderStateByte state)
 	mSource = source;
 	mState = state;
 
-	k_work_submit(&mNotifyWork);
+	std::ignore = AliroWorkSubmit(&mNotifyWork);
 	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
 }
 
@@ -75,7 +78,7 @@ void LockSim::ActuatorTimerEventHandler()
 	}
 
 	if (prevState != mState) {
-		k_work_submit(&mNotifyWork);
+		std::ignore = AliroWorkSubmit(&mNotifyWork);
 	}
 }
 

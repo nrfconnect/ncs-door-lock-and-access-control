@@ -38,19 +38,27 @@ mcuboot_secondary:
   orig_span: &id003
   - mcuboot_secondary_pad
   - mcuboot_secondary_app
+  device: MX25R64
   region: external_flash
   size: 0x1E3000
   span: *id003
 mcuboot_secondary_pad:
+  device: MX25R64
   region: external_flash
   address: 0x0
   size: 0x800
 mcuboot_secondary_app:
+  device: MX25R64
   region: external_flash
   address: 0x800
   size: 0x1E2800
-external_flash:
+external_nvs:
   address: 0x1E3000
-  size: 0x5DB000
+  size: 0x20000
+  device: MX25R64
+  region: external_flash
+external_flash:
+  address: 0x203000
+  size: 0x5FD000
   device: MX25R64
   region: external_flash

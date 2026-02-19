@@ -11,8 +11,8 @@
 #endif // CONFIG_CHIP
 
 #include "aliro/utils.h"
-#include "crypto/crypto.h"
 
+#include <crypto/utils.h>
 #include <zephyr/logging/log.h>
 
 #include <cstdlib>
@@ -31,7 +31,7 @@
 #endif // CONFIG_DOOR_LOCK_BLE_NUS
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-#include "access_manager/access_manager.h"
+#include "access_manager.h"
 #include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -43,8 +43,8 @@ LOG_MODULE_REGISTER(door_lock_app, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 int main()
 {
-	auto error = Aliro::CryptoInstance().Init();
-	VerifyOrReturnValue(error == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Cannot initialize crypto engine."));
+	auto error = DoorLock::Crypto::Init();
+	VerifyOrDie(error == ALIRO_NO_ERROR, "Failed to initialize Aliro crypto");
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 

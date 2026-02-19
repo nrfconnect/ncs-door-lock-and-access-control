@@ -14,13 +14,14 @@ config DOOR_LOCK_EXPEDITED_FAST_PHASE
 config DOOR_LOCK_STEP_UP_PHASE
     bool "Support for Aliro Step-up Phase"
     default y if CHIP
+    select DOOR_LOCK_EXTERNAL_NVS if !SOC_SERIES_NRF52X
     help
         If enabled, the Step-up phase is supported.
         The user authentication is based on the Access Document.
 
 config DOOR_LOCK_CREDENTIAL_ISSUER_CA
     bool "Support for Credential Issuer CA public key"
-    default y if DOOR_LOCK_STEP_UP_PHASE
+    default y if DOOR_LOCK_STEP_UP_PHASE && !CHIP
     help
         If enabled, the Credential Issuer CA public key is supported.
         The Credential Issuer CA public key is used to verify the signature of the Credential Issuer certificate.
@@ -48,10 +49,8 @@ if DOOR_LOCK_CLI
     rsource "cli/Kconfig"
 endif
 
-if DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
-rsource "access_manager_impl_default/Kconfig"
-endif
-
+rsource "access_manager/Kconfig"
 rsource "kpersistent_manager/Kconfig"
 rsource "lock_sim/Kconfig"
 rsource "storage/Kconfig"
+rsource "aliro_work/Kconfig"

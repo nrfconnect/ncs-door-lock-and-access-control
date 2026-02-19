@@ -8,6 +8,9 @@
 
 #include "aliro/utils.h"
 
+#include "aliro/aliro_work/aliro_work.h"
+
+#include <tuple>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
 
@@ -37,7 +40,7 @@ AliroError InitAccessDecisionIndicator()
 void SignalAccessGranted()
 {
 	(void)gpio_pin_set_dt(&kAccessGrantedLed, kLedOn);
-	(void)k_work_schedule(&ResetIndicatorStateWork, K_MSEC(kDelayMs));
+	std::ignore = AliroWorkReschedule(&ResetIndicatorStateWork, K_MSEC(kDelayMs));
 }
 
 } // namespace Aliro::Access::Indicator
