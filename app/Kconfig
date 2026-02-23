@@ -10,49 +10,13 @@ module-dep = LOG
 module-help = Enables nRF Connect SDK Door Lock Application log messages.
 source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
 
-choice DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION
-	prompt "Access Manager implementation"
-	default DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
-
-	config DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_DEFAULT
-		bool "Access Manager default implementation"
-		help
-		  Uses the default implementation of the Access Manager
-		  provided by the Door Lock Reference Application.
-
-	config DOOR_LOCK_ACCESS_MANAGER_IMPLEMENTATION_CUSTOM
-		bool "Access Manager custom implementation"
-		help
-		  Uses a custom implementation of the Access Manager.
-		  This implementation is based on provided template
-		  that can be tailored to specific requirements.
-endchoice
-
 config DOOR_LOCK_CLI
 	bool "Door Lock CLI support"
-	default y
+	default y if (!DOOR_LOCK_RELEASE || !CHIP)
 	select SHELL
 	select REBOOT
 	help
 	  Enable support for Door Lock CLI.
-
-config DOOR_LOCK_PRINT_READER_GROUP_IDENTIFIER
-	bool "Print reader group identifier that should be provisioned into the User Device"
-	default y
-	help
-	  Enable printing of the reader group identifier that should be provisioned into the User Device.
-
-config DOOR_LOCK_USE_TEST_READER_IDENTIFIER
-	bool "Use test reader identifier"
-	default y
-	help
-	  Initialize the reader Group Identifier and Group Sub Identifier to test values.
-
-config DOOR_LOCK_USE_TEST_KEYS
-	bool "Use test keys"
-	default y
-	help
-	  Initialize the reader keys to test values.
 
 rsource "src/aliro/Kconfig"
 

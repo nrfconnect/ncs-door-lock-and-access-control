@@ -1,0 +1,69 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+menuconfig NCS_ALIRO
+	bool "NCS Aliro Stack [EXPERIMENTAL]"
+	select EXPERIMENTAL
+	help
+	  This option enables the Aliro reader stack.
+	  The Aliro stack provides the core functionality for Aliro readers.
+
+if NCS_ALIRO
+
+config NCS_ALIRO_RELEASE
+	bool "Enable Aliro release configuration"
+	help
+	  This option selects precompiled Aliro stack libraries without logs.
+
+choice NCS_ALIRO_LOG_LEVEL
+    prompt "Log level for Aliro module"
+    default NCS_ALIRO_LOG_LEVEL_OFF if NCS_ALIRO_RELEASE
+    default NCS_ALIRO_LOG_LEVEL_DBG
+
+config NCS_ALIRO_LOG_LEVEL_OFF
+    bool "Aliro module log level set to off"
+    help
+      No logging
+
+config NCS_ALIRO_LOG_LEVEL_ERR
+    bool "Aliro module log level set to error"
+    help
+      Error logging only
+
+config NCS_ALIRO_LOG_LEVEL_WRN
+    bool "Aliro module log level set to warning"
+    help
+      Warning and error logging
+
+config NCS_ALIRO_LOG_LEVEL_INF
+    bool "Aliro module log level set to info"
+    help
+      Informational, warning and error logging
+
+config NCS_ALIRO_LOG_LEVEL_DBG
+    bool "Aliro module log level set to debug"
+    help
+      Debug, informational, warning and error logging
+
+endchoice
+
+config NCS_ALIRO_LOG_LEVEL_VALUE
+    int
+    default 0 if NCS_ALIRO_LOG_LEVEL_OFF
+    default 1 if NCS_ALIRO_LOG_LEVEL_ERR
+    default 2 if NCS_ALIRO_LOG_LEVEL_WRN
+    default 3 if NCS_ALIRO_LOG_LEVEL_INF
+    default 4 if NCS_ALIRO_LOG_LEVEL_DBG
+
+config NCS_ALIRO_BLE_UWB
+	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
+	help
+	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
+	  used by the Reader to communicate with the User Device. It is used to send and
+	  receive packets over BLE. Additionally the UWB is enabled in order to manage the
+	  ranging between the Reader and the User Device.
+
+endif # NCS_ALIRO

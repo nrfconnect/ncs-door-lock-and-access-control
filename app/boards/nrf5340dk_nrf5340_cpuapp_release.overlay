@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+#include "nrf5340dk_nrf5340_cpuapp.overlay"
+
+&uart1 {
+	status = "disabled";
+};
+
+&adc {
+	status = "disabled";
+};
+
+&i2c1 {
+	status = "disabled";
+};
+
+&pwm0 {
+	status = "disabled";
+};
+
+&nfct {
+	status = "disabled";
+};
+
+&usbd {
+	status = "disabled";
+};
+
+&spi4 {
+	status = "disabled";
+};
+

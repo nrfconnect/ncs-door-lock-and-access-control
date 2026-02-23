@@ -154,11 +154,3 @@ template <class T> constexpr std::underlying_type_t<T> ToUnderlying(T e)
 	static_assert(std::is_enum<T>::value, "ToUnderlying called to non-enum values.");
 	return static_cast<std::underlying_type_t<T>>(e);
 }
-
-/**
- * @brief Checks if buffer is empty.
- */
-inline bool IsBufferEmpty(const uint8_t *data, size_t length)
-{
-	return (data == nullptr) || (length == 0);
-}

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "kpersistent_manager/kpersistent_manager.h"
+#include "aliro/kpersistent_manager/kpersistent_manager.h"
 
 /**
  * @brief Initializes shell commands for managing a door lock system.
