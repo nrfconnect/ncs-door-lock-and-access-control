@@ -4,8 +4,11 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+menu "Storage"
+
 config DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS
     int "Maximum number of stored Access Documents"
+    default 0 if SOC_SERIES_NRF52X
     default 5 if DOOR_LOCK_STEP_UP_PHASE
     default 0
     help
@@ -19,3 +22,5 @@ config DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENT_SIZE
     default 0
     help
       Specifies the maximum size of the stored Access Document.
+
+endmenu # Storage

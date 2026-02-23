@@ -5,7 +5,8 @@
  */
 
 #include "ncs_pal_gpio.h"
-#include "ncs_pal_semaphore.h"
+#include "ncs_pal_isr.h"
+#include "ncs_pal_nfc_worker.h"
 
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
@@ -29,7 +30,8 @@ static void irq_pin_cb(const struct device *gpiob, struct gpio_callback *cb, uin
 	ARG_UNUSED(cb);
 	ARG_UNUSED(pins);
 
-	ncs_pal_give_semaphore();
+	ncs_pal_submit_nfc_work();
+	ncs_pal_isr_trigger();
 }
 
 // TODO: The function should be moved to the nRF54L style shield.

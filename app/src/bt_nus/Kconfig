@@ -4,6 +4,20 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+menuconfig DOOR_LOCK_BLE_NUS
+    bool "Nordic UART Service (NUS)"
+    depends on !CHIP
+    help
+      Enables the Bluetooth LE Nordic Uart Service (NUS). Using NUS service you can control a door lock using pre-defined BLE commands.
+
+if DOOR_LOCK_BLE_NUS
+
+config DOOR_LOCK_BT_NUS_MAX_COMMANDS
+	int "Maximum number of NUS commands"
+	default 2
+	help
+	  Define the maximum number of NUS commands to declare by user.
+
 config DOOR_LOCK_BT_NUS_MAX_COMMAND_LEN
 	int "Maximum length of single command in Bytes"
 	default 10
@@ -12,14 +26,10 @@ config DOOR_LOCK_BT_NUS_MAX_COMMAND_LEN
 	  a paired smart door lock.
 
 config DOOR_LOCK_BT_NUS_APP_PASSKEY
-	int "Define the default passkey for NUS"
+	int "Default passkey"
 	depends on BT_APP_PASSKEY
 	default 123456
 	help
 	  Define the default password for pairing with the Bluetooth LE device.
 
-config DOOR_LOCK_BT_NUS_MAX_COMMANDS
-	int "Define maximum NUS commands amount"
-	default 1
-	help
-	  Define the maximum number of NUS commands to declare by user.
+endif # DOOR_LOCK_BLE_NUS

@@ -8,11 +8,12 @@
 #include "matter/init.h"
 #else // CONFIG_CHIP
 #include "aliro/init.h"
+#include "aliro/lock_sim/lock_sim_instance.h"
 #endif // CONFIG_CHIP
 
 #include "aliro/utils.h"
-#include "crypto/crypto.h"
 
+#include <crypto/utils.h>
 #include <zephyr/logging/log.h>
 
 #include <cstdlib>
@@ -23,15 +24,11 @@
 
 #ifdef CONFIG_DOOR_LOCK_BLE_NUS
 
-#ifdef CONFIG_ACCESS_DECISION_INDICATOR
-#include "aliro/platform/access_decision_indicator/access_decision_indicator.h"
-#endif // CONFIG_ACCESS_DECISION_INDICATOR
-
 #include "bt_nus/bt_nus.h"
 #endif // CONFIG_DOOR_LOCK_BLE_NUS
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-#include "access_manager/access_manager.h"
+#include "access_manager.h"
 #include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -43,8 +40,8 @@ LOG_MODULE_REGISTER(door_lock_app, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 int main()
 {
-	auto error = Aliro::CryptoInstance().Init();
-	VerifyOrReturnValue(error == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Cannot initialize crypto engine."));
+	auto error = DoorLock::Crypto::Init();
+	VerifyOrDie(error == ALIRO_NO_ERROR, "Failed to initialize Aliro crypto");
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -93,10 +90,15 @@ int main()
 		"Unlock", strlen("Unlock"),
 		[](void *context) {
 			LOG_INF("Unlock command received");
+			Aliro::LockSimInstance().Unlock(Aliro::OperationSource::Unspecified);
+		},
+		nullptr);
 
-#ifdef CONFIG_ACCESS_DECISION_INDICATOR
-			Aliro::Access::Indicator::SignalAccessGranted();
-#endif // CONFIG_ACCESS_DECISION_INDICATOR
+	Aliro::BtNus::NUSService::Instance().RegisterCommand(
+		"Lock", strlen("Lock"),
+		[](void *context) {
+			LOG_INF("Lock command received");
+			Aliro::LockSimInstance().Lock(Aliro::OperationSource::Unspecified);
 		},
 		nullptr);
 

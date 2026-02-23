@@ -1,0 +1,24 @@
+flow: "API and interface flow" {
+  shape: sequence_diagram
+
+  app: "Application" {
+    transport: "Transport (NFC/BLE)"
+  }
+  iface: "Aliro Stack Interface"
+  api: "Aliro Stack Public API"
+  stack: "Aliro Stack"
+  radio: "NFC/BLE radio" {
+    style: {
+      stroke-dash: 2
+      stroke: "#666"
+    }
+  }
+
+  name: "Public API and interface" {
+    radio -> app: "TX/RX data"
+    app -> api: "calls"
+    api -> stack: "invokes"
+    stack -> iface: "calls"
+    iface -> app: "implemented by"
+  }
+}

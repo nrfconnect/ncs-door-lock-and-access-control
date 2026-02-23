@@ -8,7 +8,7 @@
 	aliases {
 		/* Use watchdog wdt31 as the application watchdog */
 		watchdog0 = &wdt31;
-		/delete-property/ access-decision-indicator;
+		/delete-property/ lock-sim-indicator;
 	};
 };
 
