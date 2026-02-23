@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
+menu "UWB"
 
 config TIMESYNC_PROCEDURE_0
 	bool "Enable timesync Procedure 0"
@@ -24,3 +25,5 @@ module-str = DOOR_LOCK_UWB
 module-dep = LOG
 module-help = Enables Door Lock UWB platform log messages.
 source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endmenu # UWB

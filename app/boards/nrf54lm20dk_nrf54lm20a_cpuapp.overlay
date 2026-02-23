@@ -57,7 +57,7 @@
 		/delete-property/ led0;
 		/delete-property/ mcuboot-led0;
 		mcuboot-button0 = &button1;
-		access-decision-indicator = &led2; /* green LED2 on nRF54LM20DK */
+		lock-sim-indicator = &led2; /* green LED2 on nRF54LM20DK */
 	};
 
 	chosen {
@@ -76,4 +76,10 @@
 
 &mx25r64 {
 	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+	/* Use PORT event rather than GPIOTE IN event, to save power */
+	sense-edge-mask = <0x00004000>; /* P1.14 */
 };

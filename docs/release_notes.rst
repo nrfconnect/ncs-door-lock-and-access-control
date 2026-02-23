@@ -18,40 +18,42 @@ v0.6.0
 Changelog
 =========
 
-The following updates were introduced in this release.
+.. toggle::
 
-* Added:
+  The following updates were introduced in this release.
 
-  * Compliance with the Aliro specification confirmed against Aliro Test Harness (`aliro-sve-v1.0`_ tag).
-  * Credential Issuer Certificate verification using the Credential Issuer CA Public Key.
-  * Reader Certificate provisioning.
-  * Presenting Reader Certificate using the ``LOAD_CERT`` command.
-  * Support for injecting proprietary NFC technologies.
-  * The UWB Suspend and Resume functionality.
-  * Support for testing Aliro over NFC and Aliro over Bluetooth LE + UWB with the Apple Home ecosystem.
-  * Access Document storage in non-volatile memory.
-  * Reference implementation of QM35825 firmware update using:
-    * DFU over Matter
-    * DFU over Bluetooth LE
+  * Added:
 
-* Updated:
+    * Compliance with the Aliro specification confirmed against Aliro Test Harness (`aliro-sve-v1.0`_ tag).
+    * Credential Issuer Certificate verification using the Credential Issuer CA Public Key.
+    * Reader Certificate provisioning.
+    * Presenting Reader Certificate using the ``LOAD_CERT`` command.
+    * Support for injecting proprietary NFC technologies.
+    * The UWB Suspend and Resume functionality.
+    * Support for testing Aliro over NFC and Aliro over Bluetooth LE + UWB with the Apple Home ecosystem.
+    * Access Document storage in non-volatile memory.
+    * Reference implementation of QM35825 firmware update using:
+      * DFU over Matter
+      * DFU over Bluetooth LE
 
-  * Integrated nRF Connect SDK v3.2.0.
-  * Integrated Matter v1.5.0.
-  * Integrated QM35825 firmware and software v0.6.0.
-  * Improved NFC discovery mechanism.
-  * Improved support for Aliro Expedited-Fast phase and Aliro Step-up phase.
-  * Updated default UWB session termination to allow User Device–controlled session closure.
-  * Improved system robustness by avoiding fatal errors when X-NUCLEO-NFC09A1 shield or QM35825 UWB module fail to initialize, preserving operability for potential firmware upgrades.
-  * Changed default configuration to communicate with X-NUCLEO-NFC09A1 shield and QM35825 UWB module using a single SPI bus.
-  * Extended documentation with:
-    * Instructions for flashing the QM35825 device using nRF5340 DK.
-    * Guidelines for testing with Aliro Test Harness.
-    * Instructions for testing with the Apple Home ecosystem using Bluetooth LE + UWB.
+  * Updated:
 
-* Fixed:
+    * Integrated nRF Connect SDK v3.2.0.
+    * Integrated Matter v1.5.0.
+    * Integrated QM35825 firmware and software v0.6.0.
+    * Improved NFC discovery mechanism.
+    * Improved support for Aliro Expedited-Fast phase and Aliro Step-up phase.
+    * Updated default UWB session termination to allow User Device–controlled session closure.
+    * Improved system robustness by avoiding fatal errors when X-NUCLEO-NFC09A1 shield or QM35825 UWB module fail to initialize, preserving operability for potential firmware upgrades.
+    * Changed default configuration to communicate with X-NUCLEO-NFC09A1 shield and QM35825 UWB module using a single SPI bus.
+    * Extended documentation with:
+      * Instructions for flashing the QM35825 device using nRF5340 DK.
+      * Guidelines for testing with Aliro Test Harness.
+      * Instructions for testing with the Apple Home ecosystem using Bluetooth LE + UWB.
 
-  * Build issues when compiling the project on Windows PCs.
+  * Fixed:
+
+    * Build issues when compiling the project on Windows PCs.
 
 v0.5.0
 ******
@@ -62,27 +64,29 @@ v0.5.0
 Changelog
 =========
 
-The following updates were introduced in this release.
+.. toggle::
 
-* Added support for:
+  The following updates were introduced in this release.
 
-  * nRF54LM20A platform.
-  * Aliro Expedited-fast phase.
-  * Aliro Step-up phase.
-  * Aliro Access Document reception and parsing in the application.
-  * Bluetooth LE Nordic UART Service (NUS) for remote control of the door lock.
-  * Device Firmware Upgrade (DFU) over Bluetooth LE Simple Management Protocol (SMP).
-  * Building QM35825 UWB libraries from sources for registered users.
+  * Added support for:
 
-* Extended the documentation with:
+    * nRF54LM20A platform.
+    * Aliro Expedited-fast phase.
+    * Aliro Step-up phase.
+    * Aliro Access Document reception and parsing in the application.
+    * Bluetooth LE Nordic UART Service (NUS) for remote control of the door lock.
+    * Device Firmware Upgrade (DFU) over Bluetooth LE Simple Management Protocol (SMP).
+    * Building QM35825 UWB libraries from sources for registered users.
 
-  * A guide on how to test the application with the Apple smart home ecosystem.
-  * Instructions on how to test Matter over-the-air (OTA) updates and DFU over Bluetooth LE SMP.
-  * Explanation of the new Aliro features and their usage.
+  * Extended the documentation with:
 
-* Fixed:
+    * A guide on how to test the application with the Apple smart home ecosystem.
+    * Instructions on how to test Matter over-the-air (OTA) updates and DFU over Bluetooth LE SMP.
+    * Explanation of the new Aliro features and their usage.
 
-  * Compliance issues with the Apple smart home ecosystem.
+  * Fixed:
+
+    * Compliance issues with the Apple smart home ecosystem.
 
 v0.4.0
 ******
@@ -93,26 +97,28 @@ v0.4.0
 Changelog
 =========
 
-The following updates were introduced in this release.
+.. toggle::
 
-* Added:
+  The following updates were introduced in this release.
 
-  * Matter support.
-  * Integration of the Matter door lock cluster server in the |APP_NAME|.
-  * Support for provisioning of Aliro door lock reader and user credentials using Matter.
+  * Added:
 
-* Updated:
+    * Matter support.
+    * Integration of the Matter door lock cluster server in the |APP_NAME|.
+    * Support for provisioning of Aliro door lock reader and user credentials using Matter.
 
-  * nRF Connect SDK revision to v3.1.0.
-  * STM RFAL drivers to the STSW-ST25RFAL005 revision.
-  * QM35 libraries to latest internal Qorvo delivery.
-  * Moved CLI and persistent storage implementation from Aliro stack to the application layer.
+  * Updated:
 
-* Fixed:
+    * nRF Connect SDK revision to v3.1.0.
+    * STM RFAL drivers to the STSW-ST25RFAL005 revision.
+    * QM35 libraries to latest internal Qorvo delivery.
+    * Moved CLI and persistent storage implementation from Aliro stack to the application layer.
 
-  * An issue where the watchdog was expiring for an NFC session upon test execution (AL-335).
-  * An issue where occasional timeout was occuring in the Reader when executing the RD-NFC-STDTXN-2.0 test from the test harness (AL-239).
-  * An issue where an undefined access decision was occuring when executing the RD-NFC-STDTXN-2.0 test harness case in a loop (AL-282).
+  * Fixed:
+
+    * An issue where the watchdog was expiring for an NFC session upon test execution (AL-335).
+    * An issue where occasional timeout was occuring in the Reader when executing the RD-NFC-STDTXN-2.0 test from the test harness (AL-239).
+    * An issue where an undefined access decision was occuring when executing the RD-NFC-STDTXN-2.0 test harness case in a loop (AL-282).
 
 v0.3.1
 ******
@@ -123,22 +129,24 @@ v0.3.1
 Changelog
 =========
 
-The following updates were introduced in this release.
+.. toggle::
 
-* Fixed:
+  The following updates were introduced in this release.
 
-  * An issue where ranging measurements with the QM35825 module were not delivered to the application.
-    The QM35825 module's ranging measurements are now correctly delivered to the application.
-    The distance between the Reader and User Device can now be displayed in the logs.
-  * An issue with Access Manager not supporting multiple Aliro sessions.
-    Access Manager now supports multiple Aliro and UWB sessions.
-  * An issue where only one User Device could be provisioned to the Reader.
-    The application now allows provisioning multiple User Devices to the Reader.
+  * Fixed:
 
-* Changed:
+    * An issue where ranging measurements with the QM35825 module were not delivered to the application.
+      The QM35825 module's ranging measurements are now correctly delivered to the application.
+      The distance between the Reader and User Device can now be displayed in the logs.
+    * An issue with Access Manager not supporting multiple Aliro sessions.
+      Access Manager now supports multiple Aliro and UWB sessions.
+    * An issue where only one User Device could be provisioned to the Reader.
+      The application now allows provisioning multiple User Devices to the Reader.
 
-  * The Access Manager can now autonomously terminate the Aliro and UWB ranging sessions.
-  * The ``dl provisioning AC_key`` shell command was extended to support multiple Access Credential public keys.
+  * Changed:
+
+    * The Access Manager can now autonomously terminate the Aliro and UWB ranging sessions.
+    * The ``dl provisioning AC_key`` shell command was extended to support multiple Access Credential public keys.
 
 v0.3.0
 ******
@@ -149,17 +157,19 @@ v0.3.0
 Changelog
 =========
 
-The following updates were introduced in this release.
+.. toggle::
 
-* Added:
+  The following updates were introduced in this release.
 
-  * The EXCHANGE command implementation.
-  * Support for Bluetooth LE transport protocol.
-  * Support for ultra wideband (UWB) interface.
-  * Reference implementation of the UWB module QM35825 example.
-    The Aliro UWB adapter is provided as precompiled libraries.
-  * Access Manager interface and its reference implementation.
-  * Support for LED indicator of access decision.
+  * Added:
+
+    * The EXCHANGE command implementation.
+    * Support for Bluetooth LE transport protocol.
+    * Support for ultra wideband (UWB) interface.
+    * Reference implementation of the UWB module QM35825 example.
+      The Aliro UWB adapter is provided as precompiled libraries.
+    * Access Manager interface and its reference implementation.
+    * Support for LED indicator of access decision.
 
 v0.2.0
 ******
@@ -170,24 +180,26 @@ v0.2.0
 Changelog
 =========
 
-The following updates were introduced in this release.
+.. toggle::
 
-* Added:
+  The following updates were introduced in this release.
 
-  * Experimental support for the following development platforms:
+  * Added:
 
-    * `nRF52840 DK`_
-    * `nRF5340 DK`_
+    * Experimental support for the following development platforms:
 
-  * A platform logger implementation.
-  * A new NFC transport interface integration.
-  * Simplified Aliro stack API integration.
+      * `nRF52840 DK`_
+      * `nRF5340 DK`_
 
-* Improved the implementation of the following components in the RFAL platform abstraction layer:
+    * A platform logger implementation.
+    * A new NFC transport interface integration.
+    * Simplified Aliro stack API integration.
 
-    * Timers
-    * Semaphores
-    * Threading
+  * Improved the implementation of the following components in the RFAL platform abstraction layer:
+
+      * Timers
+      * Semaphores
+      * Threading
 
 v0.1.0
 ******
@@ -195,15 +207,20 @@ v0.1.0
 .. note::
   |EXPERIMENTAL_NOTE|
 
-See the following section for the list of implemented features.
+Changelog
+=========
 
-* Added experimental support for the following:
+.. toggle::
 
-  * Access Protocol (the expedited standard transaction only).
-  * Transport Protocol over Near Field Communication (NFC) transport.
-  * Trusted Framework implementation with the |NCS| PSA API as a cryptography backend.
-  * The nRF54L15 hardware platform.
-  * STM NFC reader transceivers: ST25R200, ST25R3911, ST25R3916, ST25R3916B, ST25R200.
-  * ST Microelectronics R/F Abstraction Layer driver with Zephyr Platform Abstraction Layer integration.
-  * |APP_NAME| that leverages Aliro stack and supports CLI-based provisioning of the Access Credential public key, the reader's group identifier, and the group sub-identifier.
-  * Sample applications that uses RFAL driver.
+  See the following section for the list of implemented features.
+
+  * Added experimental support for the following:
+
+    * Access Protocol (the expedited standard transaction only).
+    * Transport Protocol over Near Field Communication (NFC) transport.
+    * Trusted Framework implementation with the |NCS| PSA API as a cryptography backend.
+    * The nRF54L15 hardware platform.
+    * STM NFC reader transceivers: ST25R200, ST25R3911, ST25R3916, ST25R3916B, ST25R200.
+    * ST Microelectronics R/F Abstraction Layer driver with Zephyr Platform Abstraction Layer integration.
+    * |APP_NAME| that leverages Aliro stack and supports CLI-based provisioning of the Access Credential public key, the reader's group identifier, and the group sub-identifier.
+    * Sample applications that uses RFAL driver.

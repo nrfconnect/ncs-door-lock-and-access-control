@@ -4,7 +4,18 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-file(GLOB src CONFIGURE_DEPENDS ./*.cpp)
+zephyr_library_sources(
+  info.cpp
+  shell.c
+  shell_private.cpp
+)
 
-zephyr_library_sources(${src})
+zephyr_library_sources_ifdef(CONFIG_BT btaddr.cpp)
+zephyr_library_sources_ifdef(CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE kpersistent.cpp)
+zephyr_library_sources_ifndef(CONFIG_CHIP
+  factory_reset.cpp
+  install.cpp
+  provisioning.cpp
+)
+
 zephyr_include_directories(.)

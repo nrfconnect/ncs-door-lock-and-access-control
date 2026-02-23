@@ -5,13 +5,34 @@
  */
 
 #include "lock_sim.h"
+
+#include "aliro/aliro_work/aliro_work.h"
 #include "aliro/utils.h"
 
+#ifdef CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
+#include <zephyr/drivers/gpio.h>
+#endif // CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
+
 #include <zephyr/logging/log.h>
+
+#include <tuple>
 
 LOG_MODULE_REGISTER(lock_sim, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace Aliro {
+
+namespace {
+
+#ifdef CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
+
+constexpr int kLedOn{ 1 };
+constexpr int kLedOff{ 0 };
+
+constexpr gpio_dt_spec kLockSimIndicatorLed = GPIO_DT_SPEC_GET(DT_ALIAS(lock_sim_indicator), gpios);
+
+#endif // CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
+
+} // namespace
 
 void LockSim::Init(LockStateChangeCallback callback)
 {
@@ -26,6 +47,12 @@ void LockSim::Init(LockStateChangeCallback callback)
 	k_timer_init(&mAutoRelockTimer, &LockSim::AutoRelockTimerEventHandler, nullptr);
 	k_timer_user_data_set(&mAutoRelockTimer, this);
 #endif // CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK
+
+#ifdef CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
+	VerifyOrDie(gpio_is_ready_dt(&kLockSimIndicatorLed), "Lock simulator indicator GPIO not ready");
+	VerifyOrDie(gpio_pin_configure_dt(&kLockSimIndicatorLed, GPIO_OUTPUT_INACTIVE) == 0,
+		    "Failed to configure lock simulator indicator GPIO");
+#endif // CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
 }
 
 bool LockSim::Lock(OperationSource source)
@@ -47,7 +74,7 @@ void LockSim::StartOperation(OperationSource source, ReaderStateByte state)
 	mSource = source;
 	mState = state;
 
-	k_work_submit(&mNotifyWork);
+	std::ignore = AliroWorkSubmit(&mNotifyWork);
 	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
 }
 
@@ -75,7 +102,7 @@ void LockSim::ActuatorTimerEventHandler()
 	}
 
 	if (prevState != mState) {
-		k_work_submit(&mNotifyWork);
+		std::ignore = AliroWorkSubmit(&mNotifyWork);
 	}
 }
 
@@ -90,9 +117,15 @@ void LockSim::NotifyWorkHandler()
 	switch (mState) {
 	case ReaderStateByte::Secured:
 		LOG_INF("Locking the lock completed");
+#ifdef CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
+		gpio_pin_set_dt(&kLockSimIndicatorLed, kLedOff);
+#endif // CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
 		break;
 	case ReaderStateByte::Unsecured:
 		LOG_INF("Unlocking the lock completed");
+#ifdef CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
+		gpio_pin_set_dt(&kLockSimIndicatorLed, kLedOn);
+#endif // CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
 #ifdef CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK
 		StartAutoRelock();
 #endif // CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK

@@ -1,0 +1,48 @@
+flow: "UWB session establishment and handling" {
+  shape: sequence_diagram
+
+  app: "Application" {
+    access_mgr: "AccessManager"
+    uwb_impl: "UltraWideBandImpl"
+    transport: "Transport (BLE)"
+  }
+  interface: "Aliro Stack Interface" {
+    session_iface: "Interface::Session"
+    uwb_iface: "Interface::Uwb"
+  }
+  api: "Aliro Stack Public API"
+  stack: "Aliro Stack"
+  radio: "BLE radio" {
+    style: {
+      stroke-dash: 2
+      stroke: "#666"
+    }
+  }
+
+  name: "UWB session establishment and handling" {
+
+    stack.start -> interface: "StartRangingSession(handle, sessionId, ursk, protocolVersion)"
+    interface -> app.start: "AccessManager.StartRangingSession"
+    app -> app: "ConfigureRangingSession"
+    app -> app: "Create UWB session (URSK, protocol); add to list"
+    app.start -> interface: "return"
+    interface -> stack.start: "return"
+    radio -> app: "RX BLE data (UWB message)"
+    app -> api: "HandleSessionData(handle, data)"
+    api -> stack: "invokes"
+    stack -> stack: "UwbRanging state: parse message"
+    stack -> interface: "HandleBleMessage(handle, data, length)"
+    interface -> app: "UltraWideBandImpl.HandleBleMessage"
+    app -> app: "aliro_uwb_session_message_handle"
+    app -> app: "UWB lib processes; may produce response (e.g. M1)"
+    app -> app: "TransmitBleMessage callback"
+    app -> api: "SendBleMessage(handle, response)"
+    api -> stack: "ProcessUwbData"
+    stack -> interface: "Session::Send(handle, data)"
+    interface -> app: "BLE send"
+    app -> radio: "TX BLE data"
+    app -> app: "SessionHandlerCallback (state / ranging report)"
+    app -> app: "HandleRangingSessionStateChanged\nHandleRangingSessionData"
+    app -> app: "Update in-range, access policy"
+  }
+}

@@ -4,4 +4,5 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+orsource "aliro/Kconfig"
 rsource "qm35_uwb/Kconfig"

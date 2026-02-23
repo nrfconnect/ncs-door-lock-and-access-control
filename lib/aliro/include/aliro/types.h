@@ -296,25 +296,9 @@ constexpr size_t kSha256HashLength{ 32 };
 using Sha256Hash = std::array<uint8_t, kSha256HashLength>;
 
 /**
- * Helper structure for representing symmetric session-bounds key IDs (respective):
- * - SkReader - used for Reader's messages encryption, when secure channel is established.
- * - SkDevice - used for User Device messages decryption, when secure channel is established.
- * - StepUpSK - used for derive StepUpSKDevice and StepUpSKReader keys to protect Step-up phase. Available only for
- * Expedited-standard phase.
- * - BleSK - used to protect a ultra wideband (UWB) session setup commands. Available only for BLE session.
- * - URSK - as a UWB Ranging Secret Key (URSK). Available only for BLE session.
- *
- * NOTE: CryptogramSK and StepUpSK cannot be derived during the same Access Protocol session.
- * CryptogramSK is valid only for Expedited-fast phase and StepUpSK is valid only for Step-up-phase
- * that requires the Expedited-standard (not fast) phase as a prerequisite.
+ * @brief Type alias for key exchange shared secret.
  */
-struct SessionBoundKeys {
-	KeyId mSkReader{};
-	KeyId mSkDevice{};
-	std::optional<KeyId> mStepUpSk{};
-	std::optional<KeyId> mBleSk{};
-	Ursk *mUrsk{};
-};
+using SharedSecret = std::array<uint8_t, kEccP256KeySingleCoordinateLength>;
 
 } // namespace Aliro::CryptoTypes
 

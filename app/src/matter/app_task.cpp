@@ -45,12 +45,14 @@ constexpr uint8_t kLockNUSPriority{ 2 };
 #ifndef CONFIG_CHIP_FACTORY_RESET_ERASE_SETTINGS
 void AppEventHandler(const ChipDeviceEvent *event, [[maybe_unused]] intptr_t)
 {
+	constexpr bool reinitializeStorage{ !IS_ENABLED(CONFIG_CHIP_LAST_FABRIC_REMOVED_ERASE_AND_REBOOT) };
+
 	switch (event->Type) {
 	case DeviceEventType::kFactoryReset:
 		// With this configuration we have to manually clean up the storage,
 		// as whole settings partition won't be erased.
 		BoltLockMgr().FactoryReset();
-		ClearStorageAliro();
+		ClearStorageAliro(reinitializeStorage);
 		break;
 	default:
 		break;
@@ -61,26 +63,6 @@ void AppEventHandler(const ChipDeviceEvent *event, [[maybe_unused]] intptr_t)
 Nrf::Matter::IdentifyCluster sIdentifyCluster(kLockEndpointId, false, []() {
 	Nrf::PostTask([] { Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Set(BoltLockMgr().IsLocked()); });
 });
-
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-Aliro::ReaderStateByte ToAliroState(BoltLockManager::State state)
-{
-	switch (state) {
-	case BoltLockManager::State::kLockingInitiated:
-		return Aliro::ReaderStateByte::EnteringSecured;
-	case BoltLockManager::State::kLockingCompleted:
-		return Aliro::ReaderStateByte::Secured;
-	case BoltLockManager::State::kUnlockingInitiated:
-		return Aliro::ReaderStateByte::EnteringUnsecured;
-	case BoltLockManager::State::kUnlockingCompleted:
-		return Aliro::ReaderStateByte::Unsecured;
-	default:
-		return Aliro::ReaderStateByte::Unknown;
-	}
-}
-
-#endif
 
 } /* namespace */
 
@@ -103,40 +85,41 @@ void AppTask::LockActionEventHandler()
 void AppTask::LockStateChanged(const BoltLockManager::StateData &stateData)
 {
 	switch (stateData.mState) {
-	case BoltLockManager::State::kLockingInitiated:
+	case Aliro::ReaderStateByte::EnteringSecured:
 		LOG_INF("Lock action initiated");
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Blink(50, 50);
 #ifdef CONFIG_CHIP_NUS
 		Nrf::GetNUSService().SendData("locking", sizeof("locking"));
 #endif
 		break;
-	case BoltLockManager::State::kLockingCompleted:
+	case Aliro::ReaderStateByte::Secured:
 		LOG_INF("Lock action completed");
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Set(true);
 #ifdef CONFIG_CHIP_NUS
 		Nrf::GetNUSService().SendData("locked", sizeof("locked"));
 #endif
 		break;
-	case BoltLockManager::State::kUnlockingInitiated:
+	case Aliro::ReaderStateByte::EnteringUnsecured:
 		LOG_INF("Unlock action initiated");
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Blink(50, 50);
 #ifdef CONFIG_CHIP_NUS
 		Nrf::GetNUSService().SendData("unlocking", sizeof("unlocking"));
 #endif
 		break;
-	case BoltLockManager::State::kUnlockingCompleted:
+	case Aliro::ReaderStateByte::Unsecured:
 		LOG_INF("Unlock action completed");
 #ifdef CONFIG_CHIP_NUS
 		Nrf::GetNUSService().SendData("unlocked", sizeof("unlocked"));
 #endif
 		Nrf::GetBoard().GetLED(Nrf::DeviceLeds::LED2).Set(false);
 		break;
+	default:
+		break;
 	}
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
-	Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(stateData.mAliroSource,
-								     ToAliroState(stateData.mState));
+	Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(stateData.mAliroSource, stateData.mState);
 
 #endif
 
@@ -171,10 +154,10 @@ void AppTask::UpdateClusterStateHandler(const BoltLockManager::StateData &stateD
 	DlLockState newLockState;
 
 	switch (stateData.mState) {
-	case BoltLockManager::State::kLockingCompleted:
+	case Aliro::ReaderStateByte::Secured:
 		newLockState = DlLockState::kLocked;
 		break;
-	case BoltLockManager::State::kUnlockingCompleted:
+	case Aliro::ReaderStateByte::Unsecured:
 		newLockState = DlLockState::kUnlocked;
 		break;
 	default:
@@ -221,8 +204,8 @@ void AppTask::UpdateClusterStateHandler(const BoltLockManager::StateData &stateD
 void AppTask::NUSLockCallback(void *context)
 {
 	LOG_DBG("Received LOCK command from NUS");
-	if (BoltLockMgr().GetState().mState == BoltLockManager::State::kLockingCompleted ||
-	    BoltLockMgr().GetState().mState == BoltLockManager::State::kLockingInitiated) {
+	if (BoltLockMgr().GetState().mState == Aliro::ReaderStateByte::Secured ||
+	    BoltLockMgr().GetState().mState == Aliro::ReaderStateByte::EnteringSecured) {
 		LOG_INF("Device is already locked");
 		return;
 	}
@@ -233,8 +216,8 @@ void AppTask::NUSLockCallback(void *context)
 void AppTask::NUSUnlockCallback(void *context)
 {
 	LOG_DBG("Received UNLOCK command from NUS");
-	if (BoltLockMgr().GetState().mState == BoltLockManager::State::kUnlockingCompleted ||
-	    BoltLockMgr().GetState().mState == BoltLockManager::State::kUnlockingInitiated) {
+	if (BoltLockMgr().GetState().mState == Aliro::ReaderStateByte::Unsecured ||
+	    BoltLockMgr().GetState().mState == Aliro::ReaderStateByte::EnteringUnsecured) {
 		LOG_INF("Device is already unlocked");
 	} else {
 		Nrf::PostTask([] { LockActionEventHandler(); });
@@ -301,9 +284,7 @@ CHIP_ERROR AppTask::Init()
 CHIP_ERROR AppTask::StartApp()
 {
 	ReturnErrorOnFailure(Init());
-
-	int err = AliroInit();
-	VerifyOrReturnError(err == EXIT_SUCCESS, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to initialize Aliro"));
+	VerifyOrReturnError(AliroInit() == EXIT_SUCCESS, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to initialize Aliro"));
 
 	while (true) {
 		Nrf::DispatchNextTask();

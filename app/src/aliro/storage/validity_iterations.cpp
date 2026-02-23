@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 #include "validity_iterations.h"
 
 #include "aliro/utils.h"
@@ -56,5 +55,3 @@ AliroError ClearValidityIterations(size_t credentialIssuerKeyIndex)
 }
 
 } // namespace Aliro
-
-#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE

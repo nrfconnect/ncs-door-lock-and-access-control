@@ -69,9 +69,14 @@ mcuboot_secondary_2:
   size: 0x81000
   device: MX25R64
   region: external_flash
-external_flash:
+external_nvs:
   address: 0x231000
-  size: 0x5cf000
+  size: 0x20000
+  device: MX25R64
+  region: external_flash
+external_flash:
+  address: 0x251000
+  size: 0x5af000
   device: MX25R64
   region: external_flash
 pcd_sram:
