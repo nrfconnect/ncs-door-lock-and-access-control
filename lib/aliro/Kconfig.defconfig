@@ -4,60 +4,8 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-# crypto default configuration
-config MBEDTLS_PSA_CRYPTO_C
-	default y
-
-config MBEDTLS_ENABLE_HEAP
-	default y
-
-config MBEDTLS_HEAP_SIZE
-	default 8192
-
-config MBEDTLS_X509_LIBRARY
-	default y
-
-config PSA_WANT_ALG_ECDSA
-	default y
-
-config PSA_WANT_ALG_ECDH
-	default y
-
-config PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE
-	default y
-
-config PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT
-	default y
-
-config PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT
-	default y
-
-config PSA_WANT_ECC_SECP_R1_256
-	default y
-
-config PSA_WANT_ALG_SHA_256
-	default y
-
-config PSA_WANT_ALG_HKDF
-	default y
-
-config PSA_WANT_ALG_HMAC
-	default y
-
-config PSA_WANT_KEY_TYPE_HMAC
-	default y
-
-config PSA_WANT_KEY_TYPE_AES
-	default y
-
-config PSA_WANT_ALG_ECB_NO_PADDING
-	default y
-
-config PSA_WANT_GENERATE_RANDOM
-	default y
-
-config PSA_WANT_ALG_GCM
-	default y
+config BT_DEVICE_NAME
+	default "AliroDL"
 
 config TRUSTED_STORAGE
 	default y
@@ -91,25 +39,18 @@ config NVS_LOOKUP_CACHE_SIZE
 	default 512 if NVS
 
 config NVS_LOOKUP_CACHE_FOR_SETTINGS
-	default y if NVS
+	default y if SETTINGS_NVS
 
 config ZMS
 	default y if SOC_FLASH_NRF_RRAM
 
 config ZMS_LOOKUP_CACHE_SIZE
-	default 512 if ZMS
+	default 512 if SETTINGS_ZMS
 
 config ZMS_LOOKUP_CACHE_FOR_SETTINGS
-	default y if ZMS
+	default y if SETTINGS_ZMS
 
 config SETTINGS
-	default y
-
-# required by Aliro CLI
-config REBOOT
-	default y
-
-config SHELL
 	default y
 
 config EVENTS

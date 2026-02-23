@@ -63,10 +63,16 @@
 	};
 
 	aliases {
-		access-decision-indicator = &led1; /* green LED2 on nRF52840DK */
+		lock-sim-indicator = &led1; /* green LED2 on nRF52840DK */
 	};
 };
 
 &mx25r64 {
 	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+	/* Use PORT event rather than GPIOTE IN event, to save power */
+	sense-edge-mask = <0x00000008>; /* P0.03 */
 };

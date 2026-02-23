@@ -31,25 +31,28 @@ target_include_directories(app PRIVATE
   ${ZAP_PARENT_DIR}
 )
 
-SET(access_srcs
-  access/access_data_types.cpp
-  access/access_manager_credentials.cpp
-  access/access_manager_users.cpp
-  access/access_manager.cpp
-  access/access_storage.cpp
-)
-
-if(CONFIG_LOCK_SCHEDULES)
-  LIST(APPEND access_srcs access/access_manager_schedules.cpp)
-endif()
-
 target_sources(app PRIVATE
   app_task.cpp
   bolt_lock_manager.cpp
   door_lock_delegate.cpp
   init.cpp
   zcl_callbacks.cpp
-  ${access_srcs}
+  access/access_data_types.cpp
+  access/access_manager_credentials.cpp
+  access/access_manager_users.cpp
+  access/access_manager.cpp
+)
+
+target_sources_ifdef(CONFIG_LOCK_ACCESS_STORAGE_PROTECTED_STORAGE app PRIVATE
+  access/access_storage_psa_ps.cpp
+)
+
+target_sources_ifdef(CONFIG_LOCK_SCHEDULES app PRIVATE
+  access/access_manager_schedules.cpp
+)
+
+target_sources_ifdef(CONFIG_LOCK_PRINT_STORAGE_STATUS app PRIVATE
+  access/access_storage_print.cpp
 )
 
 # Do not treat warnings as errors while the variable may be uninitialized for this sample data model.

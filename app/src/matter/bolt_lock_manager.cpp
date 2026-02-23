@@ -5,9 +5,9 @@
  */
 
 #include "bolt_lock_manager.h"
-#include "access_manager/access_manager.h"
 #include "app/task_executor.h"
 
+#include "aliro/access_manager/access_manager.h"
 #include "aliro/aliro.h"
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
@@ -48,22 +48,26 @@ void BoltLockManager::Init(StateChangeCallback callback)
 {
 	mStateChangeCallback = callback;
 
-	k_timer_init(&mActuatorTimer, &BoltLockManager::ActuatorTimerEventHandler, nullptr);
-	k_timer_user_data_set(&mActuatorTimer, this);
+	mLockSim.Init([](Aliro::OperationSource, Aliro::ReaderStateByte state) {
+		Nrf::PostTask([state] { BoltLockMgr().UpdateState(state); });
+	});
 
 	// Set Aliro AccessManager application callbacks
 	Aliro::AccessManagerInstance().SetApplicationCallbacks({
 		.mUnlockIndicatorClb =
 			[](Aliro::OperationSource source) {
-				if (!BoltLockMgr().Unlock(source)) {
+				Nrf::PostTask([source] {
+					if (!BoltLockMgr().Unlock(source)) {
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-					// The lock is already unlocked, so we can send the Unsecured state
-					Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
-						source, Aliro::ReaderStateByte::Unsecured);
+						// The lock is already unlocked, so we can send the Unsecured state
+						Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
+							source, Aliro::ReaderStateByte::Unsecured);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
-				}
+					}
+				});
 			},
-		.mLockIndicatorClb = [](Aliro::OperationSource source) { BoltLockMgr().Lock(source); },
+		.mLockIndicatorClb =
+			[](Aliro::OperationSource source) { Nrf::PostTask([source] { BoltLockMgr().Lock(source); }); },
 	});
 
 	auto addPublicKey = [](uint16_t credentialIndex, CredentialTypeEnum credentialType,
@@ -194,90 +198,62 @@ bool BoltLockManager::GetRequirePIN()
 void BoltLockManager::Lock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx,
 			   const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)
 {
-	VerifyOrReturn(mStateData.mState != State::kLockingCompleted);
-	StateData newStateData{ State::kLockingInitiated, source, ToAliroOperationSource(source), fabricIdx, nodeId,
-				validatePINResult };
-	SetStateData(newStateData);
+	VerifyOrReturn(mStateData.mState != Aliro::ReaderStateByte::Secured);
+	mStateData = { Aliro::ReaderStateByte::EnteringSecured,
+		       source,
+		       ToAliroOperationSource(source),
+		       fabricIdx,
+		       nodeId,
+		       validatePINResult };
 
-	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
+	mLockSim.Lock(ToAliroOperationSource(source));
 }
 
 void BoltLockManager::Unlock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx,
 			     const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)
 {
-	VerifyOrReturn(mStateData.mState != State::kUnlockingCompleted);
-	StateData newStateData{ State::kUnlockingInitiated, source, ToAliroOperationSource(source), fabricIdx, nodeId,
-				validatePINResult };
-	SetStateData(newStateData);
+	VerifyOrReturn(mStateData.mState != Aliro::ReaderStateByte::Unsecured);
+	mStateData = { Aliro::ReaderStateByte::EnteringUnsecured,
+		       source,
+		       ToAliroOperationSource(source),
+		       fabricIdx,
+		       nodeId,
+		       validatePINResult };
 
-	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
+	mLockSim.Unlock(ToAliroOperationSource(source));
 }
 
 bool BoltLockManager::Lock(Aliro::OperationSource source)
 {
-	VerifyOrReturnValue(mStateData.mState != State::kLockingCompleted, false);
-	StateData newStateData{
-		State::kLockingInitiated, OperationSource::kAliro, source, NullNullable, NullNullable, NullNullable
-	};
-	SetStateData(newStateData);
+	VerifyOrReturnValue(mStateData.mState != Aliro::ReaderStateByte::Secured, false);
+	mStateData = { Aliro::ReaderStateByte::EnteringSecured,
+		       OperationSource::kAliro,
+		       source,
+		       NullNullable,
+		       NullNullable,
+		       NullNullable };
 
-	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
+	mLockSim.Lock(source);
 	return true;
 }
 
 bool BoltLockManager::Unlock(Aliro::OperationSource source)
 {
-	VerifyOrReturnValue(mStateData.mState != State::kUnlockingCompleted, false);
-	StateData newStateData{
-		State::kUnlockingInitiated, OperationSource::kAliro, source, NullNullable, NullNullable, NullNullable
-	};
-	SetStateData(newStateData);
+	VerifyOrReturnValue(mStateData.mState != Aliro::ReaderStateByte::Unsecured, false);
+	mStateData = { Aliro::ReaderStateByte::EnteringUnsecured,
+		       OperationSource::kAliro,
+		       source,
+		       NullNullable,
+		       NullNullable,
+		       NullNullable };
 
-	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
+	mLockSim.Unlock(source);
 	return true;
 }
 
-void BoltLockManager::ActuatorTimerEventHandler(k_timer *timer)
-{
-	/*
-	 * The timer event handler is called in the context of the system clock ISR.
-	 * Post an event to the application task queue to process the event in the
-	 * context of the application thread.
-	 */
-
-	BoltLockManagerEvent event;
-	event.manager = static_cast<BoltLockManager *>(k_timer_user_data_get(timer));
-	Nrf::PostTask([event] { ActuatorAppEventHandler(event); });
-}
-
-void BoltLockManager::ActuatorAppEventHandler(const BoltLockManagerEvent &event)
-{
-	BoltLockManager *lock = reinterpret_cast<BoltLockManager *>(event.manager);
-
-	switch (lock->mStateData.mState) {
-	case State::kLockingInitiated:
-		lock->SetState(State::kLockingCompleted);
-		break;
-	case State::kUnlockingInitiated:
-		lock->SetState(State::kUnlockingCompleted);
-		break;
-	default:
-		break;
-	}
-}
-
-void BoltLockManager::SetState(State state)
+void BoltLockManager::UpdateState(Aliro::ReaderStateByte state)
 {
 	mStateData.mState = state;
-
-	if (mStateChangeCallback != nullptr) {
-		mStateChangeCallback(mStateData);
-	}
-}
-
-void BoltLockManager::SetStateData(const StateData &stateData)
-{
-	mStateData = stateData;
 
 	if (mStateChangeCallback != nullptr) {
 		mStateChangeCallback(mStateData);

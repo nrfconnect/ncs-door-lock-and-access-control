@@ -1,0 +1,32 @@
+flow: "Aliro Stack events handling" {
+  shape: sequence_diagram
+
+  app: "Application" {
+    transport: "Transport (NFC/BLE)"
+  }
+  interface: "Aliro Stack Interface" {
+    os_iface: "Aliro::Interface::Os"
+  }
+  api: "Aliro Stack Public API"
+  stack: "Aliro Stack"
+  radio: "NFC/BLE radio" {
+    style: {
+      stroke-dash: 2
+      stroke: "#666"
+    }
+  }
+
+  name: "Stack Event Processing" {
+
+    radio -> app: "RX data"
+    app -> api: "HandleSessionData(handle, data)"
+    api -> stack: "invokes"
+    stack -> stack: "Session Execution/Data Handling"
+    stack -> interface: "QueueEvent(event)"
+    interface -> app: "FIFO put, submit work"
+    app -> app: "work runs"
+    app -> api: "ProcessEvent(event)"
+    api -> stack: "invokes"
+    stack -> stack: "Event Processing"
+  }
+}

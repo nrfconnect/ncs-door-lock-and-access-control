@@ -4,7 +4,14 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-file(GLOB src CONFIGURE_DEPENDS ./*.cpp)
+target_sources(app PRIVATE
+  reader_cache.cpp
+  storage.cpp
+)
+target_sources_ifdef(CONFIG_DOOR_LOCK_STEP_UP_PHASE app PRIVATE validity_iterations.cpp)
 
-zephyr_library_sources(${src})
-zephyr_include_directories(.)
+if(CONFIG_DOOR_LOCK_STEP_UP_PHASE AND CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS GREATER 0)
+  target_sources(app PRIVATE access_document.cpp)
+endif()
+
+target_include_directories(app PRIVATE .)

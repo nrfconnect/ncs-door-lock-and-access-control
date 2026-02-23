@@ -20,6 +20,6 @@ config DOOR_LOCK_BT_NUS_APP_PASSKEY
 
 config DOOR_LOCK_BT_NUS_MAX_COMMANDS
 	int "Define maximum NUS commands amount"
-	default 1
+	default 2
 	help
 	  Define the maximum number of NUS commands to declare by user.

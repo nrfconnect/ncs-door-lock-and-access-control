@@ -6,7 +6,7 @@
 
 / {
 	aliases {
-		/delete-property/ access-decision-indicator;
+		/delete-property/ lock-sim-indicator;
 	};
 };
 

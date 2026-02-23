@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
-
 #pragma once
 
 #include "aliro/errors.h"
@@ -77,5 +75,3 @@ AliroError StoreAccessDocument(size_t index, const AccessDocument &ad);
 AliroError ClearAccessDocument(size_t index);
 
 } // namespace Aliro
-
-#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE

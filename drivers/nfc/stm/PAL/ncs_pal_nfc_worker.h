@@ -7,23 +7,18 @@
 #ifndef NCS_PAL_NFC_WORKER_H
 #define NCS_PAL_NFC_WORKER_H
 
-#include <stdbool.h>
 #include <zephyr/kernel.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void (*thread_func_t)(void *, void *, void *);
+/** @brief Submit a work item to the dedicated Aliro workqueue.
 
-/**
- * @brief Start NFC worker thread with CONFIG_WORKER_THREAD_PRIORITY priority.
+ * @note Must be implemented by the application.
  *
- * @param thread_func Pointer to the function that will be executed by the NFC worker thread.
- *
- * @return The thread ID when success, nullptr otherwise.
  */
-k_tid_t ncs_pal_nfc_worker_start(thread_func_t thread_func);
+void ncs_pal_submit_nfc_work();
 
 #ifdef __cplusplus
 }

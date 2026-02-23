@@ -6,6 +6,7 @@
 
 config DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS
     int "Maximum number of stored Access Documents"
+    default 0 if SOC_SERIES_NRF52X
     default 5 if DOOR_LOCK_STEP_UP_PHASE
     default 0
     help

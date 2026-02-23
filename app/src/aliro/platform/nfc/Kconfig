@@ -1,0 +1,70 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+rsource "Kconfig.rfal.defconfig"
+
+# Prompt-less option only for internal tuning of the RFAL worker.
+config RFAL_NFC_WORKER_INTERVAL_MS
+	int
+	default 10
+
+config RFAL_DISCOVERY_DEV_LIMIT
+	int "Maximum number of devices to discover"
+	range 1 10
+	default 1
+	help
+	  Maximum number of NFC devices to discover in a single polling cycle.
+
+config RFAL_DISCOVERY_TOTAL_DURATION_MS
+	int "Total duration of each polling cycle (ms)"
+	range 10 2000
+	default 50
+	help
+	  Total duration of each polling cycle in milliseconds.
+
+choice RFAL_DISCOVERY_COMP_MODE
+	prompt "RFAL compliance mode"
+	default RFAL_DISCOVERY_COMP_MODE_EMV
+
+config RFAL_DISCOVERY_COMP_MODE_EMV
+	bool "EMVCo compliance"
+
+config RFAL_DISCOVERY_COMP_MODE_ISO
+	bool "ISO/IEC 14443 compliance"
+
+endchoice # RFAL_DISCOVERY_COMP_MODE
+
+config RFAL_DISCOVERY_MAX_BR
+	int "Maximum bitrate for NFC communication"
+	range 0 3
+	default 3
+	help
+	  0 = 106 kbps, 1 = 212 kbps, 2 = 424 kbps, 3 = 848 kbps
+
+config RFAL_DISCOVERY_GBLEN
+	int "General Bytes length for P2P"
+	range 0 48
+	default 0
+	help
+	  Length of General Bytes for NFC-DEP P2P activation.
+
+#
+# Proprietary NFC Technology add-on
+#
+
+config DOOR_LOCK_NFC_PROP
+	bool "Enable support for proprietary NFC Technology"
+	help
+	  Enable proprietary NFC technology module using RFAL PROP API.
+	  This optional module implements custom NFC functionality that
+	  enhances device detection capabilities. When disabled, only
+	  standard NFC-A technology is used.
+
+module = DOOR_LOCK_RFAL
+module-str = DOOR_LOCK_RFAL
+module-dep = LOG
+module-help = Enables Door Lock NFC RFAL log messages.
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"

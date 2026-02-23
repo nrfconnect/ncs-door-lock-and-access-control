@@ -491,6 +491,9 @@ using CredentialsBits = uint16_t;
 
 constexpr CredentialsBits ToCredentialBits(CredentialTypeEnum type)
 {
+	static_assert(static_cast<size_t>(CredentialTypeEnum::kUnknownEnumValue) < sizeof(CredentialsBits) * 8,
+		      "CredentialsBits does not have enough bits to represent all CredentialTypeEnum values");
+
 	return BIT(chip::to_underlying(type));
 }
 
