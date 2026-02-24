@@ -21,12 +21,13 @@ namespace {
 
 DoorLock::ExternalNvs::Id GetExternalNvsId(size_t index)
 {
-	return DoorLock::ExternalNvsIds::AccessDocument::kRangeStart + static_cast<DoorLock::ExternalNvs::Id>(index);
+	return DoorLock::Storage::ExternalNvsIds::kAccessDocumentRangeStart +
+	       static_cast<DoorLock::ExternalNvs::Id>(index);
 }
 
 bool IsIndexInRange(size_t index)
 {
-	return index < DoorLock::ExternalNvsIds::AccessDocument::kRangeSize;
+	return index < DoorLock::Storage::ExternalNvsIds::kAccessDocumentRangeSize;
 }
 
 int ReadAccessDocumentHelper(size_t index, AccessDocument &ad)

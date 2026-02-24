@@ -148,7 +148,7 @@ For details, see the `Matter chip-tool guide`_.
          The ``GroupResolvingKey`` can only be set if the Aliro door lock application is built with Bluetooth LE transport and Ultra-Wideband (UWB) support.
          Currently, the Aliro Test Harness expects the ``GroupResolvingKey`` to be set to all zeros.
 
-#. Add door lock user and ``AliroEvictableEndpointKey`` credentials using CHIP Tool.
+#. Add door lock user and ``AliroNonEvictableEndpointKey`` credentials using CHIP Tool.
 
    a. Add the first user (Home user):
 
@@ -166,14 +166,14 @@ For details, see the `Matter chip-tool guide`_.
       * Node ID of the door lock - ``1``
       * Endpoint ID - ``1``
       
-   #. Set the first ``AliroEvictableEndpointKey`` credential for the Home user:
+   #. Set the first ``AliroNonEvictableEndpointKey`` credential for the Home user:
 
       .. code-block:: console
 
-         ./chip-tool doorlock set-credential 0 '{"credentialType": 7, "credentialIndex": 1}' hex:<credential-data> 1 null null 1 1 --timedInteractionTimeoutMs 5000
+         ./chip-tool doorlock set-credential 0 '{"credentialType": 8, "credentialIndex": 1}' hex:<credential-data> 1 null null 1 1 --timedInteractionTimeoutMs 5000
 
       * OperationType (0 = Add) - ``0``
-      * credentialType (7 = AliroEvictableEndpointKey) - ``7``
+      * credentialType (8 = AliroNonEvictableEndpointKey) - ``8``
       * credentialIndex - ``1``
       * ``<credential-data>`` - An octet string parameter with the Access Credential public key data.
         It corresponds to ``th_access_credential_public_key``.
@@ -187,13 +187,13 @@ For details, see the `Matter chip-tool guide`_.
 
       .. code-block:: console
 
-         ./chip-tool doorlock set-credential 0 '{"credentialType": 7, "credentialIndex": 1}' hex:04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa 1 null null 1 1 --timedInteractionTimeoutMs 5000
+         ./chip-tool doorlock set-credential 0 '{"credentialType": 8, "credentialIndex": 1}' hex:04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa 1 null null 1 1 --timedInteractionTimeoutMs 5000
 
    #. Read the status of credential assigned to the user to verify that it was set correctly:
 
       .. code-block:: console
 
-         ./chip-tool doorlock get-credential-status {"credentialType": 7, "credentialIndex": 1} 1 1
+         ./chip-tool doorlock get-credential-status {"credentialType": 8, "credentialIndex": 1} 1 1
 
 #. Add Aliro Credential Issuer key using CHIP Tool.
    Once you have a user created on the door lock, you can add the Credential Issuer public key to the Reader using the following command:

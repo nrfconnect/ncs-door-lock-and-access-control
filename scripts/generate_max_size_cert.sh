@@ -101,7 +101,7 @@ echo "=== Provisioning Commands ===" >&2
 if [[ -n "$ISSUER_PUB" ]]; then
     echo "dl provisioning issuer_pk set $ISSUER_PUB" >&2
 fi
-echo "dl provisioning reader_cert set $COMPRESSED_HEX" >&2
+echo "dl reader certificate set $COMPRESSED_HEX" >&2
 echo "" >&2
 
 # Output hex for easy copy-paste

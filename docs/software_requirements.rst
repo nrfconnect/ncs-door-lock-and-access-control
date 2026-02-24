@@ -24,11 +24,6 @@ Prepare the environment:
    #. Installing prerequisities
    #. Installing the |NCS| toolchain
 
-   .. note::
-
-      |VSC| does not support private add-ons.
-      You must use command-line to clone and manage the repository.
-
 #. Once completed, open the repository and locate the :file:`ncs` directory.
    By default, this is one level up from the location where you installed the toolchain.
    This directory will hold all |NCS| repositories.
@@ -43,10 +38,10 @@ Prepare the environment:
 
    .. code-block:: console
 
-      west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr main door-lock-workspace
-      cd door-lock-workspace
+      west init -m https://github.com/nrfconnect/ncs-door-lock-and-access-control --mr main project-workspace
+      cd project-workspace
 
-   This command will clone the `ncs-door-lock-app`_ add-on manifest repository into :file:`door-lock-workspace`.
+   This command will clone the `ncs-door-lock-and-access-control`_ manifest repository into :file:`project-workspace`.
 
 #. Enter the following command to clone the project repository and all of its submodules:
 
@@ -70,11 +65,11 @@ Prepare the environment:
       ncs
       ├─── toolchains
       │  └─── <toolchain-installation>
-      └─── <door-lock-workspace>
+      └─── <project-workspace>
          ├─── .west
          ├─── bootloader
          ├─── modules
-         ├─── ncs-door-lock-app
+         ├─── ncs-door-lock-and-access-control
          ├─── nrf
          ├─── nrfxlib
          ├─── zephyr

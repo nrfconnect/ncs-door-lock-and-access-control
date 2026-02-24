@@ -9,10 +9,10 @@
 
 #ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
 
-#include "aliro/crypto_key_ids.h"
 #include "aliro/interface.h"
 #include "aliro/utils.h"
 #include "crypto/utils.h"
+#include "psa_key_ids.h"
 
 #include <algorithm>
 
@@ -63,8 +63,8 @@ AliroError VerifyCertificateSignature(const mbedtls_x509_crt &crt)
 	VerifyOrReturnStatus(rawLength == signatureArray.size(), ALIRO_INVALID_DATA_FORMAT,
 			     LOG_ERR("Invalid signature length"));
 
-	return DoorLock::Crypto::VerifySignature(kCredentialIssuerCAPublicKeyId, crt.tbs.p, crt.tbs.len,
-						 signatureArray);
+	return DoorLock::Crypto::VerifySignature(DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId,
+						 crt.tbs.p, crt.tbs.len, signatureArray);
 }
 
 AliroError VerifyCertificate(const mbedtls_x509_crt &crt)

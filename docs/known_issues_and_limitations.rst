@@ -41,6 +41,8 @@ The following optional Aliro features are out-of-scope for the |APP_NAME|:
      - --
    * - Expedited-Fast Phase authentication based on Credential Issuer CA Public Key
      - --
+   * - When the application is built with Matter support, only one Aliro BLE session is supported at a time
+     - --
 
 Known issues
 ************
@@ -59,8 +61,8 @@ A known issue can list one or both of the following entries:
   Some known issues have a workaround.
   Sometimes, they are discovered later and added over time.
 
-The |APP_NAME| v1.0.0
-*********************
+The |REPO_NAME| v1.0.0
+**********************
 
 .. toggle::
 
@@ -79,8 +81,19 @@ The |APP_NAME| v1.0.0
 
     **Affected platforms:** nRF52840 DK
 
-The |APP_NAME| v0.6.0
-*********************
+  AL-727: Credentials created during Step-up phase are not forwarded to Matter.
+    User credentials provisioned in the Step-up phase (with Access Document) are not exported to Matter.
+    As a result, they are not synchronized from the Matter controller's perspective.
+
+  AL-728: When built with Matter support, the ProductAppearance attribute is not supported.
+    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
+    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
+
+    **Workaround:**
+    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
+
+The |REPO_NAME| v0.6.0
+**********************
 
 .. toggle::
 
@@ -89,8 +102,8 @@ The |APP_NAME| v0.6.0
     Use the ``uwb_qm35`` snippet when building the application to configure both NFC and UWB modules to share the same SPI bus.
     The snippet configures both devices to use different chip select (CS) pins on the same SPI bus.
 
-The |APP_NAME| v0.5.0
-*********************
+The |REPO_NAME| v0.5.0
+**********************
 
 .. toggle::
 
@@ -127,8 +140,8 @@ The |APP_NAME| v0.5.0
   AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
     During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
 
-The |APP_NAME| v0.4.0
-*********************
+The |REPO_NAME| v0.4.0
+**********************
 
 .. toggle::
     
@@ -162,8 +175,8 @@ The |APP_NAME| v0.4.0
   AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
     During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
 
-The |APP_NAME| v0.3.1
-*********************
+The |REPO_NAME| v0.3.1
+**********************
 
 .. toggle::
 
@@ -210,8 +223,8 @@ The |APP_NAME| v0.3.1
     During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
 
 
-The |APP_NAME| v0.3.0
-*********************
+The |REPO_NAME| v0.3.0
+**********************
 
 .. toggle::
 
@@ -258,8 +271,8 @@ The |APP_NAME| v0.3.0
   AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
     During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
 
-The |APP_NAME| v0.2.0
-*********************
+The |REPO_NAME| v0.2.0
+**********************
 
 .. toggle::
 
@@ -291,8 +304,8 @@ The |APP_NAME| v0.2.0
     **Workaround:** Switch to X-NUCLEO-NFC09A1, a newer, recommended revision of the NFC ST module.
     Attach the X-NUCLEO-NFC09A1 shield to the supported Nordic development kit, rebuild the firmware with the ``CONFIG_ST25R200_DRV`` Kconfig option enabled, and reflash the DK.
 
-The |APP_NAME| v0.1.0
-*********************
+The |REPO_NAME| v0.1.0
+**********************
 
 .. toggle::
 

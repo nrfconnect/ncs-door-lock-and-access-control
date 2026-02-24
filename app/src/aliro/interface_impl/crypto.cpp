@@ -7,7 +7,7 @@
 #include "aliro/errors.h"
 #include "aliro/interface.h"
 
-#include "aliro/crypto_key_ids.h"
+#include "aliro/storage/psa_key_ids.h"
 #include "aliro/utils.h"
 #include "crypto/utils.h"
 
@@ -165,8 +165,8 @@ AliroError GenerateSignature(const uint8_t *msg, const size_t msgLength, CryptoT
 	psa_status_t status = PSA_SUCCESS;
 	size_t outputLen{};
 
-	status = psa_sign_message(kPrivateKeyId, PSA_ALG_ECDSA(PSA_ALG_SHA_256), msg, msgLength, signature.data(),
-				  signature.size(), &outputLen);
+	status = psa_sign_message(DoorLock::Storage::PsaKeyIds::kPrivateKeyId, PSA_ALG_ECDSA(PSA_ALG_SHA_256), msg,
+				  msgLength, signature.data(), signature.size(), &outputLen);
 
 	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
 			     LOG_WRN("Cannot sign message [Error: %d]", status));
@@ -364,8 +364,8 @@ AliroError Encrypt(const uint8_t *plainText, size_t plainTextLength, uint8_t *ci
 
 	size_t outLength{};
 
-	psa_status_t status = psa_cipher_encrypt(kGroupResolvingKeyId, algorithm, plainText, blockSize, cipherText,
-						 blockSize, &outLength);
+	psa_status_t status = psa_cipher_encrypt(DoorLock::Storage::PsaKeyIds::kGroupResolvingKeyId, algorithm,
+						 plainText, blockSize, cipherText, blockSize, &outLength);
 	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
 			     LOG_WRN("Cannot encrypt payload [Error: %d]", status));
 	VerifyOrReturnStatus(outLength == blockSize, ALIRO_ERROR_INTERNAL, LOG_WRN("Invalid output length"));

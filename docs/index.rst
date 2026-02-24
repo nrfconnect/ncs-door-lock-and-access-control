@@ -1,12 +1,9 @@
 .. _index:
 
-|APP_NAME| for the |NCS|
+|REPO_NAME|
 ########################
 
-.. note::
-  |EXPERIMENTAL_NOTE|
-
-|APP_NAME| is a sample application that demonstrates how to integrate the Aliro and `Matter <Matter marketing note_>`_  stacks to implement fully functional door lock firmware.
+|REPO_NAME| is a top-level add-on containing a sample application that demonstrates how to integrate the `Aliro <Aliro Technology_>`_ and `Matter <Matter marketing note_>`_  stacks to implement fully functional door lock firmware.
 
 Aliro is the new industry-standard access control and communication protocol, offering a secure, convenient, and consistent experience for users using smartphones, wearables, or other smart digital devices to unlock doors and openings.
 Aliro includes several key features that distinguish it from existing access protocols:
@@ -15,6 +12,9 @@ Aliro includes several key features that distinguish it from existing access pro
   The standardized solution allows manufacturer-independent devices and readers to work together without compromising security.
 * Flexibility - Does not dictate how your digital door lock or access control reader connects to the rest of your ecosystem.
 * Protocol support - Supports various transport protocols, including mandatory Near Field Communication (NFC), Bluetooth® LE or Bluetooth LE with ultra wideband (UWB).
+
+.. note::
+  The support for the Bluetooth LE transport and UWB ranging is currently `experimental <Software maturity_>`_.
 
 .. toctree::
    :maxdepth: 1
@@ -28,6 +28,7 @@ Aliro includes several key features that distinguish it from existing access pro
    software_requirements.rst
    building_and_running.rst
    nfc_power_measurements.rst
+   matter_power_measurements.rst
    testing.rst
    firmware_update.rst
    troubleshooting.rst

@@ -1,57 +1,17 @@
-# ncs-door-lock-app
-NCS manifest repo for the door lock reference application.
+# nRF Door Lock and Access Control Add-on
+
+In combination with the nRF Connect SDK, the nRF Door Lock and Access Control Add-on provides a complete reference for building Aliro- and Matter-compatible locks and access control readers for both residential and commercial applications. The reference integrates multiple wireless technologies - including Bluetooth Low Energy (BLE), Ultra-Wideband (UWB), NFC, Thread, and Wi-Fi - allowing developers to choose the appropriate technology for their specific use case.
+
+Aliro standardizes the interaction that lets a phone or wearable act as a digital key at an opening. Matter specifies how connected products communicate for command-and-control use cases like remotely locking or unlocking a door, checking lock status, user provisioning or integrating with home automation systems. The reference can support Aliro alone, Matter alone, or both protocols, depending on the specific use case and product requirements.
 
 ## Getting started
 
-Before getting started, set up the nRF Connect SDK development environment.
+To get started with the nRF Door Lock and Access Control Add-on, follow the [documentation](https://docs.nordicsemi.com/bundle/aliro_1.0.0/page/index.html).
 
-Follow the official [Installing the nRF Connect SDK](https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/installation/install_ncs.html) guide and complete the following steps:
+## License
 
-- [Update operating system](https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/installation/install_ncs.html#update_operating_system)
-- [Install prerequisites](https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/installation/install_ncs.html#install_prerequisites)
-- [Install the nRF Connect SDK toolchain](https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/installation/install_ncs.html#install_the_nrf_connect_sdk_toolchain)
+Source code included within this repository is licensed under the [LicenseRef-Nordic-5-Clause](LICENSE).
 
-### Initialization
+## Support
 
-First, initialize the workspace folder (``door-lock-workspace``) where
-the ``ncs-door-lock-app`` and all nRF Connect SDK modules will be cloned.
-
-Run the following commands:
-
-```shell
-# launch nRF Connect toolchain for v3.2.0 release
-nrfutil sdk-manager toolchain launch --ncs-version v3.2.0 --shell
-```
-
-```shell
-# initialize workspace for the ncs-door-lock-app (v0.6.0 release)
-west init -m https://github.com/nrfconnect/ncs-door-lock-app --mr v0.6.0 door-lock-workspace
-```
-
-```shell
-# update nRF Connect SDK modules
-cd door-lock-workspace
-west update
-```
-
-For detailed instructions on building and testing the `ncs-door-lock-app` application, see the technical documentation in the `docs` directory.
-To build this documentation locally, follow the steps in the section below.
-
-## Building local documentation
-
-To build the documentation locally, you must complete a minimal setup.
-
-Navigate to the ``docs`` folder, and install Sphinx and other documentation dependencies by running the following command:
-
-```shell
-pip install -r requirements.txt
-```
-
-Once successfully installed, you can build the Sphinx documentation from the ``docs`` folder:
-
-```shell
-make html
-```
-
-The documentation will be generated in the ``build`` folder.
-To view the built documentation, open ``docs/build/html/index.html`` in your web browser.
+To ask questions about the reference or to get technical support, please refer to [Nordic DevZone](https://devzone.nordicsemi.com).

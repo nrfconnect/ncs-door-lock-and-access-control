@@ -7,11 +7,11 @@
 #include "kpersistent_manager_impl.h"
 
 #include "access_manager.h"
-#include "aliro/crypto_key_ids.h"
 #include "aliro/errors.h"
 #include "aliro/interface.h"
 #include "aliro/utils.h"
 #include "crypto/utils.h"
+#include "psa_key_ids.h"
 
 #include "zephyr/sys/util.h"
 #include <zephyr/logging/log.h>
@@ -26,12 +26,19 @@ namespace {
 
 constexpr KeyId ToKpersistentKeyId(size_t keyOffset)
 {
-	return kKpersistentRangeBegin + keyOffset;
+	return DoorLock::Storage::PsaKeyIds::kKpersistentRangeBegin + keyOffset;
 }
 
 constexpr size_t FromKpersistentKeyId(KeyId keyId)
 {
-	return keyId - kKpersistentRangeBegin;
+	return keyId - DoorLock::Storage::PsaKeyIds::kKpersistentRangeBegin;
+}
+
+bool IsKpersistentKeyIdValid(KeyId keyId)
+{
+	constexpr KeyId kKpersistentRangeEnd{ DoorLock::Storage::PsaKeyIds::kKpersistentRangeBegin +
+					      DoorLock::Storage::PsaKeyIds::kKpersistentRangeSize };
+	return IN_RANGE(keyId, DoorLock::Storage::PsaKeyIds::kKpersistentRangeBegin, kKpersistentRangeEnd - 1);
 }
 
 } // namespace
@@ -84,8 +91,8 @@ AliroError KpersistentManagerImpl::PreserveKpersistent(const PublicKey &publicKe
 	VerifyOrReturnStatus(IN_RANGE(index, 0, kMaxKpersistentCount - 1), ALIRO_NO_MEMORY);
 
 	auto kpersistentKeyIdPersistent = ToKpersistentKeyId(index);
-	VerifyOrReturnStatus(IN_RANGE(kpersistentKeyIdPersistent, kKpersistentRangeBegin, kKpersistentRangeEnd),
-			     ALIRO_INVALID_ARGUMENT, LOG_WRN("Kpersistent key ID is out of range"));
+	VerifyOrReturnStatus(IsKpersistentKeyIdValid(kpersistentKeyIdPersistent), ALIRO_INVALID_ARGUMENT,
+			     LOG_WRN("Kpersistent key ID is out of range"));
 
 	LOG_DBG("Preserving Kpersistent key with ID: 0x%08x", kpersistentKeyIdPersistent);
 
@@ -120,8 +127,8 @@ AliroError KpersistentManagerImpl::RemoveKpersistent(size_t kpersistentKeyOffset
 	}
 
 	auto kPersistentKeyIdPersistent = ToKpersistentKeyId(kpersistentKeyOffset);
-	VerifyOrReturnStatus(IN_RANGE(kPersistentKeyIdPersistent, kKpersistentRangeBegin, kKpersistentRangeEnd),
-			     ALIRO_INVALID_ARGUMENT, LOG_WRN("Kpersistent key ID is out of range"));
+	VerifyOrReturnStatus(IsKpersistentKeyIdValid(kPersistentKeyIdPersistent), ALIRO_INVALID_ARGUMENT,
+			     LOG_WRN("Kpersistent key ID is out of range"));
 
 	VerifyOrReturnStatus(DoorLock::Crypto::DestroyKey(kPersistentKeyIdPersistent) == ALIRO_NO_ERROR,
 			     ALIRO_ERROR_INTERNAL,
@@ -145,8 +152,7 @@ void KpersistentManagerImpl::RemoveAllKpersistent()
 AliroError KpersistentManagerImpl::GetAccessCredentialPublicKey(CryptoTypes::KeyId kpersistentKeyId,
 								CryptoTypes::PublicKey &publicKey)
 {
-	VerifyOrReturnStatus(IN_RANGE(kpersistentKeyId, kKpersistentRangeBegin, kKpersistentRangeEnd),
-			     ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnStatus(IsKpersistentKeyIdValid(kpersistentKeyId), ALIRO_INVALID_ARGUMENT);
 
 	// Keys are stored linearly, so we can get the access credential public key id by subtracting the kpersistent
 	// key id from the kpersistent begin key id. Plus, it is ensured that for a given kpersistent key id, the

@@ -7,12 +7,12 @@ Building and running
    :local:
    :depth: 2
 
-In the :file:`door-lock-workspace`, the |APP_NAME| is placed in the :file:`ncs-door-lock-app` directory.
+In the :file:`project-workspace`, the |REPO_NAME| is placed in the :file:`ncs-door-lock-and-access-control` directory.
 To build and run the application on one of the :ref:`supported development kits (DKs) <hw_requirements>`, complete the following steps:
 
 1. Connect the DK to your computer using the **DEBUGGER** port on the DK and set the **POWER** switch to **ON**.
 
-#. In the :file:`door-lock-workspace` directory, navigate to the :file:`ncs-door-lock-app` folder.
+#. In the :file:`project-workspace` directory, navigate to the :file:`ncs-door-lock-and-access-control` folder.
 
 #. Depending on the :ref:`NFC reader expansion board <hw_requirements_nfc_reader>` connected to the development kit, build the application by running the corresponding command:
 
@@ -123,7 +123,7 @@ To build the application in release mode:
             *** Booting My Application v0.1.0-f0e5cf444fb0 ***
             *** Using nRF Connect SDK v2.9.0-7787b2649840 ***
             *** Using Zephyr OS v3.7.99-1f8f3dc29142 ***
-            Starting nRF Door Lock Reference Application for the nRF Connect SDK
+            Starting nRF Door Lock and Access Control Application
 
          * Additionally, depending on the activated options, you will see the following:
 

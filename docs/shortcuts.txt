@@ -1,9 +1,10 @@
 .. ### NCS shortcuts
 
-.. |APP_NAME| replace:: nRF Door Lock Reference Application
+.. |APP_NAME| replace:: nRF Door Lock and Access Control Application
+.. |REPO_NAME| replace:: nRF Door Lock and Access Control Add-on
 .. |NCS| replace:: nRF Connect SDK
 .. |VSC| replace:: Visual Studio Code
 .. |nRFVSC| replace:: nRF Connect for VS Code extension
+.. |EXPERIMENTAL_NOTE| replace:: The support for the |APP_NAME| and Aliro stack is currently `experimental <Software maturity_>`_.
 .. |app_hwfc_enabled| replace:: This application has Hardware Flow Control mechanism enabled by default in serial communication.
    When enabled, it allows devices to manage transmission by informing each other about their current state, ensuring more reliable connection in high-speed communication scenarios.
-.. |EXPERIMENTAL_NOTE| replace:: The support for the |APP_NAME| and Aliro stack is currently `experimental <Software maturity_>`_.

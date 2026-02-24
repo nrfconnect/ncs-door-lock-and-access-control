@@ -86,28 +86,28 @@ Connect to the DUT through serial console and provision both the certificate and
 
    .. code-block:: console
 
-      uart:~$ dl install group_id <dut_reader_issuer_group_identifier>
+      uart:~$ dl reader group_id <dut_reader_issuer_group_identifier>
 
 #. Provision the Issuer Public Key:
 
    .. code-block:: console
 
-      uart:~$ dl provisioning issuer_pk set <ISSUER_PUB>
+      uart:~$ dl reader issuer_public_key set <ISSUER_PUB>
 
 #. Provision the Reader Certificate (compressed):
 
    .. code-block:: console
 
-      uart:~$ dl provisioning reader_cert set <COMPRESSED_CERT>
+      uart:~$ dl reader certificate set <COMPRESSED_CERT>
 
 #. Verify provisioning:
 
    .. code-block:: console
 
-      uart:~$ dl provisioning issuer_pk list
+      uart:~$ dl reader issuer_public_key list
       Issuer public key (65 bytes): <ISSUER_PUB>
 
-      uart:~$ dl provisioning reader_cert list
+      uart:~$ dl reader certificate list
       Reader certificate (XXX bytes): <COMPRESSED_CERT>
 
 .. note::
@@ -137,7 +137,7 @@ To run standard tests without certificates, clear the provisioned data:
 
 .. code-block:: console
 
-   uart:~$ dl provisioning reader_cert clear
-   uart:~$ dl provisioning issuer_pk clear
+   uart:~$ dl reader certificate clear
+   uart:~$ dl reader issuer_public_key clear
 
 After clearing, the DUT will skip the ``LOAD_CERT`` state and proceed directly from ``AUTH0`` response to ``AUTH1`` (expedited standard phase).

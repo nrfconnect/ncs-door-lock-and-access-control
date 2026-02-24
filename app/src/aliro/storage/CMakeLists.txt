@@ -5,7 +5,7 @@
 #
 
 target_sources(app PRIVATE
-  reader_cache.cpp
+  reader.cpp
   storage.cpp
 )
 target_sources_ifdef(CONFIG_DOOR_LOCK_STEP_UP_PHASE app PRIVATE validity_iterations.cpp)

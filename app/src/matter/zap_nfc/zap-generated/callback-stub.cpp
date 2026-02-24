@@ -79,6 +79,9 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
 	case app::Clusters::ThreadNetworkDiagnostics::Id:
 		emberAfThreadNetworkDiagnosticsClusterInitCallback(endpoint);
 		break;
+	case app::Clusters::TimeSynchronization::Id:
+		emberAfTimeSynchronizationClusterInitCallback(endpoint);
+		break;
 	default:
 		// Unrecognized cluster ID
 		break;
@@ -166,6 +169,11 @@ void __attribute__((weak)) emberAfSoftwareDiagnosticsClusterInitCallback(Endpoin
 	(void)endpoint;
 }
 void __attribute__((weak)) emberAfThreadNetworkDiagnosticsClusterInitCallback(EndpointId endpoint)
+{
+	// To prevent warning
+	(void)endpoint;
+}
+void __attribute__((weak)) emberAfTimeSynchronizationClusterInitCallback(EndpointId endpoint)
 {
 	// To prevent warning
 	(void)endpoint;

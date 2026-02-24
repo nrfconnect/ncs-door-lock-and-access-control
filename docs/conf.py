@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'nRF Door Lock Reference Application'
+project = 'nRF Door Lock and Access Control Add-on'
 copyright = '2025, Nordic Semiconductor'
 author = 'Nordic Semiconductor'
 

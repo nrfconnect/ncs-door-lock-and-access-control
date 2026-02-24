@@ -7,13 +7,11 @@
 menu "Aliro features"
 
 config DOOR_LOCK_BLE_UWB
-	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
+	bool "Integration with Aliro BLE and UWB [EXPERIMENTAL]"
 	select NCS_ALIRO_BLE_UWB
+	select EXPERIMENTAL
 	help
-	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
-	  used by the Reader to communicate with the User Device. It is used to send and
-	  receive packets over BLE. Additionally the UWB is enabled in order to manage the
-	  ranging between the Reader and the User Device.
+	  Enable the door lock application integration with Aliro Bluetooth LE (BLE) and ultra wideband (UWB).
 
 if DOOR_LOCK_BLE_UWB
 

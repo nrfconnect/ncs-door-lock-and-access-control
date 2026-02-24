@@ -71,13 +71,13 @@ When the Aliro service is stopped and other Bluetooth LE services, such as Bluet
 Bluetooth LE transport
 **********************
 
-Bluetooth LE transport is supported on the `nRF5340 DK`_ platform and is configured to operate in the peripheral role, allowing the device to advertise its presence and accept connections from Bluetooth LE central devices.
+Bluetooth LE transport is supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_ platforms and is configured to operate in the peripheral role, allowing the device to advertise its presence and accept connections from Bluetooth LE central devices.
 The advertising payload is generated according to the Aliro specification, based on the ``reader group identifier`` and ``reader group sub-identifier``.
 The payload updates automatically whenever these values change, ensuring that the device always advertises the latest group information.
 
 .. note::
    The device is preconfigured with default values for the ``reader group identifier`` and ``reader group sub-identifier``.
-   You can provide custom values using the ``dl install`` command through the console to override the defaults.
+   You can provide custom values using the ``reader`` command through the console to override the defaults.
    For more information about setting these values, see the :ref:`testing_environment_configuration` section.
 
 When a Bluetooth LE central device connects, the Aliro stack manages the Bluetooth LE session, handling connection events, security, and data exchange over a dedicated L2CAP channel with Aliro-specific GATT services.
@@ -213,6 +213,9 @@ You can select the hardware resource used for this indication by going to the de
       lock-sim-indicator = &led2; // green LED2
     };
   };
+
+In the default implementation, the indicator turns the LED on when the lock is opened (unsecured) and turns it off when the lock is closed (secured).
+The LED therefore stays on for a time period equal to the simulated movement time (``CONFIG_DOOR_LOCK_LOCK_SIM_MOVEMENT_TIME_MS``) plus the auto-relock time (``CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK_TIME_MS``).
 
 Aliro Access Manager
 ********************
