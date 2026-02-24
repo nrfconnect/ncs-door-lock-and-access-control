@@ -5,9 +5,8 @@
 #
 
 menuconfig NCS_ALIRO
-	bool "NCS Aliro Stack [EXPERIMENTAL]"
+	bool "NCS Aliro Stack"
 	depends on (SOC_SERIES_NRF54LX || SOC_SERIES_NRF53X || SOC_SERIES_NRF52X)
-	select EXPERIMENTAL
 	select NFC_T4T_APDU
 	select SMF
 	select SMF_ANCESTOR_SUPPORT
@@ -66,8 +65,9 @@ config NCS_ALIRO_LOG_LEVEL_VALUE
     default 4 if NCS_ALIRO_LOG_LEVEL_DBG
 
 config NCS_ALIRO_BLE_UWB
-	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
-	depends on (SOC_SERIES_NRF54LX || SOC_SERIES_NRF53X)
+	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB) [EXPERIMENTAL]"
+	depends on (SOC_NRF54LM20A || SOC_SERIES_NRF53X)
+	select EXPERIMENTAL
 	help
 	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
 	  used by the Reader to communicate with the User Device. It is used to send and

@@ -6,7 +6,7 @@
 
 #include "aliro/interface.h"
 
-#include "reader_cache.h"
+#include "reader.h"
 
 #include <zephyr/logging/log.h>
 
@@ -16,18 +16,18 @@ namespace Aliro::Interface::Reader {
 
 AliroError GetIdentifier(Identifier &identifier)
 {
-	return ReaderCache::Instance().GetIdentifier(identifier);
+	return DoorLock::Storage::Reader::GetIdentifier(identifier);
 }
 
 AliroError GetPublicKey(CryptoTypes::PublicKey &publicKey)
 {
-	return ReaderCache::Instance().GetPublicKey(publicKey);
+	return DoorLock::Storage::Reader::GetPublicKey(publicKey);
 }
 
 bool IsCertificateProvisioned()
 {
 #ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
-	return ReaderCache::Instance().IsCertificateSet() && ReaderCache::Instance().IsIssuerPublicKeySet();
+	return DoorLock::Storage::Reader::IsCertificateSet() && DoorLock::Storage::Reader::IsIssuerPublicKeySet();
 #else // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 	return false;
 #endif // CONFIG_DOOR_LOCK_READER_CERTIFICATE
@@ -36,7 +36,7 @@ bool IsCertificateProvisioned()
 AliroError GetIssuerPublicKey(CryptoTypes::PublicKey &publicKey)
 {
 #ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
-	return ReaderCache::Instance().GetIssuerPublicKey(publicKey);
+	return DoorLock::Storage::Reader::GetIssuerPublicKey(publicKey);
 #else // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 	ARG_UNUSED(publicKey);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
@@ -46,7 +46,7 @@ AliroError GetIssuerPublicKey(CryptoTypes::PublicKey &publicKey)
 AliroError GetCertificate(ConstData &certificate)
 {
 #ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
-	return ReaderCache::Instance().GetCertificate(certificate);
+	return DoorLock::Storage::Reader::GetCertificate(certificate);
 #else // CONFIG_DOOR_LOCK_READER_CERTIFICATE
 	ARG_UNUSED(certificate);
 	return ALIRO_ERROR_NOT_IMPLEMENTED;

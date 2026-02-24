@@ -1055,9 +1055,13 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 #if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 	MutexGuard lock{ sMutex };
 
-	// Check if there is a free index in the Access Document container to store the Access Document.
 	size_t keyIndex = 0;
-	error = GetFirstFreeIndex(mAdKeys, keyIndex);
+	const bool adKeyStored = IsPublicKeyStored(mAdKeys, userPublicKey, &keyIndex);
+
+	if (!adKeyStored) {
+		// Check if there is a free index in the Access Document container to store the Access Document.
+		error = GetFirstFreeIndex(mAdKeys, keyIndex);
+	}
 
 	if (error == ALIRO_NO_MEMORY) {
 		LOG_DBG("No free index in the Access Document container, removing oldest credential");
@@ -1072,7 +1076,7 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 
 		if (credentialIssuerKeyStored) {
 			error = StoreAccessDocument(keyIndex, credentialIssuerKeyIndex, ad);
-			if (error == ALIRO_NO_ERROR) {
+			if (error == ALIRO_NO_ERROR && !adKeyStored) {
 				AddKeyToContainer(mAdKeys, userPublicKey, keyIndex);
 			}
 		}

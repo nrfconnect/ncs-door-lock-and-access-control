@@ -5,6 +5,6 @@
 #
 
 config SHELL_CMD_BUFF_SIZE
-    # Shell buffer must fit: "dl provisioning reader_cert set " (28 chars) + hex string (2 * cert size)
-    # For 512 byte cert: 28 + 1024 = 1052
+    # Shell buffer must fit: "dl reader certificate set " (26 chars) + hex string (2 * cert size)
+    # For 512 byte cert: 26 + 1024 = 1050
     default 1052 if (SHELL && DOOR_LOCK_READER_CERTIFICATE)

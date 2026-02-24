@@ -6,10 +6,8 @@
 
 #include "aliro_state_control.h"
 
-#include "aliro/crypto_key_ids.h"
 #include "aliro/init.h"
-#include "crypto/utils.h"
-#include "reader_cache.h"
+#include "reader.h"
 
 #include <aliro/aliro.h>
 #include <aliro/utils.h>
@@ -21,19 +19,9 @@ LOG_MODULE_DECLARE(aliro);
 
 namespace {
 
-bool IsReaderIdentifierProvisioned()
-{
-	return Aliro::ReaderCache::Instance().IsIdentifierSet();
-}
-
-bool IsReaderPrivateKeyProvisioned()
-{
-	return DoorLock::Crypto::IsKeyAvailable(Aliro::kPrivateKeyId) == ALIRO_NO_ERROR;
-}
-
 bool IsProvisioningComplete()
 {
-	return IsReaderPrivateKeyProvisioned() && IsReaderIdentifierProvisioned();
+	return DoorLock::Storage::Reader::IsIdentifierSet() && DoorLock::Storage::Reader::IsPrivateKeySet();
 }
 
 } // anonymous namespace

@@ -11,13 +11,9 @@
 #include <aliro/aliro.h>
 #include <aliro/init.h>
 #include <aliro/interface.h>
-#include <aliro/storage/storage.h>
-#include <aliro/storage/storage_keys.h>
 #include <platform/CHIPDeviceLayer.h>
 
-#include "aliro/crypto_key_ids.h"
-#include "crypto/utils.h"
-#include "reader_cache.h"
+#include "reader.h"
 
 #include <zephyr/logging/log.h>
 
@@ -61,19 +57,10 @@ CHIP_ERROR EncodeProtocolVersion(size_t index, chip::MutableByteSpan &protocolVe
 CHIP_ERROR DoorLockDelegate::Init()
 {
 	CHIP_ERROR err = chip::DeviceLayer::SystemLayer().ScheduleLambda([]() {
-		Aliro::CryptoTypes::PublicKey publicKey{};
-		Aliro::Identifier identifier{};
+		const auto rc = DoorLock::Storage::Reader::Init();
+		VerifyOrReturn(rc == ALIRO_NO_ERROR, LOG_ERR("Failed to load Reader data"));
 
-		AliroError ec = DoorLock::Crypto::ExportPublicKey(Aliro::kPrivateKeyId, publicKey);
-		VerifyOrReturn(ec == ALIRO_NO_ERROR, /* device not provisioned */);
-		VerifyOrReturn(Aliro::ReaderCache::Instance().SetPublicKey(publicKey) == ALIRO_NO_ERROR,
-			       LOG_ERR("Failed to set reader public key"));
-
-		VerifyOrReturn(KeyValueStorage::Instance().Get(Aliro::StorageKeys::kStorageKeyNameIdentifier,
-							       identifier.data(), identifier.size()) == 0,
-			       LOG_ERR("Failed to get reader group identifier"));
-		VerifyOrReturn(Aliro::ReaderCache::Instance().SetIdentifier(identifier) == ALIRO_NO_ERROR,
-			       LOG_ERR("Failed to set reader identifier"));
+		VerifyOrReturn(DoorLock::Storage::Reader::IsPrivateKeySet(), /* device not provisioned */);
 
 		int err = AliroStart();
 		if (err != EXIT_SUCCESS) {
@@ -91,13 +78,17 @@ CHIP_ERROR DoorLockDelegate::GetAliroReaderVerificationKey(chip::MutableByteSpan
 
 	VerifyOrReturnError(verificationKey.size() == kAliroReaderVerificationKeySize, CHIP_ERROR_INVALID_ARGUMENT);
 
-	Aliro::CryptoTypes::PublicKey publicKey{};
-	AliroError ec = DoorLock::Crypto::ExportPublicKey(Aliro::kPrivateKeyId, publicKey);
-	if (ec != ALIRO_NO_ERROR) {
+	if (!DoorLock::Storage::Reader::IsPrivateKeySet()) {
 		verificationKey.reduce_size(0);
-
 		// We have to return CHIP_NO_ERROR here.
 		return CHIP_NO_ERROR;
+	}
+
+	Aliro::CryptoTypes::PublicKey publicKey{};
+	const auto status = DoorLock::Storage::Reader::GetPublicKey(publicKey);
+	if (status != ALIRO_NO_ERROR) {
+		verificationKey.reduce_size(0);
+		return CHIP_ERROR_INTERNAL;
 	}
 
 	std::copy_n(publicKey.begin(), kAliroReaderVerificationKeySize, verificationKey.data());
@@ -111,13 +102,17 @@ CHIP_ERROR DoorLockDelegate::GetAliroReaderGroupIdentifier(chip::MutableByteSpan
 
 	VerifyOrReturnError(groupIdentifier.size() == kAliroReaderGroupIdentifierSize, CHIP_ERROR_INVALID_ARGUMENT);
 
-	Aliro::Identifier identifier{};
-
-	if (KeyValueStorage::Instance().Get(Aliro::StorageKeys::kStorageKeyNameIdentifier, identifier.data(),
-					    identifier.size()) != 0) {
+	if (!DoorLock::Storage::Reader::IsIdentifierSet()) {
 		groupIdentifier.reduce_size(0);
 		// We have to return CHIP_NO_ERROR here.
 		return CHIP_NO_ERROR;
+	}
+
+	Aliro::Identifier identifier{};
+	const auto status = DoorLock::Storage::Reader::GetIdentifier(identifier);
+	if (status != ALIRO_NO_ERROR) {
+		groupIdentifier.reduce_size(0);
+		return CHIP_ERROR_INTERNAL;
 	}
 
 	std::copy_n(identifier.data(), kAliroReaderGroupIdentifierSize, groupIdentifier.data());
@@ -132,13 +127,17 @@ CHIP_ERROR DoorLockDelegate::GetAliroReaderGroupSubIdentifier(chip::MutableByteS
 	VerifyOrReturnError(groupSubIdentifier.size() == kAliroReaderGroupSubIdentifierSize,
 			    CHIP_ERROR_INVALID_ARGUMENT);
 
-	Aliro::Identifier identifier{};
-
-	if (KeyValueStorage::Instance().Get(Aliro::StorageKeys::kStorageKeyNameIdentifier, identifier.data(),
-					    identifier.size()) != 0) {
+	if (!DoorLock::Storage::Reader::IsIdentifierSet()) {
 		groupSubIdentifier.reduce_size(0);
 		// We have to return CHIP_NO_ERROR here.
 		return CHIP_NO_ERROR;
+	}
+
+	Aliro::Identifier identifier{};
+	const auto status = DoorLock::Storage::Reader::GetIdentifier(identifier);
+	if (status != ALIRO_NO_ERROR) {
+		groupSubIdentifier.reduce_size(0);
+		return CHIP_ERROR_INTERNAL;
 	}
 
 	std::copy_n(identifier.data() + kAliroReaderGroupIdentifierSize, kAliroReaderGroupSubIdentifierSize,
@@ -167,12 +166,18 @@ CHIP_ERROR DoorLockDelegate::GetAliroGroupResolvingKey(chip::MutableByteSpan &gr
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
-	AliroError ec = DoorLock::Crypto::ExportKey(Aliro::kGroupResolvingKeyId, groupResolvingKey.data(),
-						    groupResolvingKey.size());
-	if (ec != ALIRO_NO_ERROR) {
+	if (!DoorLock::Storage::Reader::IsGroupResolvingKeySet()) {
 		groupResolvingKey.reduce_size(0);
 		return CHIP_ERROR_NOT_FOUND;
 	}
+
+	Aliro::CryptoTypes::GroupResolvingKey key{};
+	const auto status = DoorLock::Storage::Reader::GetGroupResolvingKey(key);
+	if (status != ALIRO_NO_ERROR) {
+		groupResolvingKey.reduce_size(0);
+		return CHIP_ERROR_INTERNAL;
+	}
+	std::copy_n(key.data(), key.size(), groupResolvingKey.data());
 
 	return CHIP_NO_ERROR;
 
@@ -255,8 +260,6 @@ CHIP_ERROR DoorLockDelegate::SetAliroReaderConfig(const chip::ByteSpan &signingK
 	Aliro::CryptoTypes::PrivateKey privateKey{};
 	Aliro::Identifier identifier{};
 	Aliro::CryptoTypes::GroupResolvingKey groupResKey{};
-	Aliro::CryptoTypes::KeyId privateKeyId{ 0 };
-	Aliro::CryptoTypes::PublicKey publicKey{};
 
 	std::copy(signingKey.begin(), signingKey.end(), privateKey.data());
 	std::copy_n(groupIdentifier.data(), kAliroReaderGroupIdentifierSize, identifier.data());
@@ -265,30 +268,20 @@ CHIP_ERROR DoorLockDelegate::SetAliroReaderConfig(const chip::ByteSpan &signingK
 								  kAliroReaderGroupSubIdentifierSize);
 	VerifyOrReturnError(err == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL);
 
-	VerifyOrReturnError(KeyValueStorage::Instance().Save(Aliro::StorageKeys::kStorageKeyNameIdentifier,
-							     identifier.data(), identifier.size()) == 0,
-			    CHIP_ERROR_INTERNAL);
-	VerifyOrReturnError(Aliro::ReaderCache::Instance().SetIdentifier(identifier) == ALIRO_NO_ERROR,
+	VerifyOrReturnError(DoorLock::Storage::Reader::SetIdentifier(identifier) == ALIRO_NO_ERROR,
 			    CHIP_ERROR_INTERNAL);
 
 	if (groupResolvingKey.HasValue()) {
 		std::copy(groupResolvingKey.Value().begin(), groupResolvingKey.Value().end(), groupResKey.data());
 	}
 
-	privateKeyId = Aliro::kPrivateKeyId;
-	AliroError ec = DoorLock::Crypto::ImportPrivateKey(privateKey, true, privateKeyId);
-	VerifyOrReturnError(ec == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL);
-
-	ec = DoorLock::Crypto::ExportPublicKey(privateKeyId, publicKey);
-	VerifyOrReturnError(ec == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL);
-	VerifyOrReturnError(Aliro::ReaderCache::Instance().SetPublicKey(publicKey) == ALIRO_NO_ERROR,
+	VerifyOrReturnError(DoorLock::Storage::Reader::SetPrivateKey(privateKey) == ALIRO_NO_ERROR,
 			    CHIP_ERROR_INTERNAL);
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
-	Aliro::CryptoTypes::KeyId groupResolvingKeyId = Aliro::kGroupResolvingKeyId;
-	ec = DoorLock::Crypto::ImportGroupResolvingKey(groupResKey, true, groupResolvingKeyId);
-	VerifyOrReturnError(ec == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL);
+	VerifyOrReturnError(DoorLock::Storage::Reader::SetGroupResolvingKey(groupResKey) == ALIRO_NO_ERROR,
+			    CHIP_ERROR_INTERNAL);
 
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -303,19 +296,7 @@ CHIP_ERROR DoorLockDelegate::ClearAliroReaderConfig()
 
 	VerifyOrReturnError(AliroStop() == EXIT_SUCCESS, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to stop Aliro"));
 
-	KeyValueStorage::Instance().Clear(Aliro::StorageKeys::kStorageKeyNameIdentifier);
-	Aliro::ReaderCache::Instance().ClearIdentifier();
-	Aliro::ReaderCache::Instance().ClearPublicKey();
-
-	Aliro::CryptoTypes::KeyId keyId{ Aliro::kPrivateKeyId };
-	DoorLock::Crypto::DestroyKey(keyId);
-
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-	keyId = Aliro::kGroupResolvingKeyId;
-	DoorLock::Crypto::DestroyKey(keyId);
-
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
+	VerifyOrReturnError(DoorLock::Storage::Reader::ClearAll() == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL);
 
 	return CHIP_NO_ERROR;
 }

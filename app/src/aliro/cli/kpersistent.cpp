@@ -6,9 +6,9 @@
 
 #include "shell_private.h"
 
-#include <aliro/crypto_key_ids.h>
 #include <aliro/memory.h>
 #include <aliro/utils.h>
+#include <psa_key_ids.h>
 
 #include "aliro/utils/hex_string.h"
 
@@ -37,7 +37,8 @@ int PrintKpersistentKeys(const struct shell *shell, Aliro::CryptoTypes::KeyId *k
 	shell_print(shell, "--------------------------------");
 	for (size_t i = 0; i < kpersistentCount; i++) {
 		const Aliro::CryptoTypes::KeyId kpersistentKeyId = kpersistentKeyIds[i];
-		const size_t kpersistentKeyIndex = kpersistentKeyId - Aliro::kKpersistentRangeBegin;
+		const size_t kpersistentKeyIndex =
+			kpersistentKeyId - DoorLock::Storage::PsaKeyIds::kKpersistentRangeBegin;
 
 		Aliro::CryptoTypes::PublicKey publicKey{};
 		auto *kpersistentManager = GetShellKpersistentManager();

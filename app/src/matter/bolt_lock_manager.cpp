@@ -75,13 +75,18 @@ void BoltLockManager::Init(StateChangeCallback callback)
 		Aliro::CryptoTypes::PublicKey publicKey{};
 		std::copy_n(credentialData.data(), publicKey.size(), publicKey.data());
 
-		if (credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey ||
-		    credentialType == CredentialTypeEnum::kAliroNonEvictableEndpointKey) {
+		// The credential index is 1-based, so we need to subtract 1 to get the 0-based index
+		size_t keyIndex = credentialIndex - 1;
+
+		if (credentialType == CredentialTypeEnum::kAliroNonEvictableEndpointKey) {
 			Aliro::AccessManagerInstance().AddPublicKey(
-				publicKey, Aliro::AccessManager::PublicKeyType::AccessCredential, credentialIndex);
+				publicKey, Aliro::AccessManager::PublicKeyType::AccessCredential, keyIndex);
+		} else if (credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey) {
+			Aliro::AccessManagerInstance().AddPublicKey(
+				publicKey, Aliro::AccessManager::PublicKeyType::AccessDocument, keyIndex);
 		} else if (credentialType == CredentialTypeEnum::kAliroCredentialIssuerKey) {
 			Aliro::AccessManagerInstance().AddPublicKey(
-				publicKey, Aliro::AccessManager::PublicKeyType::CredentialIssuer, credentialIndex);
+				publicKey, Aliro::AccessManager::PublicKeyType::CredentialIssuer, keyIndex);
 		}
 	};
 
@@ -90,13 +95,18 @@ void BoltLockManager::Init(StateChangeCallback callback)
 		Aliro::CryptoTypes::PublicKey publicKey{};
 		std::copy_n(credentialData.data(), publicKey.size(), publicKey.data());
 
-		if (credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey ||
-		    credentialType == CredentialTypeEnum::kAliroNonEvictableEndpointKey) {
+		// The credential index is 1-based, so we need to subtract 1 to get the 0-based index
+		size_t keyIndex = credentialIndex - 1;
+
+		if (credentialType == CredentialTypeEnum::kAliroNonEvictableEndpointKey) {
 			Aliro::AccessManagerInstance().RemovePublicKey(
-				Aliro::AccessManager::PublicKeyType::AccessCredential, credentialIndex);
+				Aliro::AccessManager::PublicKeyType::AccessCredential, keyIndex);
+		} else if (credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey) {
+			Aliro::AccessManagerInstance().RemovePublicKey(
+				Aliro::AccessManager::PublicKeyType::AccessDocument, keyIndex);
 		} else if (credentialType == CredentialTypeEnum::kAliroCredentialIssuerKey) {
 			Aliro::AccessManagerInstance().RemovePublicKey(
-				Aliro::AccessManager::PublicKeyType::CredentialIssuer, credentialIndex);
+				Aliro::AccessManager::PublicKeyType::CredentialIssuer, keyIndex);
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 			Aliro::ClearValidityIterations(credentialIndex);

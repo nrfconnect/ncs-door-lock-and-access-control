@@ -3,7 +3,7 @@
 
 .. ### Source: github.com
 
-.. _`ncs-door-lock-app`: https://github.com/nrfconnect/ncs-door-lock-app
+.. _`ncs-door-lock-and-access-control`: https://github.com/nrfconnect/ncs-door-lock-and-access-control
 .. _`Aliro Certification Tool`: https://github.com/csa-access-control/aliro-certification-tool
 .. _`aliro-sve-v1.0`: https://github.com/csa-access-control/aliro-certification-tool/releases/tag/aliro-sve-v1.0
 .. _`test harness hardware requirements`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#requirements
@@ -62,7 +62,9 @@
 .. _`Matter door lock remote access`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/samples/matter/lock/README.html#testing_remote_access_with_pin_code_credential
 .. _`Matter door lock NUS`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/samples/matter/lock/README.html#matter_bluetooth_le_with_nordic_uart_service
 .. _`Matter marketing note`: https://www.nordicsemi.com/Products/Technologies/Matter
-.. _`Matter fork release`: https://github.com/nrfconnect/sdk-connectedhomeip/releases/tag/v3.1.0
+.. _`Matter fork release`: https://github.com/nrfconnect/sdk-connectedhomeip/releases/tag/v3.2.0
+.. _`Matter over Thread: Power consumption and battery life`: https://docs.nordicsemi.com/bundle/nwp_049/page/WP/nwp_049/intro.html
+.. _`Online Power Profiler for Matter over Thread`: https://devzone.nordicsemi.com/power/w/opp/16/online-power-profiler-for-matter-over-thread
 .. _`Thread Border Router`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/thread/tools.html#thread_border_router
 .. _`Thread radio co-processor`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/thread/tools.html#configuring_a_radio_co-processor
 .. _`Running OTBR using Docker`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/thread/tools.html#running_otbr_using_docker
@@ -99,3 +101,5 @@
 .. ### External links
 
 .. _`Connectivity Standards Alliance`: https://csa-iot.org/
+.. _`Nordic DevZone`: https://devzone.nordicsemi.com/
+.. _`Aliro Technology`: https://www.nordicsemi.com/Products/Technologies/Aliro

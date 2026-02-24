@@ -14,8 +14,8 @@ zephyr_library_sources_ifdef(CONFIG_BT btaddr.cpp)
 zephyr_library_sources_ifdef(CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE kpersistent.cpp)
 zephyr_library_sources_ifndef(CONFIG_CHIP
   factory_reset.cpp
-  install.cpp
   provisioning.cpp
+  reader.cpp
 )
 
 zephyr_include_directories(.)

@@ -24,15 +24,15 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
 #. Set the ``dut_reader_public_key`` field in the Test Harness project configuration to ``READER_PUB``.
 
-#. Provision the Reader private signing key (``READER_PRIV``) in the DUT using the following ``dl provisioning`` shell command:
+#. Provision the Reader private signing key (``READER_PRIV``) in the DUT using the following ``dl reader`` shell command:
 
    .. code-block:: console
 
-      uart:~$ dl provisioning reader_prv set <32-byte private key in hex without 0x>
+      uart:~$ dl reader private_key set <32-byte private key in hex without 0x>
 
    .. note::
 
-      Once the required credentials are provisioned (Reader identifier, Reader private signing key, and at least one Access Credential public key), the device will automatically provision and start the Aliro stack.
+      Once the required credentials are provisioned (Reader identifier and Reader private signing key), the device will automatically start the Aliro stack.
 
 #. Install the Reader identifier in the Reader device.
 
@@ -44,13 +44,13 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
          .. code-block:: console
 
-            dl install identifier <32-byte_reader_identifier_in_hex_without_0x>
+            dl reader identifier <32-byte_reader_identifier_in_hex_without_0x>
 
          Example:
 
          .. code-block:: console
 
-            dl install identifier 00113344667799AA00113344667799AA113344667799AA00113344667799AA00
+            dl reader identifier 00113344667799AA00113344667799AA113344667799AA00113344667799AA00
 
       .. tab:: Group and sub-identifier
 
@@ -59,15 +59,15 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
          .. code-block:: console
 
-            dl install group_id <16-byte_reader_group_identifier_in_hex_without_0x>
-            dl install group_sub_id <16-byte_reader_group_sub_identifier_in_hex_without_0x>
+            dl reader group_id <16-byte_reader_group_identifier_in_hex_without_0x>
+            dl reader group_sub_id <16-byte_reader_group_sub_identifier_in_hex_without_0x>
 
          Example:
 
          .. code-block:: console
 
-            dl install group_id 00113344667799AA00113344667799AA
-            dl install group_sub_id 113344667799AA00113344667799AA00
+            dl reader group_id 00113344667799AA00113344667799AA
+            dl reader group_sub_id 113344667799AA00113344667799AA00
 
          Running the same commands without specifying a value returns the currently stored identifier.
 
@@ -75,7 +75,7 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
          .. code-block:: console
 
-            dl install group_id
+            dl reader group_id
 
          Example output:
 

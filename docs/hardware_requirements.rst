@@ -193,6 +193,9 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
       These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
       To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
 
+.. note::
+   To make the hardware setup easier, you can request the PCB design files of the Arduino-compatible adapters for the `nRF54L15 DK`_  and the `nRF54LM20 DK`_ via `Nordic DevZone`_.
+
 .. _hw_requirements_uwb_module:
 
 Ultra wideband (UWB) module
@@ -219,13 +222,13 @@ With the Qorvo Arduino Interface Board, you can use the UWB module with the `nRF
 UWB compatibility matrix
 ========================
 
-The following table shows the compatibility between the versions of the |APP_NAME|, UWB Aliro SDK, UWB FW, and the |NCS|:
+The following table shows the compatibility between the versions of the |REPO_NAME|, UWB Aliro SDK, UWB FW, and the |NCS|:
 
 .. list-table:: UWB compatibility matrix
    :header-rows: 1
    :widths: 20 20 20 20
 
-   * - |APP_NAME| version
+   * - |REPO_NAME| version
      - UWB Aliro SDK version
      - UWB FW version
      - |NCS| version
@@ -249,9 +252,13 @@ The following table shows the compatibility between the versions of the |APP_NAM
      - 0.6.0
      - 0.6.0
      - 3.2.0
+   * - 1.0.0
+     - 0.6.0
+     - 0.6.0
+     - 3.2.0
 
 .. note::
-   The compatibility matrix shows tested and verified combinations of |APP_NAME| version, UWB Aliro SDK, UWB firmware, and the |NCS| version.
+   The compatibility matrix shows tested and verified combinations of |REPO_NAME| version, UWB Aliro SDK, UWB firmware, and the |NCS| version.
 
 .. _hw_requirements_test_harness:
 
