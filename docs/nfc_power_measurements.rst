@@ -7,7 +7,7 @@ NFC current measurements
    :local:
    :depth: 2
 
-This page describes a method for measuring NFC current consumption of an |APP_NAME| reference application using `Power Profiler Kit II`_ (PPK).
+This page describes a method for measuring NFC current consumption of an |APP_NAME| using `Power Profiler Kit II`_ (PPK).
 
 Overview
 ********

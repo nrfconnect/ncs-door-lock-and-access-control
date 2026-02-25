@@ -346,7 +346,7 @@
 			<v:textBlock v:margins="rect(4,4,4,4)" v:verticalAlign="0"/>
 			<v:textRect cx="246.516" cy="525.826" width="493.06" height="59.5274"/>
 			<rect x="0" y="496.063" width="493.033" height="59.5274" class="st9"/>
-			<text x="162.58" y="509.06" class="st10" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>nRF Door Lock Reference Application</text>		</g>
+			<text x="162.58" y="509.06" class="st10" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>nRF Door Lock and Access Control Application</text>		</g>
 		<g id="shape74-125" v:mID="74" v:groupContext="shape" transform="translate(7.08662,-131.812)">
 			<title>Nordic Lake</title>
 			<desc>Aliro stack</desc>

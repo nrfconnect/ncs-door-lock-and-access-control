@@ -151,22 +151,22 @@
 			<title>Nordic Blue</title>
 			<rect x="0" y="261.091" width="488.976" height="243.476" class="st8"/>
 		</g>
-		<g id="shape24-47" v:mID="24" v:groupContext="shape" transform="translate(14.1732,-461.743)">
+		<g id="shape24-47" v:mID="24" v:groupContext="shape" transform="translate(110.2932,-461.743)">
 			<title>Arkusz.24</title>
 			<desc>Aliro reference application</desc>
 			<v:userDefs/>
 			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
 			<v:textRect cx="138.898" cy="486.141" width="277.81" height="36.8504"/>
 			<rect x="0" y="467.716" width="277.795" height="36.8504" class="st9"/>
-			<text x="21.4" y="490.34" class="st10" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>nRF Door Lock and Access Control Add-on</text>		</g>
+			<text x="138.898" y="486.141" text-anchor="middle" dominant-baseline="middle" class="st10" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>nRF Door Lock and Access Control Add-on</text>		</g>
 		<g id="shape25-50" v:mID="25" v:groupContext="shape" transform="translate(20.7537,-433.134)">
 			<title>Nordic Blueslate</title>
-			<desc>nRF Door Lock Reference Application</desc>
+			<desc>nRF Door Lock and Access Control Application</desc>
 			<v:userDefs/>
 			<v:textBlock v:margins="rect(4,4,4,4)"/>
 			<v:textRect cx="228.442" cy="490.262" width="456.89" height="28.6097"/>
 			<rect x="0" y="475.957" width="456.884" height="28.6097" class="st11"/>
-			<text x="228.442" y="490.262" text-anchor="middle" dominant-baseline="middle" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>nRF Door Lock Reference Application</text>		</g>
+			<text x="228.442" y="490.262" text-anchor="middle" dominant-baseline="middle" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>nRF Door Lock and Access Control Application</text>		</g>
 		<g id="shape26-53" v:mID="26" v:groupContext="shape" transform="translate(-107.15,-420.936)">
 			<title>Block Double Arrow.1006</title>
 			<v:userDefs>
