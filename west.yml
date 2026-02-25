@@ -7,6 +7,8 @@ manifest:
   remotes:
     - name: ncs
       url-base: https://github.com/nrfconnect
+    - name: ncs-ssh
+      url-base: git@github.com:nrfconnect
     - name: nrfconnect-uwb-qorvo
       url-base: git@gitlab.com:qorvo/qswg/public
   projects:
@@ -42,5 +44,12 @@ manifest:
           upstream-url: https://github.com/project-chip/connectedhomeip
           upstream-sha: 181b0cb14ff007ec912f2ba6627e05dfb066c008
           compare-by-default: false
+    - name: ncs-door-lock-app-extensions
+      remote: ncs-ssh
+      repo-path: ncs-door-lock-app-extensions
+      revision: v1.0.0
+      groups:
+        - ncs-door-lock-app-extensions
   group-filter:
     - -nrfconnect-sdk-qorvo
+    - -ncs-door-lock-app-extensions
