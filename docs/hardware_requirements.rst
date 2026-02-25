@@ -209,56 +209,50 @@ The application supports the following UWB module:
 | `QM35825`_        | Qorvo Arduino Interface Board (with custom rework by Qorvo) |
 +-------------------+-------------------------------------------------------------+
 
-With the Qorvo Arduino Interface Board, you can use the UWB module with the `nRF5340 DK`_ without requiring any additional hardware, as it connects directly to the Arduino header of the DK.
+The following table shows the pin mapping for the Qorvo Arduino Interface Board with custom rework by Qorvo:
+
+.. tabs::
+
+   .. tab:: nRF54LM20 DK
+
+      The `nRF54LM20 DK`_ does not have Arduino-compatible header, therefore, you must connect your board using wires.
+      To connect the Qorvo Arduino Interface Board to the DK, refer to the following pin mapping.
+
+      +-------------------+---------------------------+
+      | nRF54LM20 DK      | Qorvo Arduino Interface   |
+      |                   | Board                     |
+      +===================+===========================+
+      | P1.13             | SPI0_CLK (D13)            |
+      +-------------------+---------------------------+
+      | P1.12             | SPI0_MISO (D12)           |
+      +-------------------+---------------------------+
+      | P1.11             | SPI0_MOSI (D11)           |
+      +-------------------+---------------------------+
+      | P3.11             | SPI0_CS (D2)              |
+      +-------------------+---------------------------+
+      | P0.0              | SS_IRQ (A5)               |
+      +-------------------+---------------------------+
+      | P3.7              | RST_HOST (D7)             |
+      +-------------------+---------------------------+
+      | P3.12             | EXTON (D5)                |
+      +-------------------+---------------------------+
+      | VBUS              | 5V_HOST                   |
+      +-------------------+---------------------------+
+      | VDDIO             | 3V3_HOST                  |
+      +-------------------+---------------------------+
+      | GND               | GND                       |
+      +-------------------+---------------------------+
+
+      .. note::
+         To make the hardware setup easier, you can request the PCB design files of the Arduino-compatible adapter for the nRF54LM20 DK and Qorvo Arduino Interface Board through `Nordic DevZone`_.
+
+   .. tab:: nRF5340 DK
+
+      The `nRF5340 DK`_ has Arduino-compatible headers, so you can connect the Qorvo Arduino Interface Board directly to development kit.
 
 .. note::
-   Contact your local Qorvo support team in the following cases:
-
-   * To obtain the Qorvo Arduino Interface Board with special rework done on the board.
-     You need it to run the application with the QM35825 UWB module.
-
-.. _hw_requirements_uwb_compatibility:
-
-UWB compatibility matrix
-========================
-
-The following table shows the compatibility between the versions of the |REPO_NAME|, UWB Aliro SDK, UWB FW, and the |NCS|:
-
-.. list-table:: UWB compatibility matrix
-   :header-rows: 1
-   :widths: 20 20 20 20
-
-   * - |REPO_NAME| version
-     - UWB Aliro SDK version
-     - UWB FW version
-     - |NCS| version
-   * - 0.3.0
-     - 0.3.0
-     - 0.3.0
-     - 2.9.0
-   * - 0.4.0
-     - 0.4.0
-     - 0.4.0
-     - 3.1.0
-   * - 0.5.0
-     - 0.4.0
-     - 0.4.0
-     - 3.1.0
-   * - 0.6.0-rc1
-     - 0.5.0
-     - 0.5.0
-     - 3.2.0-preview2
-   * - 0.6.0
-     - 0.6.0
-     - 0.6.0
-     - 3.2.0
-   * - 1.0.0
-     - 0.6.0
-     - 0.6.0
-     - 3.2.0
-
-.. note::
-   The compatibility matrix shows tested and verified combinations of |REPO_NAME| version, UWB Aliro SDK, UWB firmware, and the |NCS| version.
+   Contact your local Qorvo Regional Sales Manager or Nordic Regional Sales Manager to obtain the Qorvo Arduino Interface Board with special rework done on the board.
+   You need it to run the application with the QM35825 UWB module.
 
 .. _hw_requirements_test_harness:
 

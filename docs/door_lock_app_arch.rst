@@ -23,7 +23,7 @@ The |APP_NAME| architecture can be represented as follows:
 
 .. figure:: /images/door_lock_app_arch.svg
    :scale: 100%
-   :alt: nRF Door Lock Reference Application architecture.
+   :alt: |APP_NAME| architecture.
 
    |APP_NAME| architecture overview.
 
@@ -71,7 +71,9 @@ When the Aliro service is stopped and other Bluetooth LE services, such as Bluet
 Bluetooth LE transport
 **********************
 
-Bluetooth LE transport is supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_ platforms and is configured to operate in the peripheral role, allowing the device to advertise its presence and accept connections from Bluetooth LE central devices.
+Aliro over Bluetooth LE-only mode is not supported.
+The Aliro mode, which uses a combination of Bluetooth LE and UWB transports, is supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_.
+Bluetooth LE transport on the `nRF54L15 DK`_ or `nRF52840 DK`_ is used for other purposes, such as Nordic UART Service (NUS) or OTA DFU.
 The advertising payload is generated according to the Aliro specification, based on the ``reader group identifier`` and ``reader group sub-identifier``.
 The payload updates automatically whenever these values change, ensuring that the device always advertises the latest group information.
 

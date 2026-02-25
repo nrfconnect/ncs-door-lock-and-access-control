@@ -26,12 +26,12 @@ To build and run the application on one of the :ref:`supported development kits 
         - Build command
         - Description
       * - Debug (default)
-        - `X-NUCLEO-NFC09A1`_
+        - `X-NUCLEO-NFC12A1`_
         - ``west build -p -b build_target app``
         - Recommended for new door lock designs.
       * - Debug (default)
-        - `X-NUCLEO-NFC12A1`_
-        - ``west build -p -b build_target app -- -DCONFIG_ST25R500_DRV=y``
+        - `X-NUCLEO-NFC09A1`_
+        - ``west build -p -b build_target app -- -DCONFIG_ST25R200_DRV=y``
         - Supported, but not recommended for new products.
 
    For example, if you are using the nRF5340 DK and `X-NUCLEO-NFC12A1`_, the command is:

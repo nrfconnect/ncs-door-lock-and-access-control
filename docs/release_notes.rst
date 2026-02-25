@@ -1,18 +1,81 @@
 .. _release_notes:
 
-Release notes
-#############
+Compatibility matrix and release notes
+######################################
 
 .. contents::
    :local:
    :depth: 2
 
-This page outlines changes introduced with each release of the |REPO_NAME|.
+This page provides a compatibility matrix with various versions of the components used in |REPO_NAME| and outlines changes introduced with each release of the Add-on.
+
+Compatibility matrix
+********************
+
+The following table shows tested and verified combinations of |REPO_NAME| releases with various versions of the components used in the Add-on.
+
+.. list-table:: |REPO_NAME| compatibility matrix
+   :header-rows: 1
+   :widths: 12 12 12 12 12 12
+
+   * - |REPO_NAME| version
+     - |NCS| version
+     - Aliro protocol version
+     - Matter protocol version
+     - Qorvo UWB SDK and QM35825 FW version
+     - STM NFC RFAL library version
+   * - 0.1.0
+     - 2.9.0
+     - 0.9.0
+     - —
+     - —
+     - —
+   * - 0.2.0
+     - 2.9.0
+     - 0.9.0
+     - —
+     - —
+     - 3.0.0
+   * - 0.3.0
+     - 2.9.0
+     - 0.9.0
+     - —
+     - 0.3.0
+     - 3.0.0
+   * - 0.4.0
+     - 3.1.0
+     - 0.9.0
+     - 1.4.0
+     - 0.4.0
+     - 4.0.2
+   * - 0.5.0
+     - 3.1.0
+     - 0.9.0
+     - 1.4.0
+     - 0.4.0
+     - 4.0.2
+   * - 0.6.0
+     - 3.2.0
+     - 1.0.0
+     - 1.5.0
+     - 0.6.0
+     - 4.0.2
+   * - 1.0.0
+     - 3.2.0
+     - 1.0.0
+     - 1.5.0
+     - 0.6.0
+     - 4.0.2
+
+Release notes
+*************
+
+The following list outlines the release notes for each release of the |REPO_NAME|.
 
 v1.0.0
 ******
 
-This milestone release represents the first production-ready, fully certifiable nRF Door Lock Add-on with Aliro v1.0 certification compliance and Matter support, enabling customers to develop and certify commercial smart lock products for the broad market.
+This milestone release represents the first production-ready, fully certifiable |REPO_NAME| with Aliro v1.0 certification compliance and Matter support, enabling you to develop and certify interoperable access control products for everything from commercial buildings to residential smart homes.
 
 Changelog
 =========
@@ -25,7 +88,7 @@ Changelog
 
     * Full compliance with Aliro v1.0 certification program.
     * Production support for ST25R300 NFC reader module.
-    * Experimental support for BLE transport protocol and QM35825 UWB module.
+    * Experimental support for the Aliro mode, which uses a combination of Bluetooth LE and UWB transports, with support for the QM35825 UWB module.
     * NFC power profiling and optimization documentation.
     * Event-based RFAL worker implementation for reduced NFC power consumption.
     * Encrypted Access Document storage on external flash using Zephyr NVS.

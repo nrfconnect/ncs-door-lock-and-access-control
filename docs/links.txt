@@ -1,4 +1,4 @@
-.. ### This page lists links used in the NCS door lock reference applications docs.
+.. ### This page lists links used in the NCS Door Lock and Access Control Add-on docs.
 
 
 .. ### Source: github.com
@@ -6,6 +6,7 @@
 .. _`ncs-door-lock-and-access-control`: https://github.com/nrfconnect/ncs-door-lock-and-access-control
 .. _`Aliro Certification Tool`: https://github.com/csa-access-control/aliro-certification-tool
 .. _`aliro-sve-v1.0`: https://github.com/csa-access-control/aliro-certification-tool/releases/tag/aliro-sve-v1.0
+.. _`dryrun/test_event4-2024-aliro_specification_v0.9.0-v1.0`: https://github.com/csa-access-control/aliro-certification-tool/releases/tag/dryrun%2Ftest_event4-2024-aliro_specification_v0.9.0-v1.0
 .. _`test harness hardware requirements`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#requirements
 .. _`test harness usage instructions`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#usage-instructions
 .. _`running test scripts`: https://github.com/csa-access-control/aliro-certification-tool?tab=readme-ov-file#c---creating-a-test-run-running-test-scripts
@@ -50,6 +51,7 @@
 
 .. _`Matter`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/matter/index.html
 .. _`Matter overview`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/matter/overview/index.html
+.. _`Matter development model in NCS`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/matter/overview/dev_model.html
 .. _`Matter getting started`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/matter/getting_started/index.html
 .. _`Matter tools`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/matter/getting_started/tools.html
 .. _`Matter controller tools`: https://docs.nordicsemi.com/bundle/ncs-3.2.0/page/nrf/protocols/matter/getting_started/tools.html#matter_controller_tools
