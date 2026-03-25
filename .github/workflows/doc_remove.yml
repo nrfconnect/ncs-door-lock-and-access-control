@@ -1,0 +1,20 @@
+name: Documentation Remove
+
+permissions:
+  contents: read
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  remove:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Try removal of PR-docs
+        env:
+          AZCOPY_CONCURRENCY_VALUE: 3000
+        run: |
+          azcopy rm "${{ vars.NCS_DOC_PR_STORAGE_URL }}addon-aliro/PR-${{ github.event.number }}?${{ secrets.NCS_DOC_SAS_PRS }}" --recursive=true || true
