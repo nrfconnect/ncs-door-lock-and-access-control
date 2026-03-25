@@ -1,0 +1,111 @@
+name: Documentation Build
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - '.github/workflows/doc_build.yml'
+      - '**.rst'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: 3.12
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+          pip-install: |
+            -r docs/requirements.txt
+
+      - name: Build
+        working-directory: docs
+        run: make html
+
+      - name: Check version
+        run: |
+          VERSION_REGEX="^v([0-9a-zA-Z\.\-]+)$"
+          if [[ ${GITHUB_REF#refs/tags/} =~ $VERSION_REGEX ]]; then
+            VERSION=${BASH_REMATCH[1]}
+          elif [[ ${GITHUB_REF#refs/heads/} == "main" ]]; then
+            VERSION="latest"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            VERSION="pr-${{ github.event.number }}"
+          fi
+          echo "VERSION=${VERSION}"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Prepare Azure upload
+        run: |
+          PUBLISH="$PWD/publish"
+          mkdir -p "$PUBLISH"
+
+          MONITOR="monitor_${{ github.run_id }}.txt"
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            ARCHIVE="legacy-addon-aliro-pr-${{ github.event.number }}.zip"
+            echo "publish2 dev PR-${{ github.event.number }} ${ARCHIVE}" > "${MONITOR}"
+            echo "${{ github.event.number }}" > pr.txt
+          else
+            ARCHIVE="legacy-addon-aliro-${VERSION}.zip"
+            echo "publish2 main ${VERSION} ${ARCHIVE}" > "${MONITOR}"
+          fi
+
+          pushd "docs/build/html"
+          zip -rq "${ARCHIVE}" .
+          mv "${ARCHIVE}" "$PUBLISH"
+          popd
+
+          mv "${MONITOR}" "$PUBLISH"
+          if [[ -f pr.txt ]]; then mv pr.txt "$PUBLISH"; fi
+
+      - name: Prepare Zoomin upload
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          PUBLISH="$PWD/publish"
+          mkdir -p "$PUBLISH"
+
+          OUTDIR=docs/build/html
+          ARCHIVE="addon-aliro_$VERSION.zip"
+
+          cp docs/_zoomin/aliro.custom.properties "$OUTDIR/custom.properties"
+          sed -i 's/__VERSION__/'"$VERSION"'/g' "$OUTDIR/custom.properties"
+
+          cp docs/_zoomin/aliro.tags.yml "$OUTDIR/tags.yml"
+          sed -i 's/__VERSION__/'"$VERSION"'/g' "$OUTDIR/tags.yml"
+
+          pushd "$OUTDIR"
+          zip -rq "$ARCHIVE" .
+          mv "$ARCHIVE" "$PUBLISH"
+          popd
+
+      - name: Store
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'external') || contains(github.event.pull_request.labels.*.name, 'CI-trusted-author') }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: docs
+          retention-days: 5
+          path: |
+            publish/*
