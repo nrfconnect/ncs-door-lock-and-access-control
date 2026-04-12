@@ -6,7 +6,7 @@
 
 #include "aliro/interface.h"
 
-#include "aliro/aliro_work/aliro_work.h"
+#include <aliro_workqueue/aliro_workqueue.h>
 
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
@@ -76,7 +76,7 @@ void ExpiryHandler(k_timer *timer)
 		return;
 	}
 
-	const auto err = AliroWorkSubmit(&slot->mWork);
+	const auto err = AliroWorkqueueSubmit(&slot->mWork);
 	if (err < 0) {
 		LOG_ERR("Failed to submit timer expiry work, err: %d", err);
 	}

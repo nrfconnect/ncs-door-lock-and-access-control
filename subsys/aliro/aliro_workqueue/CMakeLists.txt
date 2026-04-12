@@ -1,0 +1,13 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+zephyr_include_directories(include)
+
+zephyr_library_named(aliro_workqueue)
+
+zephyr_library_sources(
+  src/aliro_workqueue.cpp
+)

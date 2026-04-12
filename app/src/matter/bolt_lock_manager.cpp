@@ -148,7 +148,7 @@ bool BoltLockManager::SetCredential(uint16_t credentialIndex, FabricIndex creato
 						   secret);
 }
 
-#ifdef CONFIG_LOCK_SCHEDULES
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
 DlStatus BoltLockManager::GetWeekDaySchedule(uint8_t weekdayIndex, uint16_t userIndex,
 					     EmberAfPluginDoorLockWeekDaySchedule &schedule)
@@ -188,7 +188,9 @@ DlStatus BoltLockManager::SetHolidaySchedule(uint8_t holidayIndex, DlScheduleSta
 							operatingMode);
 }
 
-#endif /* CONFIG_LOCK_SCHEDULES */
+#endif /* CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES */
+
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 bool BoltLockManager::ValidatePIN(const Optional<chip::ByteSpan> &pinCode, OperationErrorEnum &err,
 				  Nullable<ValidatePINResult> &result)
@@ -204,6 +206,8 @@ bool BoltLockManager::GetRequirePIN()
 {
 	return AccessMgr::Instance().GetRequirePIN();
 }
+
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 void BoltLockManager::Lock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx,
 			   const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)

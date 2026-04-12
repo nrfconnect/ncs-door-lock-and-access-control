@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menu "Aliro Subsystems"
+
+rsource "access_document/Kconfig"
+rsource "aliro_workqueue/Kconfig"
+rsource "crypto_utils/Kconfig"
+rsource "time_utils/Kconfig"
+
+endmenu

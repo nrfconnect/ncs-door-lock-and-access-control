@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#include "aliro/aliro.h"
-#include "aliro/aliro_work/aliro_work.h"
-#include "aliro/errors.h"
-#include "aliro/interface.h"
-#include "aliro/utils.h"
+#include <aliro/aliro.h>
+#include <aliro/errors.h>
+#include <aliro/interface.h>
+#include <aliro/utils.h>
+#include <aliro_workqueue/aliro_workqueue.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -67,7 +67,7 @@ void ProcessEventsWorkHandler(k_work *work)
 	 * - therefore worker performs one final check and self-resubmits if needed
 	 */
 	if (atomic_get(&sNewEvents) && atomic_cas(&sWorkerActive, 0, 1)) {
-		const int submitErr = AliroWorkSubmit(work);
+		const int submitErr = AliroWorkqueueSubmit(work);
 		if (submitErr < 0) {
 			atomic_clear(&sWorkerActive);
 			LOG_ERR("Failed to resubmit events work, err: %d", submitErr);
@@ -89,7 +89,7 @@ AliroError QueueEvent(void *event)
 
 	/* First producer in a burst schedules processing; others only enqueue+mark. */
 	if (atomic_cas(&sWorkerActive, 0, 1)) {
-		const int submitErr = AliroWorkSubmit(&sProcessEventsWork);
+		const int submitErr = AliroWorkqueueSubmit(&sProcessEventsWork);
 		if (submitErr < 0) {
 			atomic_clear(&sWorkerActive);
 			/* Do not return here, as it may cause the stack to free the event

@@ -5,7 +5,9 @@
  */
 
 #include "storage.h"
-#include "aliro/utils.h"
+
+#include <aliro/utils.h>
+#include <settings_utils/settings_utils.h>
 
 #include <zephyr/init.h>
 #include <zephyr/logging/log.h>
@@ -14,26 +16,6 @@
 LOG_MODULE_REGISTER(storage, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 namespace {
-
-struct LoadItemParam {
-	uint8_t *buf;
-	size_t bufLen;
-	bool found;
-};
-
-int LoadItemCallback(const char *, size_t len, settings_read_cb read_cb, void *cb_arg, void *param)
-{
-	LoadItemParam &itemParam = *static_cast<LoadItemParam *>(param);
-
-	VerifyOrReturnStatus(len == itemParam.bufLen, -EINVAL, LOG_ERR("Invalid item length"));
-
-	size_t lengthRead = read_cb(cb_arg, itemParam.buf, itemParam.bufLen);
-
-	VerifyOrReturnStatus(lengthRead == len, -EIO, LOG_ERR("Item read failed"));
-
-	itemParam.found = true;
-	return 1;
-}
 
 int InitStorage(void)
 {
@@ -50,7 +32,7 @@ int KeyValueStorage::Save(const char *keyName, const uint8_t *value, size_t valu
 	Aliro::StorageKeys::KeyNameBuffer key;
 	snprintf(key.data(), key.size(), "%s/%s", Aliro::StorageKeys::kDoorLockBaseKey, keyName);
 
-	return settings_save_one(key.data(), value, valueLen);
+	return DoorLock::SettingsUtils::Save(key.data(), value, valueLen);
 }
 
 int KeyValueStorage::Clear(const char *keyName)
@@ -58,7 +40,7 @@ int KeyValueStorage::Clear(const char *keyName)
 	Aliro::StorageKeys::KeyNameBuffer key;
 	snprintf(key.data(), key.size(), "%s/%s", Aliro::StorageKeys::kDoorLockBaseKey, keyName);
 
-	return settings_delete(key.data());
+	return DoorLock::SettingsUtils::Delete(key.data());
 }
 
 int KeyValueStorage::Get(const char *keyName, uint8_t *buf, size_t bufLength)
@@ -66,11 +48,7 @@ int KeyValueStorage::Get(const char *keyName, uint8_t *buf, size_t bufLength)
 	Aliro::StorageKeys::KeyNameBuffer key;
 	snprintf(key.data(), key.size(), "%s/%s", Aliro::StorageKeys::kDoorLockBaseKey, keyName);
 
-	LoadItemParam param{ buf, bufLength, false };
-	int status = settings_load_subtree_direct(key.data(), LoadItemCallback, &param);
-	VerifyOrReturnStatus(status == 0, status, LOG_ERR("Loading subtree failed: %d", status));
-
-	return (param.found ? 0 : -ENODATA);
+	return DoorLock::SettingsUtils::LoadExact(key.data(), buf, bufLength);
 }
 
 Aliro::StorageKeys::KeyNameBuffer KeyValueStorage::GetStorageKeyName(KeyIdString keyIdString, size_t keyId)

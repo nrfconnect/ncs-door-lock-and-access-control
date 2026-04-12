@@ -6,20 +6,19 @@
 
 #pragma once
 
-#include "access/access_manager.h"
 #include "aliro/lock_sim/lock_sim.h"
 #include "aliro/types.h"
 
 #include <app/clusters/door-lock-server/door-lock-server.h>
 #include <lib/core/ClusterEnums.h>
+#include <matter_access/access_manager.h>
 
 #include <zephyr/kernel.h>
 
 #include <cstdint>
 
 class BoltLockManager {
-	using AccessMgr = AccessManager<DoorLockData::PIN | DoorLockData::ALIRO_CRED_ISSUER |
-					DoorLockData::ALIRO_EV_EP | DoorLockData::ALIRO_NON_EV_EP>;
+	using AccessMgr = DoorLock::MatterAccess::AccessManagerType;
 
 public:
 	using OperationSource = chip::app::Clusters::DoorLock::OperationSourceEnum;
@@ -53,7 +52,7 @@ public:
 			   DlCredentialStatus credentialStatus, CredentialTypeEnum credentialType,
 			   const chip::ByteSpan &secret);
 
-#ifdef CONFIG_LOCK_SCHEDULES
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 	DlStatus GetWeekDaySchedule(uint8_t weekdayIndex, uint16_t userIndex,
 				    EmberAfPluginDoorLockWeekDaySchedule &schedule);
 	DlStatus SetWeekDaySchedule(uint8_t weekdayIndex, uint16_t userIndex, DlScheduleStatus status,
@@ -66,10 +65,12 @@ public:
 	DlStatus GetHolidaySchedule(uint8_t holidayIndex, EmberAfPluginDoorLockHolidaySchedule &schedule);
 	DlStatus SetHolidaySchedule(uint8_t holidayIndex, DlScheduleStatus status, uint32_t localStartTime,
 				    uint32_t localEndTime, OperatingModeEnum operatingMode);
-#endif /* CONFIG_LOCK_SCHEDULES */
+#endif /* CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES */
 
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 	bool ValidatePIN(const Optional<chip::ByteSpan> &pinCode, OperationErrorEnum &err,
 			 Nullable<ValidatePINResult> &result);
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 	void Lock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx = NullNullable,
 		  const Nullable<chip::NodeId> &nodeId = NullNullable,
@@ -81,8 +82,10 @@ public:
 	bool Lock(Aliro::OperationSource source);
 	bool Unlock(Aliro::OperationSource source);
 
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 	void SetRequirePIN(bool require);
 	bool GetRequirePIN();
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 	void FactoryReset();
 

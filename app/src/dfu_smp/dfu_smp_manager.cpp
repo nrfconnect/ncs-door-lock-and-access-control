@@ -6,12 +6,11 @@
 
 #include "dfu_smp_manager.h"
 
-#include "aliro/ble_types.h"
-#include "aliro/utils.h"
-
-#include "aliro/aliro_work/aliro_work.h"
-
 #include "aliro/platform/ble/ble_advertising_arbiter.h"
+
+#include <aliro/ble_types.h>
+#include <aliro/utils.h>
+#include <aliro_workqueue/aliro_workqueue.h>
 
 #include <zephyr/dfu/mcuboot.h>
 #include <zephyr/logging/log.h>
@@ -91,7 +90,7 @@ void SmpManager::StopAdvertising()
 void SmpManager::Toggle()
 {
 	VerifyOrReturn(mIsInitialized, LOG_ERR("DFU SMP module not initialized"));
-	std::ignore = AliroWorkSubmit(&mWork);
+	std::ignore = AliroWorkqueueSubmit(&mWork);
 }
 
 AliroError SmpManager::Init()

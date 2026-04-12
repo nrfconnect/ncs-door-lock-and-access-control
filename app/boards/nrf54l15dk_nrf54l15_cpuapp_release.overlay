@@ -25,4 +25,3 @@
 &spi22 {
 	status = "disabled";
 };
-

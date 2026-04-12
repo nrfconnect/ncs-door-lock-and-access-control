@@ -314,7 +314,9 @@ int ReadLocked(Id id, void *data, size_t &len)
 {
 	const auto ec = Read(id, data, len);
 	if (ec != 0) {
-		LOG_ERR("Failed to read object at Id %u: %d", id, ec);
+		if (ec != -ENOENT) {
+			LOG_ERR("Failed to read object at Id %u: %d", id, ec);
+		}
 
 		if (ec == -EIO) {
 			Storage::Delete(id);

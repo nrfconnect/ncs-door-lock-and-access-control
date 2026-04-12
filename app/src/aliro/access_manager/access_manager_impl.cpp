@@ -10,7 +10,6 @@
 #include "aliro/interface.h"
 #include "aliro/time.h"
 #include "aliro/utils.h"
-#include "crypto/utils.h"
 #include "mutex_guard.h"
 #include "storage.h"
 #include "storage_keys.h"
@@ -26,6 +25,8 @@
 #include "aliro/memory.h"
 #include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
+
+#include <crypto_utils/crypto_utils.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>

@@ -8,10 +8,11 @@
 #include <rfal_ncs_pal.h>
 #include <rfal_nfc_config.h>
 
-#include "aliro/aliro.h"
-#include "aliro/aliro_work/aliro_work.h"
-#include "aliro/utils.h"
 #include "ncs_pal_nfc_worker.h"
+
+#include <aliro/aliro.h>
+#include <aliro/utils.h>
+#include <aliro_workqueue/aliro_workqueue.h>
 
 #ifdef CONFIG_DOOR_LOCK_NFC_PROP
 #include "nfc_transport_rfal_prop.h"
@@ -25,7 +26,7 @@ K_WORK_DELAYABLE_DEFINE(nfc_pal_nfc_work, [](k_work *) { Aliro::NfcTransportRfal
 
 extern "C" void ncs_pal_submit_nfc_work()
 {
-	(void)AliroWorkReschedule(&nfc_pal_nfc_work, K_NO_WAIT);
+	(void)AliroWorkqueueReschedule(&nfc_pal_nfc_work, K_NO_WAIT);
 }
 namespace Aliro {
 
@@ -47,7 +48,7 @@ void NfcTransportRfal::Execute()
 	const rfalNfcState st = rfalNfcGetState();
 
 	if (st != RFAL_NFC_STATE_WAKEUP_MODE || mSendInProgress) {
-		(void)AliroWorkReschedule(&nfc_pal_nfc_work, K_MSEC(CONFIG_RFAL_NFC_WORKER_INTERVAL_MS));
+		(void)AliroWorkqueueReschedule(&nfc_pal_nfc_work, K_MSEC(CONFIG_RFAL_NFC_WORKER_INTERVAL_MS));
 	}
 }
 

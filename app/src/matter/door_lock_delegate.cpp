@@ -9,10 +9,10 @@
 #include "lib/support/CodeUtils.h"
 #include <algorithm>
 #include <aliro/aliro.h>
-#include <aliro/init.h>
 #include <aliro/interface.h>
-#include <platform/CHIPDeviceLayer.h>
 
+#include "aliro/aliro_state_control.h"
+#include "aliro/init.h"
 #include "reader.h"
 
 #include <zephyr/logging/log.h>
@@ -53,24 +53,6 @@ CHIP_ERROR EncodeProtocolVersion(size_t index, chip::MutableByteSpan &protocolVe
 	return CHIP_NO_ERROR;
 }
 } // namespace
-
-CHIP_ERROR DoorLockDelegate::Init()
-{
-	CHIP_ERROR err = chip::DeviceLayer::SystemLayer().ScheduleLambda([]() {
-		const auto rc = DoorLock::Storage::Reader::Init();
-		VerifyOrReturn(rc == ALIRO_NO_ERROR, LOG_ERR("Failed to load Reader data"));
-
-		VerifyOrReturn(DoorLock::Storage::Reader::IsPrivateKeySet(), /* device not provisioned */);
-
-		int err = AliroStart();
-		if (err != EXIT_SUCCESS) {
-			LOG_ERR("Failed to start Aliro");
-		}
-	});
-	VerifyOrReturnError(err == CHIP_NO_ERROR, err, LOG_ERR("Failed to schedule lambda"));
-
-	return CHIP_NO_ERROR;
-}
 
 CHIP_ERROR DoorLockDelegate::GetAliroReaderVerificationKey(chip::MutableByteSpan &verificationKey)
 {
@@ -285,7 +267,7 @@ CHIP_ERROR DoorLockDelegate::SetAliroReaderConfig(const chip::ByteSpan &signingK
 
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
-	VerifyOrReturnError(AliroStart() == EXIT_SUCCESS, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to start Aliro"););
+	VerifyOrReturnError(DoorLock::AliroStateControl::UpdateAliroState() == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL);
 
 	return CHIP_NO_ERROR;
 }

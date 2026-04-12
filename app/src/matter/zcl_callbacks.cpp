@@ -7,34 +7,43 @@
 #include "app_task.h"
 #include "bolt_lock_manager.h"
 #include "door_lock_delegate.h"
+#ifdef CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+#include "time_sync_delegate.h"
+#endif
 
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <app-common/zap-generated/ids/Clusters.h>
 #include <app/ConcreteAttributePath.h>
 #include <app/clusters/door-lock-server/door-lock-server.h>
+#include <app/clusters/time-synchronization-server/time-synchronization-cluster.h>
 #include <app/data-model/Nullable.h>
 #include <lib/core/DataModelTypes.h>
 #include <lib/support/CodeUtils.h>
 
 using namespace ::chip;
-using namespace ::chip::app::Clusters;
-using namespace ::chip::app::Clusters::DoorLock;
+using namespace ::chip::app;
+using ::chip::app::Clusters::DoorLock::DlLockType;
 using ::chip::app::DataModel::Nullable;
 
 namespace {
 
 DoorLockDelegate gDoorLockDelegate;
+#ifdef CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+TimeSyncDelegate gTimeSyncDelegate;
+#endif
 
 } // namespace
 
 void MatterPostAttributeChangeCallback(const chip::app::ConcreteAttributePath &attributePath, uint8_t type,
 				       uint16_t size, uint8_t *value)
 {
-	VerifyOrReturn(attributePath.mClusterId == DoorLock::Id);
+	VerifyOrReturn(attributePath.mClusterId == Clusters::DoorLock::Id);
 
-	if (attributePath.mAttributeId == DoorLock::Attributes::RequirePINforRemoteOperation::Id) {
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	if (attributePath.mAttributeId == Clusters::DoorLock::Attributes::RequirePINforRemoteOperation::Id) {
 		BoltLockMgr().SetRequirePIN(*value);
 	}
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 }
 
 bool emberAfPluginDoorLockGetUser(EndpointId endpointId, uint16_t userIndex, EmberAfPluginDoorLockUserInfo &user)
@@ -71,7 +80,12 @@ bool emberAfPluginDoorLockOnDoorLockCommand(EndpointId endpointId, const Nullabl
 					    OperationErrorEnum &err)
 {
 	Nullable<BoltLockManager::ValidatePINResult> validatePINResult;
+
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 	bool success = BoltLockMgr().ValidatePIN(pinCode, err, validatePINResult);
+#else
+	const bool success = true;
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 	/* Handle changing attribute state on command reception */
 	if (success) {
@@ -86,7 +100,13 @@ bool emberAfPluginDoorLockOnDoorUnlockCommand(EndpointId endpointId, const Nulla
 					      OperationErrorEnum &err)
 {
 	Nullable<BoltLockManager::ValidatePINResult> validatePINResult;
-	bool success = BoltLockMgr().ValidatePIN(pinCode, err, validatePINResult);
+
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	const bool success = BoltLockMgr().ValidatePIN(pinCode, err, validatePINResult);
+#else
+	const bool success = true;
+	err = OperationErrorEnum::kUnspecified;
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 	/* Handle changing attribute state on command reception */
 	if (success) {
@@ -104,10 +124,10 @@ void emberAfPluginDoorLockOnAutoRelock(chip::EndpointId)
 void emberAfDoorLockClusterInitCallback(EndpointId endpoint)
 {
 	DoorLockServer::Instance().InitServer(endpoint);
-
-	VerifyOrDie(gDoorLockDelegate.Init() == CHIP_NO_ERROR);
-
 	VerifyOrDie(DoorLockServer::Instance().SetDelegate(endpoint, &gDoorLockDelegate) == CHIP_NO_ERROR);
+#ifdef CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+	Clusters::TimeSynchronization::SetDefaultDelegate(&gTimeSyncDelegate);
+#endif
 
 	const auto logOnFailure = [](Protocols::InteractionModel::Status status, const char *attributeName) {
 		if (status != Protocols::InteractionModel::Status::Success) {
@@ -115,36 +135,42 @@ void emberAfDoorLockClusterInitCallback(EndpointId endpoint)
 		}
 	};
 
-	logOnFailure(DoorLock::Attributes::LockType::Set(endpoint, DlLockType::kDeadBolt), "type");
-	logOnFailure(DoorLock::Attributes::NumberOfTotalUsersSupported::Set(endpoint, CONFIG_LOCK_MAX_NUM_USERS),
+	logOnFailure(Clusters::DoorLock::Attributes::LockType::Set(endpoint, DlLockType::kDeadBolt), "type");
+	logOnFailure(Clusters::DoorLock::Attributes::NumberOfTotalUsersSupported::Set(
+			     endpoint, CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_USERS),
 		     "number of users");
-	logOnFailure(DoorLock::Attributes::NumberOfPINUsersSupported::Set(endpoint,
-									  CONFIG_LOCK_MAX_NUM_CREDENTIALS_PER_TYPE),
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	logOnFailure(Clusters::DoorLock::Attributes::NumberOfPINUsersSupported::Set(
+			     endpoint, CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_CREDENTIALS_PER_TYPE),
 		     "number of PIN users");
-	logOnFailure(DoorLock::Attributes::NumberOfCredentialsSupportedPerUser::Set(
-			     endpoint, CONFIG_LOCK_MAX_NUM_CREDENTIALS_PER_USER),
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	logOnFailure(Clusters::DoorLock::Attributes::NumberOfCredentialsSupportedPerUser::Set(
+			     endpoint, CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_CREDENTIALS_PER_USER),
 		     "number of credentials per user");
-	logOnFailure(DoorLock::Attributes::RequirePINforRemoteOperation::Set(endpoint, BoltLockMgr().GetRequirePIN()),
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	logOnFailure(Clusters::DoorLock::Attributes::RequirePINforRemoteOperation::Set(endpoint,
+										       BoltLockMgr().GetRequirePIN()),
 		     "require PIN code for the remote operation");
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
-#ifdef CONFIG_LOCK_SCHEDULES
-	logOnFailure(DoorLock::Attributes::NumberOfWeekDaySchedulesSupportedPerUser::Set(
-			     endpoint, CONFIG_LOCK_MAX_WEEKDAY_SCHEDULES_PER_USER),
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
+	logOnFailure(Clusters::DoorLock::Attributes::NumberOfWeekDaySchedulesSupportedPerUser::Set(
+			     endpoint, CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES_MAX_WEEKDAY_SCHEDULES_PER_USER),
 		     "number of WeekDay schedules per user");
-	logOnFailure(DoorLock::Attributes::NumberOfYearDaySchedulesSupportedPerUser::Set(
-			     endpoint, CONFIG_LOCK_MAX_YEARDAY_SCHEDULES_PER_USER),
+	logOnFailure(Clusters::DoorLock::Attributes::NumberOfYearDaySchedulesSupportedPerUser::Set(
+			     endpoint, CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES_MAX_YEARDAY_SCHEDULES_PER_USER),
 		     "number of YearDay schedules per user");
-	logOnFailure(DoorLock::Attributes::NumberOfHolidaySchedulesSupported::Set(endpoint,
-										  CONFIG_LOCK_MAX_HOLIDAY_SCHEDULES),
+	logOnFailure(Clusters::DoorLock::Attributes::NumberOfHolidaySchedulesSupported::Set(
+			     endpoint, CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES_MAX_HOLIDAY_SCHEDULES),
 		     "number of holiday schedules");
-#endif /* CONFIG_LOCK_SCHEDULES */
+#endif /* CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES */
 
 	BoltLockManager::StateData state = BoltLockMgr().GetState();
 	state.mSource = BoltLockManager::OperationSource::kUnspecified;
 	AppTask::Instance().UpdateClusterState(state);
 }
 
-#ifdef CONFIG_LOCK_SCHEDULES
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
 DlStatus emberAfPluginDoorLockGetSchedule(chip::EndpointId endpointId, uint8_t weekdayIndex, uint16_t userIndex,
 					  EmberAfPluginDoorLockWeekDaySchedule &schedule)
@@ -185,4 +211,4 @@ DlStatus emberAfPluginDoorLockSetSchedule(chip::EndpointId endpointId, uint8_t h
 	return BoltLockMgr().SetHolidaySchedule(holidayIndex, status, localStartTime, localEndTime, operatingMode);
 }
 
-#endif /* CONFIG_LOCK_SCHEDULES */
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES

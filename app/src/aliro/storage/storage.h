@@ -54,7 +54,7 @@ public:
 	 * @param buf input buffer with value.
 	 * @param bufLength input length of the buffer.
 	 *
-	 * @return 0 when key has read, the -ENODATA when key does not exist or error code otherwise.
+	 * @return 0 when key has read, the -ENOENT when key does not exist or error code otherwise.
 	 */
 	int Get(const char *keyName, uint8_t *buf, size_t bufLength);
 

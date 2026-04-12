@@ -13,7 +13,7 @@
 
 #include "aliro/utils.h"
 
-#include <crypto/utils.h>
+#include <crypto_utils/crypto_utils.h>
 #include <zephyr/logging/log.h>
 
 #include <cstdlib>
@@ -40,8 +40,8 @@ LOG_MODULE_REGISTER(door_lock_app, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
 int main()
 {
-	auto error = DoorLock::Crypto::Init();
-	VerifyOrDie(error == ALIRO_NO_ERROR, "Failed to initialize Aliro crypto");
+	auto error = DoorLock::CryptoUtils::Init();
+	VerifyOrDie(error == ALIRO_NO_ERROR, "Failed to initialize crypto utils");
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 

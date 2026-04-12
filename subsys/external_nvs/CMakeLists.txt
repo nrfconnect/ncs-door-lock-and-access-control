@@ -5,7 +5,10 @@
 #
 
 zephyr_include_directories(include)
-zephyr_sources(
+
+zephyr_library_named(external_nvs)
+
+zephyr_library_sources(
   src/aead.cpp
   src/external_nvs.cpp
   src/key.cpp
@@ -13,4 +16,5 @@ zephyr_sources(
   src/storage.cpp
 )
 
-zephyr_sources_ifdef(CONFIG_DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION src/counter.cpp)
+zephyr_library_sources_ifdef(CONFIG_DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION src/counter.cpp)
+zephyr_library_sources_ifdef(CONFIG_DOOR_LOCK_EXTERNAL_NVS_SHELL src/shell.cpp)

@@ -35,11 +35,17 @@ config DOOR_LOCK_UWB_SESSION_LOGGING
 	help
 	  Enable logging for UWB session states and reason codes.
 
+config DOOR_LOCK_UWB_QM35_DIAGNOSTICS_AOA
+	bool "Enable QM35 AoA diagnostics"
+	help
+	  Enable AoA diagnostics for QM35.
+	  It turns on the reporting of AoA measurements as a part of the diagnostic data.
+	  The data will be reported as INFO logs.
+
 config DOOR_LOCK_UWB_QM35_DFU
 	bool "Enable firmware upgrade for QM35"
-	default n
 	help
-	  Enable update procedure for QM35 during initalization
+	  Enable update procedure for QM35 during initialization
 
 if DOOR_LOCK_UWB_QM35_DFU
 

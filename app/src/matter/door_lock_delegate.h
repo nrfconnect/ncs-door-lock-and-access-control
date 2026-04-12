@@ -12,8 +12,6 @@ public:
 	DoorLockDelegate() = default;
 	~DoorLockDelegate() = default;
 
-	CHIP_ERROR Init();
-
 	virtual CHIP_ERROR GetAliroReaderVerificationKey(chip::MutableByteSpan &verificationKey) override;
 	virtual CHIP_ERROR GetAliroReaderGroupIdentifier(chip::MutableByteSpan &groupIdentifier) override;
 	virtual CHIP_ERROR GetAliroReaderGroupSubIdentifier(chip::MutableByteSpan &groupSubIdentifier) override;

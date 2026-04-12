@@ -1,5 +1,5 @@
 tests:
-  aliro.subsys.external_nvs:
+  door_lock.subsys.external_nvs:
     sysbuild: true
     platform_allow: &platforms
       - nrf5340dk/nrf5340/cpuapp

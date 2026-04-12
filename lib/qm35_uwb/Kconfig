@@ -6,6 +6,6 @@
 
 config QM35_UWB_LIB
 	bool "QM35 UWB library"
-	depends on SOC_SERIES_NRF53X || SOC_NRF54LM20A
+	depends on SOC_SERIES_NRF53 || SOC_NRF54LM20A
 	help
 	  Enable support for the Qorvo QM35 UWB chip.

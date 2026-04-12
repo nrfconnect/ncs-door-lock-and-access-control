@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-if(CONFIG_SOC_SERIES_NRF52X)
+if(CONFIG_SOC_SERIES_NRF52)
   set(SOC_NAME "nrf52840")
-elseif(CONFIG_SOC_SERIES_NRF53X)
+elseif(CONFIG_SOC_SERIES_NRF53)
   set(SOC_NAME "nrf5340")
 elseif(CONFIG_SOC_NRF54L15)
   set(SOC_NAME "nrf54l15")

@@ -9,13 +9,14 @@
 
 #include "aliro/storage/psa_key_ids.h"
 #include "aliro/utils.h"
-#include "crypto/utils.h"
 
-#include <algorithm>
+#include <crypto_utils/crypto_utils.h>
 
-#include <cstdio>
 #include <psa/crypto.h>
 #include <zephyr/logging/log.h>
+
+#include <algorithm>
+#include <cstdio>
 
 LOG_MODULE_REGISTER(crypto_psa, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
@@ -124,7 +125,7 @@ AliroError GenerateEphemeralKeyPair(CryptoTypes::KeyId &keyId, CryptoTypes::Publ
 	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
 			     LOG_WRN("Cannot generate ephemeral keys [error: %d]", status));
 
-	return DoorLock::Crypto::ExportPublicKey(keyId, ephemeralPubKey);
+	return DoorLock::CryptoUtils::ExportPublicKey(keyId, ephemeralPubKey);
 }
 
 AliroError ImportSharedKey(const uint8_t *key, size_t keyLength, CryptoTypes::KeyId &keyId)
@@ -155,7 +156,7 @@ AliroError ImportSymmetricKey(const uint8_t *key, size_t keyLength, CryptoTypes:
 
 AliroError DestroyKey(CryptoTypes::KeyId &keyId)
 {
-	return DoorLock::Crypto::DestroyKey(keyId);
+	return DoorLock::CryptoUtils::DestroyKey(keyId);
 }
 
 AliroError GenerateSignature(const uint8_t *msg, const size_t msgLength, CryptoTypes::Signature &signature)
@@ -180,11 +181,11 @@ AliroError VerifySignature(const CryptoTypes::PublicKey &publicKey, const uint8_
 			   const CryptoTypes::Signature &signature)
 {
 	CryptoTypes::KeyId pubKeyId{ 0 };
-	ReturnErrorOnFailure(DoorLock::Crypto::ImportPublicKey(publicKey, false, pubKeyId));
+	ReturnErrorOnFailure(DoorLock::CryptoUtils::ImportPublicKey(publicKey, false, pubKeyId));
 
-	const auto status = DoorLock::Crypto::VerifySignature(pubKeyId, msg, msgLength, signature);
+	const auto status = DoorLock::CryptoUtils::VerifySignature(pubKeyId, msg, msgLength, signature);
 
-	DoorLock::Crypto::DestroyKey(pubKeyId);
+	DoorLock::CryptoUtils::DestroyKey(pubKeyId);
 
 	return status;
 }
@@ -232,10 +233,10 @@ AliroError DeriveRawKey(CryptoTypes::KeyId keyId, const uint8_t *info, size_t in
 	AliroError status = DeriveKey(keyId, info, infoLength, salt, saltLength, attributes, derivedKeyId);
 	VerifyOrExit(status == ALIRO_NO_ERROR);
 
-	status = DoorLock::Crypto::ExportKey(derivedKeyId, outputKey, outputKeyLength);
+	status = DoorLock::CryptoUtils::ExportKey(derivedKeyId, outputKey, outputKeyLength);
 
 exit:
-	DoorLock::Crypto::DestroyKey(derivedKeyId);
+	DoorLock::CryptoUtils::DestroyKey(derivedKeyId);
 
 	return status;
 }

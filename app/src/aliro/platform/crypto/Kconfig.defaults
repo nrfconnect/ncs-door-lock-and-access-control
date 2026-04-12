@@ -58,3 +58,12 @@ config PSA_WANT_GENERATE_RANDOM
 config PSA_WANT_ALG_GCM
 	default y
 
+#   Matter + Aliro (NFC+5xBLE/UWB):  (16 + 64 + 5*11) slots -> 136
+#   Aliro only (NFC+5xBLE/UWB):      (16+ 5*11) slots ->  72
+#   Matter + Aliro (NFC):           (64 + 16) slots ->  80
+#   Aliro only (NFC):                9 slots ->  16 (with margin)
+config MBEDTLS_PSA_KEY_SLOT_COUNT
+	default 136 if CHIP && DOOR_LOCK_BLE_UWB
+	default 72 if DOOR_LOCK_BLE_UWB
+	default 80 if CHIP
+	default 16

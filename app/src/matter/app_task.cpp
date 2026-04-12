@@ -21,6 +21,7 @@
 #include <setup_payload/OnboardingCodesUtil.h>
 
 #include <aliro/aliro.h>
+#include <aliro/aliro_state_control.h>
 #include <aliro/init.h>
 
 #include <zephyr/logging/log.h>
@@ -285,6 +286,8 @@ CHIP_ERROR AppTask::StartApp()
 {
 	ReturnErrorOnFailure(Init());
 	VerifyOrReturnError(AliroInit() == EXIT_SUCCESS, CHIP_ERROR_INTERNAL, LOG_ERR("Failed to initialize Aliro"));
+	VerifyOrReturnError(DoorLock::AliroStateControl::UpdateAliroState() == ALIRO_NO_ERROR, CHIP_ERROR_INTERNAL,
+			    LOG_ERR("Failed to update Aliro state"));
 
 	while (true) {
 		Nrf::DispatchNextTask();

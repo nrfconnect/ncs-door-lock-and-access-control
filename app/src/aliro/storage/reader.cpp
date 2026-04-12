@@ -6,8 +6,6 @@
 
 #include "reader.h"
 
-#include "crypto/utils.h"
-
 #include "psa_key_ids.h"
 #include "psa_ps_ids.h"
 #include "storage.h"
@@ -15,6 +13,7 @@
 
 #include <aliro/memory.h>
 #include <aliro/utils.h>
+#include <crypto_utils/crypto_utils.h>
 
 #include <psa/protected_storage.h>
 #include <zephyr/logging/log.h>
@@ -49,7 +48,7 @@ AliroError LoadPublicKeyFromPrivateKey()
 	}
 
 	CryptoTypes::PublicKey publicKey{};
-	const auto error = Crypto::ExportPublicKey(PsaKeyIds::kPrivateKeyId, publicKey);
+	const auto error = CryptoUtils::ExportPublicKey(PsaKeyIds::kPrivateKeyId, publicKey);
 	VerifyOrReturnValue(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to export Reader public key"));
 
 	sPublicKey = publicKey;
@@ -110,7 +109,7 @@ AliroError LoadReaderCertificate()
 	uint16_t certLength{};
 	int ec = KeyValueStorage::Instance().Get(StorageKeys::kStorageKeyNameReaderCertificateLength,
 						 reinterpret_cast<uint8_t *>(&certLength), sizeof(certLength));
-	if (ec == -ENODATA) {
+	if (ec == -ENOENT) {
 		LOG_WRN("Reader certificate is not set");
 		return ALIRO_NO_ERROR;
 	}
@@ -141,7 +140,7 @@ AliroError LoadIssuerPublicKey()
 	CryptoTypes::PublicKey publicKey{};
 	int ec = KeyValueStorage::Instance().Get(StorageKeys::kStorageKeyNameReaderSystemIssuerCAPublicKey,
 						 publicKey.data(), publicKey.size());
-	if (ec == -ENODATA) {
+	if (ec == -ENOENT) {
 		LOG_WRN("Reader System Issuer CA public key is not set");
 		return ALIRO_NO_ERROR;
 	}
@@ -164,14 +163,14 @@ AliroError LoadIssuerPublicKey()
 
 AliroError EnsureGroupResolvingKey()
 {
-	const bool isKeyAvailable = Crypto::IsKeyAvailable(PsaKeyIds::kGroupResolvingKeyId) == ALIRO_NO_ERROR;
+	const bool isKeyAvailable = CryptoUtils::IsKeyAvailable(PsaKeyIds::kGroupResolvingKeyId) == ALIRO_NO_ERROR;
 	if (isKeyAvailable) {
 		return ALIRO_NO_ERROR;
 	}
 
 	CryptoTypes::GroupResolvingKey groupResolvingKey{};
 	CryptoTypes::KeyId keyId = PsaKeyIds::kGroupResolvingKeyId;
-	const auto error = Crypto::ImportGroupResolvingKey(groupResolvingKey, true, keyId);
+	const auto error = CryptoUtils::ImportGroupResolvingKey(groupResolvingKey, true, keyId);
 	VerifyOrReturnValue(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to import Group Resolving Key"));
 
 	return ALIRO_NO_ERROR;
@@ -240,7 +239,7 @@ AliroError ClearIdentifier()
 
 bool IsPrivateKeySet()
 {
-	return Crypto::IsKeyAvailable(PsaKeyIds::kPrivateKeyId) == ALIRO_NO_ERROR;
+	return CryptoUtils::IsKeyAvailable(PsaKeyIds::kPrivateKeyId) == ALIRO_NO_ERROR;
 }
 
 AliroError GetPublicKey(CryptoTypes::PublicKey &publicKey)
@@ -254,11 +253,11 @@ AliroError GetPublicKey(CryptoTypes::PublicKey &publicKey)
 AliroError SetPrivateKey(const CryptoTypes::PrivateKey &privateKey)
 {
 	CryptoTypes::KeyId keyId{ PsaKeyIds::kPrivateKeyId };
-	auto error = Crypto::ImportPrivateKey(privateKey, true, keyId);
+	auto error = CryptoUtils::ImportPrivateKey(privateKey, true, keyId);
 	VerifyOrReturnValue(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to import Reader private key"));
 
 	CryptoTypes::PublicKey publicKey{};
-	error = Crypto::ExportPublicKey(keyId, publicKey);
+	error = CryptoUtils::ExportPublicKey(keyId, publicKey);
 	VerifyOrReturnValue(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to export Reader public key"));
 
 	sPublicKey = publicKey;
@@ -270,7 +269,7 @@ AliroError ClearPrivateKey()
 	sPublicKey.reset();
 
 	CryptoTypes::KeyId keyId{ PsaKeyIds::kPrivateKeyId };
-	const auto error = Crypto::DestroyKey(keyId);
+	const auto error = CryptoUtils::DestroyKey(keyId);
 	VerifyOrReturnValue(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to destroy Reader private key"));
 
 	return ALIRO_NO_ERROR;
@@ -369,13 +368,13 @@ AliroError ClearIssuerPublicKey()
 
 bool IsGroupResolvingKeySet()
 {
-	return Crypto::IsKeyAvailable(PsaKeyIds::kGroupResolvingKeyId) == ALIRO_NO_ERROR;
+	return CryptoUtils::IsKeyAvailable(PsaKeyIds::kGroupResolvingKeyId) == ALIRO_NO_ERROR;
 }
 
 AliroError GetGroupResolvingKey(CryptoTypes::GroupResolvingKey &groupResolvingKey)
 {
-	const auto error =
-		Crypto::ExportKey(PsaKeyIds::kGroupResolvingKeyId, groupResolvingKey.data(), groupResolvingKey.size());
+	const auto error = CryptoUtils::ExportKey(PsaKeyIds::kGroupResolvingKeyId, groupResolvingKey.data(),
+						  groupResolvingKey.size());
 	VerifyOrReturnValue(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to export Group Resolving Key"));
 
 	return ALIRO_NO_ERROR;
@@ -384,7 +383,7 @@ AliroError GetGroupResolvingKey(CryptoTypes::GroupResolvingKey &groupResolvingKe
 AliroError SetGroupResolvingKey(const CryptoTypes::GroupResolvingKey &groupResolvingKey)
 {
 	CryptoTypes::KeyId keyId{ PsaKeyIds::kGroupResolvingKeyId };
-	const auto error = Crypto::ImportGroupResolvingKey(groupResolvingKey, true, keyId);
+	const auto error = CryptoUtils::ImportGroupResolvingKey(groupResolvingKey, true, keyId);
 	VerifyOrReturnValue(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to import Group Resolving Key"));
 
 	return ALIRO_NO_ERROR;
@@ -393,7 +392,7 @@ AliroError SetGroupResolvingKey(const CryptoTypes::GroupResolvingKey &groupResol
 AliroError ClearGroupResolvingKey()
 {
 	CryptoTypes::KeyId keyId{ PsaKeyIds::kGroupResolvingKeyId };
-	const auto error = Crypto::DestroyKey(keyId);
+	const auto error = CryptoUtils::DestroyKey(keyId);
 	VerifyOrReturnValue(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to destroy Group Resolving Key"));
 
 	return ALIRO_NO_ERROR;

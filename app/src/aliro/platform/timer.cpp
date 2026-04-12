@@ -6,8 +6,8 @@
 
 #include "timer.h"
 
-#include "aliro/aliro_work/aliro_work.h"
-#include "aliro/utils.h"
+#include <aliro/utils.h>
+#include <aliro_workqueue/aliro_workqueue.h>
 
 #include <tuple>
 
@@ -22,7 +22,7 @@ Timer::Timer(uint32_t timeoutMs, Callback callback, Context userData)
 			auto timerObj = static_cast<Timer *>(k_timer_user_data_get(timer));
 			VerifyOrDie(timerObj, "Invalid timer");
 
-			std::ignore = AliroWorkSubmit(&timerObj->mWork);
+			std::ignore = AliroWorkqueueSubmit(&timerObj->mWork);
 		},
 		nullptr);
 

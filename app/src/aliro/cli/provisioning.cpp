@@ -10,8 +10,6 @@
 #include <aliro/utils.h>
 
 #include "aliro/utils/hex_string.h"
-#include "crypto/utils.h"
-#include "psa_key_ids.h"
 
 #include <zephyr/shell/shell.h>
 
@@ -23,9 +21,6 @@
 #include "validity_iterations.h"
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
-#include <zephyr/sys/util.h>
-
-#include <algorithm>
 #include <cstdlib>
 
 namespace {
@@ -244,66 +239,6 @@ int ShellCmdHandleCredentialIssuerClear(const struct shell *shell, size_t argc, 
 
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 
-#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-int ShellCmdHandleCredentialIssuerCAGet(const struct shell *shell, size_t argc, char **)
-{
-	VerifyOrReturnStatus(argc == 1, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
-	VerifyOrReturnValue(IsShellInitialized(), -EIO, shell_warn(shell, "Not initialized yet\n"));
-
-	CryptoTypes::PublicKey publicKey{};
-	const auto error = DoorLock::Crypto::ExportKey(DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId,
-						       publicKey.data(), publicKey.size());
-	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
-			     shell_warn(shell, "Cannot export Credential Issuer CA public key\n"));
-
-	DoorLock::Utils::HexStringBuffer<CryptoTypes::PublicKey> hexString{};
-	VerifyOrReturnStatus(DoorLock::Utils::ArrayToHexString(hexString, publicKey), -EINVAL,
-			     shell_warn(shell, "Cannot convert Credential Issuer CA public key to hex\n"));
-	shell_print(shell, "%s", hexString.data());
-
-	return 0;
-}
-
-int ShellCmdHandleCredentialIssuerCASet(const struct shell *shell, size_t argc, char **argv)
-{
-	VerifyOrReturnStatus(argc == 2, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
-	VerifyOrReturnValue(IsShellInitialized(), -EIO, shell_warn(shell, "Not initialized yet\n"));
-
-	const char *pubkeyStr{ argv[1] };
-	size_t len = strlen(pubkeyStr);
-	VerifyOrReturnStatus(len == kPublicKeyStringLength, -EINVAL, shell_warn(shell, "Invalid key length!\n"));
-
-	CryptoTypes::PublicKey publicKey{};
-	const auto result = hex2bin(pubkeyStr, len, publicKey.data(), publicKey.size());
-	VerifyOrReturnStatus(result == publicKey.size(), -EINVAL, shell_warn(shell, "Invalid key length!\n"));
-
-	VerifyOrReturnStatus(publicKey[0] == CryptoTypes::kEccP256PublicKeyPrefix, -EINVAL,
-			     shell_warn(shell, "Invalid key prefix!\n"));
-
-	CryptoTypes::KeyId keyId{ DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId };
-	const auto error = DoorLock::Crypto::ImportPublicKey(publicKey, true, keyId);
-	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
-			     shell_warn(shell, "Cannot import Credential Issuer CA public key\n"));
-
-	return 0;
-}
-
-int ShellCmdHandleCredentialIssuerCAClear(const struct shell *shell, size_t argc, char **argv)
-{
-	VerifyOrReturnStatus(argc == 1, -EINVAL, shell_warn(shell, "Invalid number of arguments!\n"));
-	VerifyOrReturnValue(IsShellInitialized(), -EIO, shell_warn(shell, "Not initialized yet\n"));
-
-	CryptoTypes::KeyId keyId{ DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId };
-	const auto error = DoorLock::Crypto::DestroyKey(keyId);
-	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
-			     shell_warn(shell, "Cannot remove Credential Issuer CA public key\n"));
-
-	return 0;
-}
-
-#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
 SHELL_STATIC_SUBCMD_SET_CREATE(AC_key_cmd,
 			       SHELL_CMD(list, NULL,
 					 "List Access Credential public keys\n"
@@ -319,6 +254,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(AC_key_cmd,
 					 "         dl AC_key clear all\n",
 					 ShellCmdHandleAccessCredentialClear),
 			       SHELL_SUBCMD_SET_END);
+SHELL_SUBCMD_ADD((provisioning), AC_key, &AC_key_cmd, "Manage Access Credential public keys", NULL, 0, 0);
 
 #if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
 
@@ -337,40 +273,8 @@ SHELL_STATIC_SUBCMD_SET_CREATE(CI_key_cmd,
 					 "         dl CI_key clear all\n",
 					 ShellCmdHandleCredentialIssuerClear),
 			       SHELL_SUBCMD_SET_END);
+SHELL_SUBCMD_ADD((provisioning), CI_key, &CI_key_cmd, "Manage Credential Issuer public keys", NULL, 0, 0);
 
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
-
-#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-SHELL_STATIC_SUBCMD_SET_CREATE(CI_CA_key_cmd,
-			       SHELL_CMD(get, NULL,
-					 "Get Credential Issuer CA public key\n"
-					 "  Usage: dl CI_CA_key get",
-					 ShellCmdHandleCredentialIssuerCAGet),
-			       SHELL_CMD(set, NULL,
-					 "Set Credential Issuer CA public key\n"
-					 "  Usage: dl CI_CA_key set <65-byte public key in hex without 0x>",
-					 ShellCmdHandleCredentialIssuerCASet),
-			       SHELL_CMD(clear, NULL,
-					 "Clear Credential Issuer CA public key\n"
-					 "  Usage: dl CI_CA_key clear\n",
-					 ShellCmdHandleCredentialIssuerCAClear),
-			       SHELL_SUBCMD_SET_END);
-
-#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-SHELL_STATIC_SUBCMD_SET_CREATE(provisioning_cmd,
-			       SHELL_CMD(AC_key, &AC_key_cmd, "Manage Access Credential public keys", NULL),
-
-#if CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
-			       SHELL_CMD(CI_key, &CI_key_cmd, "Manage Credential Issuer public keys", NULL),
-#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
-
-#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-			       SHELL_CMD(CI_CA_key, &CI_CA_key_cmd, "Manage Credential Issuer CA public key", NULL),
-#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-			       SHELL_SUBCMD_SET_END);
 
 } // namespace
-
-SHELL_SUBCMD_ADD((dl), provisioning, &provisioning_cmd, "Provisioning commands", NULL, 0, 0);

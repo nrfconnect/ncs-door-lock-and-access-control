@@ -33,4 +33,3 @@
 &spi4 {
 	status = "disabled";
 };
-

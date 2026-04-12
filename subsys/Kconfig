@@ -6,6 +6,9 @@
 
 menu "Door Lock Subsystems"
 
+rsource "aliro/Kconfig"
 rsource "external_nvs/Kconfig"
+rsource "matter_access/Kconfig"
+rsource "settings_utils/Kconfig"
 
 endmenu

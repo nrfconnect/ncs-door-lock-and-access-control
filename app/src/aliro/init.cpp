@@ -8,7 +8,6 @@
 #include "aliro/features.h"
 #include "aliro/types.h"
 #include "aliro/utils.h"
-#include "crypto/utils.h"
 #include "nfc/nfc_transport_rfal.h"
 #include "reader.h"
 
@@ -18,6 +17,11 @@
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "aliro/ble_types.h"
+
+#ifdef CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+#include "dynamic_tag_control/dynamic_tag_control.h"
+#endif // CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+
 #include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -46,9 +50,10 @@
 #include "lock_sim/lock_sim_instance.h"
 #endif // CONFIG_CHIP
 
-#include "aliro_work/aliro_work.h"
 #include "storage.h"
 #include "storage_keys.h"
+
+#include <crypto_utils/crypto_utils.h>
 
 #include <zephyr/logging/log.h>
 #include <zephyr/shell/shell.h>
@@ -84,7 +89,7 @@ AliroError LoadCredentials(KeyValueStorage::KeyIdString pubKeyName, size_t KeyNu
 
 		CryptoTypes::PublicKey pubKey{};
 		int ec = KeyValueStorage::Instance().Get(keyName.data(), pubKey.data(), pubKey.size());
-		VerifyOrReturnStatus(ec == 0 || ec == -ENODATA, ALIRO_ERROR_INTERNAL,
+		VerifyOrReturnStatus(ec == 0 || ec == -ENOENT, ALIRO_ERROR_INTERNAL,
 				     LOG_ERR("Cannot get %s/%d public key, error code: %d", pubKeyName, keyId, ec));
 		if (ec == 0) {
 			AliroError err = AccessManagerInstance().AddPublicKey(pubKey, publicKeyType, keyId);
@@ -135,9 +140,6 @@ AliroError StorageInit()
 
 	err = LoadIssuerCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Issuer Credentials"));
-
-	err = DoorLock::Storage::Reader::Init();
-	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot initialize Reader storage"));
 
 	return ALIRO_NO_ERROR;
 }
@@ -208,7 +210,7 @@ void PrintAliroFeatures(uint8_t stackFeatures, uint8_t applicationFeatures)
 	logAppFeature("Matter", (applicationFeatures & kFeatureMatterSupported) != 0);
 }
 
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+#if defined(CONFIG_DOOR_LOCK_BLE_UWB) && !defined(CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL)
 AliroError StartAliroAdvertisingImpl(BleManager &bleManager)
 {
 	Identifier readerIdentifier{};
@@ -232,7 +234,7 @@ AliroError StartAliroAdvertisingImpl(BleManager &bleManager)
 
 	return ALIRO_NO_ERROR;
 }
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
+#endif // CONFIG_DOOR_LOCK_BLE_UWB && !CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
 
 } // namespace
 
@@ -240,7 +242,16 @@ AliroError StartAliroAdvertisingImpl(BleManager &bleManager)
 
 AliroError StartAliroAdvertising()
 {
-	return StartAliroAdvertisingImpl(BleManager::Instance());
+#ifdef CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+	const int ec = DoorLock::DynamicTagControl::Start();
+	VerifyOrReturnStatus(ec == 0, AliroError::FromInt(ec),
+			     LOG_ERR("Failed to start Dynamic Tag Controller: %d", ec));
+#else
+	const AliroError ec = StartAliroAdvertisingImpl(BleManager::Instance());
+	VerifyOrReturnStatus(ec == ALIRO_NO_ERROR, ec, LOG_ERR("Failed to start Aliro advertising"));
+#endif // CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+
+	return ALIRO_NO_ERROR;
 }
 
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
@@ -249,8 +260,6 @@ int AliroInit()
 {
 	AliroError ec{};
 	LOG_INF("Starting nRF Door Lock and Access Control Application");
-
-	std::ignore = AliroWorkInit();
 
 #ifdef CONFIG_BT
 	// Initialize BLE manager first (app-controlled BLE stack)
@@ -320,6 +329,9 @@ int AliroInit()
 
 #endif // CONFIG_CHIP
 
+	ec = DoorLock::Storage::Reader::Init();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Cannot initialize Reader storage"));
+
 #ifdef CONFIG_DOOR_LOCK_EXTERNAL_NVS
 	auto initRc = DoorLock::ExternalNvs::Init(FIXED_PARTITION_ID(external_nvs));
 	VerifyOrReturnValue(initRc == 0, EXIT_FAILURE, LOG_ERR("External NVS init failed: %d", initRc));
@@ -360,18 +372,18 @@ int AliroStart()
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	// Ensure Group Resolving Key exists before starting BLE advertising
-	ec = DoorLock::Crypto::IsKeyAvailable(DoorLock::Storage::PsaKeyIds::kGroupResolvingKeyId);
+	ec = DoorLock::CryptoUtils::IsKeyAvailable(DoorLock::Storage::PsaKeyIds::kGroupResolvingKeyId);
 	if (ec != ALIRO_NO_ERROR) {
 		LOG_DBG("Group Resolving Key is not provisioned, all-zero key will be used");
 		CryptoTypes::GroupResolvingKey groupResolvingKey{};
 		CryptoTypes::KeyId groupResolvingKeyId = DoorLock::Storage::PsaKeyIds::kGroupResolvingKeyId;
-		ec = DoorLock::Crypto::ImportGroupResolvingKey(groupResolvingKey, true, groupResolvingKeyId);
+		ec = DoorLock::CryptoUtils::ImportGroupResolvingKey(groupResolvingKey, true, groupResolvingKeyId);
 		VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Cannot import group resolving key"));
 	}
 
-	auto &bleManager = BleManager::Instance();
-	ec = StartAliroAdvertisingImpl(bleManager);
+	ec = StartAliroAdvertising();
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Failed to start Aliro advertising"));
+
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 	sAliroRunning = true;
@@ -388,6 +400,11 @@ int AliroStop()
 	}
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
+
+#ifdef CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+	DoorLock::DynamicTagControl::Stop();
+#endif // CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL
+
 	ec = BleManager::Instance().StopAdvertising();
 	if (ec != ALIRO_NO_ERROR) {
 		LOG_ERR("Failed to stop BLE advertising: %d", ec.ToInt());
@@ -412,37 +429,20 @@ bool IsAliroRunning()
 
 void ClearStorageAliro(bool reinitializeStorage)
 {
-	int ec = KeyValueStorage::Instance().Clear(StorageKeys::kStorageKeyNameIdentifier);
-	if (!ec) {
-		LOG_ERR("Failed to clear %s/%s storage key: %d", StorageKeys::kDoorLockBaseKey,
-			StorageKeys::kStorageKeyNameIdentifier, ec);
-	}
-
-	CryptoTypes::KeyId keyId{ DoorLock::Storage::PsaKeyIds::kPrivateKeyId };
-	AliroError err = DoorLock::Crypto::DestroyKey(keyId);
+	auto err = DoorLock::Storage::Reader::ClearAll();
 	if (err != ALIRO_NO_ERROR) {
-		LOG_ERR("Failed to destroy Reader Private Key: %d", err.ToInt());
+		LOG_ERR("Failed to clear Reader storage: %d", err.ToInt());
 	}
 
 #ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
 
-	keyId = DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId;
-	err = DoorLock::Crypto::DestroyKey(keyId);
+	auto keyId = DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId;
+	err = DoorLock::CryptoUtils::DestroyKey(keyId);
 	if (err != ALIRO_NO_ERROR) {
 		LOG_ERR("Failed to destroy Credential Issuer CA Public Key: %d", err.ToInt());
 	}
 
 #endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
-
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-	keyId = DoorLock::Storage::PsaKeyIds::kGroupResolvingKeyId;
-	err = DoorLock::Crypto::DestroyKey(keyId);
-	if (err != ALIRO_NO_ERROR) {
-		LOG_ERR("Failed to destroy Group Resolving Key: %d", err.ToInt());
-	}
-
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 

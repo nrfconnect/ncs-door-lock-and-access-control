@@ -25,6 +25,7 @@ include(${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/cmake/data_model.cmake)
 
 include(${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/cmake/zap_helpers.cmake)
 ncs_get_zap_parent_dir(ZAP_PARENT_DIR)
+zephyr_include_directories(${ZAP_PARENT_DIR})
 
 target_include_directories(app PRIVATE
   .
@@ -37,22 +38,10 @@ target_sources(app PRIVATE
   door_lock_delegate.cpp
   init.cpp
   zcl_callbacks.cpp
-  access/access_data_types.cpp
-  access/access_manager_credentials.cpp
-  access/access_manager_users.cpp
-  access/access_manager.cpp
 )
 
-target_sources_ifdef(CONFIG_LOCK_ACCESS_STORAGE_PROTECTED_STORAGE app PRIVATE
-  access/access_storage_psa_ps.cpp
-)
-
-target_sources_ifdef(CONFIG_LOCK_SCHEDULES app PRIVATE
-  access/access_manager_schedules.cpp
-)
-
-target_sources_ifdef(CONFIG_LOCK_PRINT_STORAGE_STATUS app PRIVATE
-  access/access_storage_print.cpp
+target_sources_ifdef(CONFIG_DOOR_LOCK_DYNAMIC_TAG_CONTROL app PRIVATE
+  time_sync_delegate.cpp
 )
 
 # Do not treat warnings as errors while the variable may be uninitialized for this sample data model.

@@ -10,8 +10,9 @@
 #include "aliro/errors.h"
 #include "aliro/interface.h"
 #include "aliro/utils.h"
-#include "crypto/utils.h"
 #include "psa_key_ids.h"
+
+#include <crypto_utils/crypto_utils.h>
 
 #include "zephyr/sys/util.h"
 #include <zephyr/logging/log.h>
@@ -50,7 +51,7 @@ void KpersistentManagerImpl::Init()
 	for (size_t i = 0; i < kMaxKpersistentCount; i++) {
 		const auto kpersistentKeyId = ToKpersistentKeyId(i);
 
-		auto error = DoorLock::Crypto::IsKeyAvailable(kpersistentKeyId);
+		auto error = DoorLock::CryptoUtils::IsKeyAvailable(kpersistentKeyId);
 		if (error != ALIRO_NO_ERROR) {
 			continue;
 		}
@@ -100,14 +101,14 @@ AliroError KpersistentManagerImpl::PreserveKpersistent(const PublicKey &publicKe
 		LOG_DBG("Removing existing Kpersistent key");
 
 		auto tempKpersistentKeyId{ kpersistentKeyIdPersistent };
-		auto status = DoorLock::Crypto::DestroyKey(tempKpersistentKeyId);
+		auto status = DoorLock::CryptoUtils::DestroyKey(tempKpersistentKeyId);
 		VerifyOrReturnStatus(status == ALIRO_NO_ERROR, status, LOG_ERR("Cannot remove existing Kpersistent"));
 
 		mKpersistentMap[index] = false;
 		mKpersistentCount--;
 	}
 
-	AliroError status = DoorLock::Crypto::PreserveKey(kpersistentKeyId, kpersistentKeyIdPersistent);
+	AliroError status = DoorLock::CryptoUtils::PreserveKey(kpersistentKeyId, kpersistentKeyIdPersistent);
 	VerifyOrReturnStatus(status == ALIRO_NO_ERROR, status, LOG_ERR("Cannot preserve new Kpersistent"));
 
 	mKpersistentMap[index] = true;
@@ -130,7 +131,7 @@ AliroError KpersistentManagerImpl::RemoveKpersistent(size_t kpersistentKeyOffset
 	VerifyOrReturnStatus(IsKpersistentKeyIdValid(kPersistentKeyIdPersistent), ALIRO_INVALID_ARGUMENT,
 			     LOG_WRN("Kpersistent key ID is out of range"));
 
-	VerifyOrReturnStatus(DoorLock::Crypto::DestroyKey(kPersistentKeyIdPersistent) == ALIRO_NO_ERROR,
+	VerifyOrReturnStatus(DoorLock::CryptoUtils::DestroyKey(kPersistentKeyIdPersistent) == ALIRO_NO_ERROR,
 			     ALIRO_ERROR_INTERNAL,
 			     LOG_WRN("Cannot remove Kpersistent with key ID: 0x%08x", kPersistentKeyIdPersistent));
 

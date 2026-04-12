@@ -12,6 +12,8 @@ zephyr_library_sources(
 
 zephyr_library_sources_ifdef(CONFIG_BT btaddr.cpp)
 zephyr_library_sources_ifdef(CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE kpersistent.cpp)
+zephyr_library_sources_ifdef(CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA provisioning_ci_ca.cpp)
+zephyr_library_sources_ifdef(CONFIG_DOOR_LOCK_READER_CERTIFICATE reader_cert.cpp)
 zephyr_library_sources_ifndef(CONFIG_CHIP
   factory_reset.cpp
   provisioning.cpp

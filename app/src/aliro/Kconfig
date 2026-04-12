@@ -34,7 +34,8 @@ config DOOR_LOCK_EXPEDITED_FAST_PHASE
 config DOOR_LOCK_STEP_UP_PHASE
     bool "Support for Aliro Step-up Phase"
     default y if CHIP
-    select DOOR_LOCK_EXTERNAL_NVS if !SOC_SERIES_NRF52X
+    select DOOR_LOCK_ALIRO_ACCESS_DOCUMENT_PARSER
+    select DOOR_LOCK_EXTERNAL_NVS if !SOC_SERIES_NRF52
     help
         If enabled, the Step-up phase is supported.
         The user authentication is based on the Access Document.
@@ -42,6 +43,7 @@ config DOOR_LOCK_STEP_UP_PHASE
 config DOOR_LOCK_CREDENTIAL_ISSUER_CA
     bool "Support for Credential Issuer CA public key"
     default y if DOOR_LOCK_STEP_UP_PHASE && !CHIP
+    depends on DOOR_LOCK_STEP_UP_PHASE
     help
         If enabled, the Credential Issuer CA public key is supported.
         The Credential Issuer CA public key is used to verify the signature of the Credential Issuer certificate.
@@ -63,16 +65,20 @@ config DOOR_LOCK_READER_CERTIFICATE_MAX_SIZE
 
 endif # DOOR_LOCK_READER_CERTIFICATE
 
+config DOOR_LOCK_TIME_CONCEPT
+	bool "Support for Time concept"
+	default y
+	depends on CHIP
+	select DOOR_LOCK_ALIRO_TIME_UTILS
+	help
+	  If enabled, the Time concept is supported.
+
 endmenu # Aliro features
 
+rsource "dynamic_tag_control/Kconfig"
 rsource "platform/Kconfig"
-
-if DOOR_LOCK_CLI
-    rsource "cli/Kconfig"
-endif
-
 rsource "access_manager/Kconfig"
+rsource "cli/Kconfig"
 rsource "kpersistent_manager/Kconfig"
 rsource "lock_sim/Kconfig"
 rsource "storage/Kconfig"
-rsource "aliro_work/Kconfig"

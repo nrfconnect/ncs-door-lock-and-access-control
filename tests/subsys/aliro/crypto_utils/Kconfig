@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config MBEDTLS_ENABLE_HEAP
+	default y if !BUILD_WITH_TFM
+	default n
+
+config MBEDTLS_HEAP_SIZE
+	default 8192
+
+source "Kconfig.zephyr"

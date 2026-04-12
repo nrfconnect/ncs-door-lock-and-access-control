@@ -83,13 +83,13 @@ tests:
     - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
     - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
     - CONFIG_DOOR_LOCK_READER_CERTIFICATE=y
-  smoke.door_lock.nfc-ble-uwb.matter-exp_fast-step_up:
-    platform_allow: *id001
-    integration_platforms: *id001
+  smoke.door_lock.nfc-ble-uwb.dfu_smp-matter-exp_fast-step_up:
+    platform_allow: *id002
+    integration_platforms: *id002
     extra_args:
     - app_SNIPPET="uwb_qm35"
     - SNIPPET=matter
-    - CONFIG_DFU_SMP_LOG_LEVEL_DBG=y
+    - CONFIG_CHIP_DFU_OVER_BT_SMP=y
     - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
     - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
   smoke.door_lock.nfc-ble-uwb:

@@ -6,10 +6,11 @@
 
 #include "ble_manager.h"
 
-#include "aliro/aliro.h"
-#include "aliro/aliro_work/aliro_work.h"
 #include "ble_advertising_arbiter.h"
 #include "mutex_guard.h"
+
+#include <aliro/aliro.h>
+#include <aliro_workqueue/aliro_workqueue.h>
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "gatt_server/gatt_server.h"
@@ -142,7 +143,7 @@ void BleManager::ResumeAdvertising()
 	// Allow to resume advertising only if it is enabled.
 	VerifyOrReturn(IsAdvertising(), LOG_DBG("Skipped, advertising is disabled"));
 
-	const auto workErr = AliroWorkSubmit(&mAdvResumeWork);
+	const auto workErr = AliroWorkqueueSubmit(&mAdvResumeWork);
 	VerifyOrReturn(workErr >= 0, LOG_ERR("Failed to submit work (error: %d)", workErr));
 }
 

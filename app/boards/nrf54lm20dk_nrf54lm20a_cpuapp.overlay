@@ -8,16 +8,16 @@
 	spi21_default: spi21_default {
 		group1 {
 			psels = <NRF_PSEL(SPIM_SCK, 1, 13)>,
-			        <NRF_PSEL(SPIM_MOSI, 1, 11)>,
-			        <NRF_PSEL(SPIM_MISO, 1, 12)>;
+				<NRF_PSEL(SPIM_MOSI, 1, 11)>,
+				<NRF_PSEL(SPIM_MISO, 1, 12)>;
 		};
 	};
 
 	spi21_sleep: spi21_sleep {
 		group1 {
 			psels = <NRF_PSEL(SPIM_SCK, 1, 13)>,
-			        <NRF_PSEL(SPIM_MOSI, 1, 11)>,
-			        <NRF_PSEL(SPIM_MISO, 1, 12)>;
+				<NRF_PSEL(SPIM_MOSI, 1, 11)>,
+				<NRF_PSEL(SPIM_MISO, 1, 12)>;
 			low-power-enable;
 		};
 	};
@@ -31,18 +31,21 @@
 	pinctrl-0 = <&spi21_default>;
 	pinctrl-1 = <&spi21_sleep>;
 	pinctrl-names = "default", "sleep";
+
 	nucleo_nfc@0 {
 		compatible = "x-nucleo-nfc";
 		reg = <0>;
 		spi-max-frequency = <DT_FREQ_M(8)>;
+		spi-cs-setup-delay-ns = <1000>;
+		spi-cs-hold-delay-ns = <1000>;
 		irq-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
 	};
 };
 
 / {
-
 	/* Disable button0 to align with the nRF54L15DK.
-	It also allows to use the button with the same label (1) on all supported dev kits. */
+	 * It also allows to use the button with the same label (1) on all supported dev kits.
+	 */
 	buttons {
 		/delete-node/ button_0;
 	};
@@ -50,7 +53,6 @@
 	leds {
 		/delete-node/ led_0;
 	};
-
 
 	aliases {
 		/delete-property/ sw0;
@@ -63,7 +65,6 @@
 	chosen {
 		nordic,pm-ext-flash = &mx25r64;
 	};
-
 };
 
 &gpio0 {
@@ -72,6 +73,13 @@
 
 &gpio1 {
 	status = "okay";
+};
+
+&rram_controller {
+	cpuapp_rram: rram@0 {
+		reg = <0x0 DT_SIZE_K(2036)>;
+		ranges = <0x0 0x0 DT_SIZE_K(2036)>;
+	};
 };
 
 &mx25r64 {

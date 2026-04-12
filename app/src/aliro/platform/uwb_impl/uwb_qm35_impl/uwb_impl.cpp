@@ -135,6 +135,88 @@ constexpr const char *RangingSessionStateToString(RangingSessionState state)
 
 #endif // CONFIG_DOOR_LOCK_UWB_SESSION_LOGGING
 
+#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DIAGNOSTICS_AOA
+
+/**
+ * @brief Converts a Q4.11 integer value to degrees.
+ *
+ * @param value The Q4.11 integer value to convert.
+ *
+ * @return The converted value in degrees.
+ */
+constexpr double IntQ411ToDegrees(int16_t value) noexcept
+{
+	constexpr double kPi{ 3.14159265358979323846 };
+	constexpr uint16_t kResolution{ 2048 };
+	constexpr double kIntQ411ToDegrees{ 180.0 / (kResolution * kPi) };
+
+	return static_cast<double>(value) * kIntQ411ToDegrees;
+}
+
+/**
+ * @brief Logs AoA in degrees using integer-only format specifiers.
+ *
+ * Converts the AoA from Q4.11 format to degrees and logs the result without using floating point printing.
+ *
+ * @param q411Aoa The AoA in Q4.11 format.
+ */
+void LogAoADegreesFromQ411(int16_t q411Aoa) noexcept
+{
+	const double deg = IntQ411ToDegrees(q411Aoa);
+	// Multiply by 1000 and round to the nearest integer to get millidegrees.
+	const int32_t mdeg = static_cast<int32_t>(deg >= 0.0 ? deg * 1000.0 + 0.5 : deg * 1000.0 - 0.5);
+
+	if (mdeg < 0) {
+		// If negative, convert to positive and log the absolute value (account for INT32_MIN case).
+		const uint32_t pos = static_cast<uint32_t>(-static_cast<int64_t>(mdeg));
+		LOG_INF("AoA [degrees]: -%u.%03u", static_cast<unsigned int>(pos / 1000U),
+			static_cast<unsigned int>(pos % 1000U));
+	} else {
+		// If positive, log the value.
+		const uint32_t pos = static_cast<uint32_t>(mdeg);
+		LOG_INF("AoA [degrees]: %u.%03u", static_cast<unsigned int>(pos / 1000U),
+			static_cast<unsigned int>(pos % 1000U));
+	}
+}
+
+/**
+ * @brief Prints the UWB AoA measurements from the diagnostic report.
+ *
+ * @param aoas The array of AoA measurements.
+ * @param nAoa The number of AoA measurements.
+ */
+void PrintDiagnosticReport(const cherry_common_aoa_measurement *aoas, unsigned int nAoa) noexcept
+{
+	VerifyOrReturn(aoas && nAoa > 0, LOG_ERR("Invalid AoA measurements."));
+
+	for (unsigned int i = 0; i < nAoa; i++) {
+		const auto &aoa = aoas[i];
+		LOG_INF("AoA Q4.11 measurement: tdoa: %d, pdoa: %d, aoa: %d, fom: %d, type: %d", aoa.tdoa, aoa.pdoa,
+			aoa.aoa, aoa.fom, aoa.type);
+
+		LogAoADegreesFromQ411(aoa.aoa);
+	}
+}
+
+/**
+ * @brief Handles the diagnostic report.
+ *
+ * @param diagnostics The diagnostic report.
+ */
+void HandleDiagnosticReport(const cherry_common_diag_report *diagnostics) noexcept
+{
+	VerifyOrReturn(diagnostics, LOG_ERR("Invalid diagnostic report."));
+
+	for (size_t i = 0; i < diagnostics->n_frame_report; i++) {
+		const auto &frame = diagnostics->frame_report[i];
+		if (frame.aoas && frame.n_aoa > 0) {
+			PrintDiagnosticReport(frame.aoas, frame.n_aoa);
+		}
+	}
+}
+
+#endif // CONFIG_DOOR_LOCK_UWB_QM35_DIAGNOSTICS_AOA
+
 } // namespace
 
 namespace Aliro::Uwb {
@@ -302,6 +384,13 @@ void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, v
 			}
 			break;
 		}
+#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DIAGNOSTICS_AOA
+		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_DIAGNOSTIC_REPORT: {
+			LOG_INF("Diagnostic report received");
+			HandleDiagnosticReport(sessionData.diagnostics);
+			break;
+		}
+#endif // CONFIG_DOOR_LOCK_UWB_QM35_DIAGNOSTICS_AOA
 		default:
 			break;
 		}
@@ -423,6 +512,11 @@ AliroError UltraWideBandImpl::_Init(const Callbacks &callbacks)
 
 	err = GetDeviceCapabilities();
 	VerifyOrExit(err == ALIRO_NO_ERROR);
+
+#ifdef CONFIG_DOOR_LOCK_UWB_QM35_DIAGNOSTICS_AOA
+	aliro_uwb_adapter_set_diagnostics(mAliroCtx, { .aoa = true });
+	LOG_INF("AoA diagnostics enabled");
+#endif // CONFIG_DOOR_LOCK_UWB_QM35_DIAGNOSTICS_AOA
 
 	mInitialized = true;
 	LOG_INF("UWB device initialized successfully.");

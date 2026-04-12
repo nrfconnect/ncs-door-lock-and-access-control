@@ -22,10 +22,10 @@ AliroError ReadValidityIterations(size_t credentialIssuerKeyIndex, ValidityItera
 		StorageKeys::kStorageKeyNameCredentialIssuerValidityIteration, credentialIssuerKeyIndex);
 	const auto status = KeyValueStorage::Instance().Get(keyName.data(), reinterpret_cast<uint8_t *>(&iterations),
 							    sizeof(ValidityIterations));
-	VerifyOrReturnStatus(status == 0 || status == -ENODATA, ALIRO_ERROR_INTERNAL,
+	VerifyOrReturnStatus(status == 0 || status == -ENOENT, ALIRO_ERROR_INTERNAL,
 			     LOG_ERR("Cannot get ValidityIterations from persistent storage"));
 
-	if (status == -ENODATA) {
+	if (status == -ENOENT) {
 		iterations = ValidityIterations{};
 	}
 

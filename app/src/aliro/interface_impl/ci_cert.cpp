@@ -4,26 +4,29 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#include "aliro/errors.h"
-#include "aliro/interface.h"
+#include <aliro/interface.h>
 
 #ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
 
-#include "aliro/interface.h"
-#include "aliro/utils.h"
-#include "crypto/utils.h"
+#include <aliro/utils.h>
+
 #include "psa_key_ids.h"
 
-#include <algorithm>
+#ifdef CONFIG_DOOR_LOCK_TIME_CONCEPT
+#include <time_utils/time_utils.h>
+#endif // CONFIG_DOOR_LOCK_TIME_CONCEPT
+
+#include <crypto_utils/crypto_utils.h>
 
 extern "C" {
-#include "mbedtls/psa_util.h"
+#include <mbedtls/psa_util.h>
 }
 
-#include "mbedtls/oid.h"
-#include "mbedtls/x509_crt.h"
-
+#include <mbedtls/oid.h>
+#include <mbedtls/x509_crt.h>
 #include <zephyr/logging/log.h>
+
+#include <algorithm>
 
 LOG_MODULE_REGISTER(interface_ci_cert, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
 
@@ -63,8 +66,8 @@ AliroError VerifyCertificateSignature(const mbedtls_x509_crt &crt)
 	VerifyOrReturnStatus(rawLength == signatureArray.size(), ALIRO_INVALID_DATA_FORMAT,
 			     LOG_ERR("Invalid signature length"));
 
-	return DoorLock::Crypto::VerifySignature(DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId,
-						 crt.tbs.p, crt.tbs.len, signatureArray);
+	return DoorLock::CryptoUtils::VerifySignature(DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId,
+						      crt.tbs.p, crt.tbs.len, signatureArray);
 }
 
 AliroError VerifyCertificate(const mbedtls_x509_crt &crt)
@@ -86,6 +89,37 @@ AliroError VerifyCertificate(const mbedtls_x509_crt &crt)
 
 	error = VerifyCertificateSignature(crt);
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, error, LOG_ERR("Failed to verify certificate signature"));
+
+	return ALIRO_NO_ERROR;
+}
+
+AliroError VerifyCertificateValidityPeriod(CertificateTimestamps &timestamps)
+{
+	const auto &validFrom = timestamps.mValidFrom;
+	const auto &validUntil = timestamps.mValidUntil;
+
+	LOG_DBG("validFrom   : %04d-%02d-%02d %02d:%02d:%02d", validFrom.mYear, validFrom.mMonth, validFrom.mDay,
+		validFrom.mHour, validFrom.mMinute, validFrom.mSecond);
+	LOG_DBG("validUntil  : %04d-%02d-%02d %02d:%02d:%02d", validUntil.mYear, validUntil.mMonth, validUntil.mDay,
+		validUntil.mHour, validUntil.mMinute, validUntil.mSecond);
+
+	VerifyOrReturnStatus(validFrom <= validUntil, ALIRO_INVALID_ARGUMENT, LOG_ERR("Invalid validity period"));
+
+#ifdef CONFIG_DOOR_LOCK_TIME_CONCEPT
+	const auto currentTimeOpt = DoorLock::TimeUtils::GetCurrentTime();
+	VerifyOrReturnStatus(currentTimeOpt.has_value(), ALIRO_ERROR_INTERNAL, LOG_ERR("Current time not available"));
+
+	const auto &currentTime = currentTimeOpt.value();
+
+	LOG_DBG("Current time: %04d-%02d-%02d %02d:%02d:%02d", currentTime.mYear, currentTime.mMonth, currentTime.mDay,
+		currentTime.mHour, currentTime.mMinute, currentTime.mSecond);
+
+	VerifyOrReturnStatus(validFrom <= currentTime, ALIRO_PUBLIC_KEY_EXPIRED,
+			     LOG_ERR("Certificate is not yet valid"));
+	VerifyOrReturnStatus(currentTime <= validUntil, ALIRO_PUBLIC_KEY_EXPIRED, LOG_ERR("Certificate is expired"));
+#else
+	LOG_WRN("Time concept is not supported, skipping validity period verification");
+#endif // CONFIG_DOOR_LOCK_TIME_CONCEPT
 
 	return ALIRO_NO_ERROR;
 }
@@ -140,6 +174,9 @@ AliroError Validate(const ConstData &certificate, CryptoTypes::PublicKey &public
 							  crt.valid_from.hour, crt.valid_from.min, crt.valid_from.sec),
 				       .mValidUntil = Time(crt.valid_to.year, crt.valid_to.mon, crt.valid_to.day,
 							   crt.valid_to.hour, crt.valid_to.min, crt.valid_to.sec) });
+
+	error = VerifyCertificateValidityPeriod(timestamps.value());
+	VerifyOrExit(error == ALIRO_NO_ERROR, LOG_ERR("Failed to verify certificate validity period"));
 
 exit:
 	mbedtls_x509_crt_free(&crt);

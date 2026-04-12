@@ -1,0 +1,37 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config NVS
+	default y if !SOC_FLASH_NRF_RRAM
+
+config NVS_LOOKUP_CACHE_SIZE
+	default 512 if NVS
+
+config NVS_LOOKUP_CACHE_FOR_SETTINGS
+	default y if SETTINGS_NVS
+
+config ZMS
+	default y if SOC_FLASH_NRF_RRAM
+
+config ZMS_LOOKUP_CACHE_SIZE
+	default 512 if SETTINGS_ZMS
+
+config ZMS_LOOKUP_CACHE_FOR_SETTINGS
+	default y if SETTINGS_ZMS
+
+choice NVS_LOG_LEVEL_CHOICE
+	default NVS_LOG_LEVEL_DBG
+endchoice
+
+choice ZMS_LOG_LEVEL_CHOICE
+	default ZMS_LOG_LEVEL_DBG
+endchoice
+
+choice SETTINGS_LOG_LEVEL_CHOICE
+	default SETTINGS_LOG_LEVEL_DBG
+endchoice
+
+source "Kconfig.zephyr"

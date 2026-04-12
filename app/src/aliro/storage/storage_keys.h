@@ -16,7 +16,6 @@ constexpr size_t kKeyNameMaxLength{ 16 };
 using KeyNameBuffer = std::array<char, Aliro::StorageKeys::kKeyNameMaxLength>;
 
 constexpr char kDoorLockBaseKey[] = "dl";
-constexpr char kStorageKeyNameIdentifier[] = "identifier";
 
 #ifndef CONFIG_CHIP
 
@@ -37,7 +36,6 @@ constexpr char kStorageKeyNameReaderSystemIssuerCAPublicKey[] = "issuer_pk";
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 constexpr char kStorageKeyNameCredentialIssuerValidityIteration[] = "VI";
-constexpr char kStorageKeyNameAccessDocument[] = "AD";
 
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 

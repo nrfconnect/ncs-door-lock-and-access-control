@@ -6,8 +6,8 @@
 
 #include "lock_sim.h"
 
-#include "aliro/aliro_work/aliro_work.h"
-#include "aliro/utils.h"
+#include <aliro/utils.h>
+#include <aliro_workqueue/aliro_workqueue.h>
 
 #ifdef CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR
 #include <zephyr/drivers/gpio.h>
@@ -74,7 +74,7 @@ void LockSim::StartOperation(OperationSource source, ReaderStateByte state)
 	mSource = source;
 	mState = state;
 
-	std::ignore = AliroWorkSubmit(&mNotifyWork);
+	std::ignore = AliroWorkqueueSubmit(&mNotifyWork);
 	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
 }
 
@@ -102,7 +102,7 @@ void LockSim::ActuatorTimerEventHandler()
 	}
 
 	if (prevState != mState) {
-		std::ignore = AliroWorkSubmit(&mNotifyWork);
+		std::ignore = AliroWorkqueueSubmit(&mNotifyWork);
 	}
 }
 

@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_DYNAMIC_TAG_CONTROL
+	bool "Dynamic Tag control"
+	default y
+	depends on DOOR_LOCK_BLE_UWB && DOOR_LOCK_TIME_CONCEPT
+	help
+	  Enables periodic regeneration of the Aliro BLE Dynamic Tag with a
+	  fresh expiry timestamp sourced from the Matter real-time clock.
+
+if DOOR_LOCK_DYNAMIC_TAG_CONTROL
+
+config DOOR_LOCK_DYNAMIC_TAG_CONTROL_EXPIRY_DURATION_S
+	int "Dynamic Tag expiry duration in seconds"
+	default 900
+	range 1 86400
+	help
+	  How long the Dynamic Tag should remain valid before expiring.
+
+endif # DOOR_LOCK_DYNAMIC_TAG_CONTROL

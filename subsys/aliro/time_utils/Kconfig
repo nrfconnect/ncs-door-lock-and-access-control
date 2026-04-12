@@ -1,0 +1,17 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_TIME_UTILS
+	bool "Aliro Time Utils"
+	depends on NCS_ALIRO && CHIP
+
+if DOOR_LOCK_ALIRO_TIME_UTILS
+
+module = DOOR_LOCK_ALIRO_TIME_UTILS
+module-str = Door Lock Aliro Time Utils
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_ALIRO_TIME_UTILS

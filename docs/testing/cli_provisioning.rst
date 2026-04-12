@@ -169,12 +169,12 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
       You can also use the following commands:
 
-      * ``uart:~$ dl provisioning CI_CA_key get`` - This command retrieves the Credential Issuer CA public key stored in the DUT.
+      * ``uart:~$ dl provisioning CI_CA_key list`` - This command retrieves the Credential Issuer CA public key stored in the DUT.
       * ``uart:~$ dl provisioning CI_CA_key clear`` - This command clears the Credential Issuer CA public key stored in the DUT.
 
       For example:
 
       .. code-block:: console
 
-         uart:~$ dl provisioning CI_CA_key get
+         uart:~$ dl provisioning CI_CA_key list
          047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137
