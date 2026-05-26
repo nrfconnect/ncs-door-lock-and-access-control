@@ -5,7 +5,6 @@ permissions:
   pull-requests: write
 
 on:
-
   workflow_run:
     workflows: ["Documentation Build"]
     types:
@@ -27,7 +26,7 @@ jobs:
         run: |
           OUTDIR=$(awk 'NR==1 { if ($3 ~ /^(latest|PR-[0-9]+|[0-9]+\.[0-9a-zA-Z\.\-]+)$/) print $3 }' monitor_*.txt)
           echo "OUTDIR=$OUTDIR" >> "$GITHUB_ENV"
-          unzip legacy-addon-aliro*.zip -d $OUTDIR
+          unzip legacy-addon-door-lock*.zip -d $OUTDIR
           find "$OUTDIR" -type l -delete
 
       - name: Obtain PR number
@@ -47,37 +46,10 @@ jobs:
           NCS_DOC_SAS_MAIN: ${{ secrets.NCS_DOC_SAS_MAIN }}
         run: |
           if [[ "${{ github.event.workflow_run.event }}" == "pull_request" ]]; then
-            azcopy cp $OUTDIR "${{ vars.NCS_DOC_PR_STORAGE_URL }}addon-aliro?$NCS_DOC_SAS_PRS" --recursive=true
+            azcopy cp $OUTDIR "${{ vars.NCS_DOC_PR_STORAGE_URL }}addons/door_lock_and_access_control?$NCS_DOC_SAS_PRS" --recursive=true
           else
-            azcopy cp $OUTDIR "${{ vars.NCS_DOC_STORAGE_URL }}addon-aliro?$NCS_DOC_SAS_MAIN" --recursive=true
+            azcopy cp $OUTDIR "${{ vars.NCS_DOC_STORAGE_URL }}addons/door_lock_and_access_control?$NCS_DOC_SAS_MAIN" --recursive=true
           fi
-
-      - name: Upload Zoomin documentation
-        if: >
-          github.event.workflow_run.head_branch == 'main' &&
-          github.event.workflow_run.head_repository.full_name == github.repository
-        env:
-          NCS_ZOOMIN_KEY: ${{ secrets.NCS_ZOOMIN_KEY }}
-        run: |
-          # trust server
-          mkdir -p ~/.ssh
-          ssh-keyscan ${{ vars.NCS_ZOOMIN_SERVER }} >> ~/.ssh/known_hosts
-
-          # prepare key
-          touch zoomin_key
-          chmod 600 zoomin_key
-          echo "$NCS_ZOOMIN_KEY" | base64 -d > zoomin_key
-
-          # upload files
-          for file in docs/addon-aliro*.zip; do
-            sftp -v -i zoomin_key ${{ vars.NCS_ZOOMIN_USER }}@${{ vars.NCS_ZOOMIN_SERVER }} <<EOF
-              cd docs-be.nordicsemi.com/sphinx-html/incoming
-              put ${file}
-              cd ../../../nordic-be-dev.zoominsoftware.io/sphinx-html/incoming
-              put ${file}
-              quit
-          EOF
-          done
 
       - name: Find Comment
         if: ${{ github.event.workflow_run.event == 'pull_request' }}
@@ -95,5 +67,5 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ env.PR }}
           body: |
-            You can find the documentation preview for this PR [here](${{ vars.NCS_DOC_PR_HOSTING_URL }}addon-aliro/PR-${{ env.PR }}/).
+            You can find the documentation preview for this PR [here](${{ vars.NCS_DOC_PR_HOSTING_URL }}addons/door_lock_and_access_control/PR-${{ env.PR }}/).
           edit-mode: replace

@@ -64,12 +64,13 @@ jobs:
 
           MONITOR="monitor_${{ github.run_id }}.txt"
 
+          # Create documentation upload files
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            ARCHIVE="legacy-addon-aliro-pr-${{ github.event.number }}.zip"
+            ARCHIVE="legacy-addon-door-lock-pr-${{ github.event.number }}.zip"
             echo "publish2 dev PR-${{ github.event.number }} ${ARCHIVE}" > "${MONITOR}"
             echo "${{ github.event.number }}" > pr.txt
           else
-            ARCHIVE="legacy-addon-aliro-${VERSION}.zip"
+            ARCHIVE="legacy-addon-door-lock-${VERSION}.zip"
             echo "publish2 main ${VERSION} ${ARCHIVE}" > "${MONITOR}"
           fi
 
@@ -80,26 +81,6 @@ jobs:
 
           mv "${MONITOR}" "$PUBLISH"
           if [[ -f pr.txt ]]; then mv pr.txt "$PUBLISH"; fi
-
-      - name: Prepare Zoomin upload
-        if: ${{ github.event_name == 'push' }}
-        run: |
-          PUBLISH="$PWD/publish"
-          mkdir -p "$PUBLISH"
-
-          OUTDIR=docs/build/html
-          ARCHIVE="addon-aliro_$VERSION.zip"
-
-          cp docs/_zoomin/aliro.custom.properties "$OUTDIR/custom.properties"
-          sed -i 's/__VERSION__/'"$VERSION"'/g' "$OUTDIR/custom.properties"
-
-          cp docs/_zoomin/aliro.tags.yml "$OUTDIR/tags.yml"
-          sed -i 's/__VERSION__/'"$VERSION"'/g' "$OUTDIR/tags.yml"
-
-          pushd "$OUTDIR"
-          zip -rq "$ARCHIVE" .
-          mv "$ARCHIVE" "$PUBLISH"
-          popd
 
       - name: Store
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'external') || contains(github.event.pull_request.labels.*.name, 'CI-trusted-author') }}
