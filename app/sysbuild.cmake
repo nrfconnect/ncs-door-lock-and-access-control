@@ -38,8 +38,8 @@ if("uwb_qm35_dfu" IN_LIST SNIPPET)
     set(ext_fw_version "${QM35_IMAGE_VERSION}")
   else()
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
-    set(qm35_impl_scripts_dir applications/doorlock/app/src/aliro/platform/uwb_impl/uwb_qm35_impl/scripts)
-    set(version_mapping_script ${ZEPHYR_NCS_ALIRO_MODULE_DIR}/${qm35_impl_scripts_dir}/map_qm35_version.py)
+    set(version_mapping_script
+        ${CMAKE_CURRENT_LIST_DIR}/src/aliro/platform/uwb_impl/uwb_qm35_impl/scripts/map_qm35_version.py)
     execute_process(COMMAND python3 ${version_mapping_script} ${ext_fw} OUTPUT_VARIABLE ext_fw_version OUTPUT_STRIP_TRAILING_WHITESPACE)
   endif()
 
