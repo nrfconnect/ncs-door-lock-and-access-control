@@ -216,6 +216,14 @@ To enable QM35 firmware upgrade support, build the application with the ``uwb_qm
 
    west build -b nrf5340dk/nrf5340/cpuapp app -- -DSNIPPET='uwb_qm35_dfu' -Dapp_SNIPPET='uwb_qm35_src;dfu_smp'
 
+When the ``nrfconnect-sdk-qorvo`` west module is present in the workspace, the ``uwb_qm35_dfu`` snippet bundles its default :file:`qm35825.bin` firmware as an additional MCUboot image stored in external flash.
+During the UWB initialization at startup, the application compares versions and updates the QM35 module from this image if an update is required.
+To bundle a QM35 firmware binary from a custom location, pass the path to ``west build`` using the ``QM35_IMAGE_PATH`` CMake variable:
+
+.. code-block:: console
+
+   west build -b nrf54lm20dk/nrf54lm20a/cpuapp app -- -DSNIPPET='uwb_qm35_dfu' -Dapp_SNIPPET='uwb_qm35_src;dfu_smp' -DQM35_IMAGE_PATH='/path/to/qm35825.bin'
+
 Configuration options
 =====================
 
@@ -242,7 +250,7 @@ The QM35 firmware is automatically programmed to external flash together with th
 
    .. code-block:: console
 
-      nrfutil device --x-ext-mem-config-file applications/doorlock/app/boards/nrf54lm20dk_spi_nrfutil_config.json program --firmware build/merged.hex --options verify=VERIFY_READ,ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE,reset=RESET_SOFT
+      nrfutil device --x-ext-mem-config-file app/boards/nrf54lm20dk_spi_nrfutil_config.json program --firmware build/merged.hex --options verify=VERIFY_READ,ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE,reset=RESET_SOFT
 
 Firmware upgrade procedure
 ==========================
