@@ -27,30 +27,30 @@ To build and run the application on one of the :ref:`supported development kits 
         - Description
       * - Debug (default)
         - `X-NUCLEO-NFC12A1`_
-        - ``west build -p -b build_target app``
+        - ``west build -p -b build_target applications/app``
         - Recommended for new door lock designs.
       * - Debug (default)
         - `X-NUCLEO-NFC09A1`_
-        - ``west build -p -b build_target app -- -DCONFIG_ST25R200_DRV=y``
+        - ``west build -p -b build_target applications/app -- -DCONFIG_ST25R200_DRV=y``
         - Supported, but not recommended for new products.
 
    For example, if you are using the nRF5340 DK and `X-NUCLEO-NFC12A1`_, the command is:
 
       .. code-block:: bash
 
-         west build -p -b nrf5340dk/nrf5340/cpuapp app
+         west build -p -b nrf5340dk/nrf5340/cpuapp applications/app
 
    For the nRF54L15 DK and `X-NUCLEO-NFC09A1`_, run:
 
       .. code-block:: bash
 
-         west build -p -b nrf54l15dk/nrf54l15/cpuapp app -- -DCONFIG_ST25R200_DRV=y
+         west build -p -b nrf54l15dk/nrf54l15/cpuapp applications/app -- -DCONFIG_ST25R200_DRV=y
 
 #. To build the application with Bluetooth LE transport and UWB, run:
 
    .. code-block:: bash
 
-      west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y
+      west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y
 
 .. note::
    The above command builds the application with Bluetooth LE transport and UWB interface enabled but to operate properly it requires the implementation of the UWB interface to be provided by the application.
@@ -66,11 +66,11 @@ To build and run the application on one of the :ref:`supported development kits 
       * - Configuration
         - Build command
       * - QM35825 UWB module using the Qorvo Arduino Interface Board
-        - ``west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35``
+        - ``west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -Dapp_SNIPPET=uwb_qm35``
       * - Matter over Thread
-        - ``west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DSNIPPET='matter'``
+        - ``west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -DSNIPPET='matter'``
       * - QM35825 UWB module with Matter over Thread
-        - ``west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35 -DSNIPPET='matter'``
+        - ``west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -Dapp_SNIPPET=uwb_qm35 -DSNIPPET='matter'``
 
    The ``uwb_qm35`` snippet configures the NFC and UWB modules to share the same SPI bus.
 
@@ -94,7 +94,7 @@ To build the application in release mode:
 
    .. code-block:: bash
 
-      west build -p -b <build_target> app -- -DFILE_SUFFIX=release
+      west build -p -b <build_target> applications/app -- -DFILE_SUFFIX=release
 
 #. Once you have built the application, flash it:
 
@@ -170,7 +170,7 @@ If you have an access to the Qorvo repository with UWB stack and QM35 driver sou
 
    .. code-block:: bash
 
-      west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35_src
+      west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -Dapp_SNIPPET=uwb_qm35_src
 
    .. note::
       To get an access to the ``nrfconnect-sdk-qorvo`` repository with UWB stack and QM35 driver source code, contact your local Qorvo support team.

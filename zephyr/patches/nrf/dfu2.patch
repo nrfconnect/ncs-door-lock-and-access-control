@@ -1,0 +1,113 @@
+From a13285a0ae8ee0c0641d27da9ae2980c2f7d7057 Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Fri, 15 May 2026 10:46:54 +0200
+Subject: [PATCH 2/2] samples: matter: Gate DfuOverSmp on CHIP_DFU_OVER_BT_SMP
+
+Build and use DfuOverSmp only when CONFIG_CHIP_DFU_OVER_BT_SMP is
+enabled. This allows CONFIG_MCUMGR_TRANSPORT_BT to be enabled without
+pulling in Matter DFU over SMP support.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+ applications/matter_weather_station/src/app_task.cpp | 4 ++--
+ samples/matter/common/cmake/source_common.cmake      | 2 +-
+ samples/matter/common/src/app/matter_init.cpp        | 4 ++--
+ samples/matter/common/src/board/board.cpp            | 4 ++--
+ samples/matter/temperature_sensor/src/app_task.cpp   | 2 +-
+ 5 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/applications/matter_weather_station/src/app_task.cpp b/applications/matter_weather_station/src/app_task.cpp
+index d8e5b89ab4..6615c5dd48 100644
+--- a/applications/matter_weather_station/src/app_task.cpp
++++ b/applications/matter_weather_station/src/app_task.cpp
+@@ -17,7 +17,7 @@
+ #include "board/led_widget.h"
+ #include "clusters/identify.h"
+ 
+-#ifdef CONFIG_MCUMGR_TRANSPORT_BT
++#ifdef CONFIG_CHIP_DFU_OVER_BT_SMP
+ #include "dfu/smp/dfu_over_smp.h"
+ #endif
+ 
+@@ -372,7 +372,7 @@ void AppTask::UpdateLedState()
+ CHIP_ERROR AppTask::Init()
+ {
+ 	/* Initialize Matter stack */
+-#ifdef CONFIG_MCUMGR_TRANSPORT_BT
++#ifdef CONFIG_CHIP_DFU_OVER_BT_SMP
+ 	ReturnErrorOnFailure(
+ 		Nrf::Matter::PrepareServer(Nrf::Matter::InitData{ .mPostServerInitClbk = []() -> CHIP_ERROR {
+ 			Nrf::GetDFUOverSMP().StartServer();
+diff --git a/samples/matter/common/cmake/source_common.cmake b/samples/matter/common/cmake/source_common.cmake
+index f643b09311..a4ae1359e4 100644
+--- a/samples/matter/common/cmake/source_common.cmake
++++ b/samples/matter/common/cmake/source_common.cmake
+@@ -32,7 +32,7 @@ if(CONFIG_PWM)
+     target_sources(app PRIVATE ${MATTER_COMMONS_SRC_DIR}/pwm/pwm_device.cpp)
+ endif()
+ 
+-if(CONFIG_MCUMGR_TRANSPORT_BT)
++if(CONFIG_CHIP_DFU_OVER_BT_SMP)
+     target_sources(app PRIVATE ${MATTER_COMMONS_SRC_DIR}/dfu/smp/dfu_over_smp.cpp)
+     zephyr_library_link_libraries(MCUBOOT_BOOTUTIL)
+ endif()
+diff --git a/samples/matter/common/src/app/matter_init.cpp b/samples/matter/common/src/app/matter_init.cpp
+index 1b3cf1d44e..f8d630ba6c 100644
+--- a/samples/matter/common/src/app/matter_init.cpp
++++ b/samples/matter/common/src/app/matter_init.cpp
+@@ -23,7 +23,7 @@
+ #include "dfu/ota/ota_util.h"
+ #endif
+ 
+-#ifdef CONFIG_MCUMGR_TRANSPORT_BT
++#ifdef CONFIG_CHIP_DFU_OVER_BT_SMP
+ #include "dfu/smp/dfu_over_smp.h"
+ #endif
+ 
+@@ -265,7 +265,7 @@ void DoInitChipServer(intptr_t /* unused */)
+ 	Nrf::Matter::OtaConfirmNewImage();
+ #endif
+ 
+-#ifdef CONFIG_MCUMGR_TRANSPORT_BT
++#ifdef CONFIG_CHIP_DFU_OVER_BT_SMP
+ 	/* Initialize DFU over SMP */
+ 	Nrf::GetDFUOverSMP().Init();
+ 	Nrf::GetDFUOverSMP().ConfirmNewImage();
+diff --git a/samples/matter/common/src/board/board.cpp b/samples/matter/common/src/board/board.cpp
+index 2d806f0da3..f6fa428663 100644
+--- a/samples/matter/common/src/board/board.cpp
++++ b/samples/matter/common/src/board/board.cpp
+@@ -13,7 +13,7 @@
+ 
+ #include <zephyr/logging/log.h>
+ 
+-#ifdef CONFIG_MCUMGR_TRANSPORT_BT
++#ifdef CONFIG_CHIP_DFU_OVER_BT_SMP
+ #include "dfu/smp/dfu_over_smp.h"
+ #endif
+ 
+@@ -278,7 +278,7 @@ void Board::StartBLEAdvertisementHandler(const ButtonAction &action)
+ 	if (action == ButtonAction::Pressed) {
+ 		if (sInstance.mState == DeviceState::DeviceProvisioned) {
+ /* In this case we need to run only Bluetooth LE SMP advertising if it is available */
+-#ifdef CONFIG_MCUMGR_TRANSPORT_BT
++#ifdef CONFIG_CHIP_DFU_OVER_BT_SMP
+ 			GetDFUOverSMP().StartServer();
+ #else
+ 			LOG_INF("Software update is disabled");
+diff --git a/samples/matter/temperature_sensor/src/app_task.cpp b/samples/matter/temperature_sensor/src/app_task.cpp
+index 3113c95308..01cc2dfc2b 100644
+--- a/samples/matter/temperature_sensor/src/app_task.cpp
++++ b/samples/matter/temperature_sensor/src/app_task.cpp
+@@ -79,7 +79,7 @@ void AppTask::ButtonEventHandler(Nrf::ButtonState state, Nrf::ButtonMask hasChan
+ #ifndef CONFIG_NCS_SAMPLE_MATTER_CUSTOM_BLUETOOTH_ADVERTISING
+ 				if (Nrf::GetBoard().GetDeviceState() == Nrf::DeviceState::DeviceProvisioned) {
+ /* In this case we need to run only Bluetooth LE SMP advertising if it is available */
+-#ifdef CONFIG_MCUMGR_TRANSPORT_BT
++#ifdef CONFIG_CHIP_DFU_OVER_BT_SMP
+ 					GetDFUOverSMP().StartServer();
+ #else
+ 					LOG_INF("Software update is disabled");
+-- 
+2.52.0
+

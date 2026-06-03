@@ -65,7 +65,7 @@ Some operations, such as preprocessing transport data and managing the Aliro ses
 The dedicated work queue runs a single thread named ``aliroworkq``. 
 Its work handler drains the FIFO and calls the Aliro Stack Public API ``ProcessEvent()`` for each queued event. 
 As a result, all stack event processing within the application runs on this single thread.
-Other Aliro‑related work, such as ``Interface::Os`` timers, is also submitted to the same queue using ``AliroWorkSubmit()`` and ``AliroWorkReschedule()``. 
+Other Aliro‑related work, such as ``Interface::Os`` timers, is also submitted to the same queue using ``AliroWorkqueueSubmit()`` and ``AliroWorkqueueReschedule()``. 
 This design ensures that the stack never blocks in the caller’s context and that all work items are dispatched on the ``aliroworkq`` thread.
 
 The Aliro Stack may invoke application callbacks from different contexts. 
@@ -116,7 +116,7 @@ The workflow is as follows:
   The Application ``AccessManager`` creates a ranging session context and calls ``UltraWideBandImpl::ConfigureRangingSession()``, which creates the UWB session utilizing the Qorvo UWB library. 
   The stack does not manage UWB session objects. 
   The Application and its UWB implementation own them.
-* UWB setup and control messages (for example, M1/M2 and other Aliro UWB protocol messages) are carried over Bluetooth LE Tansport.
+* UWB setup and control messages (for example, M1/M2 and other Aliro UWB protocol messages) are carried over Bluetooth LE Transport.
 * When the Bluetooth LE radio receives data from the User Device, the Application delivers it to the Aliro Stack through ``HandleSessionData()``. 
   The stack then parses the message and calls the ``HandleBleMessage()`` function on the ``Interface::Uwb`` interface from the Aliro Stack Interface.
 * The Application ``UltraWideBandImpl`` passes the payload to the UWB library. 

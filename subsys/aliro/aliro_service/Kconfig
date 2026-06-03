@@ -1,0 +1,69 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_BLE_SERVICE
+	bool "Aliro service"
+	depends on BT
+	depends on DOOR_LOCK_BLE_UWB
+	depends on NCS_ALIRO
+	select DOOR_LOCK_ALIRO_GATT_SERVER
+	select DOOR_LOCK_ALIRO_L2CAP_SERVER
+
+if DOOR_LOCK_ALIRO_BLE_SERVICE
+
+module = DOOR_LOCK_ALIRO_BLE_SERVICE
+module-str = Door Lock Aliro service
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_ALIRO_BLE_SERVICE_MAX_SESSIONS
+	int "Maximum number of Aliro Service sessions"
+	range 1 BT_MAX_CONN
+	default BT_MAX_CONN
+	help
+	  Maximum number of concurrent Bluetooth sessions handled by the
+	  Aliro service.
+
+config DOOR_LOCK_ALIRO_BLE_SERVICE_BT_ID
+	int "Aliro Bluetooth identity"
+	default 1
+	help
+	  Bluetooth identity used by Aliro-specific advertising and connections.
+	  This must be a non-default identity and requires BT_ID_MAX to be larger
+	  than the configured identity value.
+
+config DOOR_LOCK_ALIRO_BLE_SERVICE_TIMESYNC_PROCEDURE_0
+	bool "Timesync Procedure 0 support"
+	help
+	  Enables advertisement of Aliro BLE and UWB time synchronization
+	  Procedure 0 support.
+
+config DOOR_LOCK_ALIRO_BLE_SERVICE_TIMESYNC_PROCEDURE_1
+	bool "Timesync Procedure 1 support"
+	help
+	  Enables advertisement of Aliro BLE and UWB time synchronization
+	  Procedure 1 support.
+
+config DOOR_LOCK_ALIRO_BLE_SERVICE_DYNAMIC_TAG
+	bool "Dynamic Tag support"
+	default y
+	depends on DOOR_LOCK_ALIRO_TIME_UTILS
+	help
+	  Enables periodic regeneration of the Aliro BLE Dynamic Tag with a
+	  fresh expiry timestamp sourced from the real-time clock.
+
+if DOOR_LOCK_ALIRO_BLE_SERVICE_DYNAMIC_TAG
+
+config DOOR_LOCK_ALIRO_BLE_SERVICE_DYNAMIC_TAG_EXPIRY_DURATION_S
+	int "Dynamic Tag expiry duration in seconds"
+	default 900
+	range 1 86400
+	help
+	  How long the Dynamic Tag should remain valid before expiring.
+
+endif # DOOR_LOCK_ALIRO_BLE_SERVICE_DYNAMIC_TAG
+
+
+endif # DOOR_LOCK_ALIRO_BLE_SERVICE

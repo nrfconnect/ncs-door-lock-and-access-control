@@ -1,0 +1,81 @@
+/*
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+&pinctrl {
+	spi0_default_alt: spi0_default_alt {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 1, 15)>,
+				<NRF_PSEL(SPIM_MOSI, 1, 13)>,
+				<NRF_PSEL(SPIM_MISO, 1, 14)>;
+		};
+	};
+
+	spi0_sleep_alt: spi0_sleep_alt {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 1, 15)>,
+				<NRF_PSEL(SPIM_MOSI, 1, 13)>,
+				<NRF_PSEL(SPIM_MISO, 1, 14)>;
+			low-power-enable;
+		};
+	};
+};
+
+&spi0 {
+	compatible = "nordic,nrf-spi";
+	status = "okay";
+	cs-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+
+	pinctrl-0 = <&spi0_default_alt>;
+	pinctrl-1 = <&spi0_sleep_alt>;
+	pinctrl-names = "default", "sleep";
+
+	nucleo_nfc@0 {
+		compatible = "x-nucleo-nfc";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(8)>;
+		spi-cs-setup-delay-ns = <1000>;
+		spi-cs-hold-delay-ns = <1000>;
+		irq-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 10 (GPIO_ACTIVE_LOW | GPIO_PULL_DOWN)>;
+	};
+};
+
+&spi1 {
+	status = "disabled";
+};
+
+&spi2 {
+	status = "disabled";
+};
+
+&spi3 {
+	status = "disabled";
+};
+
+/ {
+	chosen {
+		nordic,pm-ext-flash = &mx25r64;
+	};
+
+	psa_rng: psa-rng {
+		compatible = "zephyr,psa-crypto-rng";
+		status = "okay";
+	};
+
+	aliases {
+		lock-sim-indicator = &led1; /* green LED2 on nRF52840DK */
+	};
+};
+
+&mx25r64 {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+	/* Use PORT event rather than GPIOTE IN event, to save power */
+	sense-edge-mask = <0x00000008>; /* P0.03 */
+};

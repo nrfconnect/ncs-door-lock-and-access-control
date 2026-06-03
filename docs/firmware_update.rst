@@ -214,16 +214,16 @@ To enable QM35 firmware upgrade support, build the application with the ``uwb_qm
 
 .. code-block:: console
 
-   west build -b nrf5340dk/nrf5340/cpuapp app -- -DSNIPPET='uwb_qm35_dfu' -Dapp_SNIPPET='uwb_qm35_src;dfu_smp'
+   west build -b nrf5340dk/nrf5340/cpuapp applications/app -- -DSNIPPET='uwb_qm35_dfu' -Dapp_SNIPPET='uwb_qm35_src;dfu_smp'
 
 Configuration options
 =====================
 
 You can control the QM35 DFU behavior with the following Kconfig options:
 
-* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU`` - Enables QM35 firmware upgrade support.
-* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER`` - Perform an update only if the new version is higher (default).
-* ``CONFIG_DOOR_LOCK_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT`` - Perform an update if the version differs.
+* ``CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DFU`` - Enables QM35 firmware upgrade support.
+* ``CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER`` - Perform an update only if the new version is higher (default).
+* ``CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT`` - Perform an update if the version differs.
 
 Flashing
 ========
@@ -242,7 +242,7 @@ The QM35 firmware is automatically programmed to external flash together with th
 
    .. code-block:: console
 
-      nrfutil device --x-ext-mem-config-file applications/doorlock/app/boards/nrf54lm20dk_spi_nrfutil_config.json program --firmware build/merged.hex --options verify=VERIFY_READ,ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE,reset=RESET_SOFT
+      nrfutil device --x-ext-mem-config-file applications/app/boards/nrf54lm20dk_spi_nrfutil_config.json program --firmware build/merged.hex --options verify=VERIFY_READ,ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE,reset=RESET_SOFT
 
 Firmware upgrade procedure
 ==========================

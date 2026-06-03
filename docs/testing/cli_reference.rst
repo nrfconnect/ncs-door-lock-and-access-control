@@ -42,7 +42,7 @@ This page lists commonly used command-line commands for inspecting device state,
    * - ``dl provisioning``
      - Sets or gets provisioning credentials required by the Aliro protocol for authentication.
 
-   * - ``dl reader``
+   * - ``reader``
      - Manages reader data (Identifier, private/public keys, certificate, Reader System Issuer CA public key, and Group Resolving Key).
 
    * - ``dl kpersistent clear all``
@@ -55,10 +55,10 @@ This page lists commonly used command-line commands for inspecting device state,
    The ``dl kpersistent`` commands are available only if the application is built with the
    ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option enabled.
 
-Reader command details
-**********************
+Reader Storage command details
+******************************
 
-The ``dl reader`` command provides the following subcommands:
+The ``reader`` command provides the following subcommands:
 
 .. list-table::
    :header-rows: 1
@@ -66,21 +66,21 @@ The ``dl reader`` command provides the following subcommands:
 
    * - Command
      - Description
-   * - ``dl reader identifier [32-byte-hex]``
+   * - ``reader identifier [32-byte-hex]``
      - Gets or sets the full 32-byte Reader identifier.
-   * - ``dl reader group_id [16-byte-hex]``
+   * - ``reader group_id [16-byte-hex]``
      - Gets or sets the Reader group identifier (first 16 bytes).
-   * - ``dl reader group_sub_id [16-byte-hex]``
+   * - ``reader group_sub_id [16-byte-hex]``
      - Gets or sets the Reader group sub-identifier (last 16 bytes).
-   * - ``dl reader private_key set <32-byte-private-key-hex>``
+   * - ``reader private_key set <32-byte-private-key-hex>``
      - Sets the Reader private key.
-   * - ``dl reader private_key clear``
+   * - ``reader private_key clear``
      - Clears the Reader private key.
-   * - ``dl reader private_key list``
+   * - ``reader private_key list``
      - Prints the Reader private key status and its public key if set.
-   * - ``dl reader certificate list|set|clear``
+   * - ``reader certificate list|set|clear``
      - Lists, stores, or clears the Reader certificate (requires ``CONFIG_DOOR_LOCK_READER_CERTIFICATE``).
-   * - ``dl reader issuer_public_key list|set|clear``
+   * - ``reader issuer_public_key list|set|clear``
      - Lists, stores, or clears the Reader System Issuer CA public key (requires ``CONFIG_DOOR_LOCK_READER_CERTIFICATE``).
-   * - ``dl reader group_resolving_key list|set|clear``
+   * - ``reader group_resolving_key list|set|clear``
      - Lists, stores, or clears the Group Resolving Key (requires ``CONFIG_DOOR_LOCK_BLE_UWB``).

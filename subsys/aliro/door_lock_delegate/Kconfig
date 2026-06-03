@@ -1,0 +1,26 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_DOOR_LOCK_DELEGATE
+	bool "Matter Door Lock Delegate for Aliro"
+	depends on CHIP
+	depends on NCS_ALIRO
+	depends on DOOR_LOCK_ALIRO_READER_STORAGE
+	depends on PSA_WANT_GENERATE_RANDOM
+
+if DOOR_LOCK_ALIRO_DOOR_LOCK_DELEGATE
+
+module = DOOR_LOCK_ALIRO_DOOR_LOCK_DELEGATE
+module-str = Door Lock Aliro Door Lock Delegate
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_ALIRO_DOOR_LOCK_DELEGATE_BLE_UWB_SUPPORT
+	bool "BLE/UWB Support in Door Lock Delegate"
+	depends on NCS_ALIRO_BLE_UWB
+	depends on DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_SUPPORT
+	default y
+
+endif # DOOR_LOCK_ALIRO_DOOR_LOCK_DELEGATE

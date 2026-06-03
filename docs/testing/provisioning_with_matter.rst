@@ -136,7 +136,7 @@ For details, see the `Matter chip-tool guide`_.
       * ``<node-id>`` - Unique node ID for the device (for example, ``1``)
       * ``<endpoint-id>`` - Endpoint ID of the Reader device (for example, ``1`` for the door lock cluster)
       * ``<group_resolving_key>`` - Group resolving key of the Reader device. 
-        This option corresponds to ``dut_reader_group_sub_identifier``, which can be set in the Test Harness project configuration.
+        This option corresponds to ``dut_reader_group_resolving_key``, which can be set in the Test Harness project configuration.
 
       See the following example:
 

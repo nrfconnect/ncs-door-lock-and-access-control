@@ -1,0 +1,32 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_SHELL
+	bool "Shell commands for Reader Storage"
+	depends on SHELL
+	help
+	  Enable shell commands for the Reader Storage.
+
+if DOOR_LOCK_ALIRO_READER_STORAGE_SHELL
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_SHELL_CORE
+	bool "Core commands"
+	help
+	  Enable core commands for the Reader Storage.
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_SHELL_CERT
+	bool "Certificate commands"
+	depends on DOOR_LOCK_ALIRO_READER_STORAGE_CERTIFICATE_SUPPORT
+	help
+	  Enable Reader Certificate commands for the Reader Storage.
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_SHELL_GROUP
+	bool "Group Resolving Key commands"
+	depends on DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_SUPPORT
+	help
+	  Enable Group Resolving Key commands for the Reader Storage.
+
+endif # DOOR_LOCK_ALIRO_READER_STORAGE_SHELL

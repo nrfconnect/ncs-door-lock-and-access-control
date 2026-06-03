@@ -29,24 +29,6 @@ namespace Aliro::BleTypes {
 constexpr ProtocolVersion kInvalidProtocolVersion{ 0x0000 };
 
 /**
- * @brief Enumeration for the type of advertising data field.
- *
- * This enumeration maps to Bluetooth LE advertising data types as defined in
- * @ref zephyr/include/zephyr/bluetooth/gap.h. Each type determines the format
- * and content of the advertising data payload.
- * @note This enumeration contains only the types that are supposed to be used by Aliro and door-lock application.
- */
-enum class AdvertisingDataFieldType : uint8_t {
-
-	Uuid16, /// Service data with 16-bit UUID.
-	Uuid16All, /// Complete list of 16-bit service UUIDs.
-	Uuid32, /// Service data with 32-bit UUID.
-	Uuid32All, /// Complete list of 32-bit service UUIDs.
-	Uuid128, /// Service data with 128-bit UUID.
-	Uuid128All, /// Complete list of 128-bit service UUIDs.
-};
-
-/**
  * @brief Constant representing the size of the BLE address.
  */
 constexpr size_t kBleAddressSize{ 6 };
@@ -63,26 +45,15 @@ using BleAddress = std::array<uint8_t, kBleAddressSize>;
 constexpr uint16_t kAliroServiceUuid = 0xFFF2;
 
 /**
- * @brief Constant representing the size of the expiry time.
- *
- * This constant defines the number of bytes used to represent the expiry time
- * in the BleExpiryTimestamp type.
- */
-constexpr size_t kBleExpiryTimeSize{ 4 };
-
-/**
  * @typedef BleExpiryTimestamp
  * @brief Type alias for representing an expiry timestamp.
- *
- * This type is used to store expiry timestamps as an array of bytes. The size of
- * the array is defined by kBleExpiryTimeSize.
  */
-using BleExpiryTimestamp = std::array<uint8_t, kBleExpiryTimeSize>;
+using BleExpiryTimestamp = uint32_t;
 
 /**
  * @brief Constant representing an unavailable expiry timestamp.
  */
-constexpr BleExpiryTimestamp kExpiryTimeUnavailable{ 0xFF, 0xFF, 0xFF, 0xFF };
+constexpr BleExpiryTimestamp kExpiryTimeUnavailable{ 0xFFFFFFFF };
 
 /**
  * @typedef TxPowerLevel
@@ -126,7 +97,7 @@ struct AdvertisingServiceData {
 	TxPowerLevel mTxPowerLevelDbm{};
 	uint8_t mTruncatedReaderGroupId[kMaxReaderGroupIdSize]{};
 	uint8_t mTruncatedReaderGroupSubId[kMaxReaderGroupSubIdSize]{};
-	uint8_t mDynamicTagExpiryTime[kBleExpiryTimeSize]{};
+	uint8_t mDynamicTagExpiryTime[sizeof(BleExpiryTimestamp)]{};
 	uint8_t mRfu{ 0 };
 	uint8_t mDynamicTag[kMaxDynamicTagSize]{};
 
@@ -170,10 +141,9 @@ struct AdvertisingServiceData {
 	/**
 	 * @brief Sets the dynamic tag expiry timestamp in Unix format (32-bit unsigned integer).
 	 *
-	 * @param expiryTimestampUnix reference to the array containing the expiry timestamp.
-	 *                   The size of the array should not exceed kBleExpiryTimeSize.
+	 * @param expiryTimestampUnix the expiry timestamp in Unix format.
 	 */
-	void SetDynamicTagExpiryTimestamp(const BleExpiryTimestamp &expiryTimestampUnix);
+	void SetDynamicTagExpiryTimestamp(BleExpiryTimestamp expiryTimestampUnix);
 
 	/**
 	 * @brief Sets the dynamic tag.

@@ -87,8 +87,10 @@ public:
 	 * is ready to exchange data.
 	 *
 	 * @param connectionHandle The connection handle identifying the transport connection.
+	 *
+	 * @return ALIRO_NO_ERROR if the session is created successfully, an error code otherwise.
 	 */
-	void CreateSession(ConnectionHandle connectionHandle);
+	AliroError CreateSession(ConnectionHandle connectionHandle);
 
 	/**
 	 * @brief Destroy the session associated with a connection handle.
@@ -143,7 +145,7 @@ public:
 				BleTypes::TxPowerLevel txPowerLevel, const Identifier &readerIdentifier,
 				BleTypes::AdvertisingServiceData::Notification notification =
 					BleTypes::AdvertisingServiceData::Notification::NoError,
-				const BleTypes::BleExpiryTimestamp &expirationTime = BleTypes::kExpiryTimeUnavailable);
+				BleTypes::BleExpiryTimestamp expirationTime = BleTypes::kExpiryTimeUnavailable);
 
 	/**
 	 * @brief Gets the BLE advertising version.

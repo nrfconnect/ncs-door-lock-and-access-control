@@ -1,0 +1,61 @@
+From feab7c57968a9c810b3293b9b2a120611d1b06ee Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Fri, 15 May 2026 10:40:50 +0200
+Subject: [PATCH 1/2] samples: matter: Decouple DfuOverSmp from ota_util
+
+Include ota_util only when CONFIG_CHIP_OTA_REQUESTOR is enabled.
+DfuOverSmp uses ExternalFlashManager directly, so it does not need
+the OTA utility source or header dependency.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+ samples/matter/common/cmake/source_common.cmake    | 2 +-
+ samples/matter/common/src/dfu/ota/ota_util.h       | 2 --
+ samples/matter/common/src/dfu/smp/dfu_over_smp.cpp | 3 +--
+ 3 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/samples/matter/common/cmake/source_common.cmake b/samples/matter/common/cmake/source_common.cmake
+index 595ebea190..f643b09311 100644
+--- a/samples/matter/common/cmake/source_common.cmake
++++ b/samples/matter/common/cmake/source_common.cmake
+@@ -24,7 +24,7 @@ target_sources(app PRIVATE
+ zephyr_linker_sources(SECTIONS ${MATTER_COMMONS_SRC_DIR}/clusters/cluster_init.ld)
+ 
+ # Set specific sources that depend on Kconfigs
+-if(CONFIG_CHIP_OTA_REQUESTOR OR CONFIG_MCUMGR_TRANSPORT_BT)
++if(CONFIG_CHIP_OTA_REQUESTOR)
+     target_sources(app PRIVATE ${MATTER_COMMONS_SRC_DIR}/dfu/ota/ota_util.cpp)
+ endif()
+ 
+diff --git a/samples/matter/common/src/dfu/ota/ota_util.h b/samples/matter/common/src/dfu/ota/ota_util.h
+index fe57443d85..e26ef6be3c 100644
+--- a/samples/matter/common/src/dfu/ota/ota_util.h
++++ b/samples/matter/common/src/dfu/ota/ota_util.h
+@@ -6,8 +6,6 @@
+ 
+ #pragma once
+ 
+-#include <platform/nrfconnect/ExternalFlashManager.h>
+-
+ #if CONFIG_CHIP_OTA_REQUESTOR
+ #include "ota_image_processor_base_impl.h"
+ #include <platform/nrfconnect/OTAImageProcessorImpl.h>
+diff --git a/samples/matter/common/src/dfu/smp/dfu_over_smp.cpp b/samples/matter/common/src/dfu/smp/dfu_over_smp.cpp
+index 73c516f630..7ebcb14a98 100644
+--- a/samples/matter/common/src/dfu/smp/dfu_over_smp.cpp
++++ b/samples/matter/common/src/dfu/smp/dfu_over_smp.cpp
+@@ -14,10 +14,9 @@
+ #error "DFU over SMP requires MCUmgr IMG and OS groups"
+ #endif
+ 
+-#include "dfu/ota/ota_util.h"
+-
+ #include <platform/CHIPDeviceLayer.h>
+ #include <platform/nrfconnect/DFUSync.h>
++#include <platform/nrfconnect/ExternalFlashManager.h>
+ 
+ #include <lib/support/logging/CHIPLogging.h>
+ 
+-- 
+2.52.0
+

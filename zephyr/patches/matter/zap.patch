@@ -1,0 +1,162 @@
+From 9910e420f32f4faae299564124f66752149983b8 Mon Sep 17 00:00:00 2001
+From: Marcin Kajor <marcin.kajor@nordicsemi.no>
+Date: Wed, 29 Apr 2026 21:40:29 +0200
+Subject: [PATCH 1/1] [nrf noup] [west zap-append] Add fallback to the
+ attribute name deduction
+
+Some XML cluster definitions do not contain the dedicated
+'name' entry in the attribute field, instead they just
+add name of the cluster as a text to the attribute
+definition. Added a fallback logic, so that such cases
+are handled to avoid ending up with null attributes in
+zcl.json file. This mimics the ZAP loader behavior.
+
+Signed-off-by: Marcin Kajor <marcin.kajor@nordicsemi.no>
+
+[nrf noup] [west zap-sync] Handle overwriting of the default zcl file
+
+Fixed the handling of the case when the default
+cluster definition file (zcl.json) is used as both
+input and output to the command. Without the fix,
+the script removes the zcl.json and exits, because
+the removed file cannot be copied.
+
+Signed-off-by: Marcin Kajor <marcin.kajor@nordicsemi.no>
+
+[nrf noup] [west zap-gui] Refine error handling
+
+It turns out that the subprocess may return no output
+if the Chromium cannot use sandbox due to the missing
+permissions. Added a workaround that raises an exception
+if the command execution output is empty, so that it
+can be handled with the fix_sandbox_permissions() call.
+
+Signed-off-by: Marcin Kajor <marcin.kajor@nordicsemi.no>
+
+[nrf noup] [west zap-*] Apply copilot suggestions
+
+- Refined error handling
+- Reduced the verbosity
+
+Signed-off-by: Marcin Kajor <marcin.kajor@nordicsemi.no>
+---
+ scripts/west/zap_append.py | 11 ++++++++++-
+ scripts/west/zap_common.py | 15 ++++++++++-----
+ scripts/west/zap_gui.py    |  4 ++++
+ scripts/west/zap_sync.py   | 20 ++++++++++++++------
+ 4 files changed, 38 insertions(+), 12 deletions(-)
+
+diff --git a/scripts/west/zap_append.py b/scripts/west/zap_append.py
+index 5ac740e3a23..549dd5945d0 100644
+--- a/scripts/west/zap_append.py
++++ b/scripts/west/zap_append.py
+@@ -12,6 +12,15 @@ from west.commands import WestCommand
+ from zap_common import DEFAULT_MATTER_PATH, DEFAULT_MATTER_TYPES_RELATIVE_PATH, DEFAULT_ZCL_JSON_RELATIVE_PATH
+ 
+ 
++def get_attribute_name(attribute: ET.Element) -> str:
++    """If attribute has a name, return it, otherwise fallback to the text of the attribute entry."""
++    from_attr = attribute.get('name')
++    if from_attr:
++        return from_attr
++    text = ''.join(attribute.itertext()).strip()
++    return text or None
++
++
+ def add_custom_attributes_from_xml(xml_file: Path, zcl_data: dict, matter_path: Path = DEFAULT_MATTER_PATH):
+     """
+     Parse the cluster XML file and add attributes with custom types to
+@@ -50,7 +59,7 @@ def add_custom_attributes_from_xml(xml_file: Path, zcl_data: dict, matter_path:
+         # Check all attributes in the cluster
+         for attribute in cluster.findall('attribute'):
+             attr_type = attribute.get('type')
+-            attr_name = attribute.get('name')
++            attr_name = get_attribute_name(attribute)
+ 
+             if attr_type and attr_type not in types:
+                 attributes_with_missing_types.append({
+diff --git a/scripts/west/zap_common.py b/scripts/west/zap_common.py
+index 8585b307c66..e6c973443a3 100644
+--- a/scripts/west/zap_common.py
++++ b/scripts/west/zap_common.py
+@@ -299,13 +299,18 @@ def update_rules_paths(zcl_json: Path) -> ContextManager[Path]:
+ 
+ def display_zap_message(output: subprocess.CompletedProcess[str]) -> None:
+     """
+-    If the output contains the error from napi_throw, suggest user to use zap-sync to sync the ZAP file.
++    If the output contains the error from napi_throw, suggest user to use zap-sync to sync the ZAP file and make sure that all attributes are provided.
+     """
++    if output.stdout:
++        log.dbg(f"output: {output.stdout}")
++
++    if output.stderr:
++        log.wrn(f"stderr: {output.stderr}")
++
+     if 'Unknown attribute' in output.stdout:
+-        log.err("Your zcl.json file seems to be outdated. Please use 'west zap-sync' command to synchronize it with the newest Matter Data Model.")
+-        return
+-    else:
+-        print(f"output: {output.stdout}")
++        log.err("Your zcl.json file seems to be outdated or is missing some attributes. "
++                "Please use 'west zap-sync' command to synchronize it with the newest Matter Data Model "
++                "and make sure that all cluster attributes are properly defined in the cluster XML file.")
+ 
+ 
+ class ZapInstaller:
+diff --git a/scripts/west/zap_gui.py b/scripts/west/zap_gui.py
+index 34588689e93..b1b9e4a845e 100644
+--- a/scripts/west/zap_gui.py
++++ b/scripts/west/zap_gui.py
+@@ -102,6 +102,10 @@ class ZapGui(WestCommand):
+                     cmd += ["--tempState"]
+ 
+                 output = subprocess.run([str(x) for x in cmd], capture_output=True, text=True)
++                # Chromium often prints nothing to stdout when the sandbox aborts early.
++                # returncode -5 is a sentinel consumed by fix_sandbox_permissions().
++                if output.returncode != 0 and not output.stdout and not output.stderr:
++                    raise subprocess.CalledProcessError(-5, cmd)
+                 display_zap_message(output)
+                 return output
+ 
+diff --git a/scripts/west/zap_sync.py b/scripts/west/zap_sync.py
+index 753694c5e3c..db8ace920e8 100644
+--- a/scripts/west/zap_sync.py
++++ b/scripts/west/zap_sync.py
+@@ -56,13 +56,17 @@ class ZapSync(WestCommand):
+         zap_installer.update_zap_if_needed()
+ 
+         if args.zcl_json:
+-            # Provided zcl.json file exists, so we need to remove it and create a copy of the default zcl.json file.
+-            zcl_file_path = Path(args.zcl_json).absolute()
+-            if zcl_file_path.exists():
+-                zcl_file_path.unlink()
+-            shutil.copy(default_zcl_path, zcl_file_path)
++            zcl_candidate = Path(args.zcl_json).absolute()
++            # Reset project zcl.json from the SDK default. If -j is the default path itself,
++            # do not unlink/copy (to avoid deleting the source then failing to copy if the path is the same).
++            if zcl_candidate.resolve() == default_zcl_path.resolve():
++                zcl_file_path = default_zcl_path
++            else:
++                if zcl_candidate.exists():
++                    zcl_candidate.unlink()
++                shutil.copy(default_zcl_path, zcl_candidate)
++                zcl_file_path = zcl_candidate
+         else:
+-            # No zcl.json file provided, so we need to create a new one because a path was provided.
+             zcl_file_path = default_zcl_path
+ 
+         log.inf(f"Synchronizing zcl.json file ({zcl_file_path.resolve()})...")
+@@ -91,6 +95,10 @@ class ZapSync(WestCommand):
+             cmd += ["--tempState"]
+ 
+             output = subprocess.run([str(x) for x in cmd], capture_output=True, text=True)
++            # Chromium often prints nothing to stdout when the sandbox aborts early.
++            # returncode -5 is a sentinel consumed by fix_sandbox_permissions().
++            if output.returncode != 0 and not output.stdout and not output.stderr:
++                raise subprocess.CalledProcessError(-5, cmd)
+             display_zap_message(output)
+             return output
+ 
+-- 
+2.43.0
+
