@@ -113,6 +113,3 @@ configdefault DOOR_LOCK_BLE_MANAGER
 
 configdefault DOOR_LOCK_BLE_MANAGER_INIT
 	default y
-
-config DOOR_LOCK_ALIRO_UWB_QM35_DISAMBIGUATION
-	default y if DOOR_LOCK_BLE_UWB
