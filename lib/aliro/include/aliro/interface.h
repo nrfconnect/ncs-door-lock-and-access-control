@@ -247,9 +247,9 @@ namespace Uwb {
  * @param data Pointer to the decrypted message.
  * @param length Length of the message.
  *
- * @return ALIRO_NO_ERROR on success, error code otherwise.
+ * @return 0 on success, negative error code otherwise.
  */
-AliroError HandleBleMessage(ConnectionHandle connectionHandle, const uint8_t *data, size_t length);
+int HandleBleMessage(ConnectionHandle connectionHandle, const uint8_t *data, size_t length);
 
 } // namespace Uwb
 

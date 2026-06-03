@@ -24,11 +24,11 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
 #. Set the ``dut_reader_public_key`` field in the Test Harness project configuration to ``READER_PUB``.
 
-#. Provision the Reader private signing key (``READER_PRIV``) in the DUT using the following ``dl reader`` shell command:
+#. Provision the Reader private signing key (``READER_PRIV``) in the DUT using the following ``reader`` shell command:
 
    .. code-block:: console
 
-      uart:~$ dl reader private_key set <32-byte private key in hex without 0x>
+      uart:~$ reader private_key set <32-byte private key in hex without 0x>
 
    .. note::
 
@@ -44,13 +44,13 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
          .. code-block:: console
 
-            dl reader identifier <32-byte_reader_identifier_in_hex_without_0x>
+            reader identifier <32-byte_reader_identifier_in_hex_without_0x>
 
          Example:
 
          .. code-block:: console
 
-            dl reader identifier 00113344667799AA00113344667799AA113344667799AA00113344667799AA00
+            reader identifier 00113344667799AA00113344667799AA113344667799AA00113344667799AA00
 
       .. tab:: Group and sub-identifier
 
@@ -59,15 +59,15 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
          .. code-block:: console
 
-            dl reader group_id <16-byte_reader_group_identifier_in_hex_without_0x>
-            dl reader group_sub_id <16-byte_reader_group_sub_identifier_in_hex_without_0x>
+            reader group_id <16-byte_reader_group_identifier_in_hex_without_0x>
+            reader group_sub_id <16-byte_reader_group_sub_identifier_in_hex_without_0x>
 
          Example:
 
          .. code-block:: console
 
-            dl reader group_id 00113344667799AA00113344667799AA
-            dl reader group_sub_id 113344667799AA00113344667799AA00
+            reader group_id 00113344667799AA00113344667799AA
+            reader group_sub_id 113344667799AA00113344667799AA00
 
          Running the same commands without specifying a value returns the currently stored identifier.
 
@@ -75,7 +75,7 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
          .. code-block:: console
 
-            dl reader group_id
+            reader group_id
 
          Example output:
 
@@ -169,12 +169,12 @@ Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_har
 
       You can also use the following commands:
 
-      * ``uart:~$ dl provisioning CI_CA_key get`` - This command retrieves the Credential Issuer CA public key stored in the DUT.
+      * ``uart:~$ dl provisioning CI_CA_key list`` - This command retrieves the Credential Issuer CA public key stored in the DUT.
       * ``uart:~$ dl provisioning CI_CA_key clear`` - This command clears the Credential Issuer CA public key stored in the DUT.
 
       For example:
 
       .. code-block:: console
 
-         uart:~$ dl provisioning CI_CA_key get
+         uart:~$ dl provisioning CI_CA_key list
          047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137

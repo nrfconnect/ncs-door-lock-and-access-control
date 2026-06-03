@@ -1,0 +1,17 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_ACCESS_DOCUMENT_PARSER access_document)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_BLE_SERVICE aliro_service)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_WORKQUEUE aliro_workqueue)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_CRYPTO_UTILS crypto_utils)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_DOOR_LOCK_DELEGATE door_lock_delegate)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_GATT_SERVER gatt_server)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_L2CAP_SERVER l2cap_server)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_READER_STORAGE reader_storage)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_TIME_UTILS time_utils)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_UWB uwb)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM lock_sim)

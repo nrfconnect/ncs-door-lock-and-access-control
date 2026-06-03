@@ -4,4 +4,12 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+add_subdirectory(aliro)
+
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ADVERTISING_ARBITER advertising_arbiter)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_BLE_MANAGER ble_manager)
 add_subdirectory_ifdef(CONFIG_DOOR_LOCK_EXTERNAL_NVS external_nvs)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_MATTER_ACCESS matter_access)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_NFC_PROP nfc_prop)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_NUS_SERVICE nus_service)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_SETTINGS_UTILS settings_utils)

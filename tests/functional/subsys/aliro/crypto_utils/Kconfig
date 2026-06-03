@@ -1,0 +1,67 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+# Settings
+config FLASH
+	default y
+
+config FLASH_MAP
+	default y
+
+config NVS
+	default y if !SOC_FLASH_NRF_RRAM
+
+config NVS_LOOKUP_CACHE_SIZE
+	default 512 if NVS
+
+config NVS_LOOKUP_CACHE_FOR_SETTINGS
+	default y if NVS
+
+config ZMS
+	default y if SOC_FLASH_NRF_RRAM
+
+config ZMS_LOOKUP_CACHE_SIZE
+	default 512 if ZMS
+
+config ZMS_LOOKUP_CACHE_FOR_SETTINGS
+	default y if ZMS
+
+config SETTINGS
+	default y
+
+# Trusted Storage
+config TRUSTED_STORAGE
+	default y
+
+config MBEDTLS_PSA_CRYPTO_STORAGE_C
+	default y
+
+choice TRUSTED_STORAGE_BACKEND_AEAD_KEY
+	default TRUSTED_STORAGE_BACKEND_AEAD_KEY_HASH_UID if SOC_SERIES_NRF52
+	default TRUSTED_STORAGE_BACKEND_AEAD_KEY_DERIVE_FROM_HUK
+endchoice
+
+config HW_UNIQUE_KEY
+	default y
+
+config HW_UNIQUE_KEY_RANDOM
+	default y
+
+config HW_UNIQUE_KEY_WRITE_ON_CRYPTO_INIT
+	default y if (SOC_NRF5340_CPUAPP || SOC_SERIES_NRF54L)
+
+# Crypto
+config NRF_SECURITY
+	default y
+
+config MBEDTLS_ENABLE_HEAP
+	default y if !BUILD_WITH_TFM
+	default n
+
+config MBEDTLS_HEAP_SIZE
+	default 8192
+
+source "Kconfig.zephyr"

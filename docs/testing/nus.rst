@@ -13,27 +13,12 @@ This feature demonstrates the use of an out-of-band access control mechanism, un
 Enabling the NUS feature
 ************************
 
-Enable the NUS feature depending on your configuration: 
+Build the application with the ``bt_nus`` snippet.
+For example, if you are using the nRF5340 DK, run the following command:
 
-.. tabs::
+.. code-block:: console
 
-   .. group-tab:: With Matter disabled (Aliro only)
-
-      Build the application with the ``bt_nus`` snippet.
-      For example, if you are using the nRF5340 DK, run the following command:
-
-      .. code-block:: console
-
-         west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=bt_nus
-
-   .. group-tab:: With Matter enabled (Aliro and Matter)
-
-      Build the application with the ``matter`` snippet and enable the ``CONFIG_CHIP_NUS`` Kconfig option.
-      For example, if you are using the nRF5340 DK, run the following command:
-
-      .. code-block:: console
-
-         west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DSNIPPET=matter -DCONFIG_CHIP_NUS=y
+   west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -Dapp_SNIPPET=bt_nus
 
 Using the Bluetooth LE NUS service
 **********************************
@@ -55,7 +40,7 @@ You can use the service in the following ways, depending on your configuration:
 
             <inf> door_lock_app: Unlock command received
 
-      Additionally, if you enable the ``CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR`` Kconfig option, the lock simulator indicator (green **LED 2**) lights up when the lock is unlocked.
+      Additionally, if you enable the ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_INDICATOR`` Kconfig option, the lock simulator indicator (green **LED 2**) lights up when the lock is unlocked.
 
    .. group-tab:: With Matter enabled (Aliro and Matter)
 

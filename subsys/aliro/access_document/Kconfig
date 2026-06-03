@@ -1,0 +1,11 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_ACCESS_DOCUMENT_PARSER
+	bool "Generate CBOR parser for Aliro Access Document"
+	help
+	  When enabled, generates code for parsing CBOR-encoded Access Document
+	  from the CDDL definition.

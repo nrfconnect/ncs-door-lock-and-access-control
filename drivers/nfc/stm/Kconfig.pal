@@ -9,8 +9,3 @@ config RFAL_MAX_TIMERS_NUM
     default 10
     help
         Defines the size of the timer array, setting the maximum number of timers that can be used by RFAL.
-
-config RFAL_SINGLE_SPI_BUS
-    bool "Configure SPI bus to work with multiple devices on the same bus"
-    help
-        Enable this option to share the SPI bus with other devices.

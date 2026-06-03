@@ -91,7 +91,7 @@ Kconfig options
 ===============
 
 When additional BLE services (such as NUS or DFU SMP) are enabled alongside Aliro BLE/UWB transport, ``CONFIG_BT_MAX_CONN`` must be increased to support concurrent connections.
-The application automatically sets ``CONFIG_BT_MAX_CONN=2`` when ``CONFIG_DOOR_LOCK_BLE_UWB`` and either ``CONFIG_DOOR_LOCK_BLE_NUS`` or ``CONFIG_DOOR_LOCK_DFU_BLE_SMP`` are enabled.
+The application automatically sets ``CONFIG_BT_MAX_CONN=2`` when ``CONFIG_DOOR_LOCK_BLE_UWB`` and either ``CONFIG_DOOR_LOCK_NUS_SERVICE`` or ``CONFIG_DOOR_LOCK_DFU_BLE_SMP`` are enabled.
 You can override this default by explicitly setting ``CONFIG_BT_MAX_CONN`` to a different value in your project’s :file:`prj.conf` file.
 
 You can configure Bluetooth LE transport parameters, such as buffer sizes, MTU, GATT database, L2CAP channels, TX power, and PHY through Kconfig (see :file:`lib/aliro/Kconfig.ble.defconfig`).
@@ -138,15 +138,15 @@ You can configure the Qorvo QM35 interface implementation using the following Kc
 
    * - Kconfig option
      - Description
-   * - ``CONFIG_DOOR_LOCK_UWB_MIN_RAN_MULTIPLIER``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER``
      - Specifies the minimum RAN multiplier for UWB ranging blocks.
        This option controls the frequency of UWB ranging measurements received by the Reader.
        The supported time range is from 96 milliseconds, when the RAN multiplier is 1, to 24480 milliseconds, when the RAN multiplier is 255.
        The default value is ``2``, which corresponds to a measurement frequency of approximately 5 Hz.
-   * - ``CONFIG_DOOR_LOCK_UWB_MAC_MODE_OFFSET``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_MAC_MODE_OFFSET``
      - Sets the offset between the two ranging blocks in MAC mode.
        The supported range is from 0 to 63, with a default value of ``0``.
-   * - ``CONFIG_DOOR_LOCK_UWB_MAC_MODE_RANGING_ROUNDS``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_MAC_MODE_RANGING_ROUNDS``
      - Specifies the number of ranging rounds used in a ranging block.
 
        Available values include:
@@ -154,7 +154,7 @@ You can configure the Qorvo QM35 interface implementation using the following Kc
        * ``0`` – one ranging round (default)
        * ``1`` – two ranging rounds
 
-   * - ``CONFIG_DOOR_LOCK_UWB_SESSION_LOGGING``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_SESSION_LOGGING``
      - Enables logging of UWB session states, including status codes.
        This option is intended for debugging and monitoring UWB session behavior.
 
@@ -174,12 +174,12 @@ It simulates the physical movement of a lock mechanism and provides visual feedb
 Configuration options
 =====================
 
-All lock simulator configuration options are located in the :file:`app/src/aliro/lock_sim/Kconfig` file.
+All lock simulator configuration options are located in the :file:`subsys/aliro/lock_sim/Kconfig` file.
 
 Movement time
 -------------
 
-The ``CONFIG_DOOR_LOCK_LOCK_SIM_MOVEMENT_TIME_MS`` Kconfig option specifies the movement time of the lock actuator in milliseconds.
+The ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_MOVEMENT_TIME_MS`` Kconfig option specifies the movement time of the lock actuator in milliseconds.
 This is the time it takes for the lock to move from one state to another (from locked to unlocked or unlocked to locked).
 The default value is ``2000`` ms (2 seconds).
 
@@ -189,12 +189,12 @@ Auto relock
 The lock simulator supports automatic relocking functionality.
 When enabled, the lock will automatically relock itself after being unlocked for a specified period of time.
 
-* ``CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK`` - This option enables or disables the auto relock feature.
+* ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK`` - This option enables or disables the auto relock feature.
   It is enabled by default.
 
-* ``CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK_TIME_MS`` - This option specifies the auto relock time in milliseconds.
+* ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK_TIME_MS`` - This option specifies the auto relock time in milliseconds.
   The auto relock time is the duration the lock remains unlocked before automatically relocking.
-  This option is only available when ``CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK`` is enabled.
+  This option is only available when ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK`` is enabled.
   The default value is ``5000`` ms (5 seconds).
 
 Indicator
@@ -203,7 +203,7 @@ Indicator
 The lock simulator indicator provides visual feedback about the current lock state.
 When enabled, the indicator shows the lock state continuously: it is activated when the lock is unlocked and deactivated when the lock is secured.
 
-You can enable or disable the lock simulator indicator using the ``CONFIG_DOOR_LOCK_LOCK_SIM_INDICATOR`` Kconfig option.
+You can enable or disable the lock simulator indicator using the ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_INDICATOR`` Kconfig option.
 This option is enabled by default.
 
 You can select the hardware resource used for this indication by going to the device tree source file and setting the ``lock-sim-indicator`` alias in the corresponding node.
@@ -217,7 +217,7 @@ You can select the hardware resource used for this indication by going to the de
   };
 
 In the default implementation, the indicator turns the LED on when the lock is opened (unsecured) and turns it off when the lock is closed (secured).
-The LED therefore stays on for a time period equal to the simulated movement time (``CONFIG_DOOR_LOCK_LOCK_SIM_MOVEMENT_TIME_MS``) plus the auto-relock time (``CONFIG_DOOR_LOCK_LOCK_SIM_AUTO_RELOCK_TIME_MS``).
+The LED therefore stays on for a time period equal to the simulated movement time (``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_MOVEMENT_TIME_MS``) plus the auto-relock time (``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK_TIME_MS``).
 
 Aliro Access Manager
 ********************
@@ -337,7 +337,7 @@ For example, to build the application with Bluetooth LE and UWB transport suppor
 
 .. code-block:: bash
 
-   west build -p -b nrf5340dk/nrf5340/cpuapp app -- -Dapp_SNIPPET=uwb_qm35 -DCONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+   west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -Dapp_SNIPPET=uwb_qm35 -DCONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
 
 Configuration
 =============
@@ -396,7 +396,7 @@ For example, to build the application with Step-up phase support for nRF5340 pla
 
 .. code-block:: bash
 
-   west build -p -b nrf5340dk/nrf5340/cpuapp app -- -DCONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+   west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -DCONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
 Configuration
 =============

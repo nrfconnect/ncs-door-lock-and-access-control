@@ -31,6 +31,7 @@ Aliro includes several key features that distinguish it from existing access pro
 
    door_lock_app_arch.rst
    reference_application_interactions.rst
+   uwb_disambiguation.rst
    other_addons.rst
    hardware_requirements.rst
    software_requirements.rst
@@ -40,5 +41,6 @@ Aliro includes several key features that distinguish it from existing access pro
    testing.rst
    firmware_update.rst
    troubleshooting.rst
+   matter_door_lock_app.rst
    release_notes.rst
    known_issues_and_limitations.rst

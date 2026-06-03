@@ -18,7 +18,7 @@ Before you start working with the application, you must install the |NCS| develo
 
 Prepare the environment:
 
-1. From the `Installing the nRF Connect SDK`_ page, complete the following steps: 
+1. From the `Installing the nRF Connect SDK`_ page, complete the following steps:
 
    a. Updating operating system
    #. Installing prerequisities
@@ -32,7 +32,7 @@ Prepare the environment:
 
    .. code-block:: console
 
-      nrfutil sdk-manager toolchain launch --ncs-version v3.2.0 --shell
+      nrfutil sdk-manager toolchain launch --ncs-version v3.3.0 --shell
 
 #. Initialize west:
 
@@ -48,6 +48,12 @@ Prepare the environment:
    .. code-block:: console
 
       west update
+
+#. Apply the patches to the workspace:
+
+   .. code-block:: console
+
+      west patch apply
 
    Depending on your connection, this might take some time.
 

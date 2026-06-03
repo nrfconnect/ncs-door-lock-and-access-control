@@ -89,7 +89,9 @@ int Read(Id id, void *data, size_t &len)
 {
 	const auto rc = nvs_read(&nvs, id, data, len);
 	if (rc < 0) {
-		LOG_ERR("nvs_read failed: %d", rc);
+		if (rc != -ENOENT) {
+			LOG_ERR("nvs_read failed: %d", rc);
+		}
 		return rc;
 	}
 

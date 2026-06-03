@@ -1,0 +1,21 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_DFU_BLE_SMP
+    bool "DFU over SMP"
+    select DOOR_LOCK_ADVERTISING_ARBITER
+    help
+      Enables Device Firmware Upgrade over Bluetooth LE.
+
+if DOOR_LOCK_DFU_BLE_SMP
+
+module = DFU_SMP
+module-str = DFU_SMP
+module-dep = LOG
+module-help = Enables DFU SMP module log messages.
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_DFU_BLE_SMP
