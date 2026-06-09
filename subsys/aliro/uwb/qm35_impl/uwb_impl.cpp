@@ -22,9 +22,11 @@
 
 #include <cherry/cherry_common.h>
 
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DISAMBIGUATION
 #include "disambiguation/disambiguation.h"
 #include "disambiguation/processing.h"
 #include <cherry/cherry_radar.h>
+#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DISAMBIGUATION
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -294,6 +296,7 @@ constexpr uint32_t kRadarSessionId{ 2 };
 constexpr int32_t kRadarStartDelayMs{ 300 };
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DISAMBIGUATION
 
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DISAMBIGUATION
 void LogDisambiguationResult(const Aliro::Uwb::Disambiguation::Result &result) noexcept
 {
 	/* pratio_u6 = p_ratio * 1e6 — avoids %f. Threshold 0.6 → 600000. */
@@ -305,6 +308,7 @@ void LogDisambiguationResult(const Aliro::Uwb::Disambiguation::Result &result) n
 	LOG_INF("[tune] %s | dist:%3dcm | pratio_u6:%7d | cir:%4d | blk:%2d | pdoa:%s%u.%03u", sideStr,
 		result.mDistanceCm, pRatioU6, result.mCir, result.mNoiseBlocks, pdoa.sign, pdoa.integer, pdoa.fraction);
 }
+#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DISAMBIGUATION
 
 } // namespace
 
@@ -781,6 +785,7 @@ int UltraWideBandImpl::_Deinit()
 	return 0;
 }
 
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DISAMBIGUATION
 void UltraWideBandImpl::ScheduleRadarStart()
 {
 	if (mRadarRunning) {
@@ -902,6 +907,7 @@ void UltraWideBandImpl::_StopRadarSession()
 	mRadarRunning = false;
 	LOG_INF("Radar session stopped");
 }
+#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DISAMBIGUATION
 
 void UltraWideBandImpl::_BleTimeSync()
 {
