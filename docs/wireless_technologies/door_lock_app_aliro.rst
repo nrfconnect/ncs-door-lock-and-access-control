@@ -1,0 +1,398 @@
+.. _addon_architecture:
+.. _wireless_technologies_aliro:
+
+Aliro
+#####
+
+.. contents::
+   :local:
+   :depth: 2
+
+Aliro is a standardized access protocol defined by the Connectivity Standards Alliance (CSA).
+It specifies how access readers communicate with user devices like smartphones and wearables to unlock points of entry.
+
+Aliro includes several key features that distinguish it from existing access protocols:
+
+* Interoperability and compatibility - Ensures seamless interaction between access readers, such as electronic locks and access control readers, and User Devices like a smartphone and wearables.
+  The standardized solution allows manufacturer-independent devices and readers to work together without compromising security.
+* Flexibility - Does not dictate how your digital door lock or access control reader connects to the rest of your ecosystem.
+* Protocol support - Supports various transport protocols, including mandatory Near Field Communication (NFC), Bluetooth® LE or Bluetooth LE with Ultra-Wideband (UWB).
+
+This reference implements the Aliro with NFC and Bluetooth LE combined with UWB transport layer.
+It does not support Aliro with Bluetooth LE only variant.
+
+To understand how the application interacts with Aliro stack, refer to the :ref:`aliro_application_interactions` page.
+
+Overview
+********
+
+The general architecture of the application using the Aliro stack is represented as follows:
+
+.. _arch_overview:
+
+.. figure:: /images/door_lock_app_arch_aliro.svg
+   :scale: 100%
+   :alt: General architecture of the application using the Aliro stack.
+
+   General architecture of the application using the Aliro stack.
+
+The Nordic Aliro solution is built using the :ref:`nRF Connect SDK <sdk_set_up>`, which includes the Zephyr RTOS with all necessary modules.
+
+The Aliro stack implements the Access Protocol logic, Aliro-specific cryptographic primitives, and communication with the User Device.
+The interfaces layer is a bridge connecting the Aliro stack to the application through specific backends that implement the following components required by the Aliro:
+
+* NFC
+* Ultra wideband (UWB)
+* Bluetooth LE
+* Crypto
+
+This layer additionally allows to utilize other, custom backends for the crypto, NFC and UWB components by implementing the provided API.
+The Aliro stack library files are placed in the :file:`lib/aliro` directory.
+
+The `Platform Security Architecture (PSA)`_ API provides a portable programming interface for cryptographic operations and key storage across a wide range of hardware.
+It is designed to be user-friendly while still providing access to the low-level primitives essential for modern cryptography.
+
+The `Bluetooth LE stack <Bluetooth LE Controller_>`_ provides the necessary functionality for Bluetooth LE communication.
+
+When the Aliro service is stopped and other Bluetooth LE services, such as Bluetooth NUS or SMP DFU, are active, the advertising payload is updated dynamically to reflect the active services.
+
+.. _door_lock_app_arch_bluetooth_le:
+
+Bluetooth LE transport
+**********************
+
+Aliro over Bluetooth LE-only mode is not supported.
+The Aliro mode, which uses a combination of Bluetooth LE and UWB transports, is supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_.
+Bluetooth LE transport on the `nRF54L15 DK`_ or `nRF52840 DK`_ is used for other purposes, such as Nordic UART Service (NUS) or OTA DFU.
+The advertising payload is generated according to the Aliro specification, based on the ``reader group identifier`` and ``reader group sub-identifier``.
+The payload updates automatically whenever these values change, ensuring that the device always advertises the latest group information.
+
+.. note::
+   The device is preconfigured with default values for the ``reader group identifier`` and ``reader group sub-identifier``.
+   You can provide custom values using the ``reader`` command through the console to override the defaults.
+   For more information about setting these values, see the CLI provisioning sections in the application documentation.
+
+Kconfig options
+===============
+
+When additional BLE services (such as NUS or DFU SMP) are enabled alongside Aliro BLE/UWB transport, ``CONFIG_BT_MAX_CONN`` must be increased to support concurrent connections.
+The application automatically sets ``CONFIG_BT_MAX_CONN=2`` when ``CONFIG_DOOR_LOCK_BLE_UWB`` and either ``CONFIG_DOOR_LOCK_NUS_SERVICE`` or ``CONFIG_DOOR_LOCK_DFU_BLE_SMP`` are enabled.
+You can override this default by explicitly setting ``CONFIG_BT_MAX_CONN`` to a different value in your project’s :file:`prj.conf` file.
+
+You can configure Bluetooth LE transport parameters, such as buffer sizes, MTU, GATT database, L2CAP channels, TX power, and PHY through Kconfig (see :file:`lib/aliro/Kconfig.ble.defconfig`).
+See the :ref:`application-specific Kconfig options<aliro_building_and_running_config_options>`.
+
+.. _uwb_interface:
+
+UWB interface
+*************
+
+The UWB interface allows you to use an UWB hardware module with the Aliro stack and Access Manager.
+This interface operates when the Bluetooth LE transport is :ref:`enabled <door_lock_app_arch_bluetooth_le>`.
+Using ranging measurements, the Access Manager can detect the distance between the User Device and the Reader and grant or deny access based on the access policy.
+
+Custom UWB implementation
+=========================
+
+When ``CONFIG_QM35_UWB_ALIRO_ZEPHYR`` is not set, the build uses the stub implementation in :file:`subsys/aliro/uwb/custom_impl/`.
+Replace the stub ``UltraWideBandImpl`` methods with calls into your vendor driver or firmware protocol.
+
+See the full porting guide on the :ref:`uwb_custom_integration` documentation page.
+It covers the stack interface contract, application wiring, Kconfig, and bring-up sequence.
+
+Qorvo QM35 example implementation
+=================================
+
+The Qorvo QM35 implementation is the example implementation for the UWB interface.
+It is based on the Qorvo QM35825 UWB module and you can enable it through the ``uwb_qm35`` snippet.
+
+Kconfig options
+---------------
+
+You can configure the Qorvo QM35 example implementation using the following Kconfig options located under :file:`subsys/aliro/uwb/qm35_impl/Kconfig`:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Kconfig option
+     - Description
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER``
+     - Specifies the minimum RAN multiplier for UWB ranging blocks.
+       This option controls the frequency of UWB ranging measurements received by the Reader.
+       The supported time range is from 96 milliseconds, when the RAN multiplier is 1, to 24480 milliseconds, when the RAN multiplier is 255.
+       The default value is ``2``, which corresponds to a measurement frequency of approximately 5 Hz.
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_MAC_MODE_OFFSET``
+     - Sets the offset between the two ranging blocks in MAC mode.
+       The supported range is from 0 to 63, with a default value of ``0``.
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_MAC_MODE_RANGING_ROUNDS``
+     - Specifies the number of ranging rounds used in a ranging block.
+
+       Available values include:
+
+       * ``0`` – one ranging round (default)
+       * ``1`` – two ranging rounds
+
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_SESSION_LOGGING``
+     - Enables logging of UWB session states, including status codes.
+       This option is intended for debugging and monitoring UWB session behavior.
+
+The number of simultaneous UWB ranging sessions is currently not limited by the application.
+Each Aliro Bluetooth LE session can have its own UWB ranging session.
+You can establish two simultaneous UWB ranging sessions.
+Support for more than two simultaneous UWB ranging sessions has not been verified.
+
+.. _lock_simulator:
+
+Lock simulator
+**************
+
+The lock simulator provides a software implementation of a door lock actuator with configurable behavior.
+It simulates the physical movement of a lock mechanism and provides visual feedback about the lock state.
+
+Configuration options
+=====================
+
+All lock simulator configuration options are located in the :file:`subsys/aliro/lock_sim/Kconfig` file.
+
+Movement time
+-------------
+
+The ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_MOVEMENT_TIME_MS`` Kconfig option specifies the movement time of the lock actuator in milliseconds.
+This is the time it takes for the lock to move from one state to another (from locked to unlocked or unlocked to locked).
+The default value is ``2000`` ms (2 seconds).
+
+Auto relock
+-----------
+
+The lock simulator supports automatic relocking functionality.
+When enabled, the lock will automatically relock itself after being unlocked for a specified period of time.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Configuration option
+     - Description
+   * - ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK``
+     - Enables or disables the auto relock feature.
+       It is enabled by default.
+   * - ``CONFIG_DOOR_LOCK_ALSIRO_LOCK_SIM_AUTO_RELOCK_TIME_MS``
+     - Specifies the auto relock time in milliseconds.
+       The auto relock time is the duration the lock remains unlocked before automatically relocking.
+       This option is only available when ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK`` is enabled.
+       The default value is ``5000`` ms (5 seconds).
+
+Indicator
+---------
+
+The lock simulator indicator provides visual feedback about the current lock state.
+When enabled, the indicator shows the lock state continuously: it is activated when the lock is unlocked and deactivated when the lock is secured.
+
+You can enable or disable the lock simulator indicator using the ``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_INDICATOR`` Kconfig option.
+This option is enabled by default.
+
+You can select the hardware resource used for this indication by going to the device tree source file and setting the ``lock-sim-indicator`` alias in the corresponding node.
+
+.. code-block:: dts
+
+  /{
+    aliases {
+      lock-sim-indicator = &led2; // green LED2
+    };
+  };
+
+In the default implementation, the indicator turns the LED on when the lock is opened (unsecured) and turns it off when the lock is closed (secured).
+The LED therefore stays on for a time period equal to the simulated movement time (``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_MOVEMENT_TIME_MS``) plus the auto-relock time (``CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK_TIME_MS``).
+
+Aliro Access Manager
+********************
+
+The Access Manager interface (:file:`access_manager.h`) provides a unified API for handling access control logic in the application code.
+The default implementation (:file:`access_manager`) is designed to cover typical access control scenarios.
+It makes access decisions based on the proximity of the Aliro User Device, as measured by UWB ranging, and the stored public keys.
+It integrates with the Access Decision Indicator module, which provides visual feedback about access decisions, for example using LED indicator.
+
+.. _addon_architecture_kconfig_default:
+
+Kconfig options
+===============
+
+You can configure the Access Manager through Kconfig options located under the following path: :file:`app/src/aliro/access_manager/Kconfig`:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Kconfig option
+     - Description
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM``
+     - Specifies the maximum allowed distance, in centimeters, measured by UWB ranging for granting access to the User Device.
+       If the measured distance exceeds this value, access is denied.
+       If the Aliro User Device is within this distance, access is granted.
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM``
+     - * Specifies an additional margin, in centimeters, added to ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` to determine when the door should be locked, referred to as the exit range.
+         This margin prevents rapid open and close toggling when the measured distance fluctuates around the maximum allowed distance threshold.
+
+         * Unlock behavior applies when the distance is less than or equal to ``MAX_ALLOWED_DISTANCE_CM``.
+         * Lock behavior applies when the distance exceeds ``MAX_ALLOWED_DISTANCE_CM + EXIT_MARGIN_CM``.
+         * The exit margin applies per UWB ranging session based on the previous session state.
+
+       Set this option to ``0`` to disable the exit margin, causing the door to lock immediately when the distance exceeds ``MAX_ALLOWED_DISTANCE_CM``.
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS``
+     - Sets the maximum number of public keys that can be stored in the Access Manager.
+       This option determines the size of the statically allocated memory for the Access Manager cache.
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION``
+     - Selects the method used by the Aliro Reader to terminate the UWB ranging session.
+       This mechanism is important when the User Device does not terminate the ranging session on its own.
+
+       Available suboptions include:
+
+       * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_DISABLED``
+         Prevents the Access Manager from automatically terminating UWB ranging sessions.
+         This is the default behavior.
+         Sessions terminate only when explicitly requested by the User Device or when the Bluetooth LE connection is lost.
+         This option is useful when the User Device controls the session lifecycle.
+
+       * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED``
+         Terminates the UWB ranging session immediately after access is granted for the session.
+
+       * ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT``
+         Terminates the UWB ranging session after a specified timeout.
+         The timeout, in milliseconds, is defined by the
+         ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS`` Kconfig option.
+         By default, the timeout is set to ``10000`` milliseconds.
+
+Configuring Access Manager
+==========================
+
+To configure the Access Manager behavior, set options in your project’s :file:`prj.conf` file.
+For example, to allow a maximum distance of 50 cm, add the following line:
+
+.. code-block:: kconfig
+
+   CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM=50
+
+Aliro Expedited-fast phase support
+**********************************
+
+The applications that use the Aliro stack optionally supports the Aliro Expedited-fast phase as defined in the Aliro specification.
+The Expedited-fast phase provides an optimized authentication mechanism that enables faster subsequent transactions after an initial successful authentication of the User Device.
+
+Overview
+========
+
+During the first successful authentication of a User Device (using the Expedited-standard phase), the Reader derives and stores a persistent symmetric key (Kpersistent) associated with that User Device's Access Credential.
+In subsequent transaction attempts, the User Device can leverage this Kpersistent key to streamline the authentication process.
+
+Authentication flow
+===================
+
+The Expedited-fast phase authentication flow operates as follows:
+
+#. The User Device includes an encrypted cryptogram in its AUTH0 response, encrypted using its stored Kpersistent key.
+#. The Reader attempts to decrypt the cryptogram using each stored Kpersistent key until it finds a match.
+
+  * If decryption succeeds, the Reader establishes a secure channel using the matched Kpersistent key, bypassing the full Expedited-standard authentication flow.
+  * If decryption fails for all stored Kpersistent keys, the Reader falls back to the Expedited-standard phase.
+
+This optimization may reduce transaction latency for authenticated User Devices while maintaining security through cryptographic validation.
+
+Enabling the feature
+====================
+
+To enable the Expedited-fast phase support, build the application with the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option enabled.
+
+For example, to build the Aliro-only application with Bluetooth LE and UWB transport support for nRF5340 platform, along with the Expedited-fast phase capability, run the following command:
+
+.. code-block:: bash
+
+   west build -p -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=uwb_qm35 -DCONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+
+Configuration
+=============
+
+You can apply the following configuration options:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Kconfig option
+     - Description
+   * - ``CONFIG_MAX_NUMBER_OF_KPERSISTENT``
+     - Sets the maximum number of persistent keys that can be stored by the system.
+       This option defines the upper limit for the number of keys allocated in persistent storage.
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS``
+     - Defines the maximum number of Access Credential public keys that can be stored in the Access Manager.
+       This value constrains the effective maximum number of persistent keys used for access credentials.
+
+.. note::
+   The maximum number of Kpersistent keys must match the maximum number of stored Access Credential public keys.
+   Configurations with mismatched limits are not supported and may result in undefined behavior.
+
+Aliro Step-up phase support
+****************************
+
+The applications that use the Aliro stack optionally supports the Aliro Step-up phase as defined in the Aliro specification.
+The Step-up phase provides an enhanced authentication mechanism that enables User Devices to present and verify Access Documents for authorization.
+
+Overview
+========
+
+The Step-up phase extends the authentication capabilities beyond the Expedited-standard and Expedited-fast phases.
+In this phase, the Reader can request and verify an Access Document received from the User Device.
+Each Access Document contains additional authorization information such as the user identity attributes and access rights.
+
+Authentication flow
+===================
+
+The Step-up phase authentication flow operates as follows:
+
+#. After establishing a secure channel through Expedited-standard phase, the Reader may request an Access Document from the User Device.
+#. The User Device presents its Access Document, which contains cryptographically signed authorization data.
+#. The Reader validates the Access Document by verifying:
+
+   * The digital signature of the document
+   * The specific access rights granted to the User Device
+
+#. Based on the verification results, the Reader makes an access decision according to the defined access policy.
+
+Enabling the feature
+====================
+
+To enable the Step-up phase support, build the application with the ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig option enabled.
+
+For example, to build the application with Step-up phase support for nRF5340 platform, run the following command:
+
+.. code-block:: bash
+
+   west build -p -b nrf5340dk/nrf5340/cpuapp applications/app -- -DCONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+Configuration
+=============
+
+The Step-up phase uses the Access Manager interface to make authorization decisions based on the verified Access Document.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Kconfig option
+     - Description
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS``
+     - Sets the maximum number of Access Credential public keys that can be stored in the Access Manager.
+       This limit applies during the Step-up phase, where authorization decisions are made based on the verified Access Document.
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS``
+     - Configures the maximum number of Credential Issuer public keys that can be stored.
+       These keys are required during the Step-up phase to verify the digital signature of Access Documents.
+       The keys must be provisioned into the Reader before the Step-up phase can be used.
+       See :file:`app/src/aliro/access_manager/Kconfig` for details.
+
+.. note::
+   Manual provisioning of Credential Issuer public keys is required only when Matter support is disabled.
+   When Matter support is enabled, the credentials are provisioned through the Matter protocol.
+
+If Matter support is disabled, you can provision these keys using the following command through the serial console:
+
+.. code-block:: console
+
+   uart:~$ dl provisioning CI_key set <key id> <65-byte public key in hex without 0x>
+
+For more information about provisioning Credential Issuer keys, see the :ref:`testing` page.

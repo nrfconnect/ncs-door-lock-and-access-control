@@ -15,7 +15,7 @@ manifest:
     - name: nrf
       remote: ncs
       repo-path: sdk-nrf
-      revision: v3.2.0
+      revision: v3.3.0
       import: true
     - name: nrfconnect-sdk-qorvo
       remote: nrfconnect-uwb-qorvo
@@ -23,27 +23,6 @@ manifest:
       revision: QM35ALIRO_ENG-0.6.1
       groups:
         - nrfconnect-sdk-qorvo
-    - name: matter
-      remote: ncs
-      repo-path: sdk-connectedhomeip
-      path: modules/lib/matter
-      # v3.2-door-lock-app
-      revision: ffd5c633b01ab15698d2631fa5b6e8fb8a3bc0d0
-      west-commands: scripts/west/west-commands.yml
-      submodules:
-        - name: nlio
-          path: third_party/nlio/repo
-        - name: nlassert
-          path: third_party/nlassert/repo
-        - name: pigweed
-          path: third_party/pigweed/repo
-        - name: jsoncpp
-          path: third_party/jsoncpp/repo
-      userdata:
-        ncs:
-          upstream-url: https://github.com/project-chip/connectedhomeip
-          upstream-sha: 181b0cb14ff007ec912f2ba6627e05dfb066c008
-          compare-by-default: false
     - name: ncs-door-lock-app-extensions
       remote: ncs-ssh
       repo-path: ncs-door-lock-app-extensions

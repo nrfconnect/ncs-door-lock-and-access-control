@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+zephyr_include_directories(include)
+
+zephyr_library()
+
+zephyr_library_sources(
+  src/gatt_server.cpp
+  src/gatt_attribute_value.cpp
+)

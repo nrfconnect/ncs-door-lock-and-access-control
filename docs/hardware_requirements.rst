@@ -7,14 +7,14 @@ Hardware requirements
    :local:
    :depth: 2
 
-To run and test the |APP_NAME|, you must have the required hardware.
+To run and test the |APPS_NAME|, you must have the required hardware.
 
 .. _hw_requirements_development_kit:
 
 Development kit
 ***************
 
-The application supports the following development kits (DK):
+Depending on the transport technology you want to use, the |APPS_NAME| support the following development kits (DK):
 
 .. list-table::
    :header-rows: 1
@@ -46,7 +46,7 @@ Configuring VDDIO voltage for nRF54L Series devices
 ===================================================
 
 The nRF54L15 DK and the nRF54LM20 DK operate at default voltage level of 1.8V.
-Some expansion boards, especially Arduino-style boards, require higher voltage to operate properly.
+Some expansion boards required for |APPS_NAME| with Aliro support require a higher voltage to operate properly.
 
 .. tabs::
 
@@ -64,6 +64,17 @@ Some expansion boards, especially Arduino-style boards, require higher voltage t
          VDD board configuration.
 
    .. tab:: nRF54LM20 DK
+
+      You can adjust the voltage for ports on the nRF54L15 DK up to 3.3V using the `Board Configurator app`_.
+      First, you must `install the Board Configurator app <Installing Board Configurator app_>`_ and once completed `Update your DK's configuration <Updating the board configuration_>`_.
+
+      See the recommended configuration for VDD (nPM VOUT1):
+
+      .. figure:: /images/VDDIO-configuration.png
+         :scale: 70%
+         :alt: VDD board configuration.
+
+         VDD board configuration.
 
       You can adjust the voltage for ports on the nRF54LM20 DK using the following steps:
 
@@ -100,8 +111,8 @@ Some expansion boards, especially Arduino-style boards, require higher voltage t
 Near Field Communication reader
 *******************************
 
-To start working with the application, you must have at least one Near Field Communication (NFC) reader.
-The application supports the following NFC readers and their corresponding development expansion boards:
+To start working with the |APPS_NAME| with Aliro support, you must have at least one Near Field Communication (NFC) reader.
+The |REPO_NAME| supports the following NFC readers and their corresponding development expansion boards:
 
 +-------------------+---------------------------------+
 | NFC reader        | NFC reader expansion board      |
@@ -182,7 +193,7 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
          X-NUCLEO expansion board connection to the nRF54L15 DK.
 
    .. tab:: nRF5340 DK
-      
+
       The `nRF5340 DK <nRF5340 DK connector interface_>`_ has **P5** and **P20** connectors located between their Arduino headers.
       These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
       To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
@@ -201,12 +212,12 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
 Ultra wideband (UWB) module
 ***************************
 
-The application supports the following UWB module:
+The |REPO_NAME| supports the following UWB module that can be used with the |APPS_NAME| with Aliro over UWB transport support:
 
 +-------------------+-------------------------------------------------------------+
 | UWB module        | UWB module expansion board                                  |
 +===================+=============================================================+
-| `QM35825`_        | Qorvo Arduino Interface Board (with custom rework by Qorvo) |
+| `QM35825`_        | Qorvo Arduino Interface Board                               |
 +-------------------+-------------------------------------------------------------+
 
 The following table shows the pin mapping for the Qorvo Arduino Interface Board with custom rework by Qorvo:
@@ -251,7 +262,7 @@ The following table shows the pin mapping for the Qorvo Arduino Interface Board 
       The `nRF5340 DK`_ has Arduino-compatible headers, so you can connect the Qorvo Arduino Interface Board directly to development kit.
 
 .. note::
-   Contact your local Qorvo Regional Sales Manager or Nordic Regional Sales Manager to obtain the Qorvo Arduino Interface Board with special rework done on the board.
+   Contact your local Nordic Regional Sales Manager to obtain the Qorvo Arduino Interface Board with special rework done on the board.
    You need it to run the application with the QM35825 UWB module.
 
 .. _hw_requirements_test_harness:
@@ -259,7 +270,7 @@ The following table shows the pin mapping for the Qorvo Arduino Interface Board 
 Test harness hardware
 *********************
 
-For testing purposes, use the official `Aliro Certification Tool`_ as a test harness.
+If you are developing a door lock with Aliro support, for testing purposes, use the official `Aliro Certification Tool`_ as a test harness.
 To set it up, you must first meet the `test harness hardware requirements`_.
 
 .. note::

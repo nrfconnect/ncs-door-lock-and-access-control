@@ -6,6 +6,7 @@
 
 #include "counter.h"
 
+#include <cstdio>
 #include <tuple>
 
 #include <psa/crypto.h>

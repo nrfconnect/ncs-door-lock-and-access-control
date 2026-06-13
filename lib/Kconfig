@@ -5,4 +5,3 @@
 #
 
 orsource "aliro/Kconfig"
-rsource "qm35_uwb/Kconfig"

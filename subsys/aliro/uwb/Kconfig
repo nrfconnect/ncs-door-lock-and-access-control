@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+menu "UWB"
+
+config DOOR_LOCK_ALIRO_UWB
+	bool "Enable Aliro UWB support"
+
+if DOOR_LOCK_ALIRO_UWB
+
+if QM35_UWB_ALIRO_ZEPHYR
+rsource "qm35_impl/Kconfig"
+endif # QM35_UWB_ALIRO_ZEPHYR
+
+module = DOOR_LOCK_ALIRO_UWB
+module-str = DOOR_LOCK_ALIRO_UWB
+module-dep = LOG
+module-help = Enables Door Lock Aliro UWB platform log messages.
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_ALIRO_UWB
+
+endmenu # UWB

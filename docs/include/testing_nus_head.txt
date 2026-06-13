@@ -1,0 +1,15 @@
+Bluetooth LE Nordic UART Service (NUS)
+######################################
+
+.. contents::
+   :local:
+   :depth: 2
+
+The Nordic UART Service (NUS) is a Bluetooth LE service that allows for remote control of the door lock using predefined commands.
+This feature demonstrates the use of an out-of-band access control mechanism, unrelated to the Aliro and Matter protocols.
+
+Enabling the NUS feature
+************************
+
+Build the application with the ``bt_nus`` snippet.
+For example, if you are using the nRF5340 DK, run the following command:

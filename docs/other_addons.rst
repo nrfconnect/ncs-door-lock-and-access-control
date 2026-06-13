@@ -31,6 +31,16 @@ See the following diagram for deployment of software components used by the |REP
 
    Aliro add-ons deployment
 
-The Aliro UWB adapter is not yet available as a public add-on repository.
-However, the UWB adapter library is included as part of |REPO_NAME| and can be found in the :file:`lib/qm35_uwb` directory.
-For information on how to build it, see the :ref:`building_and_running` page.
+The Aliro UWB adapter is provided by the ``nrfconnect-sdk-qorvo`` west add-on, which is not fetched by default.
+To enable UWB builds, opt in to the add-on and update the workspace:
+
+.. code-block:: bash
+
+   west config manifest.group-filter -- +nrfconnect-sdk-qorvo
+   west update
+
+For information on how to build with UWB support, see the :ref:`building_and_running` page.
+
+The |REPO_NAME| also provides a vendor-neutral UWB platform interface under :file:`subsys/aliro/uwb/`.
+The Qorvo QM35825 integration in :file:`subsys/aliro/uwb/qm35_impl/` is a reference port.
+To integrate a different UWB chip, start from :file:`subsys/aliro/uwb/custom_impl/` and follow the :ref:`uwb_custom_integration` documentation page.

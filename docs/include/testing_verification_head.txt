@@ -1,0 +1,43 @@
+Verification and testing
+########################
+
+.. contents::
+   :local:
+   :depth: 2
+
+Once you have successfully provisioned Aliro credentials, perform tests to ensure your device is functioning correctly.
+
+Select tests for running
+************************
+
+You can see the full list of available tests in the `Aliro Certification Tool`_ repository.
+From the :guilabel:`Test Suites` list, choose the tests with the `Reader` in the name, for example, :guilabel:`BLE Reader`.
+This will allow you to test the Bluetooth LE + UWB transport.
+
+.. note::
+   You can upload the :file:`ncs-door-lock-and-access-control/docs/certification_assets/Aliro PICS v0.9.3.r2.xml` file to the Test Harness to automatically select tests for execution.
+   However, there is a known bug in this Test Harness revision that causes the PICS file to select some incorrect tests and skip some needed to execute.
+
+   * Tests that should be executed (but might be skipped):
+
+     * ``NFC_RDR_NEG_STEPUP_AD_SCHEDULE_IN_ACCESS_RULE_AND_READER``
+     * ``NFC_RDR_NEG_STEPUP_AD_SCHEDULE_TIME_VERIFY_REQUIRED``
+     * ``NFC_RDR_NEG_STEPUP_AD_TIME_VERIFICATION_REQUIRED``
+     * ``BLEUWB_RDR_ADVERTISEMENT_FORMAT``
+
+   * Tests that should not be executed (but might be selected):
+
+     * ``BLEUWB_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG``
+
+Always verify that the correct tests are chosen before executing them.
+If you do not upload the PICS file, you can choose the tests manually.
+
+.. figure:: /images/th_test_cases.png
+   :scale: 70%
+   :alt: Test suites list.
+
+   Test suites list.
+
+The Test Harness device will be operating as the Aliro User Device and communicate with the Reader device.
+For verification, execute the following tests, based on the `aliro-sve-v1.0`_ tag.
+The test results shown below were acquired on the nRF5340 DK build using the following command:

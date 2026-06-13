@@ -18,7 +18,7 @@ Before you start working with the application, you must install the |NCS| develo
 
 Prepare the environment:
 
-1. From the `Installing the nRF Connect SDK`_ page, complete the following steps: 
+1. From the `Installing the nRF Connect SDK`_ page, complete the following steps:
 
    a. Updating operating system
    #. Installing prerequisities
@@ -32,7 +32,7 @@ Prepare the environment:
 
    .. code-block:: console
 
-      nrfutil sdk-manager toolchain launch --ncs-version v3.2.0 --shell
+      nrfutil sdk-manager toolchain launch --ncs-version v3.3.0 --shell
 
 #. Initialize west:
 
@@ -51,6 +51,12 @@ Prepare the environment:
 
    Depending on your connection, this might take some time.
 
+#. Apply the patches to the workspace:
+
+   .. code-block:: console
+
+      west patch apply
+
 #. Export a `Zephyr CMake package`_.
    This allows CMake to automatically load the boilerplate code required for building |NCS| applications:
 
@@ -65,7 +71,7 @@ Prepare the environment:
       ncs
       ├─── toolchains
       │  └─── <toolchain-installation>
-      └─── <project-workspace>
+      └─── project-workspace
          ├─── .west
          ├─── bootloader
          ├─── modules
@@ -75,7 +81,7 @@ Prepare the environment:
          ├─── zephyr
          └─── ...
 
-   In this simplified structure preview, *<toolchain-installation>* corresponds to the toolchain version and *<west-workspace>* corresponds to the SDK version name.
+   In this simplified structure preview, *<toolchain-installation>* corresponds to the toolchain version.
 
 #. Complete `setting up the command-line build environment`_.
 
@@ -84,4 +90,9 @@ Prepare the environment:
 Aliro Certification Tool
 ************************
 
-You must have the official :ref:`Aliro Certification Tool to be able to execute test cases <hw_requirements_test_harness>`.
+If you are developing a door lock with Aliro support, and you want to execute the Aliro certification tests, you must have the official :ref:`Aliro Certification Tool <hw_requirements_test_harness>`.
+
+Matter development tools
+*************************
+
+If you are developing a door lock with Matter support, you need the `Matter tools`_.

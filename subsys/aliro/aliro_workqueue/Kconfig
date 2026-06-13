@@ -1,0 +1,31 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_WORKQUEUE
+	bool "Aliro workqueue"
+	depends on NCS_ALIRO
+	help
+	  Workqueue dedicated for handling Aliro related work.
+
+if DOOR_LOCK_ALIRO_WORKQUEUE
+
+module = DOOR_LOCK_ALIRO_WORKQUEUE
+module-str = Door Lock Aliro workqueue
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_ALIRO_WORKQUEUE_INIT_PRIORITY
+	int "Aliro workqueue init priority"
+	default APPLICATION_INIT_PRIORITY
+
+config DOOR_LOCK_ALIRO_WORKQUEUE_STACK_SIZE
+	int "Aliro workqueue stack size"
+	default 5120
+
+config DOOR_LOCK_ALIRO_WORKQUEUE_PRIORITY
+	int "Aliro workqueue priority"
+	default 10
+
+endif # DOOR_LOCK_ALIRO_WORKQUEUE

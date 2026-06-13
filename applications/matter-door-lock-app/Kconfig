@@ -1,0 +1,75 @@
+#
+# Copyright (c) 2021 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+mainmenu "Matter Lock sample application"
+
+config LOCK_PASS_CREDENTIALS_TO_SET_LOCK_STATE
+	bool "Pass used credentials when setting the lock state"
+	help
+	  This option should stay disabled until TC-DRLK-2.3 is fixed.
+	  Related issue: https://github.com/project-chip/connectedhomeip/issues/38222
+
+config STATE_LEDS
+	bool "Use LEDs to indicate the device state"
+	default y
+	help
+	  Use LEDs to render the current state of the device such as the progress of commissioning of
+	  the device into a network or the factory reset initiation. Note that setting this option to
+	  'n' does not disable the LED indicating the state of the simulated bolt.
+# Sample configuration used for Thread networking
+if OPENTHREAD
+
+choice OPENTHREAD_NORDIC_LIBRARY_CONFIGURATION
+	default OPENTHREAD_NORDIC_LIBRARY_MTD
+endchoice
+
+choice OPENTHREAD_DEVICE_TYPE
+	default OPENTHREAD_MTD
+endchoice
+
+config CHIP_ENABLE_ICD_SUPPORT
+	default y
+
+# Reduce Thread TX output power to 0 dBm for SED device
+config OPENTHREAD_DEFAULT_TX_POWER
+	default 0
+
+endif # OPENTHREAD
+
+# Increase the storage capacity if the schedules are enabled with secure storage
+# This also implies increasing of the OT and Matter stacks because some operations
+# performed during commissioning seem to allocate stack buffers based on the
+# maximum possible secure asset size.
+if DOOR_LOCK_MATTER_ACCESS_SCHEDULES && NCS_SAMPLE_MATTER_SECURE_STORAGE_BACKEND
+
+config NCS_SAMPLE_MATTER_SECURE_STORAGE_MAX_ENTRY_NUMBER
+	default 128
+
+config TRUSTED_STORAGE_BACKEND_AEAD_MAX_DATA_SIZE
+	default 3072
+
+config OPENTHREAD_THREAD_STACK_SIZE
+	default 7168
+
+config CHIP_TASK_STACK_SIZE
+	default 10240
+
+config MAIN_STACK_SIZE
+	default 7168
+
+endif
+
+# Workaround for KRKNWK-20979.
+# We must use BT multirole for pairing to work after Matter commissioning.
+# TODO: Remove this once the issue is fixed.
+choice BT_LL_SOFTDEVICE_VARIANT
+	default BT_LL_SOFTDEVICE_MULTIROLE if SOC_SERIES_NRF54L && BT_SMP
+endchoice
+
+source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.features"
+source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.defaults"
+source "$(ZEPHYR_NRF_MODULE_DIR)/samples/matter/common/src/Kconfig"
+source "Kconfig.zephyr"

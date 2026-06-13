@@ -1,0 +1,43 @@
+sample:
+  description: Door lock sample application
+  name: ncs-door-lock-sample
+common:
+  sysbuild: true
+  build_only: true
+tests:
+  app.door_lock.nfc-ble-uwb.dfu_smp-matter-exp_fast-step_up:
+    platform_allow: &id001
+    - nrf54lm20dk/nrf54lm20a/cpuapp
+    integration_platforms: *id001
+    extra_args:
+    - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
+    - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+    - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+    - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+  app.door_lock.nfc-ble-uwb.dfu_smp-matter-step_up:
+    platform_allow: *id001
+    integration_platforms: *id001
+    extra_args:
+    - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
+    - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+    - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+    - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+  app.door_lock.nfc.dfu_smp-matter-step_up:
+    platform_allow: &id002
+    - nrf54l15dk/nrf54l15/cpuapp
+    - nrf52840dk/nrf52840
+    - nrf5340dk/nrf5340/cpuapp
+    integration_platforms: *id002
+    extra_args:
+    - matter-aliro-door-lock-app_SNIPPET="dfu_smp"
+    - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+    - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+    - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+  smoke.door_lock.nfc-ble-uwb.dfu_smp-matter-exp_fast-step_up:
+    platform_allow: *id001
+    integration_platforms: *id001
+    extra_args:
+    - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
+    - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+    - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+    - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y

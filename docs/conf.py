@@ -14,11 +14,12 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+from pathlib import Path
 
 # -- Project information -----------------------------------------------------
 
 project = 'nRF Door Lock and Access Control Add-on'
-copyright = '2025, Nordic Semiconductor'
+copyright = '2026, Nordic Semiconductor'
 author = 'Nordic Semiconductor'
 
 # The full version, including alpha/beta/rc tags
@@ -33,7 +34,8 @@ release = ' '
 extensions = [
     'sphinx_tabs.tabs',
     'sphinx_copybutton',
-    'sphinx_togglebutton'
+    'sphinx_togglebutton',
+    'sphinx.ext.autosummary'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -42,7 +44,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ['.venv']
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -57,7 +59,21 @@ html_theme = 'sphinx_ncs_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static'] (currently not in use)
 
-rst_epilog = """
-.. include:: /links.txt
-.. include:: /shortcuts.txt
-"""
+# Read all your shortcut files and concatenate them
+rst_epilog = ""
+
+shortcuts_files = [
+    "links.txt",
+    "shortcuts.txt",
+]
+
+for f in shortcuts_files:
+    filepath = Path(__file__).parent / f
+    if filepath.exists():
+        rst_epilog += filepath.read_text() + "\n"
+
+# -- Options for sphinx_ncs_theme -------------------------------------------
+html_theme_options = {
+    "docset": "aliro",
+    "docsets": {},
+}

@@ -1,0 +1,31 @@
+patches:
+  - path: nrf/dfu1.patch
+    sha256sum: 03d39baaaa6759b9c1da5001aa384f65221e0b1b3eb423dd7c7a3f4e2feb3266
+    module: nrf
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-05-15
+  - path: nrf/dfu2.patch
+    sha256sum: 9085524fa7c74d0980456aee2e7f11e68cf108ce4f9792c5d7a049ce7977606e
+    module: nrf
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-05-15
+  - path: matter/ble1.patch
+    sha256sum: 1ef1fe3c8cfe991a0b02a3841ac5a73dd1ae17ea34b9fa61d967de41ab3676e4
+    module: modules/lib/matter
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-05-18
+  - path: matter/ble2.patch
+    sha256sum: 417be920254f294eb7262c7367a4e98cef9b4390c1896521174918de00c15782
+    module: modules/lib/matter
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-05-26
+  - path: matter/zap.patch
+    sha256sum: 51853e10b27d7a80914ef5aaf25c59270eca32ec241595fd504b49bae19230d3
+    module: modules/lib/matter
+    author: Marcin Kajor
+    email: marcin.kajor@nordicsemi.no
+    date: 2026-04-29

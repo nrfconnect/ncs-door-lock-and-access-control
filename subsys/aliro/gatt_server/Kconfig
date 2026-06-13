@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_GATT_SERVER
+	bool "Aliro gatt server"
+	depends on BT
+	depends on NCS_ALIRO
+
+if DOOR_LOCK_ALIRO_GATT_SERVER
+
+module = DOOR_LOCK_ALIRO_GATT_SERVER
+module-str = Door Lock Aliro gatt server
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_ALIRO_GATT_SERVER
