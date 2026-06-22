@@ -11,7 +11,7 @@ jobs:
   code-compliance:
     name: Zephyr compliance
     runs-on: ubuntu-24.04
-    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:v3.1.0
+    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:v3.3.0
     defaults:
       run:
         # Bash shell is needed to set toolchain related environment variables in docker container
