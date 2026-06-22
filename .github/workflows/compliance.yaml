@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt update
-          apt install -y libmagic-dev libffi7
+          apt install -y libmagic-dev
         shell: bash
 
       - name: Set up workspace directory
