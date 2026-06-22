@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_CRYPTO_UTILS
+	bool "Aliro Crypto Utils"
+	depends on NCS_ALIRO
+	select PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT
+	select PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT
+	select PSA_WANT_ALG_ECDSA
+	select PSA_WANT_ECC_SECP_R1_256
+	select PSA_WANT_ALG_SHA_256
+	select PSA_WANT_KEY_TYPE_AES
+
+if DOOR_LOCK_ALIRO_CRYPTO_UTILS
+
+module = DOOR_LOCK_ALIRO_CRYPTO_UTILS
+module-str = Door Lock Aliro Crypto Utils
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_ALIRO_CRYPTO_UTILS

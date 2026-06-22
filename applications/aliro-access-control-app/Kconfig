@@ -1,0 +1,42 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+mainmenu "nRF Door Lock and Access Control Add-on"
+
+module = DOOR_LOCK_APP
+module-str = NCS_DOOR_LOCK_APP
+module-dep = LOG
+module-help = Enables nRF Connect SDK Door Lock Application log messages.
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_CLI
+	bool "CLI support"
+	default y
+	select SHELL
+	select REBOOT
+	select DOOR_LOCK_ALIRO_READER_STORAGE_SHELL
+	select DOOR_LOCK_ALIRO_READER_STORAGE_SHELL_CORE
+	help
+	  Enable support for Door Lock CLI.
+
+config DOOR_LOCK_RELEASE
+    bool "Release configuration"
+    help
+      In this configuration:
+      Aliro stack logs are disabled.
+      RFAL NFC driver logs are disabled.
+      Device reset automatically on fatal error.
+
+rsource "src/Kconfig"
+
+rsource "Kconfig.defconfig"
+
+# Source BLE defconfig when any BLE feature is enabled
+if DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_SMP_SERVICE || DOOR_LOCK_NUS_SERVICE
+rsource "Kconfig.ble.defconfig"
+endif # DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_SMP_SERVICE || DOOR_LOCK_NUS_SERVICE
+
+source "Kconfig.zephyr"

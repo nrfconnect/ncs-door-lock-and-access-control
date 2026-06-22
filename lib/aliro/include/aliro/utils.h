@@ -147,10 +147,10 @@
 // clang-format on
 
 /**
- * @brief Implemented std::to_underlying introduced in C++23.
+ * @brief Equivalent of C++23 std::to_underlying.
  */
 template <class T> constexpr std::underlying_type_t<T> ToUnderlying(T e)
 {
-	static_assert(std::is_enum<T>::value, "ToUnderlying called to non-enum values.");
+	static_assert(std::is_enum<T>::value, "ToUnderlying called on non-enum value.");
 	return static_cast<std::underlying_type_t<T>>(e);
 }

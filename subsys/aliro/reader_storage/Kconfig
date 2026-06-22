@@ -1,0 +1,56 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_READER_STORAGE
+	bool "Reader Storage"
+	depends on PSA_PROTECTED_STORAGE
+	select DOOR_LOCK_ALIRO_CRYPTO_UTILS
+
+if DOOR_LOCK_ALIRO_READER_STORAGE
+
+module = DOOR_LOCK_ALIRO_READER_STORAGE
+module-str = Door Lock Reader Storage
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_SUPPORT
+	bool "Group Resolving Key Support"
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_IDENTIFIER_PSA_STORAGE_UID
+	hex "Reader Identifier PSA Storage UID"
+	default 0x500000000
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_PRIVATE_KEY_PSA_KEY_ID
+	hex "Reader Private Key PSA Key ID"
+	default 0x40000
+
+if DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_SUPPORT
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_PSA_KEY_ID
+	hex "Group Resolving Key PSA Key ID"
+	default 0x40001
+
+endif # DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_SUPPORT
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_CERTIFICATE_SUPPORT
+	bool "Certificate Support"
+	depends on SETTINGS
+	select DOOR_LOCK_SETTINGS_UTILS
+
+if DOOR_LOCK_ALIRO_READER_STORAGE_CERTIFICATE_SUPPORT
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_SETTINGS_BASE_KEY_NAME
+	string "Settings base key name"
+	default "reader"
+
+config DOOR_LOCK_ALIRO_READER_STORAGE_CERTIFICATE_MAX_SIZE
+	int "Maximum size of the Reader certificate"
+	default 512
+
+endif # DOOR_LOCK_ALIRO_READER_STORAGE_CERTIFICATE_SUPPORT
+
+rsource "src/shell/Kconfig"
+
+endif # DOOR_LOCK_ALIRO_READER_STORAGE

@@ -1,0 +1,173 @@
+From b84e175502c2ffba04c7186092119aaa2d0b642d Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Mon, 18 May 2026 14:19:46 +0200
+Subject: [PATCH 1/2] [nrf toup][nrfconnect] Add support for multiple BT
+ identities
+
+Add `CHIP_BLE_MULTI_IDENTITY_SUPPORT` Kconfig option. Filter Matter BLE
+manager and advertising arbiter callbacks to only handle connections on
+the Matter BLE identity.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+ config/nrfconnect/chip-module/Kconfig         |  9 +++++
+ src/platform/Zephyr/BLEAdvertisingArbiter.cpp | 25 +++++++++++-
+ src/platform/Zephyr/BLEManagerImpl.cpp        | 39 +++++++++++++++++++
+ 3 files changed, 72 insertions(+), 1 deletion(-)
+
+diff --git a/config/nrfconnect/chip-module/Kconfig b/config/nrfconnect/chip-module/Kconfig
+index 8cfd06d6ee..4f921ffe4e 100644
+--- a/config/nrfconnect/chip-module/Kconfig
++++ b/config/nrfconnect/chip-module/Kconfig
+@@ -568,4 +568,13 @@ config CHIP_QSPI_NOR_POWER_MANAGEMENT_SUPPORT
+ 	  Enables management of nRF QSPI NOR external flash power state
+ 	  transitions during Matter operations.
+ 
++config CHIP_BLE_MULTI_IDENTITY_SUPPORT
++  bool "Support for multiple BLE identities"
++  depends on BT
++  help
++    Enables support for multiple BLE identities, allowing the device to maintain separate BLE
++    advertisements and connections for different purposes. When this option is enabled, Matter
++    connection handlers will ignore events for connections established with a different local
++    identity.
++
+ endif # CHIP
+diff --git a/src/platform/Zephyr/BLEAdvertisingArbiter.cpp b/src/platform/Zephyr/BLEAdvertisingArbiter.cpp
+index 51eccd8c49..f2b29e4624 100644
+--- a/src/platform/Zephyr/BLEAdvertisingArbiter.cpp
++++ b/src/platform/Zephyr/BLEAdvertisingArbiter.cpp
+@@ -41,6 +41,22 @@ const BLEAdvertisingArbiter::Request & ToRequest(const sys_snode_t * node)
+     return *static_cast<const BLEAdvertisingArbiter::Request *>(node);
+ }
+ 
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++
++// Check if connection identity matches the identity used for advertising
++bool IsOurIdentity(const bt_conn * conn)
++{
++    VerifyOrReturnValue(conn, false);
++
++    bt_conn_info info{};
++    const int err = bt_conn_get_info(conn, &info);
++    VerifyOrReturnValue(err == 0, false);
++
++    return info.id == sBtId;
++}
++
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++
+ // Notify application about stopped advertising if the callback has been provided
+ void NotifyAdvertisingStopped(const sys_snode_t * node)
+ {
+@@ -81,7 +97,14 @@ CHIP_ERROR RestartAdvertising()
+ }
+ 
+ BT_CONN_CB_DEFINE(conn_callbacks) = {
+-    .disconnected = [](struct bt_conn * conn, uint8_t reason) { sWasDisconnection = true; },
++    .disconnected =
++        [](struct bt_conn * conn, uint8_t reason) {
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++            // Ignore disconnections from other identities
++            VerifyOrReturn(IsOurIdentity(conn));
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++            sWasDisconnection = true;
++        },
+     .recycled =
+         []() {
+             // In this callback the connection object was returned to the pool and we can try to re-start connectable
+diff --git a/src/platform/Zephyr/BLEManagerImpl.cpp b/src/platform/Zephyr/BLEManagerImpl.cpp
+index d88feddec4..03ad4ca148 100644
+--- a/src/platform/Zephyr/BLEManagerImpl.cpp
++++ b/src/platform/Zephyr/BLEManagerImpl.cpp
+@@ -134,6 +134,21 @@ constexpr uint8_t kMatterBleIdentity = 1;
+ constexpr uint8_t kMatterBleIdentity = 0;
+ #endif // CONFIG_BT_BONDABLE
+ 
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++
++bool IsMatterIdentity(const bt_conn * conn)
++{
++    VerifyOrReturnValue(conn, false);
++
++    bt_conn_info info{};
++    const int err = bt_conn_get_info(conn, &info);
++    VerifyOrReturnValue(err == 0, false);
++
++    return info.id == kMatterBleIdentity;
++}
++
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++
+ int InitRandomStaticAddress(bool idPresent, int & id)
+ {
+     // Generate a random static address for the default identity.
+@@ -877,6 +892,10 @@ bool BLEManagerImpl::UnsetSubscribed(bt_conn * conn)
+ ssize_t BLEManagerImpl::HandleRXWrite(struct bt_conn * conId, const struct bt_gatt_attr * attr, const void * buf, uint16_t len,
+                                       uint16_t offset, uint8_t flags)
+ {
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++    VerifyOrReturnValue(IsMatterIdentity(conId), BT_GATT_ERR(BT_ATT_ERR_VALUE_NOT_ALLOWED));
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++
+     ChipDeviceEvent event;
+     PacketBufferHandle packetBuf = PacketBufferHandle::NewWithData(buf, len);
+ 
+@@ -901,6 +920,10 @@ ssize_t BLEManagerImpl::HandleRXWrite(struct bt_conn * conId, const struct bt_ga
+ 
+ ssize_t BLEManagerImpl::HandleTXCCCWrite(struct bt_conn * conId, const struct bt_gatt_attr * attr, uint16_t value)
+ {
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++    VerifyOrReturnValue(IsMatterIdentity(conId), BT_GATT_ERR(BT_ATT_ERR_VALUE_NOT_ALLOWED));
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++
+     ChipDeviceEvent event;
+ 
+     if (value != BT_GATT_CCC_INDICATE && value != 0)
+@@ -919,6 +942,10 @@ ssize_t BLEManagerImpl::HandleTXCCCWrite(struct bt_conn * conId, const struct bt
+ 
+ void BLEManagerImpl::HandleTXIndicated(struct bt_conn * conId, bt_gatt_indicate_params *, uint8_t err)
+ {
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++    VerifyOrReturn(IsMatterIdentity(conId));
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++
+     ChipDeviceEvent event;
+ 
+     event.Type                              = DeviceEventType::kPlatformZephyrBleC2IndDoneEvent;
+@@ -939,6 +966,10 @@ void BLEManagerImpl::HandleConnect(struct bt_conn * conId, uint8_t err)
+     ChipLogProgress(DeviceLayer, "Current number of connections: %u/%u", sInstance.mTotalConnNum, CONFIG_BT_MAX_CONN);
+ 
+     VerifyOrExit(bt_conn_get_info(conId, &bt_info) == 0, );
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++    // Drop all callbacks incoming for the identity other than the one used for advertising
++    VerifyOrExit(bt_info.id == kMatterBleIdentity, );
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
+     // Drop all callbacks incoming for the role other than peripheral, required by the Matter accessory
+     VerifyOrExit(bt_info.role == BT_CONN_ROLE_PERIPHERAL, );
+     // Don't handle BLE connecting events when it is not related to CHIPoBLE
+@@ -969,6 +1000,10 @@ void BLEManagerImpl::HandleDisconnect(struct bt_conn * conId, uint8_t reason)
+     ChipLogProgress(DeviceLayer, "Current number of connections: %u/%u", sInstance.mTotalConnNum, CONFIG_BT_MAX_CONN);
+ 
+     VerifyOrExit(bt_conn_get_info(conId, &bt_info) == 0, );
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++    // Drop all callbacks incoming for the identity other than the one used for advertising
++    VerifyOrExit(bt_info.id == kMatterBleIdentity, );
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
+     // Drop all callbacks incoming for the role other than peripheral, required by the Matter accessory
+     VerifyOrExit(bt_info.role == BT_CONN_ROLE_PERIPHERAL, );
+     // Don't handle BLE disconnecting events when it is not related to CHIPoBLE
+@@ -988,6 +1023,10 @@ exit:
+ ssize_t BLEManagerImpl::HandleC3Read(struct bt_conn * conId, const struct bt_gatt_attr * attr, void * buf, uint16_t len,
+                                      uint16_t offset)
+ {
++#ifdef CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++    VerifyOrReturnValue(IsMatterIdentity(conId), 0);
++#endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
++
+     ChipLogDetail(DeviceLayer, "Read request received for CHIPoBLE C3 (ConnId 0x%02x)", bt_conn_index(conId));
+ 
+     if (sInstance.c3CharDataBufferHandle.IsNull())
+-- 
+2.52.0
+

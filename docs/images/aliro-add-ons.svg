@@ -1,16 +1,54 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Wygenerowane w programie Microsoft Visio, SVG Export aliro-add-ons.svg Infocenter diagram -->
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
-		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="6.98819in" height="7.00787in"
-		viewBox="0 0 503.15 504.567" xml:space="preserve" color-interpolation-filters="sRGB" class="st26">
-	<v:documentProperties v:langID="1033">
+
+<svg
+   width="8.06in"
+   height="7.00787in"
+   viewBox="0 0 580 504.567"
+   xml:space="preserve"
+   color-interpolation-filters="sRGB"
+   class="st26"
+   version="1.1"
+   id="svg518"
+   sodipodi:docname="aliro-add-ons.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/"><defs
+   id="defs522" /><sodipodi:namedview
+   id="namedview520"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   inkscape:document-units="in"
+   showgrid="false"
+   inkscape:zoom="3.9688045"
+   inkscape:cx="377.44364"
+   inkscape:cy="204.46963"
+   inkscape:window-width="1920"
+   inkscape:window-height="1163"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="g516" />
+	<v:documentProperties
+   v:langID="1033">
 		<v:userDefs>
-			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+			<v:ud
+   v:nameU="msvNoAutoConnect"
+   v:val="VT0(1):26" />
 		</v:userDefs>
 	</v:documentProperties>
 
-	<style type="text/css">
+	<style
+   type="text/css"
+   id="style2">
 	<![CDATA[
 		.st1 {fill:none;stroke:none;stroke-width:0.999998}
 		.st2 {fill:none;stroke:none;stroke-width:0.999999}
@@ -41,467 +79,1559 @@
 	]]>
 	</style>
 
-	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
+	<g
+   v:mID="0"
+   v:index="1"
+   v:groupContext="foregroundPage"
+   id="g516"
+   transform="translate(-5.4093781,-4.4763195)">
 		<v:userDefs>
-			<v:ud v:nameU="msvThemeOrder" v:val="VT0(0):26"/>
+			<v:ud
+   v:nameU="msvThemeOrder"
+   v:val="VT0(0):26" />
 		</v:userDefs>
-		<title>Infocenter diagram</title>
-		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50391"
-				v:shadowOffsetY="-8.50391"/>
-		<v:layer v:name="Connector" v:index="0"/>
-		<v:layer v:name="Guides" v:index="1" v:print="false" v:snap="false" v:glue="false" v:lock="true"/>
-		<v:layer v:name="Diagram" v:index="2"/>
-		<g id="group1-1" transform="translate(487.62,-7.51178) rotate(90)" v:mID="1" v:groupContext="group">
-			<v:userDefs/>
-			<title>Arkusz.1</title>
-			<desc>Max 750 px</desc>
-			<g id="shape2-2" v:mID="2" v:groupContext="shape" v:layerMember="1" transform="translate(-6.39488E-14,-6.5912)">
-				<title>Arkusz.2</title>
-				<path d="M0 504.57 L566.93 504.57 L0 504.57 Z" class="st1"/>
+		<title
+   id="title4">Infocenter diagram</title>
+		<v:pageProperties
+   v:drawingScale="0.0393701"
+   v:pageScale="0.0393701"
+   v:drawingUnits="24"
+   v:shadowOffsetX="8.50391"
+   v:shadowOffsetY="-8.50391" />
+		<v:layer
+   v:name="Connector"
+   v:index="0" />
+		<v:layer
+   v:name="Guides"
+   v:index="1"
+   v:print="false"
+   v:snap="false"
+   v:glue="false"
+   v:lock="true" />
+		<v:layer
+   v:name="Diagram"
+   v:index="2" />
+		<g
+   id="group1-1"
+   transform="rotate(90,247.56589,240.05411)"
+   v:mID="1"
+   v:groupContext="group">
+			<v:userDefs />
+			<title
+   id="title6">Arkusz.1</title>
+			<desc
+   id="desc8">Max 750 px</desc>
+			<g
+   id="shape2-2"
+   v:mID="2"
+   v:groupContext="shape"
+   v:layerMember="1"
+   transform="translate(0,-6.5912)">
+				<title
+   id="title10">Arkusz.2</title>
+				<path
+   d="M 0,504.57 H 566.93 Z"
+   class="st1"
+   id="path12" />
 			</g>
-			<g id="group3-4" transform="translate(-6.39488E-14,-6.5912)" v:mID="3" v:groupContext="group">
-				<title>Arkusz.3</title>
-				<g id="shape4-5" v:mID="4" v:groupContext="shape" v:layerMember="1">
-					<title>Arkusz.4</title>
-					<path d="M0 504.57 L566.93 504.57 L0 504.57 Z" class="st2"/>
+			<g
+   id="group3-4"
+   transform="translate(0,-6.5912)"
+   v:mID="3"
+   v:groupContext="group">
+				<title
+   id="title15">Arkusz.3</title>
+				<g
+   id="shape4-5"
+   v:mID="4"
+   v:groupContext="shape"
+   v:layerMember="1">
+					<title
+   id="title17">Arkusz.4</title>
+					<path
+   d="M 0,504.57 H 566.93 Z"
+   class="st2"
+   id="path19" />
 				</g>
-				<g id="shape5-7" v:mID="5" v:groupContext="shape" v:layerMember="1">
-					<title>Arkusz.5</title>
-					<path d="M0 504.57 L566.93 504.57 L0 504.57 Z" class="st3"/>
-					<path d="M0 504.57 L566.93 504.57" class="st4"/>
+				<g
+   id="shape5-7"
+   v:mID="5"
+   v:groupContext="shape"
+   v:layerMember="1">
+					<title
+   id="title22">Arkusz.5</title>
+					<path
+   d="M 0,504.57 H 566.93 Z"
+   class="st3"
+   id="path24" />
+					<path
+   d="M 0,504.57 H 566.93"
+   class="st4"
+   id="path26" />
 				</g>
 			</g>
-			<g id="shape6-10" v:mID="6" v:groupContext="shape" v:layerMember="1" transform="translate(255.033,5.68434E-14)">
-				<title>Arkusz.6</title>
-				<rect x="0" y="491.367" width="56.8641" height="13.2001" class="st5"/>
+			<g
+   id="shape6-10"
+   v:mID="6"
+   v:groupContext="shape"
+   v:layerMember="1"
+   transform="translate(255.033)">
+				<title
+   id="title30">Arkusz.6</title>
+				<rect
+   x="0"
+   y="491.367"
+   width="56.864101"
+   height="13.2001"
+   class="st5"
+   id="rect32" />
 			</g>
-			<g id="shape1-12" v:mID="1" v:groupContext="groupContent">
-				<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-				<v:textRect cx="283.465" cy="497.967" width="566.93" height="0"/>
-				<text x="255.03" y="501.27" class="st6" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Max 750 px</text>			</g>
+			<g
+   id="shape1-12"
+   v:mID="1"
+   v:groupContext="groupContent">
+				<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+				<v:textRect
+   cx="283.465"
+   cy="497.967"
+   width="566.93"
+   height="0" />
+				<text
+   x="255.03"
+   y="501.26999"
+   class="st6"
+   v:langID="1033"
+   id="text35"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Max 750 px</text>			</g>
 		</g>
-		<g id="group7-14" transform="translate(-10.3465,-505.479)" v:mID="7" v:groupContext="group">
-			<v:userDefs/>
-			<title>Arkusz.7</title>
-			<desc>Max 700 px</desc>
-			<g id="shape8-15" v:mID="8" v:groupContext="shape" v:layerMember="1" transform="translate(0,-6.5912)">
-				<title>Arkusz.8</title>
-				<path d="M0 504.57 L524.41 504.57 L0 504.57 Z" class="st1"/>
+		<g
+   id="group7-14"
+   transform="translate(-10.3465,-505.479)"
+   v:mID="7"
+   v:groupContext="group">
+			<v:userDefs />
+			<title
+   id="title39">Arkusz.7</title>
+			<desc
+   id="desc41">Max 700 px</desc>
+			<g
+   id="shape8-15"
+   v:mID="8"
+   v:groupContext="shape"
+   v:layerMember="1"
+   transform="translate(0,-6.5912)">
+				<title
+   id="title43">Arkusz.8</title>
+				<path
+   d="M 0,504.57 H 524.41 Z"
+   class="st1"
+   id="path45" />
 			</g>
-			<g id="group9-17" transform="translate(0,-6.5912)" v:mID="9" v:groupContext="group">
-				<title>Arkusz.9</title>
-				<g id="shape10-18" v:mID="10" v:groupContext="shape" v:layerMember="1">
-					<title>Arkusz.10</title>
-					<path d="M0 504.57 L524.41 504.57 L0 504.57 Z" class="st2"/>
+			<g
+   id="group9-17"
+   transform="translate(0,-6.5912)"
+   v:mID="9"
+   v:groupContext="group">
+				<title
+   id="title48">Arkusz.9</title>
+				<g
+   id="shape10-18"
+   v:mID="10"
+   v:groupContext="shape"
+   v:layerMember="1">
+					<title
+   id="title50">Arkusz.10</title>
+					<path
+   d="M 0,504.57 H 524.41 Z"
+   class="st2"
+   id="path52" />
 				</g>
-				<g id="shape11-20" v:mID="11" v:groupContext="shape" v:layerMember="1">
-					<title>Arkusz.11</title>
-					<path d="M0 504.57 L524.41 504.57 L0 504.57 Z" class="st3"/>
-					<path d="M0 504.57 L524.41 504.57" class="st4"/>
+				<g
+   id="shape11-20"
+   v:mID="11"
+   v:groupContext="shape"
+   v:layerMember="1">
+					<title
+   id="title55">Arkusz.11</title>
+					<path
+   d="M 0,504.57 H 524.41 Z"
+   class="st3"
+   id="path57" />
+					<path
+   d="M 0,504.57 H 524.41"
+   class="st4"
+   id="path59" />
 				</g>
 			</g>
-			<g id="shape12-23" v:mID="12" v:groupContext="shape" v:layerMember="1" transform="translate(233.773,5.68434E-14)">
-				<title>Arkusz.12</title>
-				<rect x="0" y="491.367" width="56.8641" height="13.2001" class="st7"/>
+			<g
+   id="shape12-23"
+   v:mID="12"
+   v:groupContext="shape"
+   v:layerMember="1"
+   transform="translate(233.773)">
+				<title
+   id="title63">Arkusz.12</title>
+				<rect
+   x="0"
+   y="491.367"
+   width="56.864101"
+   height="13.2001"
+   class="st7"
+   id="rect65" />
 			</g>
-			<g id="shape7-25" v:mID="7" v:groupContext="groupContent">
-				<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-				<v:textRect cx="262.205" cy="497.967" width="524.41" height="0"/>
-				<text x="233.77" y="501.27" class="st6" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Max 700 px</text>			</g>
+			<g
+   id="shape7-25"
+   v:mID="7"
+   v:groupContext="groupContent">
+				<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+				<v:textRect
+   cx="262.205"
+   cy="497.967"
+   width="524.41"
+   height="0" />
+				<text
+   x="233.77"
+   y="501.26999"
+   class="st6"
+   v:langID="1033"
+   id="text68"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Max 700 px</text>			</g>
 		</g>
-		<g id="group13-27" transform="translate(1018.63,-7.51178) rotate(90)" v:mID="13" v:groupContext="group">
-			<title>Arkusz.13</title>
-			<g id="shape14-28" v:mID="14" v:groupContext="shape" v:layerMember="1">
-				<title>Arkusz.14</title>
-				<path d="M0 504.57 L566.93 504.57 L0 504.57 Z" class="st1"/>
+		
+		<g
+   id="group18-36"
+   transform="translate(-10.3465,54.8594)"
+   v:mID="18"
+   v:groupContext="group">
+			<title
+   id="title95">Arkusz.18</title>
+			<g
+   id="shape19-37"
+   v:mID="19"
+   v:groupContext="shape"
+   v:layerMember="1">
+				<title
+   id="title97">Arkusz.19</title>
+				<path
+   d="M 0,504.57 H 524.41 Z"
+   class="st1"
+   id="path99" />
 			</g>
-			<g id="group15-30" v:mID="15" v:groupContext="group">
-				<title>Arkusz.15</title>
-				<g id="shape16-31" v:mID="16" v:groupContext="shape" v:layerMember="1">
-					<title>Arkusz.16</title>
-					<path d="M0 504.57 L566.93 504.57 L0 504.57 Z" class="st2"/>
+			<g
+   id="group20-39"
+   v:mID="20"
+   v:groupContext="group">
+				<title
+   id="title102">Arkusz.20</title>
+				<g
+   id="shape21-40"
+   v:mID="21"
+   v:groupContext="shape"
+   v:layerMember="1">
+					<title
+   id="title104">Arkusz.21</title>
+					<path
+   d="M 0,504.57 H 524.41 Z"
+   class="st2"
+   id="path106" />
 				</g>
-				<g id="shape17-33" v:mID="17" v:groupContext="shape" v:layerMember="1">
-					<title>Arkusz.17</title>
-					<path d="M0 504.57 L566.93 504.57 L0 504.57 Z" class="st3"/>
-					<path d="M0 504.57 L566.93 504.57" class="st4"/>
+				<g
+   id="shape22-42"
+   v:mID="22"
+   v:groupContext="shape"
+   v:layerMember="1">
+					<title
+   id="title109">Arkusz.22</title>
+					<path
+   d="M 0,504.57 H 524.41 Z"
+   class="st3"
+   id="path111" />
+					<path
+   d="M 0,504.57 H 524.41"
+   class="st4"
+   id="path113" />
 				</g>
 			</g>
 		</g>
-		<g id="group18-36" transform="translate(-10.3465,54.8594)" v:mID="18" v:groupContext="group">
-			<title>Arkusz.18</title>
-			<g id="shape19-37" v:mID="19" v:groupContext="shape" v:layerMember="1">
-				<title>Arkusz.19</title>
-				<path d="M0 504.57 L524.41 504.57 L0 504.57 Z" class="st1"/>
-			</g>
-			<g id="group20-39" v:mID="20" v:groupContext="group">
-				<title>Arkusz.20</title>
-				<g id="shape21-40" v:mID="21" v:groupContext="shape" v:layerMember="1">
-					<title>Arkusz.21</title>
-					<path d="M0 504.57 L524.41 504.57 L0 504.57 Z" class="st2"/>
-				</g>
-				<g id="shape22-42" v:mID="22" v:groupContext="shape" v:layerMember="1">
-					<title>Arkusz.22</title>
-					<path d="M0 504.57 L524.41 504.57 L0 504.57 Z" class="st3"/>
-					<path d="M0 504.57 L524.41 504.57" class="st4"/>
-				</g>
-			</g>
+		<g
+   id="shape23-45"
+   v:mID="23"
+   v:groupContext="shape"
+   transform="translate(7.08664,-255.118)">
+			<title
+   id="title118">Nordic Blue</title>
+			<rect
+   x="0"
+   y="261.091"
+   width="571.97601"
+   height="243.476"
+   class="st8"
+   id="rect120" />
 		</g>
-		<g id="shape23-45" v:mID="23" v:groupContext="shape" transform="translate(7.08664,-255.118)">
-			<title>Nordic Blue</title>
-			<rect x="0" y="261.091" width="488.976" height="243.476" class="st8"/>
-		</g>
-		<g id="shape24-47" v:mID="24" v:groupContext="shape" transform="translate(110.2932,-461.743)">
-			<title>Arkusz.24</title>
-			<desc>Aliro reference application</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="138.898" cy="486.141" width="277.81" height="36.8504"/>
-			<rect x="0" y="467.716" width="277.795" height="36.8504" class="st9"/>
-			<text x="138.898" y="486.141" text-anchor="middle" dominant-baseline="middle" class="st10" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>nRF Door Lock and Access Control Add-on</text>		</g>
-		<g id="shape25-50" v:mID="25" v:groupContext="shape" transform="translate(20.7537,-433.134)">
-			<title>Nordic Blueslate</title>
-			<desc>nRF Door Lock and Access Control Application</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="228.442" cy="490.262" width="456.89" height="28.6097"/>
-			<rect x="0" y="475.957" width="456.884" height="28.6097" class="st11"/>
-			<text x="228.442" y="490.262" text-anchor="middle" dominant-baseline="middle" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>nRF Door Lock and Access Control Application</text>		</g>
-		<g id="shape26-53" v:mID="26" v:groupContext="shape" transform="translate(-107.15,-420.936)">
-			<title>Block Double Arrow.1006</title>
+		<g
+   id="shape24-47"
+   v:mID="24"
+   v:groupContext="shape"
+   transform="translate(105.2932,-461.743)">
+			<title
+   id="title123">Arkusz.24</title>
+			<desc
+   id="desc125">Aliro reference application</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="180"
+   cy="486.141"
+   width="360"
+   height="36.8504" />
+			<rect
+   x="0"
+   y="467.716"
+   width="360"
+   height="36.850399"
+   class="st9"
+   id="rect127" />
+			<text
+   x="180"
+   y="486.14099"
+   text-anchor="middle"
+   dominant-baseline="middle"
+   class="st10"
+   v:langID="1033"
+   id="text129"><v:paragraph
+   v:horizAlign="1" /><v:tabList />nRF Door Lock and Access Control Add-on</text>		</g>
+		<g
+   id="shape25-50"
+   v:mID="25"
+   v:groupContext="shape"
+   transform="translate(20.7537,-433.134)">
+			<title
+   id="title132">Nordic Blueslate</title>
+			<desc
+   id="desc134">nRF Door Lock and Access Control Applications</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="275.0416"
+   cy="490.262"
+   width="550.0832"
+   height="28.6097" />
+			<rect
+   x="0"
+   y="475.957"
+   width="550.08319"
+   height="28.609699"
+   class="st11"
+   id="rect136" />
+			<text
+   x="275.0416"
+   y="490.26199"
+   text-anchor="middle"
+   dominant-baseline="middle"
+   class="st12"
+   v:langID="1033"
+   id="text138"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />nRF Door Lock and Access Control Applications</text>		</g>
+		<g
+   id="shape26-53"
+   v:mID="26"
+   v:groupContext="shape"
+   transform="translate(-107.15,-420.936)">
+			<title
+   id="title141">Block Double Arrow.1006</title>
 			<v:userDefs>
-				<v:ud v:nameU="visVersion" v:val="VT0(17):26"/>
+				<v:ud
+   v:nameU="visVersion"
+   v:val="VT0(17):26" />
 			</v:userDefs>
-			<path d="M0.93 481.89 L0.93 476.22 L0 490.39 L0.93 504.57 L0.93 498.9 L0.93 504.57 L1.86 490.39 L0.93 476.22 L0.93 481.89
-						 Z" class="st13"/>
+			<path
+   d="m 0.93,481.89 v -5.67 L 0,490.39 0.93,504.57 v -5.67 5.67 L 1.86,490.39 0.93,476.22 Z"
+   class="st13"
+   id="path143" />
 		</g>
-		<g id="shape27-55" v:mID="27" v:groupContext="shape" transform="translate(20.7537,-307.559)">
-			<title>Nordic Lake.1007</title>
-			<desc>Aliro stack</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:verticalAlign="0"/>
-			<v:textRect cx="63.3242" cy="446.26" width="126.65" height="116.611"/>
-			<rect x="0" y="387.956" width="126.648" height="116.611" class="st14"/>
-			<text x="37.96" y="401.85" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>Aliro stack</text>		</g>
-		<g id="shape28-58" v:mID="28" v:groupContext="shape" transform="translate(259.388,-264.189)">
-			<title>Nordic Lake.1010</title>
-			<desc>NFC reader</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:verticalAlign="0"/>
-			<v:textRect cx="109.125" cy="424.519" width="218.25" height="160.097"/>
-			<rect x="0" y="344.47" width="218.249" height="160.097" class="st14"/>
-			<text x="80.39" y="358.37" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>NFC reader</text>		</g>
-		<g id="shape29-61" v:mID="29" v:groupContext="shape" transform="translate(280.465,-381.991)">
-			<title>Nordic Sky.1011</title>
-			<desc>STM RFAL API</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="91.5338" cy="495.582" width="183.07" height="17.9696"/>
-			<rect x="0" y="486.597" width="183.068" height="17.9696" class="st15"/>
-			<text x="53.94" y="498.88" class="st16" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>STM RFAL API</text>		</g>
-		<g id="shape30-64" v:mID="30" v:groupContext="shape" transform="translate(280.465,-350.534)">
-			<title>Nordic Sky.1012</title>
-			<desc>Zephyr PAL</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="91.5338" cy="495.582" width="183.07" height="17.9696"/>
-			<rect x="0" y="486.597" width="183.068" height="17.9696" class="st15"/>
-			<text x="62.49" y="498.88" class="st16" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>Zephyr PAL</text>		</g>
-		<g id="shape31-67" v:mID="31" v:groupContext="shape" transform="translate(280.465,-319.077)">
-			<title>Nordic Sky.1013</title>
-			<desc>STM RFAL</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="91.5338" cy="495.582" width="183.07" height="17.9696"/>
-			<rect x="0" y="486.597" width="183.068" height="17.9696" class="st15"/>
-			<text x="64.34" y="498.88" class="st16" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>STM RFAL</text>		</g>
-		<g id="shape32-70" v:mID="32" v:groupContext="shape" transform="translate(280.465,-288.653)">
-			<title>Nordic Sky.1014</title>
-			<desc>STM25R drivers</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="91.5338" cy="495.582" width="183.07" height="17.9696"/>
-			<rect x="0" y="486.597" width="183.068" height="17.9696" class="st15"/>
-			<text x="51.8" y="498.88" class="st16" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>STM25R drivers</text>		</g>
-		<g id="shape33-73" v:mID="33" v:groupContext="shape" transform="translate(31.6634,-368.201)">
-			<title>Nordic Sky.1015</title>
-			<desc>Aliro stack API</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="53.1163" cy="490.242" width="106.24" height="28.6495"/>
-			<rect x="0" y="475.917" width="106.233" height="28.6495" class="st15"/>
-			<text x="17.36" y="493.54" class="st16" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>Aliro stack API</text>		</g>
-		<g id="shape34-76" v:mID="34" v:groupContext="shape" transform="translate(31.6634,-325.681)">
-			<title>Nordic Sky.1016</title>
-			<desc>Aliro stack binary library</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="53.1163" cy="490.242" width="106.24" height="28.6495"/>
-			<rect x="0" y="475.917" width="106.233" height="28.6495" class="st15"/>
-			<text x="11.24" y="486.94" class="st16" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>Aliro stack binary <tspan
-						x="38.14" dy="1.2em" class="st17">library</tspan></text>		</g>
-		<g id="shape35-80" v:mID="35" v:groupContext="shape" transform="translate(7.08664,-262.711)">
-			<title>Arkusz.35</title>
-			<desc>west.yaml</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="32.8819" cy="492.094" width="65.77" height="24.9449"/>
-			<rect x="0" y="479.622" width="65.7638" height="24.9449" class="st9"/>
-			<text x="8.43" y="495.39" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>west.yaml</text>		</g>
-		<g id="shape36-83" v:mID="36" v:groupContext="shape" transform="translate(5.84835E-05,-128.409)">
-			<title>Arkusz.36</title>
-			<desc>west.yaml</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="49.606" cy="492.094" width="99.22" height="24.9449"/>
-			<rect x="0" y="479.622" width="99.2123" height="24.9449" class="st9"/>
-			<text x="25.16" y="495.39" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>west.yaml</text>		</g>
-		<g id="shape37-86" v:mID="37" v:groupContext="shape" transform="translate(20.2475,-138.331)">
-			<title>Nordic Blueslate.1020</title>
-			<desc>nRF Connect SDK</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="69.9997" cy="469.735" width="140.01" height="69.6639"/>
-			<rect x="0" y="434.903" width="140" height="69.6639" class="st11"/>
-			<text x="24.76" y="473.04" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>nRF Connect SDK</text>		</g>
-		<g id="shape38-89" v:mID="38" v:groupContext="shape" transform="translate(16.7042,-135.658)">
-			<title>Arkusz.38</title>
-			<desc>west.yaml</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="26.2205" cy="492.094" width="52.45" height="24.9449"/>
-			<rect x="0" y="479.622" width="52.4409" height="24.9449" class="st9"/>
-			<text x="8.44" y="494.49" class="st18" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>west.yaml</text>		</g>
-		<g id="group39-92" transform="translate(386.367,739.484) rotate(166.008)" v:mID="39" v:groupContext="group">
+		<g
+   id="shape27-55"
+   v:mID="27"
+   v:groupContext="shape"
+   transform="translate(20.7537,-307.559)">
+			<title
+   id="title146">Nordic Lake.1007</title>
+			<desc
+   id="desc148">Aliro stack</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:verticalAlign="0" />
+			<v:textRect
+   cx="63.3242"
+   cy="446.26"
+   width="126.65"
+   height="116.611" />
+			<rect
+   x="0"
+   y="387.95599"
+   width="126.648"
+   height="116.611"
+   class="st14"
+   id="rect150" />
+			<text
+   x="37.959999"
+   y="401.85001"
+   class="st12"
+   v:langID="1033"
+   id="text152"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />Aliro stack</text>		</g>
+		<g
+   id="shape28-58"
+   v:mID="28"
+   v:groupContext="shape"
+   transform="translate(159.92868,-262.52662)">
+			<title
+   id="title155">Nordic Lake.1010</title>
+			<desc
+   id="desc157">NFC reader</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:verticalAlign="0" />
+			<v:textRect
+   cx="109.125"
+   cy="424.519"
+   width="218.25"
+   height="160.097" />
+			<rect
+   x="0"
+   y="344.47"
+   width="218.24899"
+   height="160.097"
+   class="st14"
+   id="rect159" />
+			<text
+   x="80.389999"
+   y="358.37"
+   class="st12"
+   v:langID="1033"
+   id="text161"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />NFC reader</text>		</g>
+		<g
+   id="shape29-61"
+   v:mID="29"
+   v:groupContext="shape"
+   transform="translate(181.21236,-376.28192)">
+			<title
+   id="title164">Nordic Sky.1011</title>
+			<desc
+   id="desc166">STM RFAL API</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="91.5338"
+   cy="495.582"
+   width="183.07"
+   height="17.9696" />
+			<rect
+   x="0"
+   y="486.59698"
+   width="183.06799"
+   height="17.969601"
+   class="st15"
+   id="rect168" />
+			<text
+   x="91.5338"
+   y="498.88"
+   text-anchor="middle"
+   class="st16"
+   v:langID="1033"
+   id="text170"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />STM RFAL API</text>		</g>
+		<g
+   id="shape30-64"
+   v:mID="30"
+   v:groupContext="shape"
+   transform="translate(181.21236,-350.22599)">
+			<title
+   id="title173">Nordic Sky.1012</title>
+			<desc
+   id="desc175">Zephyr PAL</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="91.5338"
+   cy="495.582"
+   width="183.07"
+   height="17.9696" />
+			<rect
+   x="0"
+   y="486.59698"
+   width="183.06799"
+   height="17.969601"
+   class="st15"
+   id="rect177" />
+			<text
+   x="91.5338"
+   y="498.88"
+   text-anchor="middle"
+   class="st16"
+   v:langID="1033"
+   id="text179"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />Zephyr PAL</text>		</g>
+		<g
+   id="shape31-67"
+   v:mID="31"
+   v:groupContext="shape"
+   transform="translate(181.21236,-324.16992)">
+			<title
+   id="title182">Nordic Sky.1013</title>
+			<desc
+   id="desc184">STM RFAL</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="91.5338"
+   cy="495.582"
+   width="183.07"
+   height="17.9696" />
+			<rect
+   x="0"
+   y="486.59698"
+   width="183.06799"
+   height="17.969601"
+   class="st15"
+   id="rect186" />
+			<text
+   x="91.5338"
+   y="498.88"
+   text-anchor="middle"
+   class="st16"
+   v:langID="1033"
+   id="text188"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />STM RFAL</text>		</g>
+		<g
+   id="shape32-70"
+   v:mID="32"
+   v:groupContext="shape"
+   transform="translate(181.21236,-298.11392)">
+			<title
+   id="title191">Nordic Sky.1014</title>
+			<desc
+   id="desc193">STM25R drivers</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="91.5338"
+   cy="495.582"
+   width="183.07"
+   height="17.9696" />
+			<rect
+   x="0"
+   y="486.59698"
+   width="183.06799"
+   height="17.969601"
+   class="st15"
+   id="rect195" />
+			<text
+   x="91.5338"
+   y="498.88"
+   text-anchor="middle"
+   class="st16"
+   v:langID="1033"
+   id="text197"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />STM25R drivers</text>		</g>
+		<g
+   id="shape33-73"
+   v:mID="33"
+   v:groupContext="shape"
+   transform="translate(31.6634,-368.201)">
+			<title
+   id="title200">Nordic Sky.1015</title>
+			<desc
+   id="desc202">Aliro stack API</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="53.1163"
+   cy="490.242"
+   width="106.24"
+   height="28.6495" />
+			<rect
+   x="0"
+   y="475.91699"
+   width="106.233"
+   height="28.6495"
+   class="st15"
+   id="rect204" />
+			<text
+   x="17.360001"
+   y="493.54001"
+   class="st16"
+   v:langID="1033"
+   id="text206"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />Aliro stack API</text>		</g>
+		<g
+   id="shape34-76"
+   v:mID="34"
+   v:groupContext="shape"
+   transform="translate(31.6634,-325.681)">
+			<title
+   id="title209">Nordic Sky.1016</title>
+			<desc
+   id="desc211">Aliro stack binary library</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="53.1163"
+   cy="490.242"
+   width="106.24"
+   height="28.6495" />
+			<rect
+   x="0"
+   y="475.91699"
+   width="106.233"
+   height="28.6495"
+   class="st15"
+   id="rect213" />
+			<text
+   x="11.24"
+   y="486.94"
+   class="st16"
+   v:langID="1033"
+   id="text217"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />Aliro stack binary <tspan
+   x="38.139999"
+   dy="1.2em"
+   class="st17"
+   id="tspan215">library</tspan></text>		</g>
+		<g
+   id="shape35-80"
+   v:mID="35"
+   v:groupContext="shape"
+   transform="translate(7.08664,-262.711)">
+			<title
+   id="title220">Arkusz.35</title>
+			<desc
+   id="desc222">west.yaml</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="32.8819"
+   cy="492.094"
+   width="65.77"
+   height="24.9449" />
+			<rect
+   x="0"
+   y="479.62201"
+   width="65.763802"
+   height="24.944901"
+   class="st9"
+   id="rect224" />
+			<text
+   x="8.4300003"
+   y="495.39001"
+   class="st12"
+   v:langID="1033"
+   id="text226"><v:paragraph
+   v:horizAlign="1" /><v:tabList />west.yaml</text>		</g>
+		<g
+   id="shape36-83"
+   v:mID="36"
+   v:groupContext="shape"
+   transform="translate(5.84835e-5,-128.409)">
+			<title
+   id="title229">Arkusz.36</title>
+			<desc
+   id="desc231">west.yaml</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="49.606"
+   cy="492.094"
+   width="99.22"
+   height="24.9449" />
+			<rect
+   x="0"
+   y="479.62201"
+   width="99.212303"
+   height="24.944901"
+   class="st9"
+   id="rect233" />
+			<text
+   x="25.16"
+   y="495.39001"
+   class="st12"
+   v:langID="1033"
+   id="text235"><v:paragraph
+   v:horizAlign="1" /><v:tabList />west.yaml</text>		</g>
+		<g
+   id="shape37-86"
+   v:mID="37"
+   v:groupContext="shape"
+   transform="translate(56.985209,-139.50618)">
+			<title
+   id="title238">Nordic Blueslate.1020</title>
+			<desc
+   id="desc240">nRF Connect SDK</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="69.9997"
+   cy="469.735"
+   width="140.01"
+   height="69.6639" />
+			<rect
+   x="0"
+   y="434.90302"
+   width="140"
+   height="69.663902"
+   class="st11"
+   id="rect242" />
+			<text
+   x="24.76"
+   y="473.04001"
+   class="st12"
+   v:langID="1033"
+   id="text244"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />nRF Connect SDK</text>		</g>
+		<g
+   id="shape38-89"
+   v:mID="38"
+   v:groupContext="shape"
+   transform="translate(53.441909,-136.83318)">
+			<title
+   id="title247">Arkusz.38</title>
+			<desc
+   id="desc249">west.yaml</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="26.2205"
+   cy="492.094"
+   width="52.45"
+   height="24.9449" />
+			<rect
+   x="0"
+   y="479.62201"
+   width="52.440899"
+   height="24.944901"
+   class="st9"
+   id="rect251" />
+			<text
+   x="8.4399996"
+   y="494.48999"
+   class="st18"
+   v:langID="1033"
+   id="text253"><v:paragraph
+   v:horizAlign="1" /><v:tabList />west.yaml</text>		</g>
+		<g
+   id="group39-92"
+   transform="rotate(166.008,166.25205,395.11478)"
+   v:mID="39"
+   v:groupContext="group">
 			<v:userDefs>
-				<v:ud v:nameU="Scale" v:val="VT0(1):26"/>
-				<v:ud v:nameU="AntiScale" v:val="VT0(1):26"/>
-				<v:ud v:nameU="visVersion" v:val="VT0(17):26"/>
+				<v:ud
+   v:nameU="Scale"
+   v:val="VT0(1):26" />
+				<v:ud
+   v:nameU="AntiScale"
+   v:val="VT0(1):26" />
+				<v:ud
+   v:nameU="visVersion"
+   v:val="VT0(17):26" />
 			</v:userDefs>
-			<title>Line Arrow.1022</title>
-			<g id="shape40-93" v:mID="40" v:groupContext="shape" transform="translate(173.86,5.68434E-14)">
-				<title>Arkusz.40</title>
-				<path d="M0 498.18 L0 504.57 L6.39 501.38 L0 498.18 Z" class="st14"/>
+			<title
+   id="title256">Line Arrow.1022</title>
+			<g
+   id="shape40-93"
+   v:mID="40"
+   v:groupContext="shape"
+   transform="translate(173.86)">
+				<title
+   id="title258">Arkusz.40</title>
+				<path
+   d="m 0,498.18 v 6.39 l 6.39,-3.19 z"
+   class="st14"
+   id="path260" />
 			</g>
-			<g id="shape41-95" v:mID="41" v:groupContext="shape" transform="translate(173.86,5.68434E-14)">
-				<title>Arkusz.41</title>
-				<path d="M0 498.18 L0 504.57 L6.39 501.38 L0 498.18 Z" class="st19"/>
+			<g
+   id="shape41-95"
+   v:mID="41"
+   v:groupContext="shape"
+   transform="translate(173.86)">
+				<title
+   id="title263">Arkusz.41</title>
+				<path
+   d="m 0,498.18 v 6.39 l 6.39,-3.19 z"
+   class="st19"
+   id="path265" />
 			</g>
-			<g id="group42-97" transform="translate(2.07834E-13,-3.19)" v:mID="42" v:groupContext="group">
-				<title>Arkusz.42</title>
-				<g id="shape43-98" v:mID="43" v:groupContext="shape">
-					<title>Arkusz.43</title>
-					<path d="M0 504.57 L173.86 504.57 L0 504.57 Z" class="st1"/>
+			<g
+   id="group42-97"
+   transform="translate(0,-3.19)"
+   v:mID="42"
+   v:groupContext="group">
+				<title
+   id="title268">Arkusz.42</title>
+				<g
+   id="shape43-98"
+   v:mID="43"
+   v:groupContext="shape">
+					<title
+   id="title270">Arkusz.43</title>
+					<path
+   d="M 0,504.57 H 173.86 Z"
+   class="st1"
+   id="path272" />
 				</g>
-				<g id="group44-100" v:mID="44" v:groupContext="group">
-					<title>Arkusz.44</title>
-					<g id="shape45-101" v:mID="45" v:groupContext="shape">
-						<title>Arkusz.45</title>
-						<path d="M0 504.57 L173.86 504.57 L0 504.57 Z" class="st2"/>
+				<g
+   id="group44-100"
+   v:mID="44"
+   v:groupContext="group">
+					<title
+   id="title275">Arkusz.44</title>
+					<g
+   id="shape45-101"
+   v:mID="45"
+   v:groupContext="shape">
+						<title
+   id="title277">Arkusz.45</title>
+						<path
+   d="M 0,504.57 H 173.86 Z"
+   class="st2"
+   id="path279" />
 					</g>
-					<g id="shape46-103" v:mID="46" v:groupContext="shape">
-						<title>Arkusz.46</title>
-						<path d="M0 504.57 L173.86 504.57 L0 504.57 Z" class="st3"/>
-						<path d="M0 504.57 L173.86 504.57" class="st20"/>
+					<g
+   id="shape46-103"
+   v:mID="46"
+   v:groupContext="shape">
+						<title
+   id="title282">Arkusz.46</title>
+						<path
+   d="M 0,504.57 H 173.86 Z"
+   class="st3"
+   id="path284" />
+						<path
+   d="M 0,504.57 H 173.86"
+   class="st20"
+   id="path286" />
 					</g>
 				</g>
 			</g>
 		</g>
-		<g id="shape47-106" v:mID="47" v:groupContext="shape" transform="translate(57.604,-221.945)">
-			<title>Arkusz.47</title>
-			<desc>revision ”x”</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="42.0641" cy="495.067" width="84.13" height="19"/>
-			<rect x="0" y="485.567" width="84.1279" height="19" class="st9"/>
-			<text x="20.06" y="497.77" class="st21" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>revision ”x”</text>		</g>
-		<g id="shape48-109" v:mID="48" v:groupContext="shape" transform="translate(189.314,-222.056)">
-			<title>Arkusz.48</title>
-			<desc>revision ”y”</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="49.606" cy="495.067" width="99.22" height="19"/>
-			<rect x="0" y="485.567" width="99.2123" height="19" class="st9"/>
-			<text x="27.6" y="497.77" class="st21" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>revision ”y”</text>		</g>
-		<g id="shape49-112" v:mID="49" v:groupContext="shape" transform="translate(189.314,-138.331)">
-			<title>Nordic Lake.1026</title>
-			<desc>Nordic Aliro stack</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="69.9997" cy="469.735" width="140.01" height="69.6639"/>
-			<rect x="0" y="434.903" width="140" height="69.6639" class="st22"/>
-			<text x="27.21" y="473.04" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>Nordic Aliro stack</text>		</g>
-		<g id="shape50-115" v:mID="50" v:groupContext="shape" transform="translate(187.795,-134.646)">
-			<title>Arkusz.50</title>
-			<desc>west.yaml</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="22.6772" cy="492.094" width="45.36" height="24.9449"/>
-			<rect x="0" y="479.622" width="45.3543" height="24.9449" class="st9"/>
-			<text x="4.9" y="494.49" class="st18" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>west.yaml</text>		</g>
-		<g id="shape51-118" v:mID="51" v:groupContext="shape" transform="translate(262.205,-138.331)">
-			<title>Arkusz.51</title>
-			<desc>private</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="49.606" cy="492.094" width="99.22" height="24.9449"/>
-			<rect x="0" y="479.622" width="99.2123" height="24.9449" class="st9"/>
-			<text x="37.6" y="494.49" class="st18" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>private</text>		</g>
-		<g id="group52-121" transform="translate(766.512,252.992) rotate(90)" v:mID="52" v:groupContext="group">
+		<g
+   id="shape47-106"
+   v:mID="47"
+   v:groupContext="shape"
+   transform="translate(94.341709,-223.12018)">
+			<title
+   id="title292">Arkusz.47</title>
+			<desc
+   id="desc294">revision ”x”</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="42.0641"
+   cy="495.067"
+   width="84.13"
+   height="19" />
+			<rect
+   x="0"
+   y="485.56699"
+   width="84.127899"
+   height="19"
+   class="st9"
+   id="rect296" />
+			<text
+   x="20.059999"
+   y="497.76999"
+   class="st21"
+   v:langID="1033"
+   id="text298"><v:paragraph
+   v:horizAlign="1" /><v:tabList />revision ”x”</text>		</g>
+		<g
+   id="shape48-109"
+   v:mID="48"
+   v:groupContext="shape"
+   transform="translate(226.05171,-223.23118)">
+			<title
+   id="title301">Arkusz.48</title>
+			<desc
+   id="desc303">revision ”y”</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="49.606"
+   cy="495.067"
+   width="99.22"
+   height="19" />
+			<rect
+   x="0"
+   y="485.56699"
+   width="99.212303"
+   height="19"
+   class="st9"
+   id="rect305" />
+			<text
+   x="27.6"
+   y="497.76999"
+   class="st21"
+   v:langID="1033"
+   id="text307"><v:paragraph
+   v:horizAlign="1" /><v:tabList />revision ”y”</text>		</g>
+		<g
+   id="shape49-112"
+   v:mID="49"
+   v:groupContext="shape"
+   transform="translate(226.05171,-139.50618)">
+			<title
+   id="title310">Nordic Lake.1026</title>
+			<desc
+   id="desc312">Nordic Aliro stack</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="69.9997"
+   cy="469.735"
+   width="140.01"
+   height="69.6639" />
+			<rect
+   x="0"
+   y="434.90302"
+   width="140"
+   height="69.663902"
+   class="st22"
+   id="rect314" />
+			<text
+   x="27.209999"
+   y="473.04001"
+   class="st12"
+   v:langID="1033"
+   id="text316"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />Nordic Aliro stack</text>		</g>
+		<g
+   id="shape50-115"
+   v:mID="50"
+   v:groupContext="shape"
+   transform="translate(224.53271,-135.82118)">
+			<title
+   id="title319">Arkusz.50</title>
+			<desc
+   id="desc321">west.yaml</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="22.6772"
+   cy="492.094"
+   width="45.36"
+   height="24.9449" />
+			<rect
+   x="0"
+   y="479.62201"
+   width="45.354301"
+   height="24.944901"
+   class="st9"
+   id="rect323" />
+			<text
+   x="4.9000001"
+   y="494.48999"
+   class="st18"
+   v:langID="1033"
+   id="text325"><v:paragraph
+   v:horizAlign="1" /><v:tabList />west.yaml</text>		</g>
+		<g
+   id="shape51-118"
+   v:mID="51"
+   v:groupContext="shape"
+   transform="translate(298.94271,-139.50618)">
+			<title
+   id="title328">Arkusz.51</title>
+			<desc
+   id="desc330">private</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="49.606"
+   cy="492.094"
+   width="99.22"
+   height="24.9449" />
+			<rect
+   x="0"
+   y="479.62201"
+   width="99.212303"
+   height="24.944901"
+   class="st9"
+   id="rect332" />
+			<text
+   x="37.599998"
+   y="494.48999"
+   class="st18"
+   v:langID="1033"
+   id="text334"><v:paragraph
+   v:horizAlign="1" /><v:tabList />private</text>		</g>
+		<g
+   id="group52-121"
+   transform="rotate(90,275.71645,527.53326)"
+   v:mID="52"
+   v:groupContext="group">
 			<v:userDefs>
-				<v:ud v:nameU="Scale" v:val="VT0(1):26"/>
-				<v:ud v:nameU="AntiScale" v:val="VT0(1):26"/>
-				<v:ud v:nameU="visVersion" v:val="VT0(17):26"/>
+				<v:ud
+   v:nameU="Scale"
+   v:val="VT0(1):26" />
+				<v:ud
+   v:nameU="AntiScale"
+   v:val="VT0(1):26" />
+				<v:ud
+   v:nameU="visVersion"
+   v:val="VT0(17):26" />
 			</v:userDefs>
-			<title>Line Arrow.1033</title>
-			<g id="shape53-122" v:mID="53" v:groupContext="shape" transform="translate(37.19,5.68434E-14)">
-				<title>Arkusz.53</title>
-				<path d="M0 498.18 L0 504.57 L6.39 501.38 L0 498.18 Z" class="st14"/>
+			<title
+   id="title337">Line Arrow.1033</title>
+			<g
+   id="shape53-122"
+   v:mID="53"
+   v:groupContext="shape"
+   transform="translate(37.19)">
+				<title
+   id="title339">Arkusz.53</title>
+				<path
+   d="m 0,498.18 v 6.39 l 6.39,-3.19 z"
+   class="st14"
+   id="path341" />
 			</g>
-			<g id="shape54-124" v:mID="54" v:groupContext="shape" transform="translate(37.19,5.68434E-14)">
-				<title>Arkusz.54</title>
-				<path d="M0 498.18 L0 504.57 L6.39 501.38 L0 498.18 Z" class="st19"/>
+			<g
+   id="shape54-124"
+   v:mID="54"
+   v:groupContext="shape"
+   transform="translate(37.19)">
+				<title
+   id="title344">Arkusz.54</title>
+				<path
+   d="m 0,498.18 v 6.39 l 6.39,-3.19 z"
+   class="st19"
+   id="path346" />
 			</g>
-			<g id="group55-126" transform="translate(-7.19425E-14,-3.19)" v:mID="55" v:groupContext="group">
-				<title>Arkusz.55</title>
-				<g id="shape56-127" v:mID="56" v:groupContext="shape">
-					<title>Arkusz.56</title>
-					<path d="M0 504.57 L37.19 504.57 L0 504.57 Z" class="st1"/>
+			<g
+   id="group55-126"
+   transform="translate(0,-3.19)"
+   v:mID="55"
+   v:groupContext="group">
+				<title
+   id="title349">Arkusz.55</title>
+				<g
+   id="shape56-127"
+   v:mID="56"
+   v:groupContext="shape">
+					<title
+   id="title351">Arkusz.56</title>
+					<path
+   d="M 0,504.57 H 37.19 Z"
+   class="st1"
+   id="path353" />
 				</g>
-				<g id="group57-129" v:mID="57" v:groupContext="group">
-					<title>Arkusz.57</title>
-					<g id="shape58-130" v:mID="58" v:groupContext="shape">
-						<title>Arkusz.58</title>
-						<path d="M0 504.57 L37.19 504.57 L0 504.57 Z" class="st2"/>
+				<g
+   id="group57-129"
+   v:mID="57"
+   v:groupContext="group">
+					<title
+   id="title356">Arkusz.57</title>
+					<g
+   id="shape58-130"
+   v:mID="58"
+   v:groupContext="shape">
+						<title
+   id="title358">Arkusz.58</title>
+						<path
+   d="M 0,504.57 H 37.19 Z"
+   class="st2"
+   id="path360" />
 					</g>
-					<g id="shape59-132" v:mID="59" v:groupContext="shape">
-						<title>Arkusz.59</title>
-						<path d="M0 504.57 L37.19 504.57 L0 504.57 Z" class="st3"/>
-						<path d="M0 504.57 L37.19 504.57" class="st20"/>
+					<g
+   id="shape59-132"
+   v:mID="59"
+   v:groupContext="shape">
+						<title
+   id="title363">Arkusz.59</title>
+						<path
+   d="M 0,504.57 H 37.19 Z"
+   class="st3"
+   id="path365" />
+						<path
+   d="M 0,504.57 H 37.19"
+   class="st20"
+   id="path367" />
 					</g>
 				</g>
 			</g>
 		</g>
-		<g id="shape60-135" v:mID="60" v:groupContext="shape" transform="translate(20.2475,-18.486)">
-			<title>Nordic Blueslate.1034</title>
-			<desc>Zephyr OS</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="69.9997" cy="469.735" width="140" height="69.6639"/>
-			<rect x="0" y="434.903" width="140" height="69.6639" class="st23"/>
-			<text x="43.41" y="473.04" class="st12" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>Zephyr OS</text>		</g>
-		<g id="shape61-138" v:mID="61" v:groupContext="shape" transform="translate(71.7323,-103.886)">
-			<title>Arkusz.61</title>
-			<desc>revision ”a” (fixed, depends on the NCS revision)</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="69.9997" cy="495.067" width="140.01" height="19"/>
-			<rect x="0" y="485.567" width="140" height="19" class="st9"/>
-			<text x="47.74" y="486.97" class="st21" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>revision ”a”<v:newlineChar/><tspan
-						x="32.97" dy="1.2em" class="st17">(fixed, depends on <v:newlineChar/></tspan><tspan x="34.74" dy="1.2em"
-						class="st17">the NCS revision)</tspan></text>		</g>
-		<g id="group62-143" transform="translate(591.615,366.236) rotate(90)" v:mID="62" v:groupContext="group">
+		<g
+   id="shape60-135"
+   v:mID="60"
+   v:groupContext="shape"
+   transform="translate(56.985209,-19.661181)">
+			<title
+   id="title373">Nordic Blueslate.1034</title>
+			<desc
+   id="desc375">Zephyr OS</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="69.9997"
+   cy="469.735"
+   width="140"
+   height="69.6639" />
+			<rect
+   x="0"
+   y="434.90302"
+   width="140"
+   height="69.663902"
+   class="st23"
+   id="rect377" />
+			<text
+   x="43.41"
+   y="473.04001"
+   class="st12"
+   v:langID="1033"
+   id="text379"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />Zephyr OS</text>		</g>
+		<g
+   id="shape61-138"
+   v:mID="61"
+   v:groupContext="shape"
+   transform="translate(108.47001,-105.06118)">
+			<title
+   id="title382">Arkusz.61</title>
+			<desc
+   id="desc384">revision ”a” (fixed, depends on the NCS revision)</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="69.9997"
+   cy="495.067"
+   width="140.01"
+   height="19" />
+			<rect
+   x="0"
+   y="485.56699"
+   width="140"
+   height="19"
+   class="st9"
+   id="rect386" />
+			<text
+   x="47.740002"
+   y="486.97"
+   class="st21"
+   v:langID="1033"
+   id="text392"><v:paragraph
+   v:horizAlign="1" /><v:tabList />revision ”a”<v:newlineChar /><tspan
+   x="32.970001"
+   dy="1.2em"
+   class="st17"
+   id="tspan388">(fixed, depends on <v:newlineChar /></tspan><tspan
+   x="34.740002"
+   dy="1.2em"
+   class="st17"
+   id="tspan390">the NCS revision)</tspan></text>		</g>
+		<g
+   id="group62-143"
+   transform="rotate(90,131.64595,496.70676)"
+   v:mID="62"
+   v:groupContext="group">
 			<v:userDefs>
-				<v:ud v:nameU="Scale" v:val="VT0(1):26"/>
-				<v:ud v:nameU="AntiScale" v:val="VT0(1):26"/>
-				<v:ud v:nameU="visVersion" v:val="VT0(17):26"/>
+				<v:ud
+   v:nameU="Scale"
+   v:val="VT0(1):26" />
+				<v:ud
+   v:nameU="AntiScale"
+   v:val="VT0(1):26" />
+				<v:ud
+   v:nameU="visVersion"
+   v:val="VT0(17):26" />
 			</v:userDefs>
-			<title>Line Arrow.1036</title>
-			<g id="shape63-144" v:mID="63" v:groupContext="shape" transform="translate(43.79,5.68434E-14)">
-				<title>Arkusz.63</title>
-				<path d="M0 498.18 L0 504.57 L6.39 501.38 L0 498.18 Z" class="st14"/>
+			<title
+   id="title395">Line Arrow.1036</title>
+			<g
+   id="shape63-144"
+   v:mID="63"
+   v:groupContext="shape"
+   transform="translate(43.79)">
+				<title
+   id="title397">Arkusz.63</title>
+				<path
+   d="m 0,498.18 v 6.39 l 6.39,-3.19 z"
+   class="st14"
+   id="path399" />
 			</g>
-			<g id="shape64-146" v:mID="64" v:groupContext="shape" transform="translate(43.79,5.68434E-14)">
-				<title>Arkusz.64</title>
-				<path d="M0 498.18 L0 504.57 L6.39 501.38 L0 498.18 Z" class="st19"/>
+			<g
+   id="shape64-146"
+   v:mID="64"
+   v:groupContext="shape"
+   transform="translate(43.79)">
+				<title
+   id="title402">Arkusz.64</title>
+				<path
+   d="m 0,498.18 v 6.39 l 6.39,-3.19 z"
+   class="st19"
+   id="path404" />
 			</g>
-			<g id="group65-148" transform="translate(-1.51879E-13,-3.19)" v:mID="65" v:groupContext="group">
-				<title>Arkusz.65</title>
-				<g id="shape66-149" v:mID="66" v:groupContext="shape">
-					<title>Arkusz.66</title>
-					<path d="M0 504.57 L43.79 504.57 L0 504.57 Z" class="st1"/>
+			<g
+   id="group65-148"
+   transform="translate(0,-3.19)"
+   v:mID="65"
+   v:groupContext="group">
+				<title
+   id="title407">Arkusz.65</title>
+				<g
+   id="shape66-149"
+   v:mID="66"
+   v:groupContext="shape">
+					<title
+   id="title409">Arkusz.66</title>
+					<path
+   d="M 0,504.57 H 43.79 Z"
+   class="st1"
+   id="path411" />
 				</g>
-				<g id="group67-151" v:mID="67" v:groupContext="group">
-					<title>Arkusz.67</title>
-					<g id="shape68-152" v:mID="68" v:groupContext="shape">
-						<title>Arkusz.68</title>
-						<path d="M0 504.57 L43.79 504.57 L0 504.57 Z" class="st2"/>
+				<g
+   id="group67-151"
+   v:mID="67"
+   v:groupContext="group">
+					<title
+   id="title414">Arkusz.67</title>
+					<g
+   id="shape68-152"
+   v:mID="68"
+   v:groupContext="shape">
+						<title
+   id="title416">Arkusz.68</title>
+						<path
+   d="M 0,504.57 H 43.79 Z"
+   class="st2"
+   id="path418" />
 					</g>
-					<g id="shape69-154" v:mID="69" v:groupContext="shape">
-						<title>Arkusz.69</title>
-						<path d="M0 504.57 L43.79 504.57 L0 504.57 Z" class="st3"/>
-						<path d="M0 504.57 L43.79 504.57" class="st20"/>
+					<g
+   id="shape69-154"
+   v:mID="69"
+   v:groupContext="shape">
+						<title
+   id="title421">Arkusz.69</title>
+						<path
+   d="M 0,504.57 H 43.79 Z"
+   class="st3"
+   id="path423" />
+						<path
+   d="M 0,504.57 H 43.79"
+   class="st20"
+   id="path425" />
 					</g>
 				</g>
 			</g>
 		</g>
-		<g id="shape70-157" v:mID="70" v:groupContext="shape" transform="translate(355.197,-138.108)">
-			<title>Nordic Lake.1037</title>
-			<desc>UWB driver (currently not available)</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)"/>
-			<v:textRect cx="69.9997" cy="469.735" width="140.01" height="69.6639"/>
-			<rect x="0" y="434.903" width="140" height="69.6639" class="st15"/>
-			<text x="24.46" y="473.04" class="st24" v:langID="1033"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>Aliro UWB adapter</text>		</g>
-		<g id="group71-160" transform="translate(393.151,-231.76) rotate(14.7919)" v:mID="71" v:groupContext="group">
+		<g
+   id="shape70-157"
+   v:mID="70"
+   v:groupContext="shape"
+   transform="translate(391.93471,-139.28318)">
+			<title
+   id="title431">Nordic Lake.1037</title>
+			<desc
+   id="desc433">UWB driver (currently not available)</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)" />
+			<v:textRect
+   cx="69.9997"
+   cy="469.735"
+   width="140.01"
+   height="69.6639" />
+			<rect
+   x="0"
+   y="434.90302"
+   width="140"
+   height="69.663902"
+   class="st15"
+   id="rect435" />
+			<text
+   x="24.459999"
+   y="473.04001"
+   class="st24"
+   v:langID="1033"
+   id="text437"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />Aliro UWB adapter</text>		</g>
+		<g
+   id="group71-160"
+   transform="rotate(14.7919,1112.1917,1539.4287)"
+   v:mID="71"
+   v:groupContext="group">
 			<v:userDefs>
-				<v:ud v:nameU="Scale" v:val="VT0(1):26"/>
-				<v:ud v:nameU="AntiScale" v:val="VT0(1):26"/>
-				<v:ud v:nameU="visVersion" v:val="VT0(17):26"/>
+				<v:ud
+   v:nameU="Scale"
+   v:val="VT0(1):26" />
+				<v:ud
+   v:nameU="AntiScale"
+   v:val="VT0(1):26" />
+				<v:ud
+   v:nameU="visVersion"
+   v:val="VT0(17):26" />
 			</v:userDefs>
-			<title>Line Arrow.1038</title>
-			<g id="shape72-161" v:mID="72" v:groupContext="shape" transform="translate(165.18,5.68434E-14)">
-				<title>Arkusz.72</title>
-				<path d="M0 498.18 L0 504.57 L6.39 501.38 L0 498.18 Z" class="st14"/>
+			<title
+   id="title440">Line Arrow.1038</title>
+			<g
+   id="shape72-161"
+   v:mID="72"
+   v:groupContext="shape"
+   transform="translate(165.18)">
+				<title
+   id="title442">Arkusz.72</title>
+				<path
+   d="m 0,498.18 v 6.39 l 6.39,-3.19 z"
+   class="st14"
+   id="path444" />
 			</g>
-			<g id="shape73-163" v:mID="73" v:groupContext="shape" transform="translate(165.18,5.68434E-14)">
-				<title>Arkusz.73</title>
-				<path d="M0 498.18 L0 504.57 L6.39 501.38 L0 498.18 Z" class="st19"/>
+			<g
+   id="shape73-163"
+   v:mID="73"
+   v:groupContext="shape"
+   transform="translate(165.18)">
+				<title
+   id="title447">Arkusz.73</title>
+				<path
+   d="m 0,498.18 v 6.39 l 6.39,-3.19 z"
+   class="st19"
+   id="path449" />
 			</g>
-			<g id="group74-165" transform="translate(2.07834E-13,-3.19)" v:mID="74" v:groupContext="group">
-				<title>Arkusz.74</title>
-				<g id="shape75-166" v:mID="75" v:groupContext="shape">
-					<title>Arkusz.75</title>
-					<path d="M0 504.57 L165.18 504.57 L0 504.57 Z" class="st1"/>
+			<g
+   id="group74-165"
+   transform="translate(0,-3.19)"
+   v:mID="74"
+   v:groupContext="group">
+				<title
+   id="title452">Arkusz.74</title>
+				<g
+   id="shape75-166"
+   v:mID="75"
+   v:groupContext="shape">
+					<title
+   id="title454">Arkusz.75</title>
+					<path
+   d="M 0,504.57 H 165.18 Z"
+   class="st1"
+   id="path456" />
 				</g>
-				<g id="group76-168" v:mID="76" v:groupContext="group">
-					<title>Arkusz.76</title>
-					<g id="shape77-169" v:mID="77" v:groupContext="shape">
-						<title>Arkusz.77</title>
-						<path d="M0 504.57 L165.18 504.57 L0 504.57 Z" class="st2"/>
+				<g
+   id="group76-168"
+   v:mID="76"
+   v:groupContext="group">
+					<title
+   id="title459">Arkusz.76</title>
+					<g
+   id="shape77-169"
+   v:mID="77"
+   v:groupContext="shape">
+						<title
+   id="title461">Arkusz.77</title>
+						<path
+   d="M 0,504.57 H 165.18 Z"
+   class="st2"
+   id="path463" />
 					</g>
-					<g id="shape78-171" v:mID="78" v:groupContext="shape">
-						<title>Arkusz.78</title>
-						<path d="M0 504.57 L165.18 504.57 L0 504.57 Z" class="st3"/>
-						<path d="M0 504.57 L165.18 504.57" class="st20"/>
+					<g
+   id="shape78-171"
+   v:mID="78"
+   v:groupContext="shape">
+						<title
+   id="title466">Arkusz.78</title>
+						<path
+   d="M 0,504.57 H 165.18 Z"
+   class="st3"
+   id="path468" />
+						<path
+   d="M 0,504.57 H 165.18"
+   class="st20"
+   id="path470" />
 					</g>
 				</g>
 			</g>
 		</g>
-		<g id="shape79-174" v:mID="79" v:groupContext="shape" transform="translate(361.417,-221.945)">
-			<title>Arkusz.79</title>
-			<desc>revision ”z”</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="49.606" cy="495.067" width="99.22" height="19"/>
-			<rect x="0" y="485.567" width="99.2123" height="19" class="st9"/>
-			<text x="27.6" y="497.77" class="st21" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>revision ”z”</text>		</g>
-		<g id="shape80-177" v:mID="80" v:groupContext="shape" transform="translate(350.281,-134.646)">
-			<title>Arkusz.80</title>
-			<desc>west.yaml</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="25.1575" cy="492.094" width="50.32" height="24.9449"/>
-			<rect x="0" y="479.622" width="50.315" height="24.9449" class="st9"/>
-			<text x="7.38" y="494.49" class="st25" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>west.yaml</text>		</g>
-		<g id="shape81-180" v:mID="81" v:groupContext="shape" transform="translate(161.474,-389.764)">
-			<title>Nordic Lake.81</title>
-			<desc>Aliro stack</desc>
-			<v:userDefs/>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:verticalAlign="0"/>
-			<v:textRect cx="42.4186" cy="486.85" width="84.84" height="35.4331"/>
-			<rect x="0" y="469.134" width="84.8369" height="35.4331" class="st14"/>
-			<text x="29.59" y="483.03" class="st12" v:langID="1045"><v:paragraph v:horizAlign="1" v:bulletSize="0.166667"/><v:tabList/>UWB <tspan
-						x="16.73" dy="1.2em" class="st17">integration</tspan></text>		</g>
+		<g
+   id="shape79-174"
+   v:mID="79"
+   v:groupContext="shape"
+   transform="translate(398.15471,-223.12018)">
+			<title
+   id="title476">Arkusz.79</title>
+			<desc
+   id="desc478">revision ”z”</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="49.606"
+   cy="495.067"
+   width="99.22"
+   height="19" />
+			<rect
+   x="0"
+   y="485.56699"
+   width="99.212303"
+   height="19"
+   class="st9"
+   id="rect480" />
+			<text
+   x="27.6"
+   y="497.76999"
+   class="st21"
+   v:langID="1033"
+   id="text482"><v:paragraph
+   v:horizAlign="1" /><v:tabList />revision ”z”</text>		</g>
+		<g
+   id="shape80-177"
+   v:mID="80"
+   v:groupContext="shape"
+   transform="translate(387.01871,-135.82118)">
+			<title
+   id="title485">Arkusz.80</title>
+			<desc
+   id="desc487">west.yaml</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="25.1575"
+   cy="492.094"
+   width="50.32"
+   height="24.9449" />
+			<rect
+   x="0"
+   y="479.62201"
+   width="50.314999"
+   height="24.944901"
+   class="st9"
+   id="rect489" />
+			<text
+   x="7.3800001"
+   y="494.48999"
+   class="st25"
+   v:langID="1033"
+   id="text491"><v:paragraph
+   v:horizAlign="1" /><v:tabList />west.yaml</text>		</g>
+		<g
+   id="shape81-180"
+   v:mID="81"
+   v:groupContext="shape"
+   transform="translate(385.34607,-388.15477)">
+			<title
+   id="title494">Nordic Lake.81</title>
+			<desc
+   id="desc496">Aliro stack</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:verticalAlign="0" />
+			<v:textRect
+   cx="42.4186"
+   cy="486.85"
+   width="84.84"
+   height="35.4331" />
+			<rect
+   x="0.24507554"
+   y="470.69009"
+   width="84.836899"
+   height="35.433102"
+   class="st14"
+   id="rect498" />
+			<text
+   x="29.59"
+   y="483.03"
+   class="st12"
+   v:langID="1045"
+   id="text502"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList />UWB <tspan
+   x="16.73"
+   dy="1.2em"
+   class="st17"
+   id="tspan500">integration</tspan></text>		</g>
+		<g
+   id="shape82-181"
+   v:mID="82"
+   v:groupContext="shape"
+   transform="translate(483.9331,-386.75518)">
+			<title
+   id="title505">Nordic Lake.82</title>
+			<desc
+   id="desc507">Matter integration</desc>
+			<v:userDefs />
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:verticalAlign="0" />
+			<v:textRect
+   cx="42.4186"
+   cy="486.85"
+   width="84.84"
+   height="35.4331" />
+			<rect
+   x="0"
+   y="469.134"
+   width="84.836899"
+   height="35.433102"
+   class="st14"
+   id="rect509" />
+			<text
+   x="22.59"
+   y="483.03"
+   class="st12"
+   v:langID="1033"
+   id="text513"><v:paragraph
+   v:horizAlign="1"
+   v:bulletSize="0.166667" /><v:tabList /> Matter <tspan
+   x="16.73"
+   dy="13.200077"
+   class="st17"
+   id="tspan511">integration</tspan></text>		</g>
 	</g>
 </svg>

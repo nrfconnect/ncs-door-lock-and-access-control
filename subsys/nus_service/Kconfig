@@ -1,0 +1,38 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_NUS_SERVICE
+	bool "Door Lock NUS service"
+	select BT_NUS
+	select BT_NUS_AUTHEN
+	select BT_SMP
+	imply DOOR_LOCK_BLE_MANAGER_AUTH
+	select DOOR_LOCK_ADVERTISING_ARBITER if !CHIP
+	help
+	  Enables the Bluetooth LE Nordic UART Service (NUS). Using NUS service you can control
+	  a door lock using pre-defined BLE commands.
+
+if DOOR_LOCK_NUS_SERVICE
+
+module = DOOR_LOCK_NUS_SERVICE
+module-str = Door Lock NUS service
+module-dep = LOG
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_NUS_SERVICE_MAX_COMMANDS
+	int "Maximum number of NUS commands"
+	default 2
+	help
+	  Define the maximum number of NUS commands to declare by user.
+
+config DOOR_LOCK_NUS_SERVICE_MAX_COMMAND_LEN
+	int "Maximum length of single command in Bytes"
+	default 10
+	help
+	  Maximum length of single command. This command will be sent via Bluetooth LE to
+	  a paired smart door lock.
+
+endif # DOOR_LOCK_NUS_SERVICE

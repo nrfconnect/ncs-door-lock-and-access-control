@@ -1,0 +1,72 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menu "Aliro features"
+
+config DOOR_LOCK_BLE_UWB
+	bool "Integration with Aliro BLE and UWB [EXPERIMENTAL]"
+	select NCS_ALIRO_BLE_UWB
+	select DOOR_LOCK_ALIRO_UWB
+	select DOOR_LOCK_ALIRO_BLE_SERVICE
+	select DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_SUPPORT
+	select EXPERIMENTAL
+	help
+	  Enable the door lock application integration with Aliro Bluetooth LE (BLE) and ultra wideband (UWB).
+
+if DOOR_LOCK_BLE_UWB
+
+config DOOR_LOCK_BLE_UWB_MAX_SESSIONS
+	int "Maximum number of BLE and UWB sessions"
+	range 1 BT_MAX_CONN
+	help
+	  The maximum number of BLE and UWB sessions that can be established.
+
+endif # DOOR_LOCK_BLE_UWB
+
+config DOOR_LOCK_EXPEDITED_FAST_PHASE
+    bool "Support for Aliro Expedited-fast Phase"
+    default y
+    help
+        If enabled, the Expedited-fast phase is supported.
+        The user authentication is based on the Kpersistent keys.
+
+config DOOR_LOCK_STEP_UP_PHASE
+    bool "Support for Aliro Step-up Phase"
+    default y
+    select DOOR_LOCK_ALIRO_ACCESS_DOCUMENT_PARSER
+    select DOOR_LOCK_EXTERNAL_NVS if !SOC_SERIES_NRF52
+    help
+        If enabled, the Step-up phase is supported.
+        The user authentication is based on the Access Document.
+
+config DOOR_LOCK_CREDENTIAL_ISSUER_CA
+    bool "Support for Credential Issuer CA public key"
+    depends on DOOR_LOCK_STEP_UP_PHASE
+    help
+        If enabled, the Credential Issuer CA public key is supported.
+        The Credential Issuer CA public key is used to verify the signature of the Credential Issuer certificate.
+
+config DOOR_LOCK_READER_CERTIFICATE
+	bool "Support for Reader certificates"
+	select DOOR_LOCK_ALIRO_READER_STORAGE_CERTIFICATE_SUPPORT
+	select DOOR_LOCK_ALIRO_READER_STORAGE_SHELL_CERT
+	help
+	  Use the reader certificate for the reader authentication.
+
+config DOOR_LOCK_TIME_CONCEPT
+	bool "Support for Time concept"
+	default y
+	select DOOR_LOCK_ALIRO_TIME_UTILS
+	help
+	  If enabled, the Time concept is supported.
+
+endmenu # Aliro features
+
+rsource "platform/Kconfig"
+rsource "access_manager/Kconfig"
+rsource "cli/Kconfig"
+rsource "kpersistent_manager/Kconfig"
+rsource "storage/Kconfig"

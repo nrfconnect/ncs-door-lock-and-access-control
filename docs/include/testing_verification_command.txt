@@ -1,0 +1,12 @@
+Always verify that the correct tests are chosen before executing them.
+If you do not upload the PICS file, you can choose the tests manually.
+
+.. figure:: /images/th_test_cases.png
+   :scale: 70%
+   :alt: Test suites list.
+
+   Test suites list.
+
+The Test Harness device will be operating as the Aliro User Device and communicate with the Reader device.
+For verification, execute the following tests, based on the `aliro-sve-v1.0`_ tag.
+The test results shown below were acquired on the nRF5340 DK build using the following command:

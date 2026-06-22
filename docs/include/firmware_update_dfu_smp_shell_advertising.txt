@@ -1,0 +1,6 @@
+Alternatively, you can use the shell commands:
+
+.. code-block:: console
+
+   uart:~$ dfu_smp on
+   uart:~$ dfu_smp off

@@ -16,7 +16,7 @@ menuconfig DOOR_LOCK_EXTERNAL_NVS
 	select HW_UNIQUE_KEY
 	select HW_UNIQUE_KEY_RANDOM
 	select HW_UNIQUE_KEY_WRITE_ON_CRYPTO_INIT
-	depends on !SOC_SERIES_NRF52X
+	depends on !SOC_SERIES_NRF52
 	help
 	  Enable External NVS Storage.
 
@@ -64,5 +64,11 @@ config DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION_UNIQUE_ID_UID
 		PSA Protected Storage UID for the device Unique ID (internal flash).
 
 endif # DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION
+
+config DOOR_LOCK_EXTERNAL_NVS_SHELL
+	bool "Shell commands for External NVS"
+	depends on SHELL
+	help
+	  Enable shell commands for the External NVS storage.
 
 endif # DOOR_LOCK_EXTERNAL_NVS

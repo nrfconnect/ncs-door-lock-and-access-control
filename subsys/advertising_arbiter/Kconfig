@@ -1,0 +1,27 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ADVERTISING_ARBITER
+	bool "BLE advertising arbiter"
+	depends on BT
+	depends on !CHIP
+	help
+	  Coordinates BLE advertising between SMP DFU and NUS when multiple components request
+	  advertising.
+
+if DOOR_LOCK_ADVERTISING_ARBITER
+
+module = DOOR_LOCK_ADVERTISING_ARBITER
+module-str = Door Lock BLE Advertising Arbiter
+module-dep = LOG
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_ADVERTISING_ARBITER_MAX_CONNECTIONS
+	int "Maximum number of connections"
+	range 1 BT_MAX_CONN
+	default 1
+
+endif # DOOR_LOCK_ADVERTISING_ARBITER

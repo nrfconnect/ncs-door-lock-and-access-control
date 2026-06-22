@@ -1,0 +1,54 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_BLE_MANAGER
+	bool "Door Lock BLE manager"
+	depends on BT
+
+if DOOR_LOCK_BLE_MANAGER
+
+module = DOOR_LOCK_BLE_MANAGER
+module-str = Door Lock BLE manager
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_BLE_MANAGER_INIT
+	bool "Initialize Bluetooth stack"
+	depends on !CHIP
+	help
+	  When enabled, a random static LE address is created for the default identity
+	  and the Bluetooth stack is enabled.
+
+config DOOR_LOCK_BLE_MANAGER_AUTH
+	bool "Enable authentication"
+	help
+	  When enabled, registers pairing, passkey, and security-level
+	  callbacks for the default Bluetooth identity (BT_ID_DEFAULT).
+
+	  The application can enable this option or register its own authentication callbacks.
+	  Only one authentication callback can be registered in the Bluetooth stack.
+
+if DOOR_LOCK_BLE_MANAGER_AUTH
+
+config DOOR_LOCK_BLE_MANAGER_AUTH_APP_PASSKEY_SUPPORT
+	bool "Enable application-provided pairing passkey"
+	select BT_APP_PASSKEY
+	help
+	  When enabled, the application can provide a passkey for pairing.
+
+if DOOR_LOCK_BLE_MANAGER_AUTH_APP_PASSKEY_SUPPORT
+
+config DOOR_LOCK_BLE_MANAGER_AUTH_APP_PASSKEY
+	int "Application-provided pairing passkey"
+	default 123456
+	range 0 999999
+	help
+	  Passkey returned from the authentication callback.
+
+endif # DOOR_LOCK_BLE_MANAGER_AUTH_APP_PASSKEY_SUPPORT
+
+endif # DOOR_LOCK_BLE_MANAGER_AUTH
+
+endif # DOOR_LOCK_BLE_MANAGER

@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+if DOOR_LOCK_CLI
+
+config DOOR_LOCK_CLI_PROVISIONING
+	bool
+	default y if DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+config SHELL_CMD_BUFF_SIZE
+	# Shell buffer must fit: "reader certificate set " (23 chars) + hex string (2 * cert size)
+	# For 512 byte cert: 23 + 1024 = 1047
+	default 1047 if (SHELL && DOOR_LOCK_ALIRO_READER_STORAGE_SHELL_CERT)
+
+endif # DOOR_LOCK_CLI

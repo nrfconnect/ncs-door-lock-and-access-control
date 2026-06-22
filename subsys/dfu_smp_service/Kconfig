@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_DFU_SMP_SERVICE
+	bool "Door Lock DFU SMP service"
+	depends on BOOTLOADER_MCUBOOT
+	select DOOR_LOCK_ADVERTISING_ARBITER if !CHIP
+	help
+	  Enables the Device Firmware Upgrade Service over Bluetooth LE Simple Management Protocol.
+
+if DOOR_LOCK_DFU_SMP_SERVICE
+
+module = DOOR_LOCK_DFU_SMP_SERVICE
+module-str = Door Lock DFU SMP service
+module-dep = LOG
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_DFU_SMP_SERVICE_SHELL
+	bool "Shell commands for DFU SMP service"
+	depends on SHELL
+	default y
+	help
+	  Enable shell commands to start and stop the DFU BLE SMP service.
+
+endif # DOOR_LOCK_DFU_SMP_SERVICE

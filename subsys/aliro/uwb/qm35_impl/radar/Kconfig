@@ -1,0 +1,41 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_UWB_QM35_RADAR
+	bool "Enable UWB radar support"
+	help
+	  Enable UWB radar support.
+
+if DOOR_LOCK_ALIRO_UWB_QM35_RADAR
+
+config DOOR_LOCK_ALIRO_UWB_QM35_RADAR_ANT_SET_ID
+	int "Radar antenna set ID"
+	range 2 3
+	default 3
+	help
+	  Antenna set used by the Cherry radar session.
+
+config DOOR_LOCK_ALIRO_UWB_QM35_RADAR_CHANNEL
+	int "Radar channel"
+	range 5 9
+	default 9
+	help
+	  UWB channel used by the Cherry radar session. Typically use channel 5 or 9.
+
+config DOOR_LOCK_ALIRO_UWB_QM35_RADAR_ACTIVATION_DISTANCE_CM
+	int "UWB distance threshold for radar session activation (cm)"
+	default 150
+	range 30 500
+	help
+	  The radar session is started only when the UWB ranging distance drops
+	  below this value.
+
+module = DOOR_LOCK_ALIRO_UWB_QM35_RADAR
+module-str = Door Lock Aliro UWB QM35 Radar
+module-dep = LOG
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_ALIRO_UWB_QM35_RADAR

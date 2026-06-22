@@ -1,0 +1,74 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION
+	bool "Enable UWB front/back disambiguation"
+	depends on DOOR_LOCK_ALIRO_UWB
+	depends on QM35_UWB_ALIRO_ZEPHYR
+	select Q_ALIRO_DISAMBIGUATION
+	help
+	  Enable the front/back disambiguation algorithm (CIR, distance, and PDOA processing).
+
+if DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_MAX_CIR
+	int "Max CIR threshold for disambiguation"
+	default 800
+	range 100 5000
+	help
+	  Maximum absolute CIR value. When the radar CIR exceeds this threshold,
+	  the algorithm reuses the previous FRONT/BACK decision instead of
+	  computing p_ratio. Increase if genuine detections are being skipped.
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_P_RATIO
+	int "p_ratio threshold for disambiguation"
+	default 3000
+	range 1 30000
+	help
+	  Minimum p_ratio for FRONT detection. The value is multiplied by 10000
+	  (e.g. set 6000 for 0.6). p_ratio is derived from radar CIR amplitude
+	  and phone RSSI. Lower values increase FRONT detection range but reduce
+	  accuracy.
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_NB_BLOCKS
+	int "Max noise blocks threshold for disambiguation"
+	default 10
+	range 0 40
+	help
+	  Maximum number of noise blocks allowed for a FRONT decision.
+	  Higher values are more permissive (easier FRONT detection).
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_NOISE_THRESHOLD
+	int "Noise block amplitude threshold"
+	default 15
+	range 1 100
+	help
+	  CIR amplitude below which a block is classified as noise (normal angle).
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_SHADOW_THRESHOLD
+	int "Shadow noise block amplitude threshold"
+	default 8
+	range 1 100
+	help
+	  CIR amplitude below which a block is classified as noise in the shadow region (back side).
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_BLIND_DISTANCE_CM
+	int "Blind distance (cm) below which disambiguation is disabled"
+	default 30
+	range 0 100
+	help
+	  Minimum distance for the algorithm to engage. Below this value the
+	  result is unreliable (too close to the antenna).
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_SECURE_BUBBLE_CM
+	int "Secure bubble radius (cm) for door open confirmation"
+	default 80
+	range 10 200
+	help
+	  Door open is confirmed only when the user is within this distance.
+	  Acts as a final gate after FRONT is detected.
+
+endif # DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION
