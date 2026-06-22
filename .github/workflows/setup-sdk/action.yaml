@@ -86,10 +86,13 @@ runs:
       run: |
         nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west init -- -l --mf west.yml
         nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west update -- --narrow -o=--depth=1
+        nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west patch apply
       shell: bash
 
     - name: West update on cache hit
       if: steps.west-cache.outputs.cache-hit == 'true'
       run: |
+        nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west patch clean
         nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west update -- --narrow -o=--depth=1
+        nrfutil sdk-manager toolchain launch --ncs-version ${{ inputs.ncs_sdk_version }} west patch apply
       shell: bash

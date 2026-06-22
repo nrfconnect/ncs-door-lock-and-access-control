@@ -21,9 +21,9 @@ manifest:
     - name: ncs-door-lock-app-extensions
       remote: ncs
       repo-path: ncs-door-lock-app-extensions
-      revision: 126115f590f849b4ec09e51f251001a5e0095677
+      revision: v1.1.0
       groups:
         - ncs-door-lock-app-extensions
   group-filter:
-    - qm35-aliro-sdk
+    - -qm35-aliro-sdk
     - -ncs-door-lock-app-extensions
