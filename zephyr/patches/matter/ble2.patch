@@ -1,0 +1,78 @@
+From 6d8ea97f38836957651f4d976d1d9fa304489fbe Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Tue, 26 May 2026 18:45:06 +0200
+Subject: [PATCH 2/2] [nrf toup][nrfconnect] Retry BLE advertising restart
+
+Replace the sWasDisconnection flag with an atomic restart flag so
+advertising can be retried when bt_le_adv_start() fails due to lack
+of available connection object.
+
+With CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT, disconnect and recycled
+callbacks can arrive in an order where a restart attempt runs before
+all connection slots are available. Re-arm the flag on failure so a
+subsequent recycled callback schedules another restart attempt.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+ src/platform/Zephyr/BLEAdvertisingArbiter.cpp | 25 ++++++++++++-------
+ 1 file changed, 16 insertions(+), 9 deletions(-)
+
+diff --git a/src/platform/Zephyr/BLEAdvertisingArbiter.cpp b/src/platform/Zephyr/BLEAdvertisingArbiter.cpp
+index f2b29e4624..2723594466 100644
+--- a/src/platform/Zephyr/BLEAdvertisingArbiter.cpp
++++ b/src/platform/Zephyr/BLEAdvertisingArbiter.cpp
+@@ -31,9 +31,9 @@ namespace {
+ // List of advertising requests ordered by priority
+ sys_slist_t sRequests;
+ 
+-bool sIsInitialized    = false;
+-bool sWasDisconnection = false;
+-uint8_t sBtId          = 0;
++bool sIsInitialized = false;
++atomic_t sRestart   = ATOMIC_INIT(0);
++uint8_t sBtId       = 0;
+ 
+ // Cast an intrusive list node to the containing request object
+ const BLEAdvertisingArbiter::Request & ToRequest(const sys_snode_t * node)
+@@ -103,25 +103,32 @@ BT_CONN_CB_DEFINE(conn_callbacks) = {
+             // Ignore disconnections from other identities
+             VerifyOrReturn(IsOurIdentity(conn));
+ #endif // CONFIG_CHIP_BLE_MULTI_IDENTITY_SUPPORT
+-            sWasDisconnection = true;
++            atomic_set(&sRestart, 1);
+         },
+     .recycled =
+         []() {
+             // In this callback the connection object was returned to the pool and we can try to re-start connectable
+-            // advertising, but only if the disconnection was detected.
+-            if (sWasDisconnection)
++            // advertising, but only if the disconnection was detected or a previous restart attempt failed.
++            constexpr atomic_val_t oldValue = 1;
++            constexpr atomic_val_t newValue = 0;
++            const bool shouldRestart        = atomic_cas(&sRestart, oldValue, newValue);
++
++            if (shouldRestart)
+             {
++
+                 SystemLayer().ScheduleLambda([] {
+                     if (!sys_slist_is_empty(&sRequests))
+                     {
+                         // Starting from Zephyr 4.0 Automatic advertiser resumption is deprecated,
+                         // so the BLE Advertising Arbiter has to take over the responsibility of restarting the advertiser.
+                         // Restart advertising in this callback if there are pending requests after the connection is released.
+-                        RestartAdvertising();
++                        const CHIP_ERROR result = RestartAdvertising();
++                        if (result != CHIP_NO_ERROR)
++                        {
++                            atomic_set(&sRestart, 1);
++                        }
+                     }
+                 });
+-                // Reset the disconnection flag to avoid restarting advertising multiple times
+-                sWasDisconnection = false;
+             }
+         },
+ };
+-- 
+2.52.0
+

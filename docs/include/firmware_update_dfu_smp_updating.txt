@@ -1,0 +1,26 @@
+Upload the new firmware image to the device using one of the following methods:
+
+.. tabs::
+
+   .. tab:: Mobile application
+
+      Use `nRF Connect Device Manager`_ on a smartphone or tablet.
+
+      #. Build the update image and locate :file:`build/dfu_application.zip` in the build directory.
+      #. Enable SMP advertising on the device (see above).
+      #. Open nRF Connect Device Manager, scan for the device, and connect.
+      #. Start the firmware update and select :file:`dfu_application.zip`.
+      #. Wait for the upload to finish; the device reboots with the new image.
+
+      For a step-by-step walkthrough, see the Nordic Developer Academy course `DFU over Bluetooth LE using device manager app`_.
+
+   .. tab:: PC command line
+
+      Several command-line tools support SMP firmware updates, including ``mcumgr`` and ``nrfutil mcu-manager``.
+      See `mcumgr tools`_ in the |NCS| documentation for other available options and libraries.
+
+      #. Build the update image and locate :file:`build/<app>/zephyr/zephyr.signed.bin` in the build directory.
+      #. Enable SMP advertising on the device (see above).
+      #. Pair with the device if needed, then upload the signed image using your chosen tool.
+
+      For ``nrfutil mcu-manager`` usage, see `MCU Bluetooth LE programming`_ in the |NCS| documentation.

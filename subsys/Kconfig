@@ -6,6 +6,14 @@
 
 menu "Door Lock Subsystems"
 
+rsource "advertising_arbiter/Kconfig"
+rsource "aliro/Kconfig"
+rsource "ble_manager/Kconfig"
+rsource "dfu_smp_service/Kconfig"
 rsource "external_nvs/Kconfig"
+rsource "matter_access/Kconfig"
+rsource "nfc_prop/Kconfig"
+rsource "nus_service/Kconfig"
+rsource "settings_utils/Kconfig"
 
 endmenu

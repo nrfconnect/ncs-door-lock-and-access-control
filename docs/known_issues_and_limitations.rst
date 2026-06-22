@@ -37,11 +37,11 @@ The following optional Aliro features are out-of-scope for the |APP_NAME|:
      - Access Credential Public Key
    * - Aliro schedules
      - Matter schedules
-   * - Pass Through Message ID in the BLE Aliro Message
+   * - Pass Through Message ID in the Bluetooth LE Aliro Message
      - --
    * - Expedited-Fast Phase authentication based on Credential Issuer CA Public Key
      - --
-   * - When the application is built with Matter support, only one Aliro BLE session is supported at a time
+   * - When the application is built with Matter support, only one Aliro Bluetooth LE session is supported at a time
      - --
 
 Known issues
@@ -144,7 +144,7 @@ The |REPO_NAME| v0.4.0
 **********************
 
 .. toggle::
-    
+
   AL-377: Error messages visible in the Reader's serial console during ranging session.
     When the Reader is close to the Test Harness during a ranging session, the following error messages may appear in the Reader's serial console:
 

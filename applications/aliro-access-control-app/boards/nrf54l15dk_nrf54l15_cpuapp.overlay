@@ -1,0 +1,104 @@
+/*
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/ {
+	/* Disable buttons to avoid collision with interrupt and SCK pins for NFC tag reader.
+	 * It also allows to use the button with the same label (1) on all supported dev kits.
+	 */
+	buttons {
+		/delete-node/ button_0;
+		/delete-node/ button_3;
+	};
+
+	leds {
+		/delete-node/ led_0;
+	};
+
+	aliases {
+		/delete-property/ sw0;
+		/delete-property/ sw3;
+		/delete-property/ led0;
+		/delete-property/ mcuboot-led0;
+		mcuboot-button0 = &button1;
+		lock-sim-indicator = &led2; /* green LED2 on nRF54L15DK */
+		dfu-smp-button = &button1;
+	};
+
+	nfc_power_switch: nfc_power_switch {
+		status = "okay";
+		compatible = "nfc-power-control";
+		gpios = <&gpio2 6 GPIO_ACTIVE_HIGH>;
+	};
+
+	chosen {
+		nordic,pm-ext-flash = &mx25r64;
+	};
+};
+
+&pinctrl {
+	spi21_default: spi21_default {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 1, 13)>,
+				<NRF_PSEL(SPIM_MOSI, 1, 11)>,
+				<NRF_PSEL(SPIM_MISO, 1, 12)>;
+		};
+	};
+
+	spi21_sleep: spi21_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 1, 13)>,
+				<NRF_PSEL(SPIM_MOSI, 1, 11)>,
+				<NRF_PSEL(SPIM_MISO, 1, 12)>;
+			low-power-enable;
+		};
+	};
+};
+
+&spi21 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	cs-gpios = <&gpio2 8 GPIO_ACTIVE_LOW>;
+
+	pinctrl-0 = <&spi21_default>;
+	pinctrl-1 = <&spi21_sleep>;
+	pinctrl-names = "default", "sleep";
+
+	nucleo_nfc@0 {
+		compatible = "x-nucleo-nfc";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(8)>;
+		spi-cs-setup-delay-ns = <1000>;
+		spi-cs-hold-delay-ns = <1000>;
+		irq-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+/* restore full RRAM and SRAM space - by default some parts are dedicated to FLRP */
+&cpuapp_rram {
+	reg = <0x0 DT_SIZE_K(1524)>;
+};
+
+&mx25r64 {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+	/* Use PORT event rather than GPIOTE IN event, to save power */
+	sense-edge-mask = <0x00000010>; /* P0.04 */
+};

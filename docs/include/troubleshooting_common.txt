@@ -1,0 +1,141 @@
+Issues when connecting to Raspberry Pi
+**************************************
+
+When you cannot reach the Test Harness Raspberry Pi over Wi-Fi or Ethernet, configure a static address on the ``eth0`` interface.
+
+#. Eject the SD card from the Raspberry Pi and mount it on your computer.
+   You should see two partitions: ``writable`` and ``system-boot``.
+
+#. On the ``writable`` partition, open :file:`writable/etc/netplan/99_config.yaml` and apply the following configuration for ``eth0``:
+
+   .. code-block:: yaml
+
+      network:
+        version: 2
+        ethernets:
+          eth0:
+            addresses:
+              - 192.167.1.10/24
+            gateway4: 192.167.1.1
+            nameservers:
+              addresses:
+                - 8.8.8.8
+                - 8.8.4.4
+
+#. On your local machine, bring up the Ethernet interface connected to the Raspberry Pi and assign an address on the same subnet.
+   Replace ``<ethernet-interface>`` with the interface name from ``ip link`` (for example ``enx109819b3e9d4``):
+
+   .. code-block:: console
+
+      ip link set <ethernet-interface> up
+      ip addr add 192.167.1.1/24 dev <ethernet-interface>
+
+Test harness error ``0x60a`` (Bluetooth LE or UWB)
+****************************************************
+
+This error indicates that the Murata `LBUA0VG2BP-EVK-P`_ module on the Test Harness has a firmware version that is incompatible with the current test scripts.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 35 65
+
+   * - Symptom
+     - What to do
+   * - ``Error returned: 0x60a`` during Bluetooth LE or UWB tests
+     - Re-run the test and allow the harness to upload firmware to the Murata module when prompted (this happens automatically at the start of Bluetooth LE tests and may take some time).
+       Power-cycle or restart the Murata board if the harness requests it.
+       If the error persists, update the Murata module to the firmware version required by your Test Harness release (see the harness documentation or release notes).
+
+QM35825 UWB module issues
+*************************
+
+Problems with the QM35825 UWB module usually occur at boot or when creating a UWB session.
+Most cases come from wiring, board configuration, or QM35 firmware that does not match the image bundled with the application.
+
+For build snippets, flashing, and QM35 DFU, see |troubleshooting_app_guide| and |troubleshooting_firmware_update|.
+When the module fails to initialize, confirm hardware and firmware before testing Aliro UWB flows.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 35 65
+
+   * - Symptom
+     - What to check
+   * - UWB module fails to initialize during boot
+     - Verify SPI connections (MOSI, MISO, SCK, CS), IRQ and reset GPIO assignments, and QM35 power supply.
+       On first boot, complete |troubleshooting_qm35_flash| if the module has never been programmed.
+   * - ``QM35 FW version not available`` in logs
+     - Run ``uart:~$ uwb qm35_fw_version``.
+       Build with the ``uwb_qm35_dfu`` snippet (see |troubleshooting_firmware_update|) and review firmware update logs during boot.
+   * - UWB sessions cannot be created
+     - Confirm ``uwb_qm35`` snippet usage, the board device tree overlay, and SPI bus configuration.
+       See :ref:`uwb_integration` and :ref:`uwb_custom_integration`.
+
+NFC reader issues
+*****************
+
+NFC problems usually appear when the reader fails to start, the field is weak or absent, or the User Device does not establish an Aliro session over NFC.
+
+For architecture, Kconfig, and board overlays, see :ref:`nfc_integration` and :ref:`door_lock_app_nfc`.
+Work through the checks below before changing Aliro provisioning or test scripts.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 35 65
+
+   * - Symptom
+     - What to check
+   * - No NFC field detected by User Device
+     - Check X-NUCLEO NFC expansion board connections.
+       Verify SPI configuration matches the device tree overlay.
+       Test with a known-good NFC expansion board.
+   * - Intermittent NFC communication
+     - Verify the correct NFC driver for your transceiver (ST25R200 vs ST25R500).
+       Review RFAL Kconfig options and NFC power management settings (see :ref:`nfc_integration`).
+   * - ``NFC reader initialization failed`` in logs
+     - Confirm board overlay, SPI bus wiring, and transceiver selection match your hardware.
+       See :ref:`nfc_custom_integration` if you use a non-reference reader.
+   * - User Device does not complete Aliro over NFC
+     - Test with multiple User Devices and confirm Aliro-over-NFC support.
+       Adjust NFC antenna orientation and tap distance.
+
+Test harness stalling
+***********************
+
+The Test Harness can stop responding after extended use.
+The web UI may freeze, or the Reader may no longer receive responses from the backend.
+
+Retrieve backend logs first, then apply the matching workaround:
+
+#. Access the test harness host:
+
+   .. code-block:: console
+
+      ssh aliro@aliro-th.local
+
+#. Retrieve Docker logs:
+
+   .. code-block:: console
+
+      docker logs aliro-certification-tool-backend-1
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Log message or symptom
+     - What to do
+   * - Test harness does not respond to Reader commands, or the web UI is unresponsive
+     - Follow the log retrieval steps above and match one of the errors below.
+       If logs show no error, reboot the Test Harness host.
+   * - ``Error grabbing logs: invalid character '\x00' looking for the beginning of value``
+     - Docker log corruption.
+       Truncate the backend container log file (see command below).
+   * - ``KeyError: KeyError('"type"')`` in ``aliro_test_case:wrapper``
+     - Reboot the Test Harness host.
+
+To clear corrupted Docker logs:
+
+.. code-block:: console
+
+   sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' aliro-certification-tool-backend-1)

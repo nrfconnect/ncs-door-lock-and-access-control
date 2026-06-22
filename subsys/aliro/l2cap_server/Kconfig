@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_L2CAP_SERVER
+	bool "Aliro l2cap server"
+	depends on BT
+
+if DOOR_LOCK_ALIRO_L2CAP_SERVER
+
+config DOOR_LOCK_ALIRO_L2CAP_SERVER_MAX_SESSIONS
+	int "Maximum number of L2CAP server sessions"
+	range 1 BT_MAX_CONN
+	default BT_MAX_CONN
+	help
+	  Maximum number of concurrent sessions handled by the Aliro L2CAP server.
+
+module = DOOR_LOCK_ALIRO_L2CAP_SERVER
+module-str = Door Lock Aliro l2cap server
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_ALIRO_L2CAP_SERVER

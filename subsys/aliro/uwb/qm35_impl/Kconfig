@@ -1,0 +1,61 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER
+	int "Minimum RAN multiplier for UWB ranging blocks"
+	default 2
+	range 1 255
+	help
+	  The RAN multiplier allows to define the time between 2 ranging blocks.
+	  The time range is between 96 ms (RAN multiplier is 1) and 24480 ms
+	  (RAN multiplier is 255).
+
+config DOOR_LOCK_ALIRO_UWB_MAC_MODE_OFFSET
+	int "Offset between ranging blocks in MAC mode"
+	default 0
+	range 0 63
+	help
+	  Offset between the 2 ranging blocks.
+
+config DOOR_LOCK_ALIRO_UWB_MAC_MODE_RANGING_ROUNDS
+	int "Number of ranging rounds per ranging block"
+	default 0
+	range 0 1
+	help
+	  Number of ranging rounds used in a ranging block.
+	  Values:
+	  - 0: 1 ranging round
+	  - 1: 2 ranging round
+
+config DOOR_LOCK_ALIRO_UWB_SESSION_LOGGING
+	bool "Enable UWB session state logging"
+	help
+	  Enable logging for UWB session states and reason codes.
+
+config DOOR_LOCK_ALIRO_UWB_QM35_DFU
+	bool "Enable firmware upgrade for QM35"
+	help
+	  Enable update procedure for QM35 during initialization
+
+if DOOR_LOCK_ALIRO_UWB_QM35_DFU
+
+choice DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON
+	prompt "Method used for QM35 version comparison"
+	default DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER
+
+config DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON_HIGHER
+	bool "Perform DFU only if the version is higher (avoid rollbacks)"
+
+config DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT
+	bool "Perform DFU for any different version"
+
+endchoice # DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON
+
+endif # DOOR_LOCK_ALIRO_UWB_QM35_DFU
+
+rsource "radar/Kconfig"
+rsource "diagnostics/Kconfig"
+rsource "front_back_detection/Kconfig"

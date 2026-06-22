@@ -17,7 +17,15 @@ if(NOT TARGET aliro)
     set(BUILD_TYPE "debug")
   endif()
 
-  set(ALIRO_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${BUILD_TYPE}/${SOC_NAME}/${ALIRO_LIB_NAME})
+  if(CONFIG_CPU_CORTEX_M33)
+    set(CPU_NAME "cortex-m33")
+  elseif(CONFIG_CPU_CORTEX_M4)
+    set(CPU_NAME "cortex-m4")
+  else()
+    message(FATAL_ERROR "Unsupported CPU")
+  endif()
+
+  set(ALIRO_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${BUILD_TYPE}/${CPU_NAME}/${ALIRO_LIB_NAME})
 
   if(NOT EXISTS ${ALIRO_LIB_PATH})
     message(FATAL_ERROR "Aliro library not found. Expected at ${ALIRO_LIB_PATH}")

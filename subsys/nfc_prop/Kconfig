@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_NFC_PROP
+	bool "Enable support for proprietary NFC Technology"
+	depends on NFC_DRIVER_STM
+	help
+	  Enable proprietary NFC technology module using RFAL PROP API.
+	  This optional module implements custom NFC functionality that
+	  enhances device detection capabilities.
+

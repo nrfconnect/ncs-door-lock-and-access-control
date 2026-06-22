@@ -1,0 +1,6 @@
+Before starting the DFU update process, ensure that:
+
+* The application is built with the ``dfu_smp`` snippet.
+* You have built the new application with a higher version number than the one currently running on the device.
+  Set the version in the application :file:`VERSION` file before building.
+* You have the firmware update image from the build directory (see `Output build files`_ in the |NCS| documentation).

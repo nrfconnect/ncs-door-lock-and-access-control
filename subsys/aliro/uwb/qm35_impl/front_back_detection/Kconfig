@@ -1,0 +1,30 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
+	bool "Enable QM35 UWB front/back detection integration"
+	select DOOR_LOCK_ALIRO_UWB_QM35_DIAGNOSTICS
+	select DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION
+	select DOOR_LOCK_ALIRO_UWB_QM35_RADAR
+	help
+	  Enable front/back detection integration for the QM35 UWB implementation,
+	  including session-event hooks and periodic front/back detection processing.
+
+if DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
+
+config DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION_PROCESSING_INTERVAL_MS
+	int "Front/back detection processing interval (ms)"
+	default 48
+	range 1 1000
+	help
+	  Period between front/back detection Process() runs while ranging is active.
+
+module = DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
+module-str = Door Lock Aliro UWB QM35 Front Back Detection
+module-dep = LOG
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION

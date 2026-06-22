@@ -1,0 +1,10 @@
+Select tests for running
+************************
+
+You can see the full list of available tests in the `Aliro Certification Tool`_ repository.
+From the :guilabel:`Test Suites` list, choose the tests with the `Reader` in the name, for example, :guilabel:`BLE Reader`.
+This will allow you to test the Bluetooth LE + UWB transport.
+
+.. note::
+   You can upload the :file:`ncs-door-lock-and-access-control/docs/certification_assets/Aliro PICS v0.9.3.r2.xml` file to the Test Harness to automatically select tests for execution.
+   However, there is a known bug in this Test Harness revision that causes the PICS file to select some incorrect tests and skip some needed to execute.
