@@ -5,10 +5,11 @@
 #
 
 menuconfig DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION
-	bool "Enable UWB front/back disambiguation"
+	bool "UWB front/back disambiguation [EXPERIMENTAL]"
 	depends on DOOR_LOCK_ALIRO_UWB
 	depends on QM35_UWB_ALIRO_ZEPHYR
 	select Q_ALIRO_DISAMBIGUATION
+	select EXPERIMENTAL
 	help
 	  Enable the front/back disambiguation algorithm (CIR, distance, and PDOA processing).
 

@@ -66,11 +66,34 @@ The following table shows tested and verified combinations of |REPO_NAME| releas
      - 1.5.0
      - 0.6.0
      - 4.0.2
+   * - 1.0.1
+     - 3.2.0
+     - 1.0.0
+     - 1.5.0
+     - 0.6.0
+     - 4.0.2
 
 Release notes
 *************
 
 The following list outlines the release notes for each release of the |REPO_NAME|.
+
+v1.0.1
+******
+
+This is a bugfix release that fixes the Device Firmware Update process for the QM35.
+Specifically, it fixes the QM35 firmware version mapping script path used during sysbuild when building with the ``uwb_qm35_dfu`` snippet.
+
+Changelog
+=========
+
+.. toggle::
+
+  The following updates were introduced in this release.
+
+  * Fixed:
+
+    * Incorrect path to the QM35 version mapping script (``map_qm35_version.py``) in sysbuild.
 
 v1.0.0
 ******

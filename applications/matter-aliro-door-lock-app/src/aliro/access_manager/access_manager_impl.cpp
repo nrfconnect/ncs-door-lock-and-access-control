@@ -456,7 +456,7 @@ AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &public
 	return ALIRO_INVALID_ARGUMENT;
 }
 
-AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex)
+AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex, bool updateUser)
 {
 	if (publicKeyType == PublicKeyType::AccessCredential) {
 		LOG_DBG("Removing Access Credential public key from storage");
@@ -487,7 +487,7 @@ AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size
 	else if (publicKeyType == PublicKeyType::AccessDocument) {
 		LOG_DBG("Removing Access Document public key from storage");
 		ReturnErrorOnFailure(RemoveKeyFromContainer(mAdKeys, keyIndex));
-		ReturnErrorOnFailure(ClearAccessDocument(keyIndex));
+		ReturnErrorOnFailure(ClearAccessDocument(keyIndex, updateUser));
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 		if (mKpersistentManager) {
@@ -1153,7 +1153,7 @@ AliroError AccessManagerImpl::RemoveOldestCredential(size_t &keyIndex)
 	}
 
 	if (oldestKeyIndex.has_value()) {
-		ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, oldestKeyIndex.value()));
+		ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, oldestKeyIndex.value(), true));
 		keyIndex = oldestKeyIndex.value();
 		return ALIRO_NO_ERROR;
 	}
@@ -1235,7 +1235,7 @@ AliroError AccessManagerImpl::RemoveOldCredentials(size_t credentialIssuerKeyInd
 			if (diff > kMaxValidityIterationDiff) {
 				LOG_DBG("Removing old credentials with index %u due to Validity Iteration difference: %" PRIu64,
 					i, diff);
-				ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i));
+				ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i, true));
 			}
 		}
 	}
@@ -1260,7 +1260,7 @@ AliroError AccessManagerImpl::RemoveAccessCredentials(size_t credentialIssuerKey
 				continue;
 			}
 
-			ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i));
+			ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i, true));
 		}
 	}
 

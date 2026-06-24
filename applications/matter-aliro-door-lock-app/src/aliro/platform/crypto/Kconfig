@@ -10,7 +10,7 @@ menu "Crypto"
 
 config DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART
     bool
-    default y if SOC_NRF54LM20A
+    default y if SOC_NRF54LM20A || SOC_NRF54LM20B
     help
       When enabled, the single-part AEAD API is used.
 

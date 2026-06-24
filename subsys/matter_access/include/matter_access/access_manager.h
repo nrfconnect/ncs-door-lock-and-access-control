@@ -146,6 +146,30 @@ public:
 			   DlCredentialStatus credentialStatus, CredentialTypeEnum credentialType,
 			   const chip::ByteSpan &secret);
 
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
+	/**
+	 * @brief Update cache with the Aliro evictable credential.
+	 *
+	 * @param credentialIndex credential index starting from 1.
+	 * @param secret a secret raw data.
+	 * @param credentialIssuerIndex credential issuer index starting from 1.
+	 * @return CHIP_NO_ERROR on success, error code otherwise.
+	 */
+	CHIP_ERROR UpdateAliroEvictableCredential(uint16_t credentialIndex, const chip::ByteSpan &secret,
+						  uint16_t credentialIssuerIndex);
+
+	/**
+	 * @brief Remove the Aliro evictable credential from cache.
+	 *
+	 * @param credentialIndex credential index starting from 1.
+	 * @param updateUser whether to update the related credential list in Matter User cache.
+	 * @return CHIP_NO_ERROR on success, error code otherwise.
+	 */
+	CHIP_ERROR RemoveAliroEvictableCredential(uint16_t credentialIndex, bool updateUser);
+
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
 #ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
 	/**
@@ -347,8 +371,8 @@ private:
 	void LoadSchedulesFromPersistentStorage();
 #endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
-	static CHIP_ERROR GetCredentialUserId(uint16_t credentialIndex, CredentialTypeEnum credentialType,
-					      uint32_t &userId);
+	static CHIP_ERROR GetCredentialUser(uint16_t credentialIndex, CredentialTypeEnum credentialType,
+					    Data::User **userPtr);
 
 	/* Similarly to SetCredential(), credentialIndex starts from 1 */
 	static bool DoSetCredential(Data::Credential &credential, uint16_t credentialIndex, chip::FabricIndex creator,

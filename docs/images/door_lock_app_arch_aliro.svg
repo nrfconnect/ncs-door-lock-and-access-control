@@ -1296,21 +1296,6 @@
    v:horizAlign="1"
    v:bulletSize="0.166667" /><v:tabList />NFC RFAL</text>		</g>
 		<g
-   id="shape85-159"
-   v:mID="85"
-   v:groupContext="shape"
-   transform="translate(168.146,-134.476)">
-			<title
-   id="title3787">Nordic Light Grey.141</title>
-			<desc
-   id="desc3789">Separate repository</desc>
-			<v:userDefs />
-			<path
-   d="M0 555.59 L166.44 555.59 L166.44 327.23 L0 327.23 L0 555.59 Z"
-   class="st20"
-   id="path3791" />
-		</g>
-		<g
    id="shape86-161"
    v:mID="86"
    v:groupContext="shape"
@@ -1755,35 +1740,6 @@
    id="text3917"><v:paragraph
    v:horizAlign="1"
    v:bulletSize="0.166667" /><v:tabList />External hardware module</text>		</g>
-		<g
-   id="shape100-204"
-   v:mID="100"
-   v:groupContext="shape"
-   transform="translate(354.331,-62.9604)">
-			<title
-   id="title3920">Nordic Light Grey.1002</title>
-			<desc
-   id="desc3922">Separate repository</desc>
-			<v:userDefs />
-			<v:textBlock
-   v:margins="rect(4,4,4,4)" />
-			<v:textRect
-   cx="72.9861"
-   cy="544.556"
-   width="145.99"
-   height="22.0804" />
-			<path
-   d="M0 555.59 L145.98 555.59 L145.98 533.51 L0 533.51 L0 555.59 Z"
-   class="st27"
-   id="path3924" />
-			<text
-   x="24.99"
-   y="547.86"
-   class="st28"
-   v:langID="1033"
-   id="text3926"><v:paragraph
-   v:horizAlign="1"
-   v:bulletSize="0.166667" /><v:tabList />Separate repository</text>		</g>
 		<g
    id="shape101-207"
    v:mID="101"
@@ -2328,26 +2284,26 @@
    id="shape147-287"
    v:mID="147"
    v:groupContext="shape"
-   transform="translate(354.331,-8.28746)">
+   transform="translate(354.331,-62.9604)">
 			<title
    id="title4141">Nordic Light Grey.140</title>
 			<desc
-   id="desc4143">Separate repository</desc>
+   id="desc4143">Optional component</desc>
 			<v:userDefs />
 			<v:textBlock
    v:margins="rect(4,4,4,4)" />
 			<v:textRect
-   cx="73.9781"
-   cy="545.563"
-   width="147.97"
-   height="20.0659" />
+   cx="72.9861"
+   cy="544.556"
+   width="145.99"
+   height="22.0804" />
 			<path
-   d="M0 555.59 L147.97 555.59 L147.97 535.53 L0 535.53 L0 555.59 Z"
+   d="M0 555.59 L145.98 555.59 L145.98 533.51 L0 533.51 L0 555.59 Z"
    class="st35"
    id="path4145" />
 			<text
    x="24.75"
-   y="548.86"
+   y="547.86"
    class="st28"
    v:langID="1033"
    id="text4147"><v:paragraph

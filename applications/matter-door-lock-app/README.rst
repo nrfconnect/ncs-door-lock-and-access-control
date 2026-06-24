@@ -14,6 +14,13 @@ This device works as a Matter accessory device, meaning it can be paired and con
 This device works as a Thread `Sleepy End Device`_.
 See the `Adding clusters to Matter application`_ page for an overview of the process you need to follow.
 
+.. note::
+
+    From the |NCS| v3.4.0 release, the Matter lock sample is no longer part of the |NCS| repository.
+    Instead, it is now part of the |REPO_NAME|.
+    If you are migrating from |NCS| v3.3.0 or earlier, bump the version in the :file:`applications/matter-door-lock-app/VERSION` file.
+    Set it above the version currently running on the device before building a firmware update for an already-deployed door lock.
+
 Requirements
 ************
 

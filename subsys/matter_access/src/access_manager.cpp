@@ -136,10 +136,10 @@ bool AccessManager<CRED_BIT_MASK>::ValidatePIN(const Optional<ByteSpan> &pinCode
 			continue;
 		}
 
-		uint32_t credentialUserId;
-		if (GetCredentialUserId(index, CredentialTypeEnum::kPin, credentialUserId) == CHIP_NO_ERROR) {
+		Data::User *user{ nullptr };
+		if (GetCredentialUser(index, CredentialTypeEnum::kPin, &user) == CHIP_NO_ERROR) {
 			result = ValidatePINResult{
-				.mUserId = static_cast<uint16_t>(credentialUserId),
+				.mUserId = static_cast<uint16_t>(user->mInfo.mFields.mUserUniqueId),
 				.mCredential =
 					LockOpCredentials{ CredentialTypeEnum::kPin, static_cast<uint16_t>(index) },
 			};
