@@ -6,7 +6,7 @@ Aliro standardizes the interaction that lets a phone or wearable act as a digita
 
 ## Getting started
 
-To get started with the nRF Door Lock and Access Control Add-on, follow the [documentation](https://docs.nordicsemi.com/bundle/aliro_1.0.0/page/index.html).
+To get started with the nRF Door Lock and Access Control Add-on, follow the [documentation](https://nrfconnectdocs.nordicsemi.com/addons/door_lock_and_access_control/latest/index.html).
 
 ## License
 
