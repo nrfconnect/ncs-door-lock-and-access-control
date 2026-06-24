@@ -10,7 +10,7 @@ Aliro
 
 Aliro is a standardized access protocol defined by the `Connectivity Standards Alliance`_ (CSA).
 It specifies how access readers communicate with user devices such as smartphones and wearables to unlock points of entry.
-In access control applications, Aliro delivers a phone-as-a-key experience: users authenticate with a digital credential stored on their device, and the reader grants or denies access based on the result.
+In access control applications, Aliro delivers a phone-as-a-key experience: users authenticate with a digital credential stored on their device, and the Reader grants or denies access based on the result.
 Aliro supports multiple transports — mandatory Near Field Communication (NFC) and optional Bluetooth® LE with Ultra-Wideband (UWB) — so products can offer tap-to-unlock, hands-free proximity unlock, or both.
 For transport-specific details, see :ref:`wireless_technologies_nfc` and :ref:`wireless_technologies_uwb`.
 For protocol-level background, see the `Aliro Technology`_ page.
@@ -27,10 +27,10 @@ The Aliro stack implements session management, cryptographic operations, and com
 The application provides the platform-specific backends — NFC, Bluetooth LE, UWB, and crypto — and uses the Access Manager to translate authentication and ranging results into lock actions.
 Aliro is well suited for interoperable access control for the following reasons:
 
-* Interoperability — certified readers and User Devices from different manufacturers work together without custom pairing.
-* Flexibility — Aliro does not dictate how the reader connects to the rest of your ecosystem.
+* Interoperability — certified Readers and User Devices from different manufacturers work together without custom pairing.
+* Flexibility — Aliro does not dictate how the Reader connects to the rest of your ecosystem.
 * Multiple unlock modes — NFC for deliberate tap-to-unlock; Bluetooth LE + UWB for hands-free proximity unlock.
-* Enterprise-grade security — hardware-backed key storage through PSA Crypto.
+* Enterprise-grade security — End-to-end encryption of the Aliro session data and device-to-device authentication.
 * Optional advanced phases — Expedited-fast authentication for high-traffic doors and Step-up authentication for tiered access policies.
 
 Role in the add-on
@@ -56,7 +56,8 @@ Platform abstraction APIs allow replacing the default NFC and UWB implementation
      - Carries the Aliro Access Protocol for the Bluetooth LE + UWB transport.
        See :ref:`aliro_ble_transport`.
    * - UWB backend
-     - Secure ranging for hands-free unlock when used with Bluetooth LE.
+     - Secure ranging for hands-free unlock.
+       It is used in combination with Bluetooth LE for authentication and ranging session setup.
        See :ref:`uwb_integration`.
    * - Crypto backend
      - PSA Crypto for hardware-backed key storage and cryptographic operations.

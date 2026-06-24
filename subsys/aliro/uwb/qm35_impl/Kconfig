@@ -4,6 +4,11 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+config DOOR_LOCK_ALIRO_UWB_QM35_EXPERIMENTAL
+	bool
+	select EXPERIMENTAL
+	default y
+
 config DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER
 	int "Minimum RAN multiplier for UWB ranging blocks"
 	default 2

@@ -10,7 +10,10 @@ target_sources(app PRIVATE
 target_sources_ifdef(CONFIG_DOOR_LOCK_STEP_UP_PHASE app PRIVATE validity_iterations.cpp)
 
 if(CONFIG_DOOR_LOCK_STEP_UP_PHASE AND CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS GREATER 0)
-  target_sources(app PRIVATE access_document.cpp)
+  target_sources(app PRIVATE
+    access_document.cpp
+    access_document_chip.cpp
+  )
 endif()
 
 target_include_directories(app PRIVATE .)

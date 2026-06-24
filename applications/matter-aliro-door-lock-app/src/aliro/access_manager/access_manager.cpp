@@ -69,7 +69,7 @@ AliroError AccessManager::GetPublicKey(size_t keyIndex, CryptoTypes::PublicKey &
 
 AliroError AccessManager::RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex)
 {
-	return Impl()->_RemovePublicKey(publicKeyType, keyIndex);
+	return Impl()->_RemovePublicKey(publicKeyType, keyIndex, false);
 }
 
 AliroError AccessManager::GetCredentialIssuerPublicKey(const CryptoTypes::KeyIdentifier &keyIdentifier,

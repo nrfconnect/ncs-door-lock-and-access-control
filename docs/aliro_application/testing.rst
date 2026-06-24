@@ -12,11 +12,11 @@ The following pages will guide you through setting up the test environment, prov
 
 To complete the testing process, you will need the following:
 
-* The Nordic Semiconductor's :ref:`development kit (DK) <hw_requirements>`, which serves as the Reader in the door lock component.
+* The Nordic Semiconductor :ref:`development kit (DK) <hw_requirements>`, which serves as the Reader in the door lock component.
   It must be attached to an NFC card reader expansion board and optionally to a UWB module.
-* The Aliro Test Harness, which acts as the User Device and simulates unlocking of the door lock.
-  See the :ref:`hw_requirements` page for more details
-  
+* The Aliro Test Harness, which acts as the User Device and simulates unlocking the door lock.
+  See the :ref:`hw_requirements` page for more details.
+
 .. toctree::
    :maxdepth: 1
    :glob:

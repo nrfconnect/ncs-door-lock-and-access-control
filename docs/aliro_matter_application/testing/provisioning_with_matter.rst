@@ -8,7 +8,7 @@ Aliro door lock provisioning with Matter
    :local:
    :depth: 2
 
-The following page covers two different approaches for testing the Aliro door lock with Matter:
+This page covers two different approaches for testing the Aliro door lock with Matter:
 
 * :ref:`testing_with_chip_tool` - Using the CHIP Tool command-line interface for commissioning and credential provisioning (intended for development and testing).
 * :ref:`testing_with_apple_ecosystem` - Using Apple Home app and Apple Wallet for real-world user experience testing with iOS devices.
@@ -22,7 +22,7 @@ For development kit LEDs, buttons, and commissioning controls, see :ref:`matter_
 Testing with Matter CHIP Tool
 *****************************
 
-This guide uses CHIP Tool as a Matter controller to commission the door lock and provision Aliro credentials through command-line interface.
+This guide uses CHIP Tool as a Matter controller to commission the door lock and provision Aliro credentials through the command-line interface.
 For details, see the `Matter chip-tool guide`_.
 
 .. note::
@@ -34,7 +34,7 @@ For details, see the `Matter chip-tool guide`_.
 
    #. Run the OpenThread Border Router and `form a Thread network using Docker <Running OTBR using Docker_>`_.
 
-   #. Obtain the Thread operational dataset for commissioning devices into created Thread network by running the following Docker command:
+   #. Obtain the Thread operational dataset for commissioning devices into the created Thread network by running the following Docker command:
 
       .. code-block:: console
 
@@ -42,7 +42,7 @@ For details, see the `Matter chip-tool guide`_.
 
       Save this operational dataset as it will be needed for commissioning the door lock device.
 
-#. Commission the Aliro door lock to Matter over Thread network.
+#. Commission the Aliro door lock to the Matter over Thread network.
 
    a. Put the door lock device in commissioning mode by pressing the appropriate button on the development kit.
       Refer to the :ref:`matter_ui` section for more details.
@@ -240,13 +240,13 @@ Build the firmware with the appropriate configuration for your testing scenario,
 
   .. code-block:: console
 
-     west build -b nrf54lm20dk/nrf54lm20a/cpuapp applications/matter-aliro-door-lock-app
+     west build -b nrf54lm20dk/nrf54lm20b/cpuapp applications/matter-aliro-door-lock-app
 
 * For NFC + Bluetooth LE + UWB testing, run:
 
   .. code-block:: console
 
-     west build -b nrf54lm20dk/nrf54lm20a/cpuapp applications/matter-aliro-door-lock-app -- -Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'
+     west build -b nrf54lm20dk/nrf54lm20b/cpuapp applications/matter-aliro-door-lock-app -- -Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'
 
 .. note::
    Before commissioning the door lock, ensure that the Apple Home Hub is set up and added to your Apple Home.
@@ -487,8 +487,8 @@ If you are facing difficulties during the commissioning process, consider the fo
 
 * Device is not discovered by the Home app:
 
-  * Verify if the device is in active commissioning mode (LED indicators should show commissioning state as described in the :ref:`matter_ui`).
-  * Ensure Bluetooth is enabled on your iPhone, and that Home app has permission to access location services.
+  * Verify that the device is in active commissioning mode (LED indicators should show commissioning state as described in the :ref:`matter_ui`).
+  * Ensure Bluetooth is enabled on your iPhone, and that the Home app has permission to access location services.
   * Confirm your iPhone is running iOS 26 or later.
   * Ensure that the HomePod mini is powered on, connected to Wi-Fi, and showing as online in the Home app.
   * Attempt to power cycle both the door lock device and the HomePod mini.
@@ -533,14 +533,14 @@ Problems with the Home Key appearing in Apple Wallet or other related issues can
 
 * The *Hold Near Lock* message appears but nothing happens (NFC unlock):
 
-  * Verify if the NFC reader hardware is properly connected to the development kit (check physical connections).
+  * Verify that the NFC reader hardware is properly connected to the development kit (check physical connections).
   * Ensure the firmware includes the NFC transport support by checking the build configuration.
   * Adjust the position of your iPhone relative to the NFC reader antenna to improve connectivity.
   * Check the device serial console for NFC reader initialization messages and any error logs.
 
 * The door does not unlock automatically when approaching (Bluetooth LE + UWB):
 
-  * Verify if the UWB module is properly connected to the development kit (check physical connections).
+  * Verify that the UWB module is properly connected to the development kit (check physical connections).
   * Ensure the firmware includes UWB support by checking the build configuration (``-Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'``).
   * Ensure your iPhone is within ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` (default: 100 cm) of the door lock.
   * Check the device serial console for UWB ranging messages and distance measurements.

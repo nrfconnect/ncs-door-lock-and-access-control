@@ -153,10 +153,11 @@ private:
 	 *
 	 * @param publicKeyType The type of the public key.
 	 * @param keyIndex The index of the public key in the storage.
+	 * @param updateUser Indicates if the related credential list in Matter User cache should be updated.
 	 *
 	 * @return ALIRO_NO_ERROR on success, error code on failure.
 	 */
-	AliroError _RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex);
+	AliroError _RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex, bool updateUser);
 
 	/**
 	 * @brief Get a Credential Issuer public key by its identifier.

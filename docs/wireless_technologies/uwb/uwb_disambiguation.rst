@@ -10,7 +10,7 @@ UWB front/back disambiguation
 The front/back disambiguation algorithm determines whether a user is standing in front of or behind the door lock, so that the door is opened only for users on the front side.
 
 .. note::
-   This feature is available only with the reference QM35825 integration.
+   This feature is available only with the QM35825 integration.
    The disambiguation algorithm is Qorvo intellectual property and depends on QM35-specific radar and diagnostic measurements.
    It is not included in third-party UWB ports and cannot be reused with other UWB radios.
    See :ref:`uwb_custom_integration`.
@@ -70,7 +70,7 @@ The radar session is managed in :file:`subsys/aliro/uwb/qm35_impl/radar/radar.cp
   * ``UnlockAction()`` stops the radar for UWB sessions via ``UltraWideBandImpl::StopRadarSession()`` (see :ref:`uwb_disambiguation_access_manager`).
 
   The radar session is not stopped when the user simply moves beyond the activation distance.
-  ``UwbRadar::Stop()`` also cancels any pending (scheduled but not yet started) radar start and always invokes the ``onSessionStopped`` callback.
+  ``UwbRadar::Stop()`` also cancels any pending (scheduled but not yet started) radar start and always invokes the ``mOnSessionStopped`` callback.
   ``LockAction()`` does not stop the radar session.
 
 Front/back processing lifecycle
@@ -88,7 +88,7 @@ Managed in :file:`subsys/aliro/uwb/qm35_impl/front_back_detection/front_back_det
   It is invoked:
 
   * Directly, when the CCC ranging session transitions from ``ACTIVE`` to ``IDLE``.
-  * From the radar ``onSessionStopped`` callback registered in :file:`subsys/aliro/uwb/qm35_impl/uwb_impl.cpp`, which runs whenever ``UwbRadar::Stop()`` runs.
+  * From the radar ``mOnSessionStopped`` callback registered in :file:`subsys/aliro/uwb/qm35_impl/uwb_impl.cpp`, which runs whenever ``UwbRadar::Stop()`` runs.
 
   ``CancelProcessing()`` does not clear the last FRONT/BACK result stored in the disambiguator.
 
@@ -139,7 +139,7 @@ Implementation details
 If no result is available yet, or the last result is BACK, the front/back gate blocks open.
 
 On unlock, ``SetOpenAllowed()`` calls ``UnlockAction(false)``, which invokes ``UltraWideBandImpl::StopRadarSession()`` for UWB sessions.
-That stops the radar and triggers ``FrontBackDetection::CancelProcessing()`` through the radar ``onSessionStopped`` callback.
+That stops the radar and triggers ``FrontBackDetection::CancelProcessing()`` through the radar ``mOnSessionStopped`` callback.
 ``LockAction()`` does not stop the radar or front/back processing directly.
 
 Configuration parameters
@@ -279,7 +279,7 @@ For example, to build the Aliro access control application for the nRF54LM20 DK 
 
 .. code-block:: bash
 
-   west build -p -b nrf54lm20dk/nrf54lm20a/cpuapp applications/aliro-access-control-app -- \
+   west build -p -b nrf54lm20dk/nrf54lm20b/cpuapp applications/aliro-access-control-app -- \
        -Daliro-access-control-app_SNIPPET=uwb_qm35 \
        -DCONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION=y
 
@@ -298,7 +298,7 @@ Testing
 
       [side] FRONT | dist: 65cm | pratio_u6: 420000 | cir: 312 | blk: 3 | pdoa:+58.123
 
-   The ``[side]`` field shows ``FRONT`` or ``BACK``, followed by the distance, ``p_ratio`` (scaled by 1e6), absolute CIR, noise-block count, and mean PDOA in degrees.
+   The ``[side]`` field shows ``FRONT`` or ``BACK``, followed by the distance, ``p_ratio`` (scaled by 1,000,000), absolute CIR, noise-block count, and mean PDOA in degrees.
 #. Verify the gating behavior:
 
    * Approaching from the front within ``MAX_ALLOWED_DISTANCE_CM`` should produce ``FRONT`` results and allow the door to open once both the distance and front/back gates pass.
@@ -312,5 +312,5 @@ Related documentation
 
 * :ref:`wireless_technologies_uwb` — How UWB fits into the add-on, including access policy overview.
 * :ref:`aliro_access_manager` — Distance thresholds and exit margin Kconfig options.
-* :ref:`uwb_integration` — Reference QM35825 architecture and stack interaction.
+* :ref:`uwb_integration` — QM35825 UWB integration architecture and stack interactions.
 * :ref:`uwb_custom_integration` — Porting a third-party UWB module (does not include this feature).

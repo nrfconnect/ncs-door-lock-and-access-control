@@ -30,8 +30,8 @@ Choose the measurement based on what you want to analyze and optimize:
 
 The analysis covers two functional modes of the NFC reader:
 
-* IDLE — Average current over the full capture window with no NFC tag or User Device at the reader (for example, a 60-second window).
-* ACTIVE — Average current while an NFC tag or User Device is held at the reader during the capture window.
+* IDLE — Average current over the full capture window with no NFC tag or User Device at the Reader (for example, a 60-second window).
+* ACTIVE — Average current while an NFC tag or User Device is held at the Reader during the capture window.
 
 Prerequisites
 *************
@@ -162,8 +162,8 @@ Complete the following steps:
 #. Enable PPK power output.
 #. Start the capture in Power Profiler.
 
-   For IDLE mode, do not present a tag or User Device at the reader.
-   For ACTIVE mode, hold an NFC tag or User Device at the reader for the capture window.
+   For IDLE mode, do not present a tag or User Device at the Reader.
+   For ACTIVE mode, hold an NFC tag or User Device at the Reader for the capture window.
 
 #. After 60 seconds, the measurement ends automatically.
    You can also stop it manually.
@@ -211,8 +211,8 @@ Procedure
 #. Connect the PPK in series between the development kit **VDD** and the NFC module power input, as shown in the schematic above.
 #. Start the capture in the Power Profiler app.
 
-   For IDLE mode, do not present a tag or User Device at the reader.
-   For ACTIVE mode, hold an NFC tag or User Device at the reader for the capture window.
+   For IDLE mode, do not present a tag or User Device at the Reader.
+   For ACTIVE mode, hold an NFC tag or User Device at the Reader for the capture window.
 
 #. After 60 seconds, the measurement ends automatically.
    You can also stop it manually.
