@@ -20,6 +20,7 @@
 #include "aliro/ble_types.h"
 #include <aliro_service/aliro_service.h>
 
+#include "last_operation.h"
 #include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
@@ -200,6 +201,24 @@ constexpr std::pair<const char *, size_t> GetNusServiceMessage(ReaderStateByte s
 
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
 
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+
+void SendReaderStatusChangedMessage(ReaderStateByte state)
+{
+	OperationSource source{ OperationSource::Auto };
+	const CryptoTypes::PublicKey *accessCredentialPublicKey{ nullptr };
+
+	const auto lastOperation = GetLastOperation();
+	source = lastOperation.source;
+	if (lastOperation.accessCredentialPublicKey.has_value()) {
+		accessCredentialPublicKey = &lastOperation.accessCredentialPublicKey.value();
+	}
+
+	AliroStack::Instance().SendReaderStatusChangedMessage(source, state, accessCredentialPublicKey);
+}
+
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
 } // namespace
 
 int AliroInit()
@@ -228,9 +247,9 @@ int AliroInit()
 	kpersistentManager = &sKpersistentManagerImpl;
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
-	LockSimInstance().Init([]([[maybe_unused]] OperationSource source, [[maybe_unused]] ReaderStateByte state) {
+	LockSimInstance().Init([](ReaderStateByte state) {
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-		Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(source, state);
+		SendReaderStatusChangedMessage(state);
 #ifdef CONFIG_DOOR_LOCK_NUS_SERVICE
 		const auto [message, messageLength] = GetNusServiceMessage(state);
 		DoorLock::NUSService::Send(message, messageLength);
@@ -248,25 +267,30 @@ int AliroInit()
 
 	AccessManagerInstance().SetApplicationCallbacks(
 		{ .mUnlockIndicatorClb =
-			  [](OperationSource source) {
-				  const auto isNfcSession = source == OperationSource::ThisUserDeviceInNfc;
+			  []([[maybe_unused]] bool isNfcSession,
+			     [[maybe_unused]] const CryptoTypes::PublicKey &accessCredentialPublicKey) {
 				  LOG_DBG("Door unlocked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
-				  if (!LockSimInstance().Unlock(source)) {
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+				  SetLastOperation(isNfcSession, accessCredentialPublicKey);
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+				  if (!LockSimInstance().Unlock()) {
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 					  // The lock is already unlocked, so we can send the Unsecured state
-					  Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
-						  source, ReaderStateByte::Unsecured);
+					  SendReaderStatusChangedMessage(ReaderStateByte::Unsecured);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 				  }
 			  },
 		  .mLockIndicatorClb =
-			  [](OperationSource source) {
-				  const auto isNfcSession = source == OperationSource::ThisUserDeviceInNfc;
+			  []([[maybe_unused]] bool isNfcSession,
+			     [[maybe_unused]] const CryptoTypes::PublicKey &accessCredentialPublicKey) {
 				  LOG_DBG("Door locked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
-				  LockSimInstance().Lock(source);
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+				  SetLastOperation(isNfcSession, accessCredentialPublicKey);
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+				  LockSimInstance().Lock();
 			  },
 		  .mAccessIndicatorClb =
-			  [](bool isAccessGranted, bool isNfcSession) {
+			  []([[maybe_unused]] bool isAccessGranted, [[maybe_unused]] bool isNfcSession) {
 				  LOG_INF("Access %s via %s session", isAccessGranted ? "granted" : "denied",
 					  isNfcSession ? "NFC" : "BLE/UWB");
 			  } });

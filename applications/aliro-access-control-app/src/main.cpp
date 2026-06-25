@@ -6,7 +6,6 @@
 
 #include "aliro/init.h"
 #include "aliro/lock_sim_instance.h"
-
 #include <crypto_utils/crypto_utils.h>
 #include <doorlock/utils/utils.h>
 #include <zephyr/logging/log.h>
@@ -27,6 +26,7 @@
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "access_manager.h"
+#include "aliro/last_operation.h"
 #include "uwb_impl.h"
 #include <aliro/aliro.h>
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
@@ -141,7 +141,10 @@ int main()
 		"Unlock",
 		[](void *context) {
 			LOG_INF("Unlock command received");
-			Aliro::LockSimInstance().Unlock(Aliro::OperationSource::Unspecified);
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+			Aliro::SetLastOperation(Aliro::OperationSource::Unspecified);
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+			Aliro::LockSimInstance().Unlock();
 		},
 		nullptr);
 
@@ -149,7 +152,10 @@ int main()
 		"Lock",
 		[](void *context) {
 			LOG_INF("Lock command received");
-			Aliro::LockSimInstance().Lock(Aliro::OperationSource::Unspecified);
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+			Aliro::SetLastOperation(Aliro::OperationSource::Unspecified);
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+			Aliro::LockSimInstance().Lock();
 		},
 		nullptr);
 

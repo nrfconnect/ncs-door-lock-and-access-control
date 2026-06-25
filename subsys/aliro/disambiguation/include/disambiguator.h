@@ -19,6 +19,7 @@ namespace Aliro::Uwb::Disambiguation {
 /** @brief Output of @ref Disambiguator::Process: door decision, phone side, and ranging diagnostics. */
 struct Result {
 	bool mSideIsFront{ false };
+	bool mUnlockAllowed{ false };
 	uint16_t mDistanceCm{ 0 };
 	float mMeanPdoaDeg{ 0.0f };
 	float mPRatio{ 0.0f };
@@ -27,6 +28,8 @@ struct Result {
 
 	/** @return True if the peer is on the front side (@ref mSideIsFront). */
 	bool IsFront() const { return mSideIsFront; }
+	/** @return True if unlock is allowed (front side and within secure bubble). */
+	bool IsUnlockAllowed() const { return mUnlockAllowed; }
 };
 
 /** @brief Singleton UWB front/back and door disambiguation over buffered CIR, distance, and PDOA/RSSI. */
@@ -49,6 +52,11 @@ public:
 	 *  @param sessionIdx Session index in @c [0, CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS).
 	 */
 	void ResetSession(uint8_t sessionIdx);
+
+	/** @brief Resets the global CIR counter, blocking Process() until the 40-sample window refills.
+	 *  Call after removing the last active session.
+	 */
+	void FlushCir();
 
 	/** @brief Feeds one distance sample for a session (internally calibrated when not in error).
 	 *  @param distanceCm Measured distance in centimeters.
@@ -87,6 +95,13 @@ public:
 	 */
 	std::optional<Result> TryGetLastResult(uint8_t sessionIdx);
 
+	/** @brief Returns true if any active session currently allows unlock.
+	 *
+	 *  Unlock is allowed when the disambiguator reports front side AND the
+	 *  user is within @c secure_bubble_radius for that session.
+	 */
+	bool IsAnyUnlockAllowed() const;
+
 private:
 	Disambiguator() = default;
 	~Disambiguator() = default;
@@ -99,17 +114,23 @@ private:
 
 	constexpr static uint8_t kMaxSessions{ CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS };
 
-	k_mutex mMutex{};
+	mutable k_mutex mMutex{};
 	bool mInitialized{ false };
 	uint32_t mCirCount{ 0 };
 	disambiguation_parameters mDisambiguationParams{};
 
-	std::array<bool, kMaxSessions> mHasLastResult{};
-	std::array<uint32_t, kMaxSessions> mDistanceCount{};
-	std::array<uint32_t, kMaxSessions> mPdoaCount{};
-	std::array<Result, kMaxSessions> mLastResult{};
-	/* Consecutive BACK count per session — FRONT→BACK requires kFrontToBackConfirmCount. */
-	std::array<uint8_t, kMaxSessions> mConsecBackCount{};
+	struct SessionState {
+		bool hasResult{ false };
+		uint32_t distanceCount{ 0 };
+		uint32_t pdoaCount{ 0 };
+		Result lastResult{};
+		/* FRONT→BACK requires kFrontToBackConfirmCount consecutive BACKs. */
+		uint8_t consecBackCount{ 0 };
+		/* BACK→FRONT requires kBackToFrontConfirmCount consecutive FRONTs. */
+		uint8_t consecFrontCount{ 0 };
+	};
+
+	std::array<SessionState, kMaxSessions> mSessions{};
 };
 
 } // namespace Aliro::Uwb::Disambiguation

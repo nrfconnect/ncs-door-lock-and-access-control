@@ -21,7 +21,7 @@ Before starting your port, make sure you understand the scope of the work and ha
 
 This guide assumes familiarity with the following:
 
-* Aliro specification — In particular the NFC transport protocol (ISO14443-A) and the Access Protocol message exchange flow.
+* Aliro specification — In particular, the NFC transport protocol (ISO14443-A) and the Access Protocol message exchange flow.
   Your NFC implementation must handle the complete Aliro message exchange over NFC without requiring modifications to the protocol layer.
   See :ref:`aliro_application_interactions` for layering, stack event processing, and the NFC data path.
 * Direct integration pattern used in the add-on — The platform code uses direct class-to-class communication between ``AliroStack`` and the NFC transport implementation (``NfcTransportRfal``).
@@ -336,8 +336,8 @@ The :file:`applications/*/src/aliro/interface_impl/session.cpp` contains the ses
 Build system integration
 ========================
 
-The reference NFC implementation is compiled unconditionally whenever the application is built with the Aliro support.
-To include your custom NFC implementation, you need to add your source files to the build system in the application platform folder and remove the RFAL specific targets in :file:`applications/*/src/aliro/platform/nfc/`:
+The reference NFC implementation is compiled unconditionally whenever the application is built with Aliro support.
+To include your custom NFC implementation, you need to add your source files to the build system in the application platform folder and remove the RFAL-specific targets in :file:`applications/*/src/aliro/platform/nfc/`:
 
 .. code-block:: cmake
 
@@ -355,7 +355,7 @@ To include your custom NFC implementation, you need to add your source files to 
 Performance considerations
 ==========================
 
-Several factors affect NFC performance and you should consider them during integration:
+Several factors affect NFC performance, and you should consider them during integration:
 
 .. list-table::
    :header-rows: 1

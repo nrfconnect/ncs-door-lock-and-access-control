@@ -9,7 +9,7 @@ NUS service
    :depth: 2
 
 The Door Lock Nordic UART Service (NUS) wrapper is built on the |NCS| `Nordic UART Service (NUS)`_ GATT service.
-It receives line-based commands over Bluetooth LE and dispatches them to registered callbacks, providing a UART-style command channel for proprietary remote lock control.
+It receives commands over Bluetooth LE and dispatches them to registered callbacks, providing a UART-style command channel for proprietary remote lock control.
 
 For transport context and how NUS fits alongside other Bluetooth LE services, see :ref:`door_lock_app_ble_nus`.
 For step-by-step pairing and command testing, see :ref:`aliro_testing_ble_nordic_uart` (|ALIRO_APP_NAME|) and :ref:`aliro_matter_testing_ble_nordic_uart` (|MATTER_ALIRO_APP_NAME|).

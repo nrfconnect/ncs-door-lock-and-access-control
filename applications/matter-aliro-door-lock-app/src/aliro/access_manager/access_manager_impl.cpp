@@ -401,7 +401,13 @@ AliroError AccessManagerImpl::_VerifyAccessCredential(
 	}
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
-	HandleAccessGranted(sessionContext.IsNfc(), status == ALIRO_NO_ERROR);
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	if (status == ALIRO_NO_ERROR && sessionContext.IsBle()) {
+		status = AllocateRangingSession(sessionContext, userPublicKey);
+	}
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
+	HandleAccessGranted(sessionContext.IsNfc(), status == ALIRO_NO_ERROR, userPublicKey);
 	return status;
 }
 
@@ -413,7 +419,14 @@ AliroError AccessManagerImpl::_VerifyKPersistentKey([[maybe_unused]] CryptoTypes
 	CryptoTypes::PublicKey publicKey{};
 	VerifyOrReturnStatus(mKpersistentManager, ALIRO_INVALID_STATE, LOG_ERR("Kpersistent manager not set"));
 	AliroError status = mKpersistentManager->GetAccessCredentialPublicKey(kpersistentKeyId, publicKey);
-	HandleAccessGranted(sessionContext.IsNfc(), status == ALIRO_NO_ERROR);
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	if (status == ALIRO_NO_ERROR && sessionContext.IsBle()) {
+		status = AllocateRangingSession(sessionContext, publicKey);
+	}
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+
+	HandleAccessGranted(sessionContext.IsNfc(), status == ALIRO_NO_ERROR, publicKey);
 	return status;
 
 #else
@@ -456,7 +469,7 @@ AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &public
 	return ALIRO_INVALID_ARGUMENT;
 }
 
-AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex)
+AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size_t keyIndex, bool updateUser)
 {
 	if (publicKeyType == PublicKeyType::AccessCredential) {
 		LOG_DBG("Removing Access Credential public key from storage");
@@ -487,7 +500,7 @@ AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size
 	else if (publicKeyType == PublicKeyType::AccessDocument) {
 		LOG_DBG("Removing Access Document public key from storage");
 		ReturnErrorOnFailure(RemoveKeyFromContainer(mAdKeys, keyIndex));
-		ReturnErrorOnFailure(ClearAccessDocument(keyIndex));
+		ReturnErrorOnFailure(ClearAccessDocument(keyIndex, updateUser));
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 		if (mKpersistentManager) {
@@ -595,6 +608,20 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext,
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	const auto openAllowed = EvaluateUwbOpenAllowed(uwbData, sessionContext);
+
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
+	{
+		const auto id = Uwb::UltraWideBandInstance().GetDisambiguationSessionIdx(sessionContext);
+		const auto result =
+			id ? Aliro::Uwb::Disambiguation::Disambiguator::Instance().TryGetLastResult(*id) : std::nullopt;
+		const char *sideStr = result.has_value() ? (result->IsFront() ? "FRONT" : "BACK") : "----";
+		LOG_INF("session %p | %-16s | %s", sessionContext.GetRaw(),
+			openAllowed ? "OPEN ALLOWED" : "OPEN NOT ALLOWED", sideStr);
+	}
+#else
+	LOG_INF("session %p | %s", sessionContext.GetRaw(), openAllowed ? "OPEN ALLOWED" : "OPEN NOT ALLOWED");
+#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
+
 	SetOpenAllowed(sessionContext, openAllowed);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
@@ -710,22 +737,18 @@ AliroError AccessManagerImpl::_GetPublicKey(size_t keyIndex, CryptoTypes::Public
 	return ALIRO_NO_ERROR;
 }
 
-void AccessManagerImpl::UnlockAction(bool isNfcSession) const
+void AccessManagerImpl::UnlockAction(bool isNfcSession, const CryptoTypes::PublicKey &accessCredentialPublicKey) const
 {
-	const auto source = isNfcSession ? OperationSource::ThisUserDeviceInNfc :
-					   OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow;
-	VerifyAndCall(mCallbacks.mUnlockIndicatorClb, source);
+	VerifyAndCall(mCallbacks.mUnlockIndicatorClb, isNfcSession, accessCredentialPublicKey);
 
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_RADAR
 	Uwb::UltraWideBandInstance().StopRadarSession();
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_RADAR
 }
 
-void AccessManagerImpl::LockAction(bool isNfcSession) const
+void AccessManagerImpl::LockAction(bool isNfcSession, const CryptoTypes::PublicKey &accessCredentialPublicKey) const
 {
-	const auto source = isNfcSession ? OperationSource::ThisUserDeviceInNfc :
-					   OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow;
-	VerifyAndCall(mCallbacks.mLockIndicatorClb, source);
+	VerifyAndCall(mCallbacks.mLockIndicatorClb, isNfcSession, accessCredentialPublicKey);
 }
 
 void AccessManagerImpl::AccessGrantedAction(bool isNfcSession) const
@@ -740,12 +763,13 @@ void AccessManagerImpl::AccessDeniedAction(bool isNfcSession) const
 	VerifyAndCall(mCallbacks.mAccessIndicatorClb, false, isNfcSession);
 }
 
-void AccessManagerImpl::HandleAccessGranted(bool isNfcSession, bool granted)
+void AccessManagerImpl::HandleAccessGranted(bool isNfcSession, bool granted,
+					    const CryptoTypes::PublicKey &accessCredentialPublicKey)
 {
 	if (granted) {
 		AccessGrantedAction(isNfcSession);
 		if (ShouldUnlockImmediately(isNfcSession)) {
-			UnlockAction(isNfcSession);
+			UnlockAction(isNfcSession, accessCredentialPublicKey);
 		}
 	} else {
 		AccessDeniedAction(isNfcSession);
@@ -789,17 +813,18 @@ bool AccessManagerImpl::EvaluateUwbOpenAllowed(const UwbRangingData &uwbData, Se
 	auto *sessionCtx = FindRangingSession(sessionContext);
 	VerifyOrReturnFalse(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext.GetRaw()));
 
-	// Apply exit margin logic based on session's previous state:
-	// - Open allowed (enter): distance <= mMaxAllowedDistance (when open was not yet allowed)
-	// - Open disallowed (exit): distance > mMaxAllowedDistance + mMaxAllowedDistanceExitMargin (when open was
-	// already allowed). Use session's previous state (sessionCtx->mOpenAllowed) to determine threshold. This
-	// ensures that each session independently tracks its state transitions and prevents issues when sessions are
-	// created/destroyed (e.g., BLE disconnect/reconnect). The exit margin is only applied when the door is
-	// unlocked to prevent rapid toggling. With CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION, entering
-	// allow-open also requires front-side detection.
 	const bool wasOpenAllowed = sessionCtx->mOpenAllowed;
+
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
+	if (!wasOpenAllowed) {
+		VerifyOrReturnFalse(DisambiguationAllowsOpen());
+		return true;
+	}
+	const uint32_t threshold = mMaxAllowedDistance + mMaxAllowedDistanceExitMargin;
+#else
 	const uint32_t threshold =
 		wasOpenAllowed ? (mMaxAllowedDistance + mMaxAllowedDistanceExitMargin) : mMaxAllowedDistance;
+#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 
 	LOG_DBG("Extracted distance: %u cm, threshold: %u cm (max: %u cm, exit margin: %u cm, wasOpenAllowed: %d)",
 		distance.value(), threshold, mMaxAllowedDistance, mMaxAllowedDistanceExitMargin,
@@ -808,27 +833,14 @@ bool AccessManagerImpl::EvaluateUwbOpenAllowed(const UwbRangingData &uwbData, Se
 	// Check if distance is within acceptable range
 	VerifyOrReturnFalse(distance.value() <= threshold, LOG_DBG("Distance check failed - User Device is too far"));
 
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-	VerifyOrReturnFalse(DisambiguationAllowsOpen(sessionContext, wasOpenAllowed));
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-
 	LOG_DBG("Distance check passed, open allowed from UWB for this update");
 	return true;
 }
 
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-bool AccessManagerImpl::DisambiguationAllowsOpen(SessionContext sessionContext, bool wasOpenAllowed) const
+bool AccessManagerImpl::DisambiguationAllowsOpen() const
 {
-	if (wasOpenAllowed) {
-		return true;
-	}
-	auto &disambiguator = Aliro::Uwb::Disambiguation::Disambiguator::Instance();
-	const auto id = Uwb::UltraWideBandInstance().GetDisambiguationSessionIdx(sessionContext);
-	VerifyOrReturnFalse(id);
-	const auto result = disambiguator.TryGetLastResult(*id);
-	VerifyOrReturnFalse(result.has_value());
-
-	return result->IsFront();
+	return Aliro::Uwb::Disambiguation::Disambiguator::Instance().IsAnyUnlockAllowed();
 }
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 
@@ -840,33 +852,54 @@ std::optional<uint16_t> AccessManagerImpl::ExtractDistanceFromUwbData(const UwbR
 	return std::make_optional<uint16_t>(sys_get_be16(uwbData.mData));
 }
 
-AliroError AccessManagerImpl::AddRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
-						ProtocolVersion protocolVersion, SessionContext sessionCtx)
+AliroError AccessManagerImpl::AllocateRangingSession(SessionContext sessionCtx,
+						     const CryptoTypes::PublicKey &accessCredentialPublicKey)
 {
 	auto *newCtx = Aliro::new_nothrow<RangingSessionContext>(
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		CONFIG_DOOR_LOCK_ACCESS_MANAGER_SESSION_TIMEOUT_MS,
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-		sessionCtx);
+		sessionCtx, accessCredentialPublicKey);
 	VerifyOrReturnStatus(newCtx, ALIRO_NO_MEMORY, LOG_ERR("Cannot allocate context for UWB session."));
 
 	MutexGuard lock{ sMutex };
-
-	int status = Uwb::UltraWideBandInstance().ConfigureRangingSession(rangingSessionId, ursk, protocolVersion,
-									  sessionCtx);
-	VerifyOrExit(status == 0, LOG_ERR("Failed to configure ranging session: %d", status));
-
 	sys_slist_append(&mActiveSessions, &newCtx->mNode);
 
 	return ALIRO_NO_ERROR;
+}
 
-exit:
-#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-	newCtx->mRangingSessionTimer.Stop();
-#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-	delete newCtx;
+AliroError AccessManagerImpl::AddRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
+						ProtocolVersion protocolVersion, SessionContext sessionCtx)
+{
+	int status = 0;
+	bool found = false;
 
-	return AliroError::FromInt(status);
+	{
+		MutexGuard lock{ sMutex };
+
+		RangingSessionContext *rangingSessionCtx{};
+		SYS_SLIST_FOR_EACH_CONTAINER (&mActiveSessions, rangingSessionCtx, mNode) {
+			if (rangingSessionCtx->mSessionContext == sessionCtx) {
+				found = true;
+				status = Uwb::UltraWideBandInstance().ConfigureRangingSession(
+					rangingSessionId, ursk, protocolVersion, sessionCtx);
+				break;
+			}
+		}
+	}
+
+	if (!found) {
+		LOG_ERR("Ranging session context not found for handle: %p", sessionCtx.GetRaw());
+		return ALIRO_INVALID_STATE;
+	}
+
+	if (status != 0) {
+		LOG_ERR("Failed to configure ranging session: %d", status);
+		RemoveRangingSession(sessionCtx);
+		return AliroError::FromInt(status);
+	}
+
+	return ALIRO_NO_ERROR;
 }
 
 void AccessManagerImpl::RemoveRangingSession(SessionContext sessionCtx)
@@ -980,13 +1013,13 @@ void AccessManagerImpl::SetOpenAllowed(SessionContext sessionContext, bool openA
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 
 		if (hasAnyOpenAllowed) {
-			UnlockAction(false);
+			UnlockAction(false, sessionCtx->mAccessCredentialPublicKey);
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 			TerminateAliroSession(sessionContext);
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_ACCESS_GRANTED
 		} else {
 #ifndef CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK
-			LockAction(false);
+			LockAction(false, sessionCtx->mAccessCredentialPublicKey);
 #endif // CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK
 		}
 	}
@@ -1153,7 +1186,7 @@ AliroError AccessManagerImpl::RemoveOldestCredential(size_t &keyIndex)
 	}
 
 	if (oldestKeyIndex.has_value()) {
-		ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, oldestKeyIndex.value()));
+		ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, oldestKeyIndex.value(), true));
 		keyIndex = oldestKeyIndex.value();
 		return ALIRO_NO_ERROR;
 	}
@@ -1235,7 +1268,7 @@ AliroError AccessManagerImpl::RemoveOldCredentials(size_t credentialIssuerKeyInd
 			if (diff > kMaxValidityIterationDiff) {
 				LOG_DBG("Removing old credentials with index %u due to Validity Iteration difference: %" PRIu64,
 					i, diff);
-				ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i));
+				ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i, true));
 			}
 		}
 	}
@@ -1260,7 +1293,7 @@ AliroError AccessManagerImpl::RemoveAccessCredentials(size_t credentialIssuerKey
 				continue;
 			}
 
-			ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i));
+			ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i, true));
 		}
 	}
 

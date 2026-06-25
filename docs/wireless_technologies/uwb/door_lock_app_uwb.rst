@@ -10,7 +10,7 @@ Ultra-wideband (UWB)
 Ultra-wideband (UWB) is a short-range radio technology that transmits over a very wide frequency spectrum (more than 500 MHz of bandwidth) using very short pulses at low energy levels.
 These short pulses let a receiver measure the time of flight of a signal with high precision, which makes UWB well suited for accurate and secure distance measurement (ranging) between two devices.
 
-In access control applications, UWB enables a hands-free, proximity-based unlock: the reader measures how far away the smartphone is and opens the lock automatically as the user approaches, then relocks when they move away.
+In access control applications, UWB enables a hands-free, proximity-based unlock: the Reader measures how far away the smartphone is and opens the lock automatically as the user approaches, then relocks when they move away.
 In the Aliro protocol defined by the `Connectivity Standards Alliance`_ (CSA), UWB is an optional extension to the Bluetooth® LE transport that provides the secure ranging used to make these distance-based access decisions.
 
 For a general introduction to Aliro and how UWB fits alongside other transports, see :ref:`wireless_technologies_aliro` and the `Aliro Technology`_ page.
@@ -25,11 +25,11 @@ Overview
 
 In the |REPO_NAME|, UWB is never used on its own.
 Bluetooth LE carries the Aliro Access Protocol and the UWB ranging session setup; see :ref:`aliro_ble_transport` for the Bluetooth LE side of that transport.
-UWB performs the secure ranging that measures distance between the User Device and the reader, and the Aliro Access Manager uses the continuous distance reports to drive the lock.
+UWB performs the secure ranging that measures distance between the User Device and the Reader, and the Aliro Access Manager uses the continuous distance reports to drive the lock.
 
 UWB is well suited for hands-free, proximity-based access for the following reasons:
 
-* Walk-up-and-unlock experience without the user having to tap the device against the reader.
+* Walk-up-and-unlock experience without the user having to tap the device against the Reader.
 * Secure distance measurement that is resistant to relay attacks.
 * Configurable unlock and relock distances for stable hands-free behavior.
 * Stack and driver support for multiple UWB sessions. 

@@ -6,6 +6,7 @@
 
 #include "front_back_detection.h"
 
+#include <algorithm>
 #include <disambiguator.h>
 #include <uwb_utils.h>
 
@@ -41,7 +42,8 @@ constexpr disambiguation_parameters kFrontBackDetectionParams = {
 	.secure_bubble_radius = CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_SECURE_BUBBLE_CM,
 };
 
-void LogFrontBackDetectionResult(const Aliro::Uwb::Disambiguation::Result &result) noexcept
+void LogFrontBackDetectionResult(uint8_t sessionIdx, size_t activeRangingSessions,
+				 const Aliro::Uwb::Disambiguation::Result &result) noexcept
 {
 	using namespace Aliro::Uwb::Utils;
 
@@ -50,11 +52,19 @@ void LogFrontBackDetectionResult(const Aliro::Uwb::Disambiguation::Result &resul
 	const int32_t pdoaMilliDeg = static_cast<int32_t>(result.mMeanPdoaDeg * 1000.0f);
 	const auto pdoa = SplitMilli(pdoaMilliDeg);
 
-	const char *sideStr = result.IsFront() ? "FRONT" : "BACK";
+	const char *rawStr = result.IsFront() ? "FRONT" : "BACK ";
 
-	LOG_INF("[side] %s | dist:%3dcm | pratio_u6:%7d | cir:%4d | blk:%2d | pdoa:%s%u.%03u", sideStr,
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+	LOG_INF("[sess:%u|total:%zu] [side] raw:%s | dist:%3dcm | pratio_u6:%7d | cir:%4d | blk:%2d | pdoa:%s%u.%03u",
+		sessionIdx, activeRangingSessions, rawStr, result.mDistanceCm, pRatioU6, result.mCir,
+		result.mNoiseBlocks, pdoa.mSign, pdoa.mInteger, pdoa.mFraction);
+#else
+	ARG_UNUSED(sessionIdx);
+	ARG_UNUSED(activeRangingSessions);
+	LOG_INF("[side] raw:%s | dist:%3dcm | pratio_u6:%7d | cir:%4d | blk:%2d | pdoa:%s%u.%03u", rawStr,
 		result.mDistanceCm, pRatioU6, result.mCir, result.mNoiseBlocks, pdoa.mSign, pdoa.mInteger,
 		pdoa.mFraction);
+#endif
 }
 
 } // namespace
@@ -89,7 +99,7 @@ void FrontBackDetection::HandleRadarMeasurement(const uint8_t *data, size_t size
 								    static_cast<uint16_t>(size));
 }
 
-int FrontBackDetection::AssignSessionIndex(SessionContext &sessionCtx)
+int FrontBackDetection::AssignSessionIndex(SessionContext &sessionCtx, DoorLock::Utils::MutexGuard &)
 {
 	for (uint8_t i = 0; i < mSessions.size(); i++) {
 		if (!mSessions[i]) {
@@ -102,12 +112,20 @@ int FrontBackDetection::AssignSessionIndex(SessionContext &sessionCtx)
 	return -ENOSPC;
 }
 
-void FrontBackDetection::ReleaseSessionIndex(const SessionContext &sessionCtx)
+void FrontBackDetection::ReleaseSessionIndex(const SessionContext &sessionCtx, DoorLock::Utils::MutexGuard &)
 {
-	if (sessionCtx.mDisambiguationSessionIdx < mSessions.size()) {
-		Disambiguation::Disambiguator::Instance().ResetSession(sessionCtx.mDisambiguationSessionIdx);
-		mSessions[sessionCtx.mDisambiguationSessionIdx] = nullptr;
+	VerifyOrReturn(sessionCtx.mDisambiguationSessionIdx < mSessions.size());
+
+	// Flush the shared CIR counter only when this is the last active session.
+	const bool isLastSession =
+		std::none_of(mSessions.begin(), mSessions.end(),
+			     [&sessionCtx](const SessionContext *s) { return s != nullptr && s != &sessionCtx; });
+
+	Disambiguation::Disambiguator::Instance().ResetSession(sessionCtx.mDisambiguationSessionIdx);
+	if (isLastSession) {
+		Disambiguation::Disambiguator::Instance().FlushCir();
 	}
+	mSessions[sessionCtx.mDisambiguationSessionIdx] = nullptr;
 }
 
 void FrontBackDetection::CancelProcessing()
@@ -137,6 +155,9 @@ void FrontBackDetection::ProcessSessions(sys_slist_t *activeSessions)
 	SessionContext *sessionCtx{};
 	{
 		DoorLock::Utils::MutexGuard lock{ *mSessionsMutex };
+
+		const size_t activeRangingSessions = CountActiveRangingSessions(activeSessions);
+
 		SYS_SLIST_FOR_EACH_CONTAINER (activeSessions, sessionCtx, mSessionContextNode) {
 			if (sessionCtx->mRangingSessionState != RangingSessionState::Ranging &&
 			    sessionCtx->mRangingSessionState != RangingSessionState::RangingResumed) {
@@ -145,7 +166,11 @@ void FrontBackDetection::ProcessSessions(sys_slist_t *activeSessions)
 
 			if (Disambiguation::Disambiguator::Instance().Process(
 				    result, sessionCtx->mDisambiguationSessionIdx) == 0) {
-				LogFrontBackDetectionResult(result);
+#if defined(CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION) && defined(ALIRO_VENDOR1_EXTENSION)
+				Vendor1Ext::ProcessDisambiguationResult(sessionCtx, result);
+#endif
+				LogFrontBackDetectionResult(sessionCtx->mDisambiguationSessionIdx,
+							    activeRangingSessions, result);
 			}
 		}
 	}
@@ -168,6 +193,14 @@ void FrontBackDetection::OnSessionEvent(const aliro_uwb_session_event &event, co
 	static_cast<FrontBackDetection *>(ctx)->HandleSessionEvent(event, sessionCtx);
 }
 
+void FrontBackDetection::ResetSession(const SessionContext &sessionCtx)
+{
+	Disambiguation::Disambiguator::Instance().ResetSession(sessionCtx.mDisambiguationSessionIdx);
+#if defined(CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION) && defined(ALIRO_VENDOR1_EXTENSION)
+	Vendor1Ext::ResetSession(sessionCtx);
+#endif
+}
+
 void FrontBackDetection::HandleSessionEvent(const aliro_uwb_session_event &event, const SessionContext &sessionCtx)
 {
 	switch (event.type) {
@@ -178,15 +211,23 @@ void FrontBackDetection::HandleSessionEvent(const aliro_uwb_session_event &event
 
 		if (oldState == CHERRY_CCC_SESSION_STATE_IDLE && newState == CHERRY_CCC_SESSION_STATE_ACTIVE) {
 			if (sessionCtx.mRangingSessionState == RangingSessionState::Idle) {
-				Disambiguation::Disambiguator::Instance().ResetSession(
-					sessionCtx.mDisambiguationSessionIdx);
+				ResetSession(sessionCtx);
 				LOG_INF("Front/back detection reset for new ranging session");
 				ScheduleProcessing();
 			} else if (sessionCtx.mRangingSessionState == RangingSessionState::RangingSuspended) {
+				ResetSession(sessionCtx);
+				LOG_INF("Front/back detection reset on ranging session resume");
 				ScheduleProcessing();
 			}
 		} else if (oldState == CHERRY_CCC_SESSION_STATE_ACTIVE && newState == CHERRY_CCC_SESSION_STATE_IDLE) {
-			CancelProcessing();
+			// Stop processing only when the last session goes idle.
+			const bool hasOtherSessions =
+				std::any_of(mSessions.begin(), mSessions.end(), [&sessionCtx](const SessionContext *s) {
+					return s != nullptr && s != &sessionCtx;
+				});
+			if (!hasOtherSessions) {
+				CancelProcessing();
+			}
 		}
 		break;
 	}
@@ -212,6 +253,7 @@ void FrontBackDetection::HandleControleeReport(const SessionContext &sessionCtx,
 		if (m->frame_status) {
 			Disambiguation::Disambiguator::Instance().AddDistanceMeasurement(
 				0, sessionCtx.mDisambiguationSessionIdx, true);
+			sessionCtx.mRangingRoundHadError = true;
 			continue;
 		}
 
@@ -219,11 +261,17 @@ void FrontBackDetection::HandleControleeReport(const SessionContext &sessionCtx,
 			LOG_INF("Ignoring measurements above maximum reportable distance");
 			Disambiguation::Disambiguator::Instance().AddDistanceMeasurement(
 				0, sessionCtx.mDisambiguationSessionIdx, true);
+			sessionCtx.mRangingRoundHadError = true;
 			break;
 		}
 
+		sessionCtx.mRangingRoundHadError = false;
 		Disambiguation::Disambiguator::Instance().AddDistanceMeasurement(
 			m->distance_cm, sessionCtx.mDisambiguationSessionIdx, false);
+
+#if defined(CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION) && defined(ALIRO_VENDOR1_EXTENSION)
+		Vendor1Ext::ProcessMeasurement(sessionCtx, *m);
+#endif
 
 		if (!mProcessingEnabled) {
 			ScheduleProcessing();
@@ -236,7 +284,8 @@ void FrontBackDetection::HandleDiagnosticReport(const SessionContext &sessionCtx
 {
 	// Aliro CCC with 1 ranging round produces 2 frame reports; PDOA is in frame[1]
 	// (controlee reply). The Qorvo demo uses 5 rounds and reads frame[4].
-	if (!diagnostics || diagnostics->n_frame_report < 2) {
+	if (!diagnostics || diagnostics->n_frame_report < 2 || sessionCtx.mRangingRoundHadError) {
+		sessionCtx.mRangingRoundHadError = false;
 		Disambiguation::Disambiguator::Instance().AddPdoaMeasurement(0, 0, sessionCtx.mDisambiguationSessionIdx,
 									     true, true);
 		return;
@@ -261,6 +310,24 @@ void FrontBackDetection::HandleDiagnosticReport(const SessionContext &sessionCtx
 
 	Disambiguation::Disambiguator::Instance().AddPdoaMeasurement(pdoa, rssi, sessionCtx.mDisambiguationSessionIdx,
 								     pdoaError, rssiError);
+}
+
+size_t FrontBackDetection::CountActiveRangingSessions(sys_slist_t *activeSessions) const
+{
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+	size_t count = 0;
+	SessionContext *sessionCtx{};
+	SYS_SLIST_FOR_EACH_CONTAINER (activeSessions, sessionCtx, mSessionContextNode) {
+		if (sessionCtx->mRangingSessionState == RangingSessionState::Ranging ||
+		    sessionCtx->mRangingSessionState == RangingSessionState::RangingResumed) {
+			count++;
+		}
+	}
+	return count;
+#else
+	ARG_UNUSED(activeSessions);
+	return 0;
+#endif
 }
 
 } // namespace Aliro::Uwb

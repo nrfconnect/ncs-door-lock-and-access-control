@@ -250,7 +250,7 @@ AliroError AeadEncrypt(CryptoTypes::KeyId keyId, const uint8_t *plainTxt, size_t
 
 	const psa_algorithm_t algorithm = PSA_ALG_GCM;
 
-#ifndef CONFIG_DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART
+#ifndef CONFIG_DOOR_LOCK_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
 	psa_aead_operation_t operation = PSA_AEAD_OPERATION_INIT;
 	size_t outLength{};
 	size_t authTagLengthOutput{};
@@ -297,9 +297,9 @@ exit:
 	}
 	return ALIRO_ERROR_INTERNAL;
 
-#else // CONFIG_DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART
+#else // CONFIG_DOOR_LOCK_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
 
-	constexpr size_t kPlainTextSize{ CONFIG_DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART_BUFFER_SIZE };
+	constexpr size_t kPlainTextSize{ CONFIG_DOOR_LOCK_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART_BUFFER_SIZE };
 	constexpr size_t kBufferSize{ kPlainTextSize + CryptoTypes::kAuthenticationTagLength };
 	const size_t expOutLen{ plainTxtLength + CryptoTypes::kAuthenticationTagLength };
 
@@ -322,7 +322,7 @@ exit:
 
 	return ALIRO_NO_ERROR;
 
-#endif // CONFIG_DOOR_LOCK_CRYPTO_PSA_AEAD_SINGLE_PART
+#endif // CONFIG_DOOR_LOCK_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
 }
 
 AliroError AeadDecrypt(CryptoTypes::KeyId keyId, const uint8_t *cipherTextWithTag, size_t cipherTextWithTagLength,

@@ -19,14 +19,14 @@ See :ref:`wireless_technologies_uwb` for how distance measurements drive unlock 
 Bluetooth identity and advertising
 **********************************
 
-Aliro uses a dedicated Bluetooth local identity (``CONFIG_DOOR_LOCK_ALIRO_BLE_SERVICE_BT_ID``) for advertising and connections.
-This keeps Aliro sessions separate from other Bluetooth LE services on the default identity, such as Matter, `Nordic UART Service (NUS)`_ or Device Firmware Update over Simple Management Protocol (DFU SMP).
+Aliro uses a dedicated Bluetooth local identity (``CONFIG_DOOR_LOCK_ALIRO_BLE_SERVICE_BT_ID`` Kconfig option) for advertising and connections.
+This keeps Aliro sessions separate from other Bluetooth LE services on the default identity, such as Matter, `Nordic UART Service (NUS)`_ or Device Firmware Update over Simple Management Protocol (`SMP protocol`_).
 
-The advertising payload follows the Aliro specification and is built from the reader group identifier and reader group sub-identifier.
+The advertising payload follows the Aliro specification and is built from the Reader group identifier and Reader group sub-identifier.
 The payload is updated automatically when either value changes.
 
 .. note::
-   To override values from the console, use the ``reader group_id`` and ``reader group_sub_id`` subcommands.
+   To override these values from the console, use the ``reader group_id`` and ``reader group_sub_id`` subcommands.
    See :ref:`aliro_testing_cli_ref` for command syntax.
 
 Kconfig options
@@ -42,7 +42,7 @@ The Aliro session limits are ``CONFIG_DOOR_LOCK_ALIRO_BLE_SERVICE_MAX_SESSIONS``
 Both default to ``CONFIG_BT_MAX_CONN`` and are defined in the :file:`subsys/aliro/aliro_service/Kconfig` and :file:`subsys/aliro/l2cap_server/Kconfig` files.
 The build verifies that ``CONFIG_BT_MAX_CONN`` is greater than or equal to both limits.
 
-For example, with ``CONFIG_DOOR_LOCK_ALIRO_BLE_SERVICE_MAX_SESSIONS`` set to ``2`` and NUS enabled for one shell connection, set ``CONFIG_BT_MAX_CONN`` to at least ``3``.
+For example, with ``CONFIG_DOOR_LOCK_ALIRO_BLE_SERVICE_MAX_SESSIONS`` set to ``2`` and NUS enabled for a separate connection, set ``CONFIG_BT_MAX_CONN`` to at least ``3``.
 
 .. list-table::
    :header-rows: 1

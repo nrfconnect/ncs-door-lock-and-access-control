@@ -39,6 +39,8 @@ if DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_SMP_SERVICE || DOOR_LOCK_NUS_SERVICE
 rsource "Kconfig.ble.defconfig"
 endif # DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_SMP_SERVICE || DOOR_LOCK_NUS_SERVICE
 
+rsource "Kconfig.crypto.defconfig"
+
 rsource "src/matter/Kconfig"
 source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.features"
 source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.defaults"
