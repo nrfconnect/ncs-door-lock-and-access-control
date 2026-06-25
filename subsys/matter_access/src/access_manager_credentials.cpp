@@ -51,13 +51,95 @@ bool AccessManager<CRED_BIT_MASK>::SetCredential(uint16_t credentialIndex, Fabri
 			       secret);
 }
 
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
+template <Data::CredentialsBits CRED_BIT_MASK>
+CHIP_ERROR AccessManager<CRED_BIT_MASK>::UpdateAliroEvictableCredential(uint16_t credentialIndex,
+									const ByteSpan &secret,
+									uint16_t credentialIssuerIndex)
+{
+	VerifyOrReturnError(IN_RANGE(credentialIndex, 1, CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_CREDENTIALS_PER_TYPE),
+			    CHIP_ERROR_INVALID_ARGUMENT);
+	VerifyOrReturnError(secret.size() <= Data::kMaxCredentialLength, CHIP_ERROR_INVALID_ARGUMENT);
+	VerifyOrReturnError(!secret.empty(), CHIP_ERROR_INVALID_ARGUMENT);
+	VerifyOrReturnError(IN_RANGE(credentialIssuerIndex, 1,
+				     CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_CREDENTIALS_PER_TYPE),
+			    CHIP_ERROR_INVALID_ARGUMENT);
+
+	/* Find the User with Credential Issuer credential */
+	Data::User *credentialIssuerUser{ nullptr };
+	VerifyOrReturnError(CHIP_NO_ERROR == Instance().GetCredentialUser(credentialIssuerIndex,
+									  CredentialTypeEnum::kAliroCredentialIssuerKey,
+									  &credentialIssuerUser),
+			    CHIP_ERROR_NOT_FOUND);
+
+	/* Find the credential array in the credentials database */
+	constexpr auto credentialType{ CredentialTypeEnum::kAliroEvictableEndpointKey };
+	bool success{ false };
+	auto &credentials = mCredentials.GetCredentialsTypes(credentialType, success);
+	VerifyOrReturnError(success, CHIP_ERROR_INTERNAL);
+
+	/* Add Evictable Credential to the User's credentials list */
+	VerifyOrReturnError(CHIP_NO_ERROR == credentialIssuerUser->AddAliroEvictableCredential(credentialIndex),
+			    CHIP_ERROR_INTERNAL);
+
+	/* Update the Evictable Credential in the credentials database */
+	auto &credential = credentials[credentialIndex - 1];
+	credential.mInfo.mFields.mStatus = static_cast<uint8_t>(DlCredentialStatus::kOccupied);
+	credential.mInfo.mFields.mCredentialType = static_cast<uint8_t>(credentialType);
+	credential.mInfo.mFields.mCreationSource = static_cast<uint8_t>(DlAssetSource::kUnspecified);
+	credential.mInfo.mFields.mCreatedBy = static_cast<uint8_t>(kUndefinedFabricIndex);
+	credential.mInfo.mFields.mModificationSource = static_cast<uint8_t>(DlAssetSource::kUnspecified);
+	credential.mInfo.mFields.mLastModifiedBy = static_cast<uint8_t>(kUndefinedFabricIndex);
+	credential.mSecret.mDataLength = secret.size();
+	memcpy(credential.mSecret.mData, secret.data(), secret.size());
+
+	return CHIP_NO_ERROR;
+}
+
+template <Data::CredentialsBits CRED_BIT_MASK>
+CHIP_ERROR AccessManager<CRED_BIT_MASK>::RemoveAliroEvictableCredential(uint16_t credentialIndex, bool updateUser)
+{
+	VerifyOrReturnError(IN_RANGE(credentialIndex, 1, CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_CREDENTIALS_PER_TYPE),
+			    CHIP_ERROR_INVALID_ARGUMENT);
+
+	/* Find the credential array in the credentials database */
+	constexpr auto credentialType{ CredentialTypeEnum::kAliroEvictableEndpointKey };
+	bool success{ false };
+	auto &credentials = mCredentials.GetCredentialsTypes(credentialType, success);
+	VerifyOrReturnError(success, CHIP_ERROR_INTERNAL);
+
+	/* Clear the credential in the credentials database */
+	auto &credential = credentials[credentialIndex - 1];
+	credential.mInfo.mFields.mStatus = static_cast<uint8_t>(DlCredentialStatus::kAvailable);
+	credential.mInfo.mFields.mCredentialType = static_cast<uint8_t>(0);
+	credential.mInfo.mFields.mCreationSource = static_cast<uint8_t>(DlAssetSource::kUnspecified);
+	credential.mInfo.mFields.mCreatedBy = static_cast<uint8_t>(kUndefinedFabricIndex);
+	credential.mInfo.mFields.mModificationSource = static_cast<uint8_t>(DlAssetSource::kUnspecified);
+	credential.mInfo.mFields.mLastModifiedBy = static_cast<uint8_t>(kUndefinedFabricIndex);
+	memset(credential.mSecret.mData, 0, credential.mSecret.mDataLength);
+	credential.mSecret.mDataLength = 0;
+
+	if (updateUser) {
+		/* Update the users credentials list */
+		auto &users = Instance().mUsers;
+		for (size_t idxUsr = 0; idxUsr < CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_USERS; ++idxUsr) {
+			users[idxUsr].RemoveAliroEvictableCredential(credentialIndex);
+		}
+	}
+
+	return CHIP_NO_ERROR;
+}
+
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
 template <Data::CredentialsBits CRED_BIT_MASK>
 bool AccessManager<CRED_BIT_MASK>::DoSetCredential(Data::Credential &credential, uint16_t credentialIndex,
 						   FabricIndex creator, FabricIndex modifier,
 						   DlCredentialStatus credentialStatus,
 						   CredentialTypeEnum credentialType, const ByteSpan &secret)
 {
-	uint32_t uniqueUserId;
+	Data::User *user{ nullptr };
 	credential.mInfo.mFields.mStatus = static_cast<uint8_t>(credentialStatus);
 	credential.mInfo.mFields.mCredentialType = static_cast<uint8_t>(credentialType);
 	credential.mInfo.mFields.mCreationSource = static_cast<uint8_t>(DlAssetSource::kMatterIM);
@@ -68,7 +150,7 @@ bool AccessManager<CRED_BIT_MASK>::DoSetCredential(Data::Credential &credential,
 	if (!secret.empty()) {
 		credential.mSecret.mDataLength = secret.size();
 		memcpy(credential.mSecret.mData, secret.data(), secret.size());
-	} else if (CHIP_NO_ERROR == Instance().GetCredentialUserId(credentialIndex, credentialType, uniqueUserId)) {
+	} else if (CHIP_NO_ERROR == Instance().GetCredentialUser(credentialIndex, credentialType, &user)) {
 		/* Credential already exists, and the new secret is empty, so the credential is being cleared.
 		 * Inform the higher layer about clearing the credential and provide current credential data.
 		 */
@@ -121,7 +203,7 @@ bool AccessManager<CRED_BIT_MASK>::DoSetCredential(Data::Credential &credential,
 		credential.mInfo.mFields.mStatus == static_cast<uint8_t>(DlCredentialStatus::kAvailable) ? "available" :
 													   "occupied");
 
-	if (CHIP_NO_ERROR == Instance().GetCredentialUserId(credentialIndex, credentialType, uniqueUserId)) {
+	if (CHIP_NO_ERROR == Instance().GetCredentialUser(credentialIndex, credentialType, &user)) {
 		if (Instance().mSetCredentialCallback && credential.mSecret.mDataLength > 0) {
 			ByteSpan secret = { credential.mSecret.mData, credential.mSecret.mDataLength };
 			Instance().mSetCredentialCallback(credentialIndex, credentialType, secret);
@@ -132,17 +214,22 @@ bool AccessManager<CRED_BIT_MASK>::DoSetCredential(Data::Credential &credential,
 }
 
 template <Data::CredentialsBits CRED_BIT_MASK>
-CHIP_ERROR AccessManager<CRED_BIT_MASK>::GetCredentialUserId(uint16_t credentialIndex,
-							     CredentialTypeEnum credentialType, uint32_t &userId)
+CHIP_ERROR AccessManager<CRED_BIT_MASK>::GetCredentialUser(uint16_t credentialIndex, CredentialTypeEnum credentialType,
+							   Data::User **userPtr)
 {
+	VerifyOrReturnError(userPtr != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
+
+	*userPtr = nullptr;
+
 	for (size_t idxUsr = 0; idxUsr < CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_USERS; ++idxUsr) {
 		auto &user = Instance().mUsers[idxUsr];
-		for (size_t idxCred = 0; idxCred < CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_CREDENTIALS_PER_USER;
-		     ++idxCred) {
+		const size_t numCredentials = user.mOccupiedCredentials.mSize / sizeof(CredentialStruct);
+
+		for (size_t idxCred = 0; idxCred < numCredentials; ++idxCred) {
 			auto &credentialStruct = user.mOccupiedCredentials.mData[idxCred];
 			if (credentialStruct.credentialIndex == credentialIndex &&
 			    credentialStruct.credentialType == credentialType) {
-				userId = user.mInfo.mFields.mUserUniqueId;
+				*userPtr = &user;
 				return CHIP_NO_ERROR;
 			}
 		}

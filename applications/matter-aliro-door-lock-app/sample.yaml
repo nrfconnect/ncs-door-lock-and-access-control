@@ -7,7 +7,7 @@ common:
 tests:
   app.door_lock.nfc-ble-uwb.dfu_smp-matter-exp_fast-step_up:
     platform_allow: &id001
-    - nrf54lm20dk/nrf54lm20a/cpuapp
+    - nrf54lm20dk/nrf54lm20b/cpuapp
     integration_platforms: *id001
     extra_args:
     - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"

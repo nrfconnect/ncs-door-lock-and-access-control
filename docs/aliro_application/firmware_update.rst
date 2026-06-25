@@ -70,7 +70,7 @@ See :ref:`aliro_qm35_firmware_update_enable` below.
 Qorvo flash_app on nRF5340 DK
 -----------------------------
 
-To program the module directly before building the door lock application, use the Qorvo ``flash_app`` tool in the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository (see :ref:`aliro_building_and_running_qm35_src`):
+To program the module directly before building the door lock application, use the Qorvo ``flash_app`` tool in the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository (see :ref:`aliro_qm35_sdk_repository`):
 
 #. Connect the QM35825 module to the nRF5340 DK.
 #. Navigate to :file:`qm35-aliro-sdk/flash_app` and build:

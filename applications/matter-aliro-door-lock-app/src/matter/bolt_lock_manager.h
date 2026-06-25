@@ -23,7 +23,7 @@ class BoltLockManager {
 
 public:
 	using OperationSource = chip::app::Clusters::DoorLock::OperationSourceEnum;
-	using ValidatePINResult = AccessMgr::ValidatePINResult;
+	using ValidateCredentialResult = AccessMgr::ValidateCredentialResult;
 
 	struct StateData {
 		Aliro::ReaderStateByte mState;
@@ -31,7 +31,7 @@ public:
 		Aliro::OperationSource mAliroSource;
 		Nullable<chip::FabricIndex> mFabricIdx;
 		Nullable<chip::NodeId> mNodeId;
-		Nullable<ValidatePINResult> mValidatePINResult;
+		Nullable<ValidateCredentialResult> mValidateCredentialResult;
 	};
 
 	using StateChangeCallback = void (*)(const StateData &);
@@ -68,20 +68,18 @@ public:
 				    uint32_t localEndTime, OperatingModeEnum operatingMode);
 #endif /* CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES */
 
-#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
-	bool ValidatePIN(const Optional<chip::ByteSpan> &pinCode, OperationErrorEnum &err,
-			 Nullable<ValidatePINResult> &result);
-#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	bool ValidateCredential(CredentialTypeEnum credentialType, const chip::ByteSpan &secret,
+				OperationErrorEnum &error, Nullable<ValidateCredentialResult> &result);
 
 	void Lock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx = NullNullable,
 		  const Nullable<chip::NodeId> &nodeId = NullNullable,
-		  const Nullable<ValidatePINResult> &validatePINResult = NullNullable);
+		  const Nullable<ValidateCredentialResult> &validateCredentialResult = NullNullable);
 	void Unlock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx = NullNullable,
 		    const Nullable<chip::NodeId> &nodeId = NullNullable,
-		    const Nullable<ValidatePINResult> &validatePINResult = NullNullable);
+		    const Nullable<ValidateCredentialResult> &validateCredentialResult = NullNullable);
 
-	bool Lock(Aliro::OperationSource source);
-	bool Unlock(Aliro::OperationSource source);
+	bool Lock(Aliro::OperationSource source, const Nullable<ValidateCredentialResult> &validateCredentialResult);
+	bool Unlock(Aliro::OperationSource source, const Nullable<ValidateCredentialResult> &validateCredentialResult);
 
 #ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 	void SetRequirePIN(bool require);

@@ -21,8 +21,10 @@ from pathlib import Path
 project = 'nRF Door Lock and Access Control Add-on'
 copyright = '2026, Nordic Semiconductor'
 author = 'Nordic Semiconductor'
-release = 'Latest'
-version = 'Latest'
+
+# The full version, including alpha/beta/rc tags
+release = ' '
+
 
 # -- General configuration ---------------------------------------------------
 

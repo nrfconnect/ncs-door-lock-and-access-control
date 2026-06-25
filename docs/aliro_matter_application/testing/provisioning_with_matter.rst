@@ -8,10 +8,11 @@ Aliro door lock provisioning with Matter
    :local:
    :depth: 2
 
-The following page covers two different approaches for testing the Aliro door lock with Matter:
+This page covers the following methods for testing the Aliro door lock with Matter support:
 
 * :ref:`testing_with_chip_tool` - Using the CHIP Tool command-line interface for commissioning and credential provisioning (intended for development and testing).
 * :ref:`testing_with_apple_ecosystem` - Using Apple Home app and Apple Wallet for real-world user experience testing with iOS devices.
+* :ref:`testing_with_samsung_ecosystem` - Using Samsung SmartThings and Samsung Wallet for real-world user experience testing with Android devices.
 
 The application allows you to provision Aliro credentials from a Matter controller.
 First, ensure that all the necessary software tools and hardware are configured (see :ref:`testing_environment`).
@@ -22,7 +23,7 @@ For development kit LEDs, buttons, and commissioning controls, see :ref:`matter_
 Testing with Matter CHIP Tool
 *****************************
 
-This guide uses CHIP Tool as a Matter controller to commission the door lock and provision Aliro credentials through command-line interface.
+This guide uses CHIP Tool as a Matter controller to commission the door lock and provision Aliro credentials through the command-line interface.
 For details, see the `Matter chip-tool guide`_.
 
 .. note::
@@ -34,7 +35,7 @@ For details, see the `Matter chip-tool guide`_.
 
    #. Run the OpenThread Border Router and `form a Thread network using Docker <Running OTBR using Docker_>`_.
 
-   #. Obtain the Thread operational dataset for commissioning devices into created Thread network by running the following Docker command:
+   #. Obtain the Thread operational dataset for commissioning devices into the created Thread network by running the following Docker command:
 
       .. code-block:: console
 
@@ -42,7 +43,7 @@ For details, see the `Matter chip-tool guide`_.
 
       Save this operational dataset as it will be needed for commissioning the door lock device.
 
-#. Commission the Aliro door lock to Matter over Thread network.
+#. Commission the Aliro door lock to the Matter over Thread network.
 
    a. Put the door lock device in commissioning mode by pressing the appropriate button on the development kit.
       Refer to the :ref:`matter_ui` section for more details.
@@ -229,7 +230,7 @@ Before you begin testing with Apple ecosystem, ensure you have the following:
   You can test the application with iPhone only, however, having an Apple Home Hub is recommended for best experience.
 * Apple Home App - Pre-installed on iOS devices.
 * Apple Wallet - Pre-installed on iOS devices.
-* nRF Door Lock App build with Matter support - A development kit from Nordic Semiconductor equipped with Aliro door lock firmware :ref:`that supports Matter <aliro_matter_access_control_application>`.
+* A development kit from Nordic Semiconductor equipped with |MATTER_ALIRO_APP_NAME| firmware :ref:`that supports Matter <aliro_matter_access_control_application>`.
 
 Building the firmware
 =====================
@@ -240,13 +241,13 @@ Build the firmware with the appropriate configuration for your testing scenario,
 
   .. code-block:: console
 
-     west build -b nrf54lm20dk/nrf54lm20a/cpuapp applications/matter-aliro-door-lock-app
+     west build -b nrf54lm20dk/nrf54lm20b/cpuapp applications/matter-aliro-door-lock-app
 
 * For NFC + Bluetooth LE + UWB testing, run:
 
   .. code-block:: console
 
-     west build -b nrf54lm20dk/nrf54lm20a/cpuapp applications/matter-aliro-door-lock-app -- -Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'
+     west build -b nrf54lm20dk/nrf54lm20b/cpuapp applications/matter-aliro-door-lock-app -- -Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'
 
 .. note::
    Before commissioning the door lock, ensure that the Apple Home Hub is set up and added to your Apple Home.
@@ -456,13 +457,13 @@ Unlocking the door
 
       #. Wait for automatic unlock:
 
-         * The door will unlock when your iPhone is within ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` (default: 100 cm).
+         * The door will unlock when your iPhone is within ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` (default: 150 cm).
          * The device serial console outputs an ``ACCESS GRANTED`` log message.
          * The lock status in the Home app updates to :guilabel:`Unlocked`.
 
       #. To lock the door again:
 
-         * Move your iPhone beyond ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM + CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM`` (default: 100 cm + 50 cm = 150 cm).
+         * Move your iPhone beyond ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM + CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM`` (default: 150 cm + 30 cm = 180 cm).
          * The door will automatically lock when all active UWB sessions are out of range.
          * The device serial console outputs a lock confirmation message.
          * The lock status in the Home app updates to :guilabel:`Locked`.
@@ -487,8 +488,8 @@ If you are facing difficulties during the commissioning process, consider the fo
 
 * Device is not discovered by the Home app:
 
-  * Verify if the device is in active commissioning mode (LED indicators should show commissioning state as described in the :ref:`matter_ui`).
-  * Ensure Bluetooth is enabled on your iPhone, and that Home app has permission to access location services.
+  * Verify that the device is in active commissioning mode (LED indicators should show commissioning state as described in the :ref:`matter_ui`).
+  * Ensure Bluetooth is enabled on your iPhone, and that the Home app has permission to access location services.
   * Confirm your iPhone is running iOS 26 or later.
   * Ensure that the HomePod mini is powered on, connected to Wi-Fi, and showing as online in the Home app.
   * Attempt to power cycle both the door lock device and the HomePod mini.
@@ -533,16 +534,16 @@ Problems with the Home Key appearing in Apple Wallet or other related issues can
 
 * The *Hold Near Lock* message appears but nothing happens (NFC unlock):
 
-  * Verify if the NFC reader hardware is properly connected to the development kit (check physical connections).
+  * Verify that the NFC reader hardware is properly connected to the development kit (check physical connections).
   * Ensure the firmware includes the NFC transport support by checking the build configuration.
   * Adjust the position of your iPhone relative to the NFC reader antenna to improve connectivity.
   * Check the device serial console for NFC reader initialization messages and any error logs.
 
 * The door does not unlock automatically when approaching (Bluetooth LE + UWB):
 
-  * Verify if the UWB module is properly connected to the development kit (check physical connections).
+  * Verify that the UWB module is properly connected to the development kit (check physical connections).
   * Ensure the firmware includes UWB support by checking the build configuration (``-Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'``).
-  * Ensure your iPhone is within ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` (default: 100 cm) of the door lock.
+  * Ensure your iPhone is within ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` (default: 150 cm) of the door lock.
   * Check the device serial console for UWB ranging messages and distance measurements.
   * Verify that Bluetooth is enabled on your iPhone and that the Home app has permission to access location services.
 
@@ -552,6 +553,286 @@ Problems with the Home Key appearing in Apple Wallet or other related issues can
   * If you wish to use the :guilabel:`Require Face ID or Passcode` option, ensure it is enabled in the settings.
 
 For additional troubleshooting, guidance, and tips for various ecosystems, see the `Matter testing with Apple, Google, and Samsung ecosystems`_ guide.
+
+.. _testing_with_samsung_ecosystem:
+
+Testing with Samsung SmartThings ecosystem
+******************************************
+
+SmartThings and Samsung Wallet support Matter and Aliro.
+The related software has been deployed to supported devices.
+
+To receive support for this feature, your door lock product must pass the Works With SmartThings certification and Samsung Wallet QA testing.
+Samsung operates a partner program to assist with these preparations.
+
+To test Aliro with the SmartThings ecosystem, you must have a special Matter lock driver running on the SmartThings hub.
+
+.. note::
+   This guide explains how to test the application with the Samsung ecosystem using Aliro over NFC only.
+   UWB is out of scope.
+   Enabling Aliro over Bluetooth LE and UWB on a Samsung phone requires an additional software package on the phone.
+   Contact Samsung for details.
+
+For additional information about Matter testing with various ecosystems, see the `Matter testing with Apple, Google, and Samsung ecosystems`_ guide.
+
+Prerequisites
+=============
+
+See the `Samsung Wallet device compatibility list`_ for supported Samsung phone models and their NFC and UWB capabilities.
+
+The SmartThings hub can be any model that supports SmartThings and Matter.
+
+For reference, the following setup was used during internal testing:
+
+* Samsung Galaxy S24+ phone running Android 16 and One UI 8.5
+* Aeotec SmartThings hub (model IM6001-V3P22, hub name ``V3_HUB``) with:
+
+  * Matter SDK version: 1.5-0
+  * Firmware version: 000.060.00012
+  * Hub app version: 1.0.49-13
+
+* A special version of the Samsung Wallet app (contact Samsung representatives to obtain the proper build)
+* The |MATTER_ALIRO_APP_NAME| build with NFC support only (see :ref:`aliro_matter_access_control_application`)
+
+Installing the Matter lock driver on the hub
+============================================
+
+Before commissioning the door lock, install a Matter lock driver on the SmartThings hub.
+The driver must support your device's Vendor ID (VID) and Product ID (PID).
+
+Complete the following steps to create and enroll the driver:
+
+#. Fork the `SmartThingsEdgeDrivers`_ repository.
+
+#. Add your device's VID, PID, brand, and model name to the `fingerprints.lua file`_.
+
+   .. figure:: /images/testing_with_samsung/driver_lua_file.png
+      :alt: fingerprints.lua file with device VID and PID
+      :scale: 70%
+
+      Adding the device fingerprint to the Matter lock driver
+
+#. Create a pull request to the main branch.
+
+   You can start testing before the pull request is merged:
+
+   a. After the pull request is created, an invitation link is generated automatically.
+   #. Use the invitation link to enroll the channel on your hub.
+   #. You can begin testing immediately without waiting for the pull request to be merged.
+
+   .. figure:: /images/testing_with_samsung/enrol_driver.png
+      :alt: Enrolling the generated driver channel on the SmartThings hub
+      :scale: 70%
+
+      Enrolling the driver channel on the hub
+
+Building the firmware
+=====================
+
+Build the |MATTER_ALIRO_APP_NAME| with NFC support only, using the same Matter VID and PID as in the hub lock driver.
+
+For example, to keep the default Product ID and change only the Vendor ID, run the following command:
+
+.. code-block:: console
+
+   west build -b nrf54lm20dk/nrf54lm20a/cpuapp applications/matter-aliro-door-lock-app -p -- \
+     -DCONFIG_CHIP_DEVICE_VENDOR_ID=4735 \
+     -DCONFIG_CHIP_FACTORY_DATA_CERT_SOURCE_GENERATED=y \
+     -DCONFIG_CHIP_FACTORY_DATA_GENERATE_CD=y
+
+.. note::
+   When you change the default VID or PID, factory data must be regenerated.
+   Enable ``CONFIG_CHIP_FACTORY_DATA_CERT_SOURCE_GENERATED`` and ``CONFIG_CHIP_FACTORY_DATA_GENERATE_CD`` Kconfig options in the build command or in :file:`prj.conf`.
+   You must also have the ``chip-cert`` tool available on your ``PATH`` when building with generated certificates.
+
+Commissioning the door lock to Samsung SmartThings
+==================================================
+
+The commissioning process allows you to add the door lock accessory into your SmartThings ecosystem using Matter over Thread.
+Complete the following steps to commission the device:
+
+#. Prepare the door lock device:
+
+   a. Flash the Aliro door lock firmware with NFC support to your Nordic development kit (see :ref:`aliro_matter_access_control_application`).
+   #. Connect the :ref:`NFC reader expansion board <hw_requirements_nfc_reader>`.
+   #. Power on the device and connect to the serial console to monitor the commissioning process.
+
+#. Open a terminal on your computer and locate the Matter QR code link printed in the device serial console after boot.
+
+#. Open the SmartThings app on your Samsung phone.
+
+   .. figure:: /images/testing_with_samsung/1_smart_things_app_main.jpg
+      :alt: SmartThings app main screen
+      :scale: 30%
+
+      SmartThings app main screen
+
+#. Tap the :guilabel:`+` button in the upper-right corner.
+
+   .. figure:: /images/testing_with_samsung/2_adding_device.jpg
+      :alt: Add device screen in SmartThings app
+      :scale: 30%
+
+      Adding a new device in SmartThings
+
+#. Select :guilabel:`Scan QR code`.
+
+   .. figure:: /images/testing_with_samsung/3_scan_qr_code.jpg
+      :alt: Scan QR code option in SmartThings app
+      :scale: 30%
+
+      Scan QR code option
+
+#. Scan the Matter QR code from the link displayed in the serial console.
+
+   .. figure:: /images/testing_with_samsung/4_prepare_device.jpg
+      :alt: QR code scanning screen in SmartThings app
+      :scale: 30%
+
+      Scanning the Matter QR code
+
+#. Start Bluetooth LE advertising on the device by pressing **Button 1**.
+   Refer to the :ref:`matter_ui` section for detailed button assignments and LED indicators.
+
+#. When testing a non-certified Matter device, a notification pop-up appears.
+   Tap :guilabel:`Continue` to proceed.
+
+   .. note::
+      This warning is expected for development devices that are not yet certified by the Connectivity Standards Alliance (CSA).
+      Once the product is certified, this warning will no longer appear.
+
+   .. figure:: /images/testing_with_samsung/5_not_certified_device.jpg
+      :alt: Non-certified Matter device warning in SmartThings app
+      :scale: 30%
+
+      Non-certified device warning during commissioning
+
+#. Wait while SmartThings adds the device to your home.
+
+   .. figure:: /images/testing_with_samsung/6_checking_network.jpg
+      :alt: SmartThings checking network during device setup
+      :scale: 30%
+      :align: center
+
+      Checking network connectivity during setup
+
+   .. figure:: /images/testing_with_samsung/7_almost_done.jpg
+      :alt: SmartThings almost done adding the device
+      :scale: 30%
+      :align: center
+
+      Device setup in progress
+
+#. When prompted, set a PIN code for opening the lock, or skip this step.
+
+   .. figure:: /images/testing_with_samsung/8_set_pincode.jpg
+      :alt: Set PIN code screen in SmartThings app
+      :scale: 30%
+      :align: center
+
+      Setting a PIN code for the lock
+
+#. Confirm that the device has been added successfully.
+
+   .. figure:: /images/testing_with_samsung/9_success.jpg
+      :alt: Device added successfully in SmartThings app
+      :scale: 30%
+      :align: center
+
+      Device added successfully
+
+#. Tap :guilabel:`Done`.
+   SmartThings downloads the plugin used to control your device.
+
+   .. figure:: /images/testing_with_samsung/10_downloading_plugin.jpg
+      :alt: Downloading device control plugin in SmartThings app
+      :scale: 30%
+      :align: center
+
+      Downloading the device control plugin
+
+#. Wait until the device is ready in SmartThings.
+
+   .. figure:: /images/testing_with_samsung/11_ready_device.jpg
+      :alt: Door lock ready in SmartThings app
+      :scale: 30%
+      :align: center
+
+      Door lock ready in SmartThings
+
+Using the digital key from Samsung Wallet
+=========================================
+
+After successful commissioning, add an Aliro digital key to Samsung Wallet and use it to unlock the door over NFC.
+
+Adding the digital key to Samsung Wallet
+----------------------------------------
+
+Complete the following steps:
+
+#. In the SmartThings device view, tap the :guilabel:`Wallet` icon at the bottom of the screen.
+
+   .. figure:: /images/testing_with_samsung/12_add_key_start.jpg
+      :alt: Wallet icon in SmartThings device view
+      :scale: 30%
+      :align: center
+
+      Starting digital key setup from SmartThings
+
+   .. figure:: /images/testing_with_samsung/13_adding_key.jpg
+      :alt: Add digital key to Samsung Wallet screen
+      :scale: 30%
+      :align: center
+
+      Adding the digital key to Samsung Wallet
+
+
+#. Tap :guilabel:`Start` to add the key to Samsung Wallet.
+
+#. When the digital key has been added successfully, tap :guilabel:`Done`.
+
+   .. figure:: /images/testing_with_samsung/14_added_key.jpg
+      :alt: Digital key added to Samsung Wallet confirmation
+      :scale: 30%
+      :align: center
+
+      Digital key added to Samsung Wallet
+
+   .. figure:: /images/testing_with_samsung/15_ready_wallet.jpg
+      :alt: Digital key ready in Samsung Wallet
+      :scale: 30%
+      :align: center
+
+      Digital key ready in Samsung Wallet
+
+Unlocking the door with NFC
+---------------------------
+
+To unlock the door using your Samsung phone with NFC, complete the following steps:
+
+#. Open Samsung Wallet and select the door lock digital key card.
+
+#. Tap the NFC reader of the door lock with your phone.
+   The NFC reader is part of the STM Nucleo NFC reader expansion board attached to the development kit.
+
+#. Confirm that the door unlocks:
+
+   .. figure:: /images/testing_with_samsung/16_unlock_confirm.jpg
+      :alt: Unlock confirmation in Samsung Wallet
+      :width: 300px
+      :align: center
+
+      Unlock confirmation in Samsung Wallet
+
+   .. figure:: /images/testing_with_samsung/17_door_unlocked.jpg
+      :alt: Door unlocked confirmation in SmartThings app
+      :scale:  30%
+      :align: center
+
+      Door unlocked in SmartThings
+
+   * The device serial console outputs an ``ACCESS GRANTED`` log message.
+   * The lock status in the SmartThings app updates to :guilabel:`Unlocked`.
 
 Aliro and Matter lock state synchronization
 *******************************************

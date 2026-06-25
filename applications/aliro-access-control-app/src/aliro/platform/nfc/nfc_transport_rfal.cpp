@@ -56,16 +56,10 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 {
 	switch (state) {
 	case RFAL_NFC_STATE_WAKEUP_MODE:
-		LOG_DBG("RFAL: Wake Up mode state");
 		break;
 	case RFAL_NFC_STATE_POLL_TECHDETECT:
-		LOG_DBG("RFAL: Poll technology detect state");
-		if (mNfcConfig.wakeupEnabled) {
-			LOG_DBG("RFAL: Wake Up mode terminated. Polling for devices.");
-		}
 		break;
 	case RFAL_NFC_STATE_POLL_SELECT:
-		LOG_DBG("RFAL: Poll select state");
 		// Check if in case of multiple devices, selection is already attempted
 		if (!mMultiSel) {
 			mMultiSel = true;
@@ -74,31 +68,26 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 			rfalNfcDevice *dev;
 			(void)rfalNfcGetDevicesFound(&dev, &devCnt);
 			(void)rfalNfcSelect(0);
-			LOG_DBG("RFAL: Multiple Tags detected: %d", devCnt);
 		} else {
 			(void)rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_DISCOVERY);
 		}
 		break;
 	case RFAL_NFC_STATE_START_DISCOVERY:
-		LOG_DBG("RFAL: Start discovery state");
 		mMultiSel = false;
 		mSendInProgress = false;
 		mTagDetectedState = false;
 		break;
 	case RFAL_NFC_STATE_DATAEXCHANGE:
-		LOG_DBG("RFAL: Data exchange state");
 		break;
 	case RFAL_NFC_STATE_DATAEXCHANGE_DONE:
 		mSendInProgress = false;
 		CaptureRxData();
 		break;
 	case RFAL_NFC_STATE_DEACTIVATION:
-		LOG_DBG("RFAL: Deactivation State");
 		mSendInProgress = false;
 		mTagDetectedState = false;
 		break;
 	case RFAL_NFC_STATE_ACTIVATED:
-		LOG_DBG("RFAL: Activated state");
 		SelectTag();
 		break;
 	default:

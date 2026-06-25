@@ -167,15 +167,15 @@ Complete the following steps for the required tests:
 
             After test execution is complete, you can check DUT logs to verify the communication and data exchange between the Reader and the test harness.
             The logs will provide detailed information about the test execution and authorization process (signature verification).
-            When all installation and provisioning data provided in :ref:`testing_environment_configuration` are correct then you will see the following output in the DUT serial console:
+            When all installation and provisioning data provided in :ref:`testing_environment_configuration` are correct, then you will see the following output in the DUT serial console:
 
             .. code-block:: console
 
                ACCESS GRANTED
 
-            When access is granted and lock is unlocked, the device signals this state by turning on a dedicated LED.
+            When access is granted and the lock is unlocked, the device signals this state by turning on a dedicated LED.
             For details, see the :ref:`lock simulator<lock_simulator>` section.
-            When the provided Access Credential public key is incorrect the following output will be displayed:
+            When the provided Access Credential public key is incorrect, the following output will be displayed:
 
             .. code-block:: console
 
@@ -218,7 +218,7 @@ You can also select tests manually.
 
    PICS file upload.
 
-When PICS file is uploaded, all required tests are selected automatically for NFC and Bluetooth LE Reader suites:
+When the PICS file is uploaded, all required tests are selected automatically for NFC and Bluetooth LE Reader suites:
 
 .. figure:: /images/tests_selected_by_pics.png
    :scale: 70%

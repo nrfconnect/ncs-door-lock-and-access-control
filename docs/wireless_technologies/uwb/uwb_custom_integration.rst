@@ -21,7 +21,7 @@ Before starting your port, make sure you understand the scope of the work and ha
 
 This guide assumes familiarity with the following:
 
-* Aliro specification — In particular the Bluetooth LE message layout (Protocol Header, Message ID, Length, Payload) and the ranging session setup flow (M1-M4 exchange).
+* Aliro specification — In particular, the Bluetooth LE message layout (Protocol Header, Message ID, Length, Payload) and the ranging session setup flow (M1-M4 exchange).
   Several integration points require you to forward complete Aliro messages unchanged, so a working understanding of this layout is essential.
   See :ref:`aliro_application_interactions` for the relevant sequence diagrams.
 * Facade pattern used in the add-on — The platform code separates a stable public API (``UltraWideBand``) from a vendor-specific implementation (``UltraWideBandImpl``).
@@ -60,7 +60,7 @@ Your UWB silicon and its driver or SDK must be able to provide the following cap
      - If your hardware supports more than one User Device at a time, your implementation must map each ``ConnectionHandle`` to a separate vendor session context.
    * - Bluetooth LE/UWB time synchronization
      - Optional
-     - Implement ``BleTimeSync()`` only if your vendor requires explicit time alignment after the Bluetooth LE connection (Aliro spec §19.4.4.1).
+     - Implement ``BleTimeSync()`` only if your vendor requires explicit time alignment after the Bluetooth LE connection.
 
 If your SDK cannot satisfy one of the required capabilities, the corresponding Aliro ranging flow cannot complete, and the stack may terminate the Bluetooth LE session.
 
@@ -331,7 +331,7 @@ Methods marked *Optional* can remain no-op or ``-ENOSYS`` stubs if your hardware
      - Release sessions and shut down the radio.
    * - ``BleTimeSync()``
      - ``_BleTimeSync()``
-     - Optional: trigger CCC Procedure 0 Bluetooth LE/UWB time sync (Aliro spec §19.4.4.1).
+     - Optional: trigger CCC Procedure 0 Bluetooth LE/UWB time sync.
        Implement if your UWB vendor requires explicit time alignment after Bluetooth LE connection.
    * - ``HandleBleMessage(data, length, handle)``
      - ``_HandleBleMessage()``
@@ -487,14 +487,14 @@ Each stage adds a verification point, so you can confirm progress before moving 
 
 #. Emit state notifications — Call ``mRangingSessionStateChanged`` so ``AccessManager`` updates reader state on suspend and destroy.
 
-#. Regression test — Run an Aliro Bluetooth LE with UWB session against a certified User Device or :ref:`Aliro Test Harness <setting_up_the_aliro_test_harness>`.
+#. Regression test — Run an Aliro Bluetooth LE + UWB session against a certified User Device or :ref:`Aliro Test Harness <setting_up_the_aliro_test_harness>`.
 
 Related documentation
 *********************
 
 For more background on UWB integration, see the following resources:
 
-* :ref:`uwb_integration` — Reference QM35825 architecture and stack interaction.
+* :ref:`uwb_integration` — QM35825 UWB integration architecture and stack interactions.
 * :ref:`wireless_technologies_uwb` — How UWB fits into the add-on, including access policy and front/back disambiguation.
 * :ref:`aliro_application_interactions` — Sequence diagrams for UWB session establishment.
 * :ref:`uwb_disambiguation` — QM35-specific front and back detection (not required for generic ports).

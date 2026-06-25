@@ -65,9 +65,8 @@ config NCS_ALIRO_LOG_LEVEL_VALUE
     default 4 if NCS_ALIRO_LOG_LEVEL_DBG
 
 config NCS_ALIRO_BLE_UWB
-	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB) [EXPERIMENTAL]"
-	depends on (SOC_NRF54LM20A || SOC_SERIES_NRF53)
-	select EXPERIMENTAL
+	bool "Aliro Bluetooth LE (BLE) transport together with ultra wideband (UWB)"
+	depends on (SOC_NRF54LM20A || SOC_NRF54LM20B || SOC_SERIES_NRF53)
 	help
 	  Enable the Aliro BLE transport protocol (TP). This is the transport layer
 	  used by the Reader to communicate with the User Device. It is used to send and

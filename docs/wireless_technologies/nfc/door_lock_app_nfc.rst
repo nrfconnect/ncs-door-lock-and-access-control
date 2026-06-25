@@ -9,10 +9,10 @@ Near Field Communication (NFC)
    :depth: 2
 
 Near Field Communication (NFC) is a short-range wireless communication technology that operates at 13.56 MHz with a typical range of a couple of centimeters.
-NFC enables data exchange between devices through electromagnetic induction, with devices operating in different roles: an NFC reader (initiator) that generates the RF field and communicates with NFC tags (targets) that can be either passive (powered by the reader's field) or active (self-powered).
+NFC enables data exchange between devices through electromagnetic induction, with devices operating in different roles: an NFC Reader (initiator) that generates the RF field and communicates with NFC tags (targets) that can be either passive (powered by the Reader's field) or active (self-powered).
 This technology is ideal for contactless applications like payment systems, data sharing, and device pairing.
 
-In access control applications, NFC provides an intuitive tap-to-unlock experience: the user holds a smartphone or wearable near the reader antenna for instant authentication.
+In access control applications, NFC provides an intuitive tap-to-unlock experience: the user holds a smartphone or wearable near the Reader antenna for instant authentication.
 NFC is a mandatory transport in the Aliro protocol defined by the `Connectivity Standards Alliance`_ (CSA), where the Aliro Access Protocol authenticates credentials over the short-range NFC link.
 
 For a general introduction to Aliro and how NFC fits alongside other transports, see :ref:`wireless_technologies_aliro` and the `Aliro Technology`_ page.
@@ -25,8 +25,8 @@ The reader polls for a User Device in NFC-A listen mode, runs the Aliro Access P
 
 NFC is well suited for deliberate, proximity-based access because of the following reasons:
 
-* Reliable unlock when the user intentionally taps the device against the reader.
-* Close proximity between the User Device and the reader limits remote threats during authentication.
+* Reliable unlock when the user intentionally taps the device against the Reader.
+* Close proximity between the User Device and the Reader limits remote threats during authentication.
 * Low power consumption during idle polling compared with always-on ranging.
 * Ease of use: only one NFC Aliro session can be active at a time.
 
@@ -47,7 +47,7 @@ To see details about the NFC readers and expansion boards supported by default, 
 Aliro protocol requirements
 ===========================
 
-When NFC is used as the Aliro transport, the reader and User Device follow the NFC-specific requirements of the Aliro Access Protocol:
+When NFC is used as the Aliro transport, the Reader and User Device follow the NFC-specific requirements of the Aliro Access Protocol:
 
 * The reader operates in Poll Mode and supports NFC-A with T4T platform and ISO-DEP.
 * The User Device operates in Listen Mode with the same technology support.

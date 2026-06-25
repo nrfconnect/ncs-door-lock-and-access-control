@@ -27,7 +27,7 @@ The following diagram shows the reference path through ``NfcTransportRfal`` and 
                  │  Aliro stack public API
    ┌─────────────▼───────────────────────┐
    │    NFC transport implementation     │
-   │     (reference: NfcTransportRfal)     │ ← Replaceable with a custom class
+   │     (reference: NfcTransportRfal)   │ ← Replaceable with a custom class
    └─────────────┬───────────────────────┘
                  │  vendor-specific API
    ┌─────────────▼───────────────────────┐
@@ -140,7 +140,7 @@ Configuration
 Set RFAL options in :file:`prj.conf` and describe hardware connections in the devicetree.
 
 Aliro over NFC requires NFC-A poller mode with T4T and ISO-DEP support (marked in the table below).
-The reference applications enable those features by default; change other options when tuning power, discovery, or buffer sizes.
+The reference applications enable those features by default; change other options when tuning power, discovery mechanism, or buffer sizes.
 
 Option definitions and defaults are in :file:`drivers/nfc/stm/Kconfig.rfal` and :file:`drivers/nfc/stm/nfc_configs/Kconfig`.
 

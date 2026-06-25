@@ -40,7 +40,7 @@ Use it to choose the one that best fits your product's use case and requirements
    * - :ref:`Smart Home (Matter)<doc_matter_door_lock_application>`
      - * Works with Apple, Google, Samsung, and Alexa ecosystems
        * Remote control and automation
-       * PIN and schedule based access
+       * PIN- and schedule-based access
      - Residential locks with full smart home ecosystem integration and keypad-based entry, at a competitive price point.
      - * nRF52840 (not recommended for new designs)
        * nRF5340
@@ -56,7 +56,7 @@ Use it to choose the one that best fits your product's use case and requirements
        * For Matter, it works with the Apple, Google, Samsung, and Alexa ecosystems.
          For Aliro, it works with Aliro-compatible digital wallets (for example, Apple Wallet and Samsung Wallet).
        * Remote control and automation
-       * PIN and schedule based access
+       * PIN- and schedule-based access
      - Residential locks combining the modern phone-as-a-key experience with full smart home ecosystem support.
      - * nRF52840 (NFC only; not recommended for new designs)
        * nRF5340
@@ -80,7 +80,7 @@ Note also that using a smartphone as a digital key requires a separate business 
    :header-rows: 1
    :widths: 30 70
 
-   * - Features
+   * - Feature
      - Description
    * - Aliro
      - An industry standard (supported by Apple, Google, Samsung, and others) that lets any phone or wearable work with any certified reader.
@@ -97,7 +97,7 @@ Note also that using a smartphone as a digital key requires a separate business 
    * - Expedited-fast phase authentication
      - After the first time a user authenticates, every subsequent unlock is faster.
    * - Step-up authentication
-     - For sensitive areas (server rooms, executive floors), the reader can require additional credential verification.
+     - For sensitive areas (server rooms, executive floors), the Reader can require additional credential verification.
        This supports tiered access policies based on the user's role in the organization.
 
 Smart home use (Matter only, Matter with Aliro)

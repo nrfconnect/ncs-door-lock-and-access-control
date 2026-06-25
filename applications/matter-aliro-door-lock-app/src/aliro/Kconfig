@@ -7,12 +7,11 @@
 menu "Aliro features"
 
 config DOOR_LOCK_BLE_UWB
-	bool "Integration with Aliro BLE and UWB [EXPERIMENTAL]"
+	bool "Integration with Aliro BLE and UWB"
 	select NCS_ALIRO_BLE_UWB
 	select DOOR_LOCK_ALIRO_UWB
 	select DOOR_LOCK_ALIRO_BLE_SERVICE
 	select DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_SUPPORT
-	select EXPERIMENTAL
 	help
 	  Enable the door lock application integration with Aliro Bluetooth LE (BLE) and ultra wideband (UWB).
 
@@ -66,6 +65,7 @@ config DOOR_LOCK_TIME_CONCEPT
 endmenu # Aliro features
 
 rsource "platform/Kconfig"
+rsource "interface_impl/Kconfig"
 rsource "access_manager/Kconfig"
 rsource "cli/Kconfig"
 rsource "kpersistent_manager/Kconfig"

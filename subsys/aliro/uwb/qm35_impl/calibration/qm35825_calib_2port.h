@@ -10,28 +10,28 @@
 #include <cherry/cherry.h>
 
 /* Modified calibration based on jolie_quad_GSavg_27032025.json. */
-static const uint8_t util_calib_qm35825_ant_pair_0_ant_path[] = { 0x03, 0x01 };
-static const uint8_t util_calib_qm35825_ant_pair_1_ant_path[] = { 0x02, 0x01 };
-static const uint8_t util_calib_qm35825_ant_set0_tx_ant_paths[] = { 0x00,
+static const uint8_t qm35825_calib_2port_ant_pair_0_ant_path[] = { 0x03, 0x01 };
+static const uint8_t qm35825_calib_2port_ant_pair_1_ant_path[] = { 0x02, 0x01 };
+static const uint8_t qm35825_calib_2port_ant_set0_tx_ant_paths[] = { 0x00,
 								    0xFF };
-static const uint8_t util_calib_qm35825_ant_set3_tx_ant_paths[] = { 0x00,
+static const uint8_t qm35825_calib_2port_ant_set3_tx_ant_paths[] = { 0x00,
 								    0xFF };
 /* ant_pair1 only: ant2 (ANT3) + ant1 (ANT2) — PDOA pair for 2-port antenna. */
-static const uint8_t util_calib_qm35825_ant_set0_rx_ants[] = { 0x01, 0xFF,
+static const uint8_t qm35825_calib_2port_ant_set0_rx_ants[] = { 0x01, 0xFF,
 							       0xFF };
-static const uint8_t util_calib_qm35825_ant_set3_rx_ants[] = { 0x02, 0xFF,
-							       0xFF };
-
-static const uint8_t util_calib_qm35825_ant_set4_tx_ant_paths[] = { 0x06,
-								    0xFF };
-static const uint8_t util_calib_qm35825_ant_set4_rx_ants[] = { 0x04, 0xFF,
-							       0xFF };
-static const uint8_t util_calib_qm35825_ant_set5_tx_ant_paths[] = { 0x07,
-								    0xFF };
-static const uint8_t util_calib_qm35825_ant_set5_rx_ants[] = { 0x05, 0xFF,
+static const uint8_t qm35825_calib_2port_ant_set3_rx_ants[] = { 0x02, 0xFF,
 							       0xFF };
 
-static const uint16_t util_calib_qm35825_pdoa_lut0_ch5[][2] = {
+static const uint8_t qm35825_calib_2port_ant_set4_tx_ant_paths[] = { 0x06,
+								    0xFF };
+static const uint8_t qm35825_calib_2port_ant_set4_rx_ants[] = { 0x04, 0xFF,
+							       0xFF };
+static const uint8_t qm35825_calib_2port_ant_set5_tx_ant_paths[] = { 0x07,
+								    0xFF };
+static const uint8_t qm35825_calib_2port_ant_set5_rx_ants[] = { 0x05, 0xFF,
+							       0xFF };
+
+static const uint16_t qm35825_calib_2port_pdoa_lut0_ch5[][2] = {
 	{ 0xEB2D, 0xF36F }, /* original: -2.602930, -1.570796 */
 	{ 0xEB58, 0xF445 }, /* original: -2.582271, -1.466077 */
 	{ 0xEBC3, 0xF51C }, /* original: -2.529768, -1.361357 */
@@ -65,7 +65,7 @@ static const uint16_t util_calib_qm35825_pdoa_lut0_ch5[][2] = {
 	{ 0x1963, 0x0C91 }, /* original: 3.173142, 1.570796 */
 };
 
-static const uint16_t util_calib_qm35825_pdoa_lut1_ch9[][2] = {
+static const uint16_t qm35825_calib_2port_pdoa_lut1_ch9[][2] = {
 	{ 0xE161, 0xF36F }, /* original: -3.827516, -1.570796 */
 	{ 0xE46C, 0xF445 }, /* original: -3.447385, -1.466077 */
 	{ 0xE740, 0xF51C }, /* original: -3.093565, -1.361357 */
@@ -99,7 +99,7 @@ static const uint16_t util_calib_qm35825_pdoa_lut1_ch9[][2] = {
 	{ 0x1814, 0x0C91 }, /* original: 3.009969, 1.570796 */
 };
 
-static const uint16_t util_calib_qm35825_pdoa_lut2_ch5[][2] = {
+static const uint16_t qm35825_calib_2port_pdoa_lut2_ch5[][2] = {
 	{ 0xE9A9, 0xF36F }, /* original: -2.792527, -1.570796 */
 	{ 0xEB3D, 0xF445 }, /* original: -2.595256, -1.466077 */
 	{ 0xEC06, 0xF51C }, /* original: -2.497197, -1.361357 */
@@ -133,7 +133,7 @@ static const uint16_t util_calib_qm35825_pdoa_lut2_ch5[][2] = {
 	{ 0x1657, 0x0C91 }, /* original: 2.792527, 1.570796 */
 };
 
-static const uint16_t util_calib_qm35825_pdoa_lut3_ch9[][2] = {
+static const uint16_t qm35825_calib_2port_pdoa_lut3_ch9[][2] = {
 	{ 0xE843, 0xF36F }, /* original: -2.967060, -1.570796 */
 	{ 0xE91A, 0xF445 }, /* original: -2.862340, -1.466077 */
 	{ 0xEA40, 0xF51C }, /* original: -2.718937, -1.361357 */
@@ -167,43 +167,43 @@ static const uint16_t util_calib_qm35825_pdoa_lut3_ch9[][2] = {
 	{ 0x1970, 0x0C91 }, /* original: 3.179507, 1.570796 */
 };
 
-static const struct cherry_calib_key util_partial_calib_qm35825_keys[] = {
+static const struct cherry_calib_key qm35825_partial_calib_default_keys[] = {
 	/* PDOA LUT Configuration. */
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut0.data",
-				     util_calib_qm35825_pdoa_lut0_ch5),
+				     qm35825_calib_2port_pdoa_lut0_ch5),
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut1.data",
-				     util_calib_qm35825_pdoa_lut1_ch9),
+				     qm35825_calib_2port_pdoa_lut1_ch9),
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut2.data",
-				     util_calib_qm35825_pdoa_lut2_ch5),
+				     qm35825_calib_2port_pdoa_lut2_ch5),
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut3.data",
-				     util_calib_qm35825_pdoa_lut3_ch9),
+				     qm35825_calib_2port_pdoa_lut3_ch9),
 	CHERRY_CALIB_UINT8("ant_pair0.ch5.pdoa.lut_id", 0x0),
 	CHERRY_CALIB_UINT8("ant_pair0.ch9.pdoa.lut_id", 0x1),
 	CHERRY_CALIB_UINT8("ant_pair1.ch5.pdoa.lut_id", 0X2),
 	CHERRY_CALIB_UINT8("ant_pair1.ch9.pdoa.lut_id", 0x3),
 	CHERRY_CALIB_UINT8("ant_set0.tx_power_control", 0x01),
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set3.tx_ant_paths",
-				     util_calib_qm35825_ant_set3_tx_ant_paths),
+				     qm35825_calib_2port_ant_set3_tx_ant_paths),
 	CHERRY_CALIB_UINT8("ant_set3.nb_rx_ants", 1),
 	CHERRY_CALIB_BOOL("ant_set3.rx_ants_are_pairs", false),
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set3.rx_ants",
-				     util_calib_qm35825_ant_set3_rx_ants),
+				     qm35825_calib_2port_ant_set3_rx_ants),
 	CHERRY_CALIB_UINT8("ant_set3.tx_power_control", 0x01),
 };
 
-static const struct cherry_calib_key util_calib_qm35825_keys[] = {
+static const struct cherry_calib_key qm35825_calib_2port_keys[] = {
 	/* Global Calibration. */
 	CHERRY_CALIB_UINT8("ip_sts_sanity_thres_q2", 0x0a),
 
 	/* PDOA LUT Configuration. */
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut0.data",
-				     util_calib_qm35825_pdoa_lut0_ch5),
+				     qm35825_calib_2port_pdoa_lut0_ch5),
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut1.data",
-				     util_calib_qm35825_pdoa_lut1_ch9),
+				     qm35825_calib_2port_pdoa_lut1_ch9),
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut2.data",
-				     util_calib_qm35825_pdoa_lut2_ch5),
+				     qm35825_calib_2port_pdoa_lut2_ch5),
 	CHERRY_CALIB_NUMBER_ARRAY_2D("pdoa_lut3.data",
-				     util_calib_qm35825_pdoa_lut3_ch9),
+				     qm35825_calib_2port_pdoa_lut3_ch9),
 
 	/* ANT0 = TX_ANT2 */
 	CHERRY_CALIB_UINT32("ant0.ch5.ref_frame0.tx_power_index", 0x4a4a4a4a),
@@ -248,7 +248,7 @@ static const struct cherry_calib_key util_calib_qm35825_keys[] = {
 	/* Ant Pair 0 to measure Azimuth between ant1 and ant3 */
 	CHERRY_CALIB_UINT8("ant_pair0.axis", 0),
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_pair0.ant_paths",
-				     util_calib_qm35825_ant_pair_0_ant_path),
+				     qm35825_calib_2port_ant_pair_0_ant_path),
 	CHERRY_CALIB_INT16("ant_pair0.ch5.pdoa.offset", 3893),
 	CHERRY_CALIB_INT16("ant_pair0.ch9.pdoa.offset", 1669),
 	CHERRY_CALIB_UINT8("ant_pair0.ch5.pdoa.lut_id", 0x0),
@@ -257,7 +257,7 @@ static const struct cherry_calib_key util_calib_qm35825_keys[] = {
 	/* Ant Pair 1 to measure Elevation between ant1 and ant2 */
 	CHERRY_CALIB_UINT8("ant_pair1.axis", 1),
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_pair1.ant_paths",
-				     util_calib_qm35825_ant_pair_1_ant_path),
+				     qm35825_calib_2port_ant_pair_1_ant_path),
 	CHERRY_CALIB_INT16("ant_pair1.ch5.pdoa.offset", 4476),
 	CHERRY_CALIB_INT16("ant_pair1.ch9.pdoa.offset", 1716),
 	CHERRY_CALIB_UINT8("ant_pair1.ch5.pdoa.lut_id", 0X2),
@@ -265,20 +265,20 @@ static const struct cherry_calib_key util_calib_qm35825_keys[] = {
 
 	/* Ant Set0: TWR ranging — ant_pair1 (ANT2+ANT3) for PDOA. */
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set0.tx_ant_paths",
-				     util_calib_qm35825_ant_set0_tx_ant_paths),
+				     qm35825_calib_2port_ant_set0_tx_ant_paths),
 	CHERRY_CALIB_UINT8("ant_set0.nb_rx_ants", 1),
 	CHERRY_CALIB_BOOL("ant_set0.rx_ants_are_pairs", true),
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set0.rx_ants",
-				     util_calib_qm35825_ant_set0_rx_ants),
+				     qm35825_calib_2port_ant_set0_rx_ants),
 	CHERRY_CALIB_UINT8("ant_set0.tx_power_control", 0x01),
 
 	/* Ant Set3 : for radar. */
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set3.tx_ant_paths",
-				     util_calib_qm35825_ant_set3_tx_ant_paths),
+				     qm35825_calib_2port_ant_set3_tx_ant_paths),
 	CHERRY_CALIB_UINT8("ant_set3.nb_rx_ants", 1),
 	CHERRY_CALIB_BOOL("ant_set3.rx_ants_are_pairs", false),
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set3.rx_ants",
-				     util_calib_qm35825_ant_set3_rx_ants),
+				     qm35825_calib_2port_ant_set3_rx_ants),
 	CHERRY_CALIB_UINT8("ant_set3.tx_power_control", 0x01),
 
 	/* Ant Set for Mac Mode 1. */
@@ -305,29 +305,29 @@ static const struct cherry_calib_key util_calib_qm35825_keys[] = {
 
 	/* Ant Set 4 */
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set4.tx_ant_paths",
-				     util_calib_qm35825_ant_set4_tx_ant_paths),
+				     qm35825_calib_2port_ant_set4_tx_ant_paths),
 	CHERRY_CALIB_UINT8("ant_set4.nb_rx_ants", 0x01),
 	CHERRY_CALIB_BOOL("ant_set4.rx_ants_are_pairs", false),
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set4.rx_ants",
-				     util_calib_qm35825_ant_set4_rx_ants),
+				     qm35825_calib_2port_ant_set4_rx_ants),
 
 	/* Ant Set 5 */
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set5.tx_ant_paths",
-				     util_calib_qm35825_ant_set5_tx_ant_paths),
+				     qm35825_calib_2port_ant_set5_tx_ant_paths),
 	CHERRY_CALIB_UINT8("ant_set5.nb_rx_ants", 0x01),
 	CHERRY_CALIB_BOOL("ant_set5.rx_ants_are_pairs", false),
 	CHERRY_CALIB_NUMBER_ARRAY_1D("ant_set5.rx_ants",
-				     util_calib_qm35825_ant_set5_rx_ants),
+				     qm35825_calib_2port_ant_set5_rx_ants),
 };
 
-static const struct cherry_calib util_calib_qm35825 = {
-	.n_keys = sizeof(util_calib_qm35825_keys) /
-		  sizeof(util_calib_qm35825_keys[0]),
-	.keys = util_calib_qm35825_keys,
+static const struct cherry_calib qm35825_calib_2port = {
+	.n_keys = sizeof(qm35825_calib_2port_keys) /
+		  sizeof(qm35825_calib_2port_keys[0]),
+	.keys = qm35825_calib_2port_keys,
 };
 
-static const struct cherry_calib util_partial_calib_qm35825 = {
-	.n_keys = sizeof(util_partial_calib_qm35825_keys) /
-		  sizeof(util_partial_calib_qm35825_keys[0]),
-	.keys = util_partial_calib_qm35825_keys,
+static const struct cherry_calib qm35825_partial_calib_default = {
+	.n_keys = sizeof(qm35825_partial_calib_default_keys) /
+		  sizeof(qm35825_partial_calib_default_keys[0]),
+	.keys = qm35825_partial_calib_default_keys,
 };

@@ -10,6 +10,8 @@
 #include "aliro/access_manager/access_manager.h"
 #include "aliro/aliro.h"
 
+#include <platform/CHIPDeviceLayer.h>
+
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 #include "validity_iterations.h"
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
@@ -42,32 +44,66 @@ namespace {
 	}
 }
 
+bool ValidateAliroCredential(const Aliro::CryptoTypes::PublicKey &accessCredentialPublicKey,
+			     Nullable<BoltLockManager::ValidateCredentialResult> &result)
+{
+	OperationErrorEnum error;
+
+	chip::DeviceLayer::PlatformMgr().LockChipStack();
+	auto &boltLockMgr = BoltLockMgr();
+	const auto success = boltLockMgr.ValidateCredential(CredentialTypeEnum::kAliroNonEvictableEndpointKey,
+							    accessCredentialPublicKey, error, result) ||
+			     boltLockMgr.ValidateCredential(CredentialTypeEnum::kAliroEvictableEndpointKey,
+							    accessCredentialPublicKey, error, result);
+	chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+
+	return success;
+}
+
 } // namespace
 
 void BoltLockManager::Init(StateChangeCallback callback)
 {
 	mStateChangeCallback = callback;
 
-	mLockSim.Init([](Aliro::OperationSource, Aliro::ReaderStateByte state) {
-		Nrf::PostTask([state] { BoltLockMgr().UpdateState(state); });
-	});
+	mLockSim.Init(
+		[](Aliro::ReaderStateByte state) { Nrf::PostTask([state] { BoltLockMgr().UpdateState(state); }); });
 
 	// Set Aliro AccessManager application callbacks
 	Aliro::AccessManagerInstance().SetApplicationCallbacks({
 		.mUnlockIndicatorClb =
-			[](Aliro::OperationSource source) {
-				Nrf::PostTask([source] {
-					if (!BoltLockMgr().Unlock(source)) {
+			[](bool isNfcSession, const Aliro::CryptoTypes::PublicKey &accessCredentialPublicKey) {
+				const auto source =
+					isNfcSession ? Aliro::OperationSource::ThisUserDeviceInNfc :
+						       Aliro::OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow;
+
+				Nullable<ValidateCredentialResult> result;
+				const auto success = ValidateAliroCredential(accessCredentialPublicKey, result);
+				VerifyOrReturn(success);
+
+				Nrf::PostTask([source, result] {
+					if (!BoltLockMgr().Unlock(source, result)) {
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 						// The lock is already unlocked, so we can send the Unsecured state
 						Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
-							source, Aliro::ReaderStateByte::Unsecured);
+							Aliro::OperationSource::Unspecified,
+							Aliro::ReaderStateByte::Unsecured);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 					}
 				});
 			},
 		.mLockIndicatorClb =
-			[](Aliro::OperationSource source) { Nrf::PostTask([source] { BoltLockMgr().Lock(source); }); },
+			[](bool isNfcSession, const Aliro::CryptoTypes::PublicKey &accessCredentialPublicKey) {
+				const auto source =
+					isNfcSession ? Aliro::OperationSource::ThisUserDeviceInNfc :
+						       Aliro::OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow;
+
+				Nullable<ValidateCredentialResult> result;
+				const auto success = ValidateAliroCredential(accessCredentialPublicKey, result);
+				VerifyOrReturn(success);
+
+				Nrf::PostTask([source, result] { BoltLockMgr().Lock(source, result); });
+			},
 	});
 
 	auto addPublicKey = [](uint16_t credentialIndex, CredentialTypeEnum credentialType,
@@ -190,13 +226,13 @@ DlStatus BoltLockManager::SetHolidaySchedule(uint8_t holidayIndex, DlScheduleSta
 
 #endif /* CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES */
 
-#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
-
-bool BoltLockManager::ValidatePIN(const Optional<chip::ByteSpan> &pinCode, OperationErrorEnum &err,
-				  Nullable<ValidatePINResult> &result)
+bool BoltLockManager::ValidateCredential(CredentialTypeEnum credentialType, const chip::ByteSpan &secret,
+					 OperationErrorEnum &error, Nullable<ValidateCredentialResult> &result)
 {
-	return AccessMgr::Instance().ValidatePIN(pinCode, err, result);
+	return AccessMgr::Instance().ValidateCredential(credentialType, secret, error, result);
 }
+
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 void BoltLockManager::SetRequirePIN(bool require)
 {
@@ -210,7 +246,8 @@ bool BoltLockManager::GetRequirePIN()
 #endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 void BoltLockManager::Lock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx,
-			   const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)
+			   const Nullable<chip::NodeId> &nodeId,
+			   const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
 	VerifyOrReturn(mStateData.mState != Aliro::ReaderStateByte::Secured);
 	mStateData = { Aliro::ReaderStateByte::EnteringSecured,
@@ -218,13 +255,14 @@ void BoltLockManager::Lock(const OperationSource source, const Nullable<chip::Fa
 		       ToAliroOperationSource(source),
 		       fabricIdx,
 		       nodeId,
-		       validatePINResult };
+		       validateCredentialResult };
 
-	mLockSim.Lock(ToAliroOperationSource(source));
+	mLockSim.Lock();
 }
 
 void BoltLockManager::Unlock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx,
-			     const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)
+			     const Nullable<chip::NodeId> &nodeId,
+			     const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
 	VerifyOrReturn(mStateData.mState != Aliro::ReaderStateByte::Unsecured);
 	mStateData = { Aliro::ReaderStateByte::EnteringUnsecured,
@@ -232,12 +270,13 @@ void BoltLockManager::Unlock(const OperationSource source, const Nullable<chip::
 		       ToAliroOperationSource(source),
 		       fabricIdx,
 		       nodeId,
-		       validatePINResult };
+		       validateCredentialResult };
 
-	mLockSim.Unlock(ToAliroOperationSource(source));
+	mLockSim.Unlock();
 }
 
-bool BoltLockManager::Lock(Aliro::OperationSource source)
+bool BoltLockManager::Lock(Aliro::OperationSource source,
+			   const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
 	VerifyOrReturnValue(mStateData.mState != Aliro::ReaderStateByte::Secured, false);
 	mStateData = { Aliro::ReaderStateByte::EnteringSecured,
@@ -245,13 +284,14 @@ bool BoltLockManager::Lock(Aliro::OperationSource source)
 		       source,
 		       NullNullable,
 		       NullNullable,
-		       NullNullable };
+		       validateCredentialResult };
 
-	mLockSim.Lock(source);
+	mLockSim.Lock();
 	return true;
 }
 
-bool BoltLockManager::Unlock(Aliro::OperationSource source)
+bool BoltLockManager::Unlock(Aliro::OperationSource source,
+			     const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
 	VerifyOrReturnValue(mStateData.mState != Aliro::ReaderStateByte::Unsecured, false);
 	mStateData = { Aliro::ReaderStateByte::EnteringUnsecured,
@@ -259,9 +299,9 @@ bool BoltLockManager::Unlock(Aliro::OperationSource source)
 		       source,
 		       NullNullable,
 		       NullNullable,
-		       NullNullable };
+		       validateCredentialResult };
 
-	mLockSim.Unlock(source);
+	mLockSim.Unlock();
 	return true;
 }
 

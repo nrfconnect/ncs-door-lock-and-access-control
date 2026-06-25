@@ -51,6 +51,11 @@ int ReadAccessDocumentHelper(size_t index, AccessDocument &ad)
 
 } // namespace
 
+AliroError UpdateAliroEvictableCredential(size_t index, const CryptoTypes::PublicKey &publicKey,
+					  size_t credentialIssuerKeyIndex);
+
+AliroError RemoveAliroEvictableCredential(size_t index, bool updateUser);
+
 AliroError LoadAccessDocuments()
 {
 	AccessDocument ad;
@@ -66,6 +71,9 @@ AliroError LoadAccessDocuments()
 
 		ReturnErrorOnFailure(AccessManagerInstance().AddPublicKey(
 			ad.mPublicKey, AccessManager::PublicKeyType::AccessDocument, index));
+
+		ReturnErrorOnFailure(
+			UpdateAliroEvictableCredential(index, ad.mPublicKey, ad.mCredentialIssuerKeyIndex));
 
 		LOG_DBG("Loaded AD at index: %zu, Version: %u, CI index: %u, Timestamp: %.*s, Access Iteration: %" PRIu64,
 			index, ad.mVersion, ad.mCredentialIssuerKeyIndex, ad.mSignedTimestamp.size(),
@@ -85,6 +93,8 @@ AliroError StoreAccessDocument(size_t index, const AccessDocument &ad)
 	VerifyOrReturnStatus(error == 0, AliroError::FromInt(error),
 			     LOG_ERR("Failed to store Access Document at index: %zu", index));
 
+	ReturnErrorOnFailure(UpdateAliroEvictableCredential(index, ad.mPublicKey, ad.mCredentialIssuerKeyIndex));
+
 	return ALIRO_NO_ERROR;
 }
 
@@ -100,7 +110,7 @@ AliroError ReadAccessDocument(size_t index, AccessDocument &ad)
 	return ALIRO_NO_ERROR;
 }
 
-AliroError ClearAccessDocument(size_t index)
+AliroError ClearAccessDocument(size_t index, bool updateUser)
 {
 	VerifyOrReturnStatus(IsIndexInRange(index), ALIRO_INVALID_ARGUMENT,
 			     LOG_ERR("Access Document index out of range: %zu", index));
@@ -109,6 +119,8 @@ AliroError ClearAccessDocument(size_t index)
 	const auto error = DoorLock::ExternalNvs::Delete(id);
 	VerifyOrReturnStatus(error == 0, AliroError::FromInt(error),
 			     LOG_ERR("Failed to clear Access Document at index: %zu", index));
+
+	ReturnErrorOnFailure(RemoveAliroEvictableCredential(index, updateUser));
 
 	return ALIRO_NO_ERROR;
 }

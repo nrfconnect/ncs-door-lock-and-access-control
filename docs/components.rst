@@ -4,10 +4,9 @@ Components
 ##########
 
 The |REPO_NAME| includes reusable software modules that implement product-facing behavior shared across the reference applications.
-Pages in this section describe each module, its configuration options, and how to adapt or replace it for your hardware.
-
-These modules sit alongside the wireless technology integrations in :ref:`wireless_technologies` and the full application guides in :ref:`doc_applications`.
-Where a reference application uses a stand-in instead of real lock or reader hardware, the corresponding module is documented on the following pages.
+These components live in the :file:`subsys/` directory.
+This section documents the most important modules, their configuration options, and how to adapt or replace them for your hardware.
+For modules not covered here, see the corresponding Kconfig and public header files under :file:`subsys/` for options, dependencies, and usage.
 
 .. toctree::
    :maxdepth: 1
