@@ -74,7 +74,7 @@ When the module fails to initialize, confirm hardware and firmware before testin
 NFC reader issues
 *****************
 
-NFC problems usually appear when the reader fails to start, the field is weak or absent, or the User Device does not establish an Aliro session over NFC.
+NFC problems usually appear when the Reader fails to start, the field is weak or absent, or the User Device does not establish an Aliro session over NFC.
 
 For architecture, Kconfig, and board overlays, see :ref:`nfc_integration` and :ref:`door_lock_app_nfc`.
 Work through the checks below before changing Aliro provisioning or test scripts.

@@ -6,6 +6,7 @@
 
 #include "radar.h"
 
+#include <doorlock/utils/mutex_guard.h>
 #include <doorlock/utils/utils.h>
 
 #include <aliro/types.h>
@@ -40,12 +41,13 @@ constexpr uint8_t kRadarChannel{ CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_RADAR_CHANNEL }
 constexpr uint32_t kRadarSessionId{ 2 };
 
 constexpr uint16_t kUwbMaximumReportableDistanceCm{ 500 };
-constexpr int32_t kRadarStartDelayMs{ 300 };
 constexpr uint32_t kRadarActivationDistanceCm{ CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_RADAR_ACTIVATION_DISTANCE_CM };
 
 } // namespace
 
 namespace Aliro::Uwb {
+
+using namespace DoorLock::Utils;
 
 void UwbRadar::Init(cherry *ctx, OnRadarMeasurement onRadarMeasurement, OnSessionStopped onSessionStopped)
 {
@@ -55,7 +57,9 @@ void UwbRadar::Init(cherry *ctx, OnRadarMeasurement onRadarMeasurement, OnSessio
 	mOnRadarMeasurement = onRadarMeasurement;
 	mOnSessionStopped = onSessionStopped;
 
-	k_work_init_delayable(&mStartWork.mDwork, StartWorkHandler);
+	VerifyOrDie(k_mutex_init(&mMutex) == 0, "Failed to initialize radar mutex");
+
+	k_work_init(&mStartWork.mWork, StartWorkHandler);
 	mStartWork.mOwner = this;
 
 	SessionEventHub::Register(mSubscriber);
@@ -63,21 +67,31 @@ void UwbRadar::Init(cherry *ctx, OnRadarMeasurement onRadarMeasurement, OnSessio
 
 int UwbRadar::ScheduleStart()
 {
-	VerifyOrReturnValue(!mRunning, -EALREADY, LOG_ERR("Radar session already running"));
-	const int ret = k_work_schedule(&mStartWork.mDwork, K_MSEC(kRadarStartDelayMs));
+	{
+		MutexGuard lock{ mMutex };
+		VerifyOrReturnValue(!mRunning, -EALREADY, LOG_ERR("Radar session already running"));
+	}
+	// Defer to work queue: Cherry API must not be called from Cherry callbacks.
+	const int ret = k_work_submit(&mStartWork.mWork);
 	VerifyOrReturnValue(ret >= 0, ret);
 	return 0;
 }
 
 void UwbRadar::Stop()
 {
+	{
+		MutexGuard lock{ mMutex };
+		VerifyOrReturn(mRunning);
+	}
+	// CancelStart must run outside mMutex to avoid deadlock with StartSession.
 	CancelStart();
 
 	VerifyAndCall(mOnSessionStopped);
+
+	MutexGuard lock{ mMutex };
 	VerifyOrReturn(mRunning && mSession);
 
 	cherry_radar_session_destroy(mSession);
-
 	mSession = nullptr;
 	mRunning = false;
 
@@ -87,13 +101,12 @@ void UwbRadar::Stop()
 void UwbRadar::CancelStart()
 {
 	k_work_sync sync;
-	(void)k_work_cancel_delayable_sync(&mStartWork.mDwork, &sync);
+	(void)k_work_cancel_sync(&mStartWork.mWork, &sync);
 }
 
 void UwbRadar::StartWorkHandler(k_work *work)
 {
-	auto *dwork = k_work_delayable_from_work(work);
-	auto *startWork = CONTAINER_OF(dwork, StartWork, mDwork);
+	auto *startWork = CONTAINER_OF(work, StartWork, mWork);
 
 	VerifyOrReturn(startWork->mOwner);
 	startWork->mOwner->StartSession();
@@ -101,6 +114,8 @@ void UwbRadar::StartWorkHandler(k_work *work)
 
 int UwbRadar::StartSession()
 {
+	MutexGuard lock{ mMutex };
+
 	VerifyOrReturnValue(!mRunning, 0);
 	VerifyOrReturnValue(mCtx, -EINVAL, LOG_WRN("Cherry context not ready for radar"));
 	VerifyOrReturnValue(!mSession, -EIO, LOG_ERR("Radar session already created"));
@@ -154,10 +169,16 @@ void UwbRadar::HandleSessionEvent(const aliro_uwb_session_event &event, const Se
 		const auto oldState = sessionCtx.mSessionState;
 		const auto newState = status->session_state;
 
-		if (oldState == CHERRY_CCC_SESSION_STATE_IDLE && newState == CHERRY_CCC_SESSION_STATE_DEINIT) {
-			Stop();
-		} else if (oldState == CHERRY_CCC_SESSION_STATE_ACTIVE && newState == CHERRY_CCC_SESSION_STATE_IDLE) {
-			Stop();
+		if (newState == CHERRY_CCC_SESSION_STATE_ACTIVE && oldState != CHERRY_CCC_SESSION_STATE_ACTIVE) {
+			mActiveSessionCount++;
+		} else if (oldState == CHERRY_CCC_SESSION_STATE_ACTIVE && newState != CHERRY_CCC_SESSION_STATE_ACTIVE) {
+			if (mActiveSessionCount > 0) {
+				mActiveSessionCount--;
+			}
+			// Stop radar only when the last ranging session ends.
+			if (mActiveSessionCount == 0) {
+				Stop();
+			}
 		}
 		break;
 	}

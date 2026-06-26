@@ -7,7 +7,7 @@ UWB integration in the reference applications
    :local:
    :depth: 2
 
-This page explains how Ultra-wideband (UWB) is integrated into the |REPO_NAME|: the layered architecture, how the Aliro stack drives the ``UltraWideBand`` facade, and how the reference Qorvo QM35825 implementation is built and selected at compile time.
+This page explains how Ultra-wideband (UWB) is integrated into the |REPO_NAME|: the layered architecture, how the Aliro stack drives the ``UltraWideBand`` facade, and how to select and build the Qorvo QM35825 implementation.
 
 For how UWB fits into access control and proximity unlock, see :ref:`wireless_technologies_uwb`.
 For the Bluetooth LE side of the transport, see :ref:`aliro_ble_transport`.
@@ -16,7 +16,7 @@ Architecture overview
 *********************
 
 The UWB integration follows a layered architecture that separates the Aliro protocol logic from the hardware-specific implementation.
-The diagram below shows the example implementation based on the Qorvo QM35825 module, which can be replaced with any compatible UWB radio.
+The diagram below shows the example implementation based on the Qorvo QM35825 module, which can be replaced with any compatible UWB IC.
 
 .. code-block:: none
 
@@ -88,7 +88,7 @@ Example UWB implementation (Qorvo QM35825)
 
    |QM35_EXPERIMENTAL_NOTE|
 
-The |REPO_NAME| includes a reference ``UltraWideBandImpl`` for the Qorvo QM35825 UWB SoC in :file:`subsys/aliro/uwb/qm35_impl/`.
+The |REPO_NAME| includes an example ``UltraWideBandImpl`` for the Qorvo QM35825 UWB SoC in :file:`subsys/aliro/uwb/qm35_impl/`.
 It maps Aliro UWB session semantics onto the Qorvo firmware through the ``aliro_uwb_adapter`` library.
 This library, along with the Cherry, QOSAL, and qmrom components, is provided by the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository.
 The implementation keeps a list of active sessions so each Aliro Bluetooth LE session maps to its own UWB ranging session.
@@ -96,7 +96,7 @@ The implementation keeps a list of active sessions so each Aliro Bluetooth LE se
 Optional QM35 features such as front/back disambiguation are documented in :ref:`uwb_disambiguation`.
 
 Enable the Qorvo QM35 implementation by applying the ``uwb_qm35`` snippet (sets ``CONFIG_QM35_UWB_ALIRO_ZEPHYR``).
-This requires the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository in your workspace; see :ref:`aliro_building_and_running_qm35_src`.
+This requires the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository in your workspace; see :ref:`aliro_qm35_sdk_repository`.
 
 The snippet also enables:
 
@@ -115,7 +115,7 @@ The build selects the UWB implementation in :file:`subsys/aliro/uwb/CMakeLists.t
 .. code-block:: cmake
 
    if(CONFIG_QM35_UWB_ALIRO_ZEPHYR)
-     add_subdirectory(qm35_impl)    # Qorvo reference implementation
+     add_subdirectory(qm35_impl)    # Qorvo example implementation
    else()
      add_subdirectory(custom_impl)  # Starting point for a third-party radio
    endif()

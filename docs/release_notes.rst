@@ -66,11 +66,100 @@ The following table shows tested and verified combinations of |REPO_NAME| releas
      - 1.5.0
      - 0.6.0
      - 4.0.2
+   * - 1.0.1
+     - 3.2.0
+     - 1.0.0
+     - 1.5.0
+     - 0.6.0
+     - 4.0.2
+   * - 1.1.0
+     - 3.3.0
+     - 1.0.0
+     - 1.5.0
+     - 1.1.0
+     - 4.0.2
 
 Release notes
 *************
 
 The following list outlines the release notes for each release of the |REPO_NAME|.
+
+v1.1.0
+******
+
+This release refactors the reference firmware into three dedicated applications aligned with the :ref:`solution_overview`, upgrades to |NCS| v3.3.0, and adds production support for the nRF54LM20B platform and Aliro over Bluetooth LE and UWB.
+
+.. note::
+
+  |QM35_EXPERIMENTAL_NOTE|
+
+Changelog
+=========
+
+.. toggle::
+
+  The following updates were introduced in this release.
+
+  * Added:
+
+    * Platforms and transports:
+
+      * Production support for the nRF54LM20B platform (nRF54LM20A remains supported for development).
+      * Production support for Aliro over Bluetooth LE and UWB transport mode.
+      * Support for up to five concurrent Aliro Bluetooth LE/UWB sessions (``CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS``).
+      * Bluetooth LE Dynamic Tag generation with an expiry timestamp.
+
+    * QM35825 UWB (experimental support):
+
+      * Integration with the public Qorvo Aliro SDK for the QM35825 UWB module (see :ref:`aliro_qm35_sdk_repository`).
+      * Experimental support for UWB diagnostic data and radar sessions using the QM35825 UWB module (see :ref:`uwb_integration`).
+      * Experimental implementation of the front/back disambiguation algorithm using the QM35825 UWB module (see :ref:`uwb_disambiguation`).
+
+    * Documentation:
+
+      * Dedicated documentation for the :ref:`doc_aliro_access_control_application`, :ref:`doc_matter_door_lock_application`, and :ref:`doc_aliro_matter_door_lock_application`.
+      * Technical guides on integrating third-party UWB and NFC modules (see :ref:`uwb_custom_integration` and :ref:`nfc_custom_integration`).
+      * Testing guide for the Matter and Aliro Door Lock Application with Samsung SmartThings and Samsung Wallet (Aliro over NFC; see :ref:`testing_with_samsung_ecosystem`).
+
+  * Updated:
+
+    * Refactored the reference firmware into three dedicated applications:
+
+      * :ref:`doc_aliro_access_control_application`
+      * :ref:`doc_matter_door_lock_application`
+      * :ref:`doc_aliro_matter_door_lock_application`
+
+    * Extracted common software modules for the Aliro and Matter applications into the :file:`subsys/` directory.
+    * Integrated the |NCS| v3.3.0.
+    * Integrated Qorvo QM35825 firmware and software v1.1.0.
+    * Refined the Reader Status reporting implementation.
+    * Optimized Aliro Bluetooth LE/UWB session handling for reduced power consumption.
+    * Optimized the RAM usage on the network core of the nRF5340 platform.
+    * Optimized Bluetooth LE connection and advertising management by adding separate Bluetooth identities for the Aliro service and optional Bluetooth LE features (see :ref:`aliro_ble_transport`).
+    * Enhanced documentation structure.
+
+  * Fixed:
+
+    * Synchronization of credentials between the Matter and Aliro backends.
+    * Support for Matter diagnostic logs.
+    * ``ValidityInfo`` verification in Access Documents (Matter builds).
+
+v1.0.1
+******
+
+This is a bugfix release that fixes the Device Firmware Update process for the QM35.
+Specifically, it fixes the QM35 firmware version mapping script path used during sysbuild when building with the ``uwb_qm35_dfu`` snippet.
+
+Changelog
+=========
+
+.. toggle::
+
+  The following updates were introduced in this release.
+
+  * Fixed:
+
+    * Incorrect path to the QM35 version mapping script (``map_qm35_version.py``) in sysbuild.
 
 v1.0.0
 ******

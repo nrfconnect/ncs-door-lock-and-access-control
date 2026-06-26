@@ -5,10 +5,11 @@
 #
 
 menuconfig DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION
-	bool "Enable UWB front/back disambiguation"
+	bool "UWB front/back disambiguation [EXPERIMENTAL]"
 	depends on DOOR_LOCK_ALIRO_UWB
 	depends on QM35_UWB_ALIRO_ZEPHYR
 	select Q_ALIRO_DISAMBIGUATION
+	select EXPERIMENTAL
 	help
 	  Enable the front/back disambiguation algorithm (CIR, distance, and PDOA processing).
 
@@ -25,7 +26,9 @@ config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_MAX_CIR
 
 config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_P_RATIO
 	int "p_ratio threshold for disambiguation"
-	default 3000
+	default 7500 if DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_4PORT
+	default 6000 if DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_2PORT
+	default 7500
 	range 1 30000
 	help
 	  Minimum p_ratio for FRONT detection. The value is multiplied by 10000
@@ -65,10 +68,51 @@ config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_BLIND_DISTANCE_CM
 
 config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_SECURE_BUBBLE_CM
 	int "Secure bubble radius (cm) for door open confirmation"
-	default 80
+	default 150
 	range 10 200
 	help
 	  Door open is confirmed only when the user is within this distance.
 	  Acts as a final gate after FRONT is detected.
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_FRONT_TO_BACK_CONFIRM
+	int "Consecutive BACK ticks required for FRONT to BACK transition"
+	default 8
+	range 1 20
+	help
+	  Number of consecutive BACK results required to switch the side
+	  decision from FRONT to BACK. Acts as a low-pass filter to prevent
+	  spurious BACK flashes (e.g. caused by CIR saturation or transient
+	  noise). Higher values make the FRONT state more stable.
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_BACK_TO_FRONT_CONFIRM
+	int "Consecutive FRONT ticks required for BACK to FRONT transition"
+	default 6
+	range 1 20
+	help
+	  Number of consecutive FRONT results required to switch the side
+	  decision from BACK to FRONT. Acts as a low-pass filter to prevent
+	  spurious FRONT detections. Lower values make FRONT detection faster.
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_PDOA_OFFSET_DEG
+	int "PDOA calibration offset (degrees)"
+	default 0
+	range -180 180
+	help
+	  PDOA offset in degrees subtracted from raw PDOA before feeding the
+	  disambiguation algorithm. Compensates for antenna placement.
+
+config DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_DISTANCE_OFFSET_CM
+	int "Distance calibration offset (cm)"
+	default 0
+	range -200 200
+	help
+	  Distance offset in cm subtracted from raw UWB range measurements
+	  before feeding the disambiguation algorithm. Compensates for
+	  systematic ranging bias.
+
+module = DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION
+module-str = "UWB disambiguation"
+module-dep = LOG
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
 
 endif # DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION

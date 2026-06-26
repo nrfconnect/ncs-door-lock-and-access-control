@@ -7,7 +7,7 @@ Aliro Access Manager
    :local:
    :depth: 2
 
-This page describes the application-side access control components in the |REPO_NAME|.
+This page describes the application-side access control component in the |REPO_NAME|.
 The Aliro Access Manager evaluates authentication results and UWB distance measurements to grant or deny access and drive lock actions.
 When the Access Manager decides to unlock or lock, it invokes application callbacks.
 In the |REPO_NAME|, those callbacks call the lock simulator.
@@ -18,7 +18,7 @@ For a high-level description of how UWB ranging feeds into access decisions, see
 The Access Manager interface (:file:`access_manager.h`) provides a unified API for handling access control logic in the application code.
 The default implementation (:file:`access_manager`) is designed to cover typical access control scenarios.
 It makes access decisions based on the proximity of the Aliro User Device, as measured by UWB ranging, and the stored public keys, and - for NFC sessions - successful tap-to-unlock authentication.
-Separate application callbacks signal access granted or denied (for logging) and unlock or lock actions.
+Separate application callbacks signal access granted or denied and unlock or lock actions.
 
 .. _aliro_access_manager_kconfig:
 .. _addon_architecture_kconfig_default:

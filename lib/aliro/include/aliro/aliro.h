@@ -159,12 +159,14 @@ public:
 	 *
 	 * @param operationSource The operation source that caused the state change.
 	 * @param readerState The current reader state.
-	 * @param sessionContext Optionally the session context for specific User Device.
+	 * @param accessCredentialPublicKey Optionally the Access Credential public key of the User Device that caused
+	 * the change.
 	 *
 	 * @return ALIRO_NO_ERROR if successful, an error code otherwise.
 	 */
-	AliroError SendReaderStatusChangedMessage(OperationSource operationSource, ReaderStateByte readerState,
-						  std::optional<ConnectionHandle> sessionContext = std::nullopt) const;
+	AliroError
+	SendReaderStatusChangedMessage(OperationSource operationSource, ReaderStateByte readerState,
+				       const CryptoTypes::PublicKey *accessCredentialPublicKey = nullptr) const;
 
 	/**
 	 * @brief Gets the BLE/UWB protocol version.

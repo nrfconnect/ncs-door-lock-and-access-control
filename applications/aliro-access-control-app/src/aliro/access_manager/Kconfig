@@ -29,7 +29,7 @@ if DOOR_LOCK_BLE_UWB
 
 config DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
     int "Maximum allowed distance for granting access (cm)"
-    default 100
+    default 150
     help
       Specifies the maximum allowed distance provided by
       UWB ranging to grant an access (in centimeters).
@@ -38,7 +38,7 @@ config DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM
 
 config DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM
     int "Exit margin above max allowed distance for locking (cm)"
-    default 50
+    default 30
     help
       Specifies an additional margin (in centimeters) added to
       DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM that is used to determine

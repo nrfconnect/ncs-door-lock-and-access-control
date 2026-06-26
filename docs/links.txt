@@ -160,3 +160,7 @@
 .. _`Aliro protocol`: https://docs.nordicsemi.com/bundle/ncs-3.3.0/page/nrf/protocols/aliro/index.html
 .. _`Aliro`: https://www.nordicsemi.com/Products/Technologies/Aliro
 .. _`qm35-aliro-sdk`: https://gitlab.com/qorvo_sdk/public/devkits/qm35-aliro-sdk
+
+.. _`SmartThingsEdgeDrivers`: https://github.com/SmartThingsCommunity/SmartThingsEdgeDrivers
+.. _`fingerprints.lua file`: https://github.com/SmartThingsCommunity/SmartThingsEdgeDrivers/blob/main/drivers/SmartThings/matter-lock/src/new-matter-lock/fingerprints.lua
+.. _`Samsung Wallet device compatibility list`: https://developer.samsung.com/wallet/references/devicecompatibility.html

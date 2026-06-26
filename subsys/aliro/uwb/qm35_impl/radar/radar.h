@@ -56,7 +56,7 @@ public:
 
 private:
 	struct StartWork {
-		k_work_delayable mDwork;
+		k_work mWork;
 		UwbRadar *mOwner{ nullptr };
 	};
 
@@ -71,9 +71,11 @@ private:
 	cherry *mCtx{ nullptr };
 	cherry_radar_session *mSession{ nullptr };
 	bool mRunning{ false };
+	k_mutex mMutex{};
 	StartWork mStartWork{};
 	OnRadarMeasurement mOnRadarMeasurement{ nullptr };
 	OnSessionStopped mOnSessionStopped{ nullptr };
+	uint8_t mActiveSessionCount{ 0 };
 
 	SessionEventHub::Subscriber mSubscriber{ .mOnSessionEvent = OnSessionEvent, .mCtx = this };
 };

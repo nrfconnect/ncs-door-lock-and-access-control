@@ -9,6 +9,8 @@ target_sources(app PRIVATE
 	init.cpp
 )
 
+target_sources_ifdef(CONFIG_DOOR_LOCK_BLE_UWB app PRIVATE last_operation.cpp)
+
 add_subdirectory(access_manager)
 add_subdirectory(interface_impl)
 add_subdirectory(platform)

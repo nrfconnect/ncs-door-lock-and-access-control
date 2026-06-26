@@ -11,6 +11,12 @@ patches:
     author: Adrian Gielniewski
     email: adrian.gielniewski@nordicsemi.no
     date: 2026-05-15
+  - path: nrf/diag.patch
+    sha256sum: ec2af608da2df6e12ec1b0b77500bd51a0cdc15bb1c01213a4f87758b1b461d5
+    module: nrf
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-06-23
   - path: matter/ble1.patch
     sha256sum: 1ef1fe3c8cfe991a0b02a3841ac5a73dd1ae17ea34b9fa61d967de41ab3676e4
     module: modules/lib/matter
