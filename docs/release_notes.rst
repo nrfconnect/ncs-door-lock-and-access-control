@@ -87,7 +87,7 @@ The following list outlines the release notes for each release of the |REPO_NAME
 v1.1.0
 ******
 
-This release refactors the reference firmware into three dedicated applications aligned with the :ref:`solution_overview`, upgrades to |NCS| v3.3.0, and adds production support for the nRF54LM20B platform and Aliro over Bluetooth LE and UWB.
+This release refactors the reference firmware into three dedicated applications aligned with the :ref:`solution_overview`, upgrades to |NCS| v3.3.0, and adds production support for the nRF54LM20A and the nRF54LM20B platform and Aliro over Bluetooth LE and UWB.
 
 .. note::
 
@@ -104,8 +104,10 @@ Changelog
 
     * Platforms and transports:
 
-      * Production support for the nRF54LM20B platform (nRF54LM20A remains supported for development).
+      * Production support for the nRF54LM20A and the nRF54LM20B platform.
       * Production support for Aliro over Bluetooth LE and UWB transport mode.
+        Platform abstraction APIs let you integrate a UWB SoC from any silicon vendor.
+        The Add-on provides a validated turnkey path through native integration of the UWB SDK for Qorvo’s QM35825 UWB SoC which remains experimental.
       * Support for up to five concurrent Aliro Bluetooth LE/UWB sessions (``CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS``).
       * Bluetooth LE Dynamic Tag generation with an expiry timestamp.
 
