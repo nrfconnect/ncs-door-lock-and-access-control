@@ -142,6 +142,12 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
       | GND               | GND                   |
       +-------------------+-----------------------+
 
+      .. figure:: /images/nRF54LM20_X_NUCLEO_connection.png
+         :scale: 75%
+         :alt: Expansion board connection to the nRF54LM20 DK.
+
+         X-NUCLEO expansion board connection to the nRF54LM20 DK.
+
       .. note::
          To make the hardware setup easier, you can request the PCB design files of the Arduino-compatible adapters for the `nRF54L15 DK`_  and the `nRF54LM20 DK`_ via `Nordic DevZone`_.
 
@@ -247,11 +253,16 @@ The following table shows the pin mapping for the reworked board:
 
    .. group-tab:: nRF5340 DK
 
-      The `nRF5340 DK`_ has Arduino-compatible headers, so you can connect the Qorvo Arduino Interface Board directly to development kit.
+      The `nRF5340 DK`_ has Arduino-compatible headers, so you can connect the Qorvo Arduino Interface Board directly to the development kit.
 
 .. note::
 
    Contact your local Nordic Regional Sales Manager to obtain a bundle consisting of the `nRF54LM20 DK`_, the Qorvo `QM35825DK-05`_ with the required custom rework, and the Arduino-compatible adapter, which enables easy connection of the Nordic and Qorvo DKs.
+
+.. note::
+
+   By default, the applications in the |REPO_NAME| use the shared SPI configuration, which allows for concurrent use of the SPI bus by both the NFC Reader and the UWB module.
+   Therefore, the NFC Reader and the UWB module can share the same Arduino header.
 
 .. _hw_requirements_test_harness:
 
@@ -263,5 +274,5 @@ To set it up, you must first meet the `test harness hardware requirements`_.
 
 .. note::
 
-   In case you do not have an access to this repository, send a request to the help@csa-iot.org providing your GitHub username.
+   In case you do not have access to this repository, send a request to the help@csa-iot.org providing your GitHub username.
    Be aware that you must first become a member of the `Connectivity Standards Alliance`_ (CSA).

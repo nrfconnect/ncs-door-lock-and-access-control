@@ -59,7 +59,7 @@ The |MATTER_ALIRO_APP_NAME| combines a Matter door lock accessory with an Aliro 
 You can exercise the application in the following ways:
 
 * On a single DK using the serial shell and the development kit buttons and LEDs (see :ref:`matter_ui`).
-* Through Matter on Thread using CHIP Tool or a commercial ecosystem (see :ref:`testing_door_lock_provisioning_with_matter`).
+* Through Matter over Thread using CHIP Tool or a commercial ecosystem (see :ref:`testing_door_lock_provisioning_with_matter`).
 * With the Aliro Test Harness acting as the User Device for NFC or UWB flows (see :ref:`testing`).
 
 .. _aliro_matter_access_control_application_features:
@@ -118,8 +118,7 @@ Debug is the default configuration.
 
 In release configuration, the application is built with the following characteristics:
 
-* Aliro stack logs are disabled.
-* RFAL NFC driver logs are disabled.
+* All logs are disabled.
 * Power-management options are enabled.
 * Unused peripherals are disabled using the board-specific ``*_release.overlay``.
 * The device resets automatically on a fatal error.
@@ -151,7 +150,7 @@ Shell availability differs by build type:
      - All from `Requirements`_
      - Release version of the application.
 
-       Enables only the necessary application functionalities to optimize its performance.
+       Enables only the necessary application functionality to optimize its performance.
 
 To build in release mode:
 
@@ -193,7 +192,7 @@ SEGGER J-Link USB port:
    Used for logs and the UART shell.
 
 NFC reader expansion board:
-   Connect the selected reader board to the Arduino-compatible header on the DK (see :ref:`hw_requirements_nfc_reader`).
+   Connect the selected reader board to the Arduino-compatible headers on the DK (see :ref:`hw_requirements_nfc_reader`).
 
 Building and running
 ********************
@@ -265,7 +264,7 @@ For UWB hardware setup, see :ref:`hw_requirements_uwb_module` and :ref:`uwb_inte
      - ``west build -p -b <build_target> applications/matter-aliro-door-lock-app``
    * - QM35825 UWB
      - ``west build -p -b <build_target> applications/matter-aliro-door-lock-app -- -Dmatter-aliro-door-lock-app_SNIPPET=uwb_qm35``
-       See :ref:`matter_aliro_building_and_running_qm35_src` for the required workspace setup.
+       See :ref:`aliro_qm35_sdk_repository` for the required workspace setup.
    * - SMP DFU over Bluetooth LE
      - ``west build -p -b <build_target> applications/matter-aliro-door-lock-app -- -Dmatter-aliro-door-lock-app_SNIPPET=dfu_smp``
        See :ref:`firmware_update` and :ref:`door_lock_dfu_smp_service`.
@@ -287,7 +286,7 @@ For UWB hardware setup, see :ref:`hw_requirements_uwb_module` and :ref:`uwb_inte
 
 The ``uwb_qm35`` snippet enables the ``CONFIG_DOOR_LOCK_BLE_UWB`` Kconfig option and configures the board overlay so the NFC and UWB modules share the same SPI bus.
 Use the snippet rather than setting ``CONFIG_DOOR_LOCK_BLE_UWB`` alone, which enables the transport without the Qorvo QM35825 implementation.
-The snippet uses the UWB stack and QM35 host driver from the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository, so you must first add it to your workspace (see :ref:`matter_aliro_building_and_running_qm35_src`).
+The snippet uses the UWB stack and QM35 host driver from the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository, so you must first add it to your workspace (see :ref:`aliro_qm35_sdk_repository`).
 
 This application supports one Bluetooth LE connection at a time on the default identity.
 Matter commissioning, SMP DFU, and NUS cannot run concurrently.
@@ -304,23 +303,8 @@ Example for the nRF54LM20 DK with QM35825 UWB:
 
 .. code-block:: bash
 
-   west build -p -b nrf54lm20dk/nrf54lm20a/cpuapp applications/matter-aliro-door-lock-app -- \
+   west build -p -b nrf54lm20dk/nrf54lm20b/cpuapp applications/matter-aliro-door-lock-app -- \
        -Dmatter-aliro-door-lock-app_SNIPPET=uwb_qm35
-
-.. _matter_aliro_building_and_running_qm35_src:
-
-QM35 SDK repository
--------------------
-
-QM35 support uses the UWB stack and QM35 host driver from the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository.
-Add the repository to your workspace before building with the ``uwb_qm35`` snippet:
-
-.. code-block:: bash
-
-   west config manifest.group-filter -- +qm35-aliro-sdk
-   west update
-
-Before first use on QM35 hardware, program the module coprocessor firmware (see :ref:`flashing_qm35_using_nrf53_dk`).
 
 .. _matter_aliro_building_and_running_verify:
 

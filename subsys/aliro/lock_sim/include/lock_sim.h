@@ -13,7 +13,7 @@ namespace Aliro {
 
 class LockSim {
 public:
-	using LockStateChangeCallback = void (*)(OperationSource source, ReaderStateByte state);
+	using LockStateChangeCallback = void (*)(ReaderStateByte state);
 
 	LockSim() = default;
 	~LockSim() = default;
@@ -33,20 +33,16 @@ public:
 	/**
 	 * @brief Locks the lock.
 	 *
-	 * @param source The source of the lock operation.
-	 *
 	 * @return True if the lock was locked successfully, false if the lock is already locked.
 	 */
-	bool Lock(OperationSource source);
+	bool Lock();
 
 	/**
 	 * @brief Unlocks the lock.
 	 *
-	 * @param source The source of the unlock operation.
-	 *
 	 * @return True if the lock was unlocked successfully, false if the lock is already unlocked.
 	 */
-	bool Unlock(OperationSource source);
+	bool Unlock();
 
 private:
 	static constexpr uint32_t kActuatorMovementTimeMs{ CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_MOVEMENT_TIME_MS };
@@ -60,7 +56,7 @@ private:
 	static void AutoRelockTimerEventHandler(k_timer *timer);
 #endif // CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK
 
-	void StartOperation(OperationSource source, ReaderStateByte state);
+	void StartOperation(ReaderStateByte state);
 	void ActuatorTimerEventHandler();
 	void NotifyWorkHandler();
 #ifdef CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK
@@ -71,7 +67,6 @@ private:
 	LockStateChangeCallback mLockStateChangeCallback{ nullptr };
 	k_timer mActuatorTimer;
 	k_work mNotifyWork;
-	OperationSource mSource{ OperationSource::Unspecified };
 	ReaderStateByte mState{ ReaderStateByte::Secured };
 #ifdef CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK
 	k_timer mAutoRelockTimer;

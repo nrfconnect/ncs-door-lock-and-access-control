@@ -4,8 +4,17 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+config DOOR_LOCK_ALIRO_UWB_QM35_EXPERIMENTAL
+	bool
+	select EXPERIMENTAL
+	default y
+
 config DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER
 	int "Minimum RAN multiplier for UWB ranging blocks"
+	default 8 if DOOR_LOCK_BLE_UWB_MAX_SESSIONS >= 5
+	default 7 if DOOR_LOCK_BLE_UWB_MAX_SESSIONS >= 4
+	default 6 if DOOR_LOCK_BLE_UWB_MAX_SESSIONS >= 3
+	default 4 if DOOR_LOCK_BLE_UWB_MAX_SESSIONS >= 2
 	default 2
 	range 1 255
 	help
@@ -35,6 +44,12 @@ config DOOR_LOCK_ALIRO_UWB_SESSION_LOGGING
 	help
 	  Enable logging for UWB session states and reason codes.
 
+config DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+	bool "Enable session context in UWB ranging logs"
+	help
+	  Prefix each ranging log with the session identifier and the
+	  current number of active ranging sessions.
+
 config DOOR_LOCK_ALIRO_UWB_QM35_DFU
 	bool "Enable firmware upgrade for QM35"
 	help
@@ -59,3 +74,17 @@ endif # DOOR_LOCK_ALIRO_UWB_QM35_DFU
 rsource "radar/Kconfig"
 rsource "diagnostics/Kconfig"
 rsource "front_back_detection/Kconfig"
+
+choice DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_CONFIG
+	prompt "Antenna configuration"
+	default DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_4PORT
+	help
+	  Select the QM35 antenna configuration.
+
+config DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_2PORT
+	bool "2-port antenna"
+
+config DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_4PORT
+	bool "4-port antenna"
+
+endchoice # DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_CONFIG

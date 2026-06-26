@@ -17,7 +17,7 @@ template <Data::CredentialsBits CRED_BIT_MASK> class AccessManager {
 	static_assert(CRED_BIT_MASK != 0, "Credential bit mask is empty");
 
 public:
-	struct ValidatePINResult {
+	struct ValidateCredentialResult {
 		uint16_t mUserId;
 		LockOpCredentials mCredential;
 	};
@@ -146,6 +146,30 @@ public:
 			   DlCredentialStatus credentialStatus, CredentialTypeEnum credentialType,
 			   const chip::ByteSpan &secret);
 
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
+	/**
+	 * @brief Update cache with the Aliro evictable credential.
+	 *
+	 * @param credentialIndex credential index starting from 1.
+	 * @param secret a secret raw data.
+	 * @param credentialIssuerIndex credential issuer index starting from 1.
+	 * @return CHIP_NO_ERROR on success, error code otherwise.
+	 */
+	CHIP_ERROR UpdateAliroEvictableCredential(uint16_t credentialIndex, const chip::ByteSpan &secret,
+						  uint16_t credentialIssuerIndex);
+
+	/**
+	 * @brief Remove the Aliro evictable credential from cache.
+	 *
+	 * @param credentialIndex credential index starting from 1.
+	 * @param updateUser whether to update the related credential list in Matter User cache.
+	 * @return CHIP_NO_ERROR on success, error code otherwise.
+	 */
+	CHIP_ERROR RemoveAliroEvictableCredential(uint16_t credentialIndex, bool updateUser);
+
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
 #ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
 	/**
@@ -241,18 +265,17 @@ public:
 
 #endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
-#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 	/**
-	 * @brief PIN code validator.
+	 * @brief Validate a stored credential of the given type.
 	 *
-	 * @param pinCode PIN code data.
-	 * @param err specific error code enumeration.
-	 * @param result user and credential data set on success.
-	 * @return true on success, false otherwise.
+	 * @param credentialType Type of credential to match.
+	 * @param secret Raw credential bytes to match against stored credentials.
+	 * @param error Operation error set on failure.
+	 * @param result User and matched credential index on success.
+	 * @return true if validation succeeded, false otherwise.
 	 */
-	bool ValidatePIN(const Optional<chip::ByteSpan> &pinCode, OperationErrorEnum &err,
-			 Nullable<ValidatePINResult> &result);
-#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	bool ValidateCredential(CredentialTypeEnum credentialType, const chip::ByteSpan &secret,
+				OperationErrorEnum &error, Nullable<ValidateCredentialResult> &result);
 
 	bool ValidateCustom(CredentialTypeEnum type, chip::MutableByteSpan &secret);
 
@@ -347,8 +370,8 @@ private:
 	void LoadSchedulesFromPersistentStorage();
 #endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
-	static CHIP_ERROR GetCredentialUserId(uint16_t credentialIndex, CredentialTypeEnum credentialType,
-					      uint32_t &userId);
+	static CHIP_ERROR GetCredentialUser(uint16_t credentialIndex, CredentialTypeEnum credentialType,
+					    Data::User **userPtr);
 
 	/* Similarly to SetCredential(), credentialIndex starts from 1 */
 	static bool DoSetCredential(Data::Credential &credential, uint16_t credentialIndex, chip::FabricIndex creator,

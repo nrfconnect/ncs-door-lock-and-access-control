@@ -246,8 +246,9 @@ private:
 	 * - NFC, this callback is called just after the Access Credential is verified.
 	 *
 	 * @param isNfcSession Indicates if the session is a NFC session.
+	 * @param accessCredentialPublicKey The User Device Access Credential public key.
 	 */
-	void UnlockAction(bool isNfcSession) const;
+	void UnlockAction(bool isNfcSession, const CryptoTypes::PublicKey &accessCredentialPublicKey) const;
 
 	/**
 	 * @brief Signals the lock action.
@@ -257,8 +258,9 @@ private:
 	 * - UWB ranging, this callback is called when the User Device is out of range or BLE session is terminated.
 	 *
 	 * @param isNfcSession Indicates if the session is a NFC session.
+	 * @param accessCredentialPublicKey The User Device Access Credential public key.
 	 */
-	void LockAction(bool isNfcSession) const;
+	void LockAction(bool isNfcSession, const CryptoTypes::PublicKey &accessCredentialPublicKey) const;
 
 	/**
 	 * @brief Template helper function to remove a key from a StoredKeys container.
@@ -283,7 +285,8 @@ private:
 	AliroError AddKeyToContainer(StoredKeys<T> &container, const CryptoTypes::PublicKey &publicKey,
 				     size_t keyIndex) const;
 
-	void HandleAccessGranted(bool isNfcSession, bool granted);
+	void HandleAccessGranted(bool isNfcSession, bool granted,
+				 const CryptoTypes::PublicKey &accessCredentialPublicKey);
 	bool VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey) const;
 	bool ShouldUnlockImmediately(bool isNfcSession) const;
 
@@ -310,20 +313,26 @@ private:
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	struct RangingSessionContext {
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
-		RangingSessionContext(uint32_t timeoutMs, SessionContext sessionContext)
-			: mSessionContext(sessionContext),
+		RangingSessionContext(uint32_t timeoutMs, SessionContext sessionContext,
+				      const CryptoTypes::PublicKey &accessCredentialPublicKey)
+			: mSessionContext(sessionContext), mAccessCredentialPublicKey(accessCredentialPublicKey),
 			  mRangingSessionTimer(timeoutMs, RangingSessionTimerCallback, this)
 		{
 		}
 
 		static void RangingSessionTimerCallback(Timer::Context ctx);
 #else
-		RangingSessionContext(SessionContext sessionContext) : mSessionContext(sessionContext) {}
+		RangingSessionContext(SessionContext sessionContext,
+				      const CryptoTypes::PublicKey &accessCredentialPublicKey)
+			: mSessionContext(sessionContext), mAccessCredentialPublicKey(accessCredentialPublicKey)
+		{
+		}
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 
 		sys_snode_t mNode{};
 		SessionContext mSessionContext;
 		bool mOpenAllowed{ false };
+		CryptoTypes::PublicKey mAccessCredentialPublicKey;
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
 		Timer mRangingSessionTimer;
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_ON_TIMEOUT
@@ -331,9 +340,11 @@ private:
 
 	bool EvaluateUwbOpenAllowed(const UwbRangingData &uwbData, SessionContext sessionContext);
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-	bool DisambiguationAllowsOpen(SessionContext sessionContext, bool wasOpenAllowed) const;
+	bool DisambiguationAllowsOpen() const;
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 	std::optional<uint16_t> ExtractDistanceFromUwbData(const UwbRangingData &uwbData) const;
+	AliroError AllocateRangingSession(SessionContext sessionCtx,
+					  const CryptoTypes::PublicKey &accessCredentialPublicKey);
 	AliroError AddRangingSession(uint32_t rangingSessionId, const CryptoTypes::Ursk &ursk,
 				     ProtocolVersion protocolVersion, const SessionContext sessionCtx);
 	void RemoveRangingSession(SessionContext sessionCtx);

@@ -12,6 +12,10 @@
 #include <cherry/cherry_ccc.h>
 #include <zephyr/sys/slist.h>
 
+#if defined(ALIRO_VENDOR1_EXTENSION) && defined(CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION)
+#include <vendor1_ext.h>
+#endif
+
 struct aliro_uwb_session;
 
 namespace Aliro::Uwb {
@@ -34,7 +38,15 @@ struct SessionContext {
 	RangingSessionState mRangingSessionState{ RangingSessionState::Uninitialized };
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 	uint8_t mDisambiguationSessionIdx{ 0 };
+	/* mutable: SessionEventHub callback signature mandates const SessionContext &. */
+	/** Set on ranging error; cleared after the paired diagnostic report. */
+	mutable bool mRangingRoundHadError{ false };
+	/** Sticky latch: set on first FRONT; keeps LZ=INDOOR even on false-BACK. */
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
+
+#if defined(ALIRO_VENDOR1_EXTENSION) && defined(CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION)
+	mutable Vendor1Ext::Session mVendor1Ext{};
+#endif
 };
 
 } // namespace Aliro::Uwb

@@ -10,9 +10,16 @@
 #include <doorlock/utils/mutex_guard.h>
 #include <doorlock/utils/utils.h>
 
+#include <zephyr/logging/log.h>
+
+LOG_MODULE_REGISTER(Disambiguator, CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_LOG_LEVEL);
+
 namespace {
-constexpr int16_t kCalibPdoaOffsetQ411{ 0 };
-constexpr int16_t kCalibDistanceOffsetCm{ 0 };
+/* Convert PDOA offset from degrees to Q4.11 fixed-point used by the library. */
+constexpr double kPi{ 3.14159265358979323846 };
+constexpr int16_t kCalibPdoaOffsetQ411{ static_cast<int16_t>(
+	kPi * CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_PDOA_OFFSET_DEG / 180.0 * 2048.0) };
+constexpr int16_t kCalibDistanceOffsetCm{ CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_DISTANCE_OFFSET_CM };
 } // namespace
 
 static_assert(CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS <= ALIRO_DISAMBIGUATION_NB_SESSION_MAX,
@@ -41,11 +48,7 @@ void Disambiguator::ResetAllSessions()
 	DoorLock::Utils::MutexGuard lock{ mMutex };
 
 	mCirCount = 0;
-	mDistanceCount.fill(0);
-	mPdoaCount.fill(0);
-	mHasLastResult.fill(false);
-	mLastResult.fill({});
-	mConsecBackCount.fill(0);
+	mSessions.fill({});
 
 	for (uint8_t sessionIdx = 0; sessionIdx < kMaxSessions; sessionIdx++) {
 		aliro_disambiguation_reset_session(sessionIdx);
@@ -59,12 +62,17 @@ void Disambiguator::ResetSession(uint8_t sessionIdx)
 
 	DoorLock::Utils::MutexGuard lock{ mMutex };
 
-	mDistanceCount[sessionIdx] = 0;
-	mPdoaCount[sessionIdx] = 0;
-	mHasLastResult[sessionIdx] = false;
-	mLastResult[sessionIdx] = {};
-	mConsecBackCount[sessionIdx] = 0;
+	mSessions[sessionIdx] = {};
 	aliro_disambiguation_reset_session(sessionIdx);
+}
+
+void Disambiguator::FlushCir()
+{
+	VerifyOrReturn(mInitialized);
+
+	DoorLock::Utils::MutexGuard lock{ mMutex };
+
+	mCirCount = 0;
 }
 
 void Disambiguator::AddDistanceMeasurement(uint16_t distanceCm, uint8_t sessionIdx, bool error)
@@ -86,7 +94,7 @@ void Disambiguator::AddDistanceMeasurement(uint16_t distanceCm, uint8_t sessionI
 	}
 	aliro_disambiguation_put_distance_data(adjusted, sessionIdx, error,
 					       CONFIG_DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER);
-	mDistanceCount[sessionIdx]++;
+	mSessions[sessionIdx].distanceCount++;
 }
 
 void Disambiguator::AddPdoaMeasurement(int16_t pdoaQ411, int16_t rssiQ88, uint8_t sessionIdx, bool pdoaError,
@@ -105,7 +113,7 @@ void Disambiguator::AddPdoaMeasurement(int16_t pdoaQ411, int16_t rssiQ88, uint8_
 	}
 	aliro_disambiguation_put_pdoa_rssi_data(adjusted, static_cast<uint16_t>(rssiQ88), sessionIdx, pdoaError,
 						rssiError, CONFIG_DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER);
-	mPdoaCount[sessionIdx]++;
+	mSessions[sessionIdx].pdoaCount++;
 }
 
 void Disambiguator::AddCirMeasurement(uint8_t *data, uint16_t size)
@@ -128,41 +136,70 @@ int Disambiguator::Process(Result &out, uint8_t sessionIdx)
 
 	VerifyOrReturnValue(sessionIdx < kMaxSessions, -EINVAL);
 
-	constexpr uint32_t kUwbReadyThreshold{ ALIRO_DISAMBIGUATION_WINDOW_SIZE /
-					       (CONFIG_DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER * 2) };
-	if (mCirCount < ALIRO_DISAMBIGUATION_WINDOW_SIZE || mDistanceCount[sessionIdx] < kUwbReadyThreshold ||
-	    mPdoaCount[sessionIdx] < kUwbReadyThreshold) {
+	constexpr uint32_t kActualDupFactor{ CONFIG_DOOR_LOCK_ALIRO_UWB_MIN_RAN_MULTIPLIER * 2 };
+	constexpr uint32_t kUwbReadyThreshold{ (ALIRO_DISAMBIGUATION_WINDOW_SIZE + kActualDupFactor - 1) /
+					       kActualDupFactor };
+	SessionState &sess = mSessions[sessionIdx];
+	if (mCirCount < ALIRO_DISAMBIGUATION_WINDOW_SIZE || sess.distanceCount < kUwbReadyThreshold ||
+	    sess.pdoaCount < kUwbReadyThreshold) {
 		return -EBUSY;
 	}
 
 	disambiguation_debug_results results{};
-	aliro_disambiguation(sessionIdx, &mDisambiguationParams, &results);
+	const int unlockAllowed = aliro_disambiguation(sessionIdx, &mDisambiguationParams, &results);
 
-	// Temporal hysteresis: FRONT→BACK requires kFrontToBackConfirmCount consecutive BACK
-	// results before the decision flips. BACK→FRONT flips immediately.
-	// This prevents spurious BACK flashes caused by CIR saturation (pratio=0 repeating last
-	// BACK decision) or transient noise in the disambiguation algorithm.
-	constexpr uint8_t kFrontToBackConfirmCount = 8;
+	// Bidirectional hysteresis: N consecutive readings required to flip FRONT↔BACK.
+	constexpr uint8_t kFrontToBackConfirmCount = CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_FRONT_TO_BACK_CONFIRM;
+	constexpr uint8_t kBackToFrontConfirmCount = CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_BACK_TO_FRONT_CONFIRM;
 	const bool rawFront = (results.side != 0);
 	if (rawFront) {
-		mConsecBackCount[sessionIdx] = 0;
-		out.mSideIsFront = true;
-	} else if (mLastResult[sessionIdx].mSideIsFront) {
-		mConsecBackCount[sessionIdx]++;
-		out.mSideIsFront = (mConsecBackCount[sessionIdx] < kFrontToBackConfirmCount);
+		sess.consecBackCount = 0;
+		if (sess.lastResult.mSideIsFront) {
+			out.mSideIsFront = true;
+		} else {
+			sess.consecFrontCount++;
+			out.mSideIsFront = (sess.consecFrontCount >= kBackToFrontConfirmCount);
+		}
 	} else {
-		out.mSideIsFront = false;
+		sess.consecFrontCount = 0;
+		if (sess.lastResult.mSideIsFront) {
+			sess.consecBackCount++;
+			out.mSideIsFront = (sess.consecBackCount < kFrontToBackConfirmCount);
+		} else {
+			out.mSideIsFront = false;
+		}
 	}
+
+	out.mUnlockAllowed = out.mSideIsFront && (unlockAllowed != 0);
+
+	const int32_t pRatioU6 = static_cast<int32_t>(results.p_ratio * 1000000.0f);
+	const int32_t meanPdoaMilliDeg = static_cast<int32_t>(results.mean_pdoa * 1000.0f);
+	LOG_DBG("sess%u %s pratio=%d pdoa=%d cir=%d blk=%d dist=%ucm consecF=%u consecB=%u", sessionIdx,
+		out.mSideIsFront ? "FRONT" : "BACK ", pRatioU6, meanPdoaMilliDeg, results.CIR, results.noise_blocks,
+		results.distance_cm, sess.consecFrontCount, sess.consecBackCount);
 
 	out.mDistanceCm = results.distance_cm;
 	out.mMeanPdoaDeg = results.mean_pdoa;
 	out.mPRatio = results.p_ratio;
 	out.mCir = results.CIR;
 	out.mNoiseBlocks = results.noise_blocks;
-	mLastResult[sessionIdx] = out;
-	mHasLastResult[sessionIdx] = true;
+	sess.lastResult = out;
+	sess.hasResult = true;
 
 	return 0;
+}
+
+bool Disambiguator::IsAnyUnlockAllowed() const
+{
+	DoorLock::Utils::MutexGuard lock{ mMutex };
+
+	// Any session on the front side within the secure bubble allows unlock.
+	for (const SessionState &sess : mSessions) {
+		if (sess.hasResult && sess.lastResult.mUnlockAllowed) {
+			return true;
+		}
+	}
+	return false;
 }
 
 std::optional<Result> Disambiguator::TryGetLastResult(uint8_t sessionIdx)
@@ -171,9 +208,9 @@ std::optional<Result> Disambiguator::TryGetLastResult(uint8_t sessionIdx)
 
 	DoorLock::Utils::MutexGuard lock{ mMutex };
 
-	VerifyOrReturnValue(mHasLastResult[sessionIdx], std::nullopt);
+	VerifyOrReturnValue(mSessions[sessionIdx].hasResult, std::nullopt);
 
-	return mLastResult[sessionIdx];
+	return mSessions[sessionIdx].lastResult;
 }
 
 } // namespace Aliro::Uwb::Disambiguation

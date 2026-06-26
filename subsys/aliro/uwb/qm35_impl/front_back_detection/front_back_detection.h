@@ -8,6 +8,7 @@
 
 #include "session_event_hub.h"
 
+#include <doorlock/utils/mutex_guard.h>
 #include <zephyr/kernel.h>
 
 #include <array>
@@ -53,7 +54,7 @@ public:
 	 *
 	 * @return 0 on success, negative errno otherwise.
 	 */
-	int AssignSessionIndex(SessionContext &sessionCtx);
+	int AssignSessionIndex(SessionContext &sessionCtx, DoorLock::Utils::MutexGuard &);
 
 	/**
 	 * @brief Release the front/back detection session index held by @p sessionCtx.
@@ -62,7 +63,7 @@ public:
 	 *
 	 * @param sessionCtx The UWB session context.
 	 */
-	void ReleaseSessionIndex(const SessionContext &sessionCtx);
+	void ReleaseSessionIndex(const SessionContext &sessionCtx, DoorLock::Utils::MutexGuard &);
 
 	/** @brief Stop periodic front/back detection processing. */
 	void CancelProcessing();
@@ -75,6 +76,7 @@ private:
 
 	static void ProcessWorkHandler(k_work *work);
 	static void OnSessionEvent(const aliro_uwb_session_event &event, const SessionContext &sessionCtx, void *ctx);
+	static void ResetSession(const SessionContext &sessionCtx);
 
 	void HandleSessionEvent(const aliro_uwb_session_event &event, const SessionContext &sessionCtx);
 	void HandleDiagnosticReport(const SessionContext &sessionCtx, const cherry_common_diag_report *diagnostics);
@@ -82,6 +84,7 @@ private:
 				   const cherry_ccc_session_controlee_measurements *report);
 	void ScheduleProcessing();
 	void ProcessSessions(sys_slist_t *activeSessions);
+	size_t CountActiveRangingSessions(sys_slist_t *activeSessions) const;
 
 	SessionEventHub::Subscriber mSubscriber{ .mOnSessionEvent = OnSessionEvent, .mCtx = this };
 

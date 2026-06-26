@@ -126,6 +126,10 @@ class UltraWideBandImpl final : public UltraWideBand {
 	std::optional<uint8_t> _GetDisambiguationSessionIdx(SessionContextHandle sessionContextData);
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+	size_t CountActiveRangingSessions();
+#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+
 	UltraWideBandImpl() = default;
 	~UltraWideBandImpl() = default;
 	UltraWideBandImpl(const UltraWideBandImpl &) = delete;
@@ -305,6 +309,10 @@ class UltraWideBandImpl final : public UltraWideBand {
 					       .count = 2 },
 		.mac_mode = static_cast<uint8_t>(CONFIG_DOOR_LOCK_ALIRO_UWB_MAC_MODE_OFFSET |
 						 (CONFIG_DOOR_LOCK_ALIRO_UWB_MAC_MODE_RANGING_ROUNDS << 6)),
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_2PORT
+		/* TWR on ANT2+ANT3 for PDOA (ant_set 1). */
+		.r1_antennas = { 1, 1 },
+#endif
 	};
 };
 

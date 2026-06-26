@@ -393,6 +393,16 @@ struct User {
 	 * @return CHIP_NO_ERROR if deserialization has been finished successfully.
 	 */
 	CHIP_ERROR Deserialize(const void *buff, size_t buffSize);
+
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
+	CHIP_ERROR AddAliroEvictableCredential(uint16_t credentialIndex);
+	void RemoveAliroEvictableCredential(uint16_t credentialIndex);
+
+private:
+	void RemoveAliroEvictableCredentials();
+
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
 };
 
 template <uint16_t N> struct IndexList {
