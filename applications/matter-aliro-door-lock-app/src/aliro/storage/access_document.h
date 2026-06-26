@@ -69,9 +69,10 @@ AliroError StoreAccessDocument(size_t index, const AccessDocument &ad);
  * @brief Clears an Access Document from persistent storage.
  *
  * @param index The index of the Access Document to clear.
+ * @param updateUser Indicates if the related credential list in Matter User cache should be updated.
  *
  * @return ALIRO_NO_ERROR on success, or an error code on failure.
  */
-AliroError ClearAccessDocument(size_t index);
+AliroError ClearAccessDocument(size_t index, bool updateUser);
 
 } // namespace Aliro

@@ -27,7 +27,8 @@ class AccessManagerImpl;
 class AccessManager {
 public:
 	using SessionContext = ConnectionHandle;
-	using LockIndicatorCallback = void (*)(OperationSource source);
+	using LockIndicatorCallback = void (*)(bool isNfcSession,
+					       const CryptoTypes::PublicKey &accessCredentialPublicKey);
 	using AccessIndicatorCallback = void (*)(bool isAccessGranted, bool isNfcSession);
 	using TerminateSessionCallback = void (*)(SessionContext sessionContext);
 

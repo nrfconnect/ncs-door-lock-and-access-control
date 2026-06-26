@@ -9,9 +9,9 @@ Pages in this section describe each technology used across the |REPO_NAME| and h
 The following wireless technologies are supported:
 
 * :ref:`wireless_technologies_aliro` — Standardized access protocol for the phone-as-a-key user experience.
-* :ref:`Near Field Communication (NFC) <wireless_technologies_nfc>` — Short-range communication for the tap-to-unlock access.
-* :ref:`wireless_technologies_matter` — Universal smart home protocol for the command-and-control and credential provisioning.
-* :ref:`wireless_technologies_ble` — General-purpose Bluetooth LE services (SMP, NUS) that operate independently of Aliro and Matter.
+* :ref:`Near Field Communication (NFC) <wireless_technologies_nfc>` — Short-range communication for tap-to-unlock access.
+* :ref:`wireless_technologies_matter` — Universal smart home protocol for command-and-control and credential provisioning.
+* :ref:`wireless_technologies_ble` — General-purpose Bluetooth LE services (SMP, NUS) that can operate independently of Aliro and Matter.
 * :ref:`Ultra-wideband (UWB) <wireless_technologies_uwb>` — Proximity-based access with the hands-free unlock.
 
 .. toctree::

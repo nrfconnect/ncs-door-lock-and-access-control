@@ -83,17 +83,18 @@ bool emberAfPluginDoorLockOnDoorLockCommand(EndpointId endpointId, const Nullabl
 					    const Nullable<chip::NodeId> &nodeId, const Optional<ByteSpan> &pinCode,
 					    OperationErrorEnum &err)
 {
-	Nullable<BoltLockManager::ValidatePINResult> validatePINResult;
+	Nullable<BoltLockManager::ValidateCredentialResult> validateCredentialResult;
+	bool success = true;
 
-#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
-	bool success = BoltLockMgr().ValidatePIN(pinCode, err, validatePINResult);
-#else
-	const bool success = true;
-#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	if (pinCode.HasValue()) {
+		success = BoltLockMgr().ValidateCredential(CredentialTypeEnum::kPin, pinCode.Value(), err,
+							   validateCredentialResult);
+	}
 
 	/* Handle changing attribute state on command reception */
 	if (success) {
-		BoltLockMgr().Lock(BoltLockManager::OperationSource::kRemote, fabricIdx, nodeId, validatePINResult);
+		BoltLockMgr().Lock(BoltLockManager::OperationSource::kRemote, fabricIdx, nodeId,
+				   validateCredentialResult);
 	}
 
 	return success;
@@ -103,18 +104,18 @@ bool emberAfPluginDoorLockOnDoorUnlockCommand(EndpointId endpointId, const Nulla
 					      const Nullable<chip::NodeId> &nodeId, const Optional<ByteSpan> &pinCode,
 					      OperationErrorEnum &err)
 {
-	Nullable<BoltLockManager::ValidatePINResult> validatePINResult;
+	Nullable<BoltLockManager::ValidateCredentialResult> validateCredentialResult;
+	bool success = true;
 
-#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
-	const bool success = BoltLockMgr().ValidatePIN(pinCode, err, validatePINResult);
-#else
-	const bool success = true;
-	err = OperationErrorEnum::kUnspecified;
-#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
+	if (pinCode.HasValue()) {
+		success = BoltLockMgr().ValidateCredential(CredentialTypeEnum::kPin, pinCode.Value(), err,
+							   validateCredentialResult);
+	}
 
 	/* Handle changing attribute state on command reception */
 	if (success) {
-		BoltLockMgr().Unlock(BoltLockManager::OperationSource::kRemote, fabricIdx, nodeId, validatePINResult);
+		BoltLockMgr().Unlock(BoltLockManager::OperationSource::kRemote, fabricIdx, nodeId,
+				     validateCredentialResult);
 	}
 
 	return success;

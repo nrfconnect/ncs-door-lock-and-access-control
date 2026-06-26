@@ -18,7 +18,11 @@
 #include <aliro_uwb_adapter/aliro_uwb_session.h>
 
 // Calibration data
-#include "calibration/qm35825_calib.h"
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_4PORT
+#include "calibration/qm35825_calib_4port.h"
+#else
+#include "calibration/qm35825_calib_2port.h"
+#endif
 
 #include <cherry/cherry_common.h>
 
@@ -31,6 +35,10 @@
 #include <errno.h>
 
 LOG_MODULE_REGISTER(UwbImpl, CONFIG_DOOR_LOCK_ALIRO_UWB_LOG_LEVEL);
+
+using DoorLock::Utils::make_unique_array_nothrow;
+using DoorLock::Utils::new_nothrow;
+using DoorLock::Utils::ToUnderlying;
 
 namespace {
 
@@ -172,8 +180,6 @@ constexpr const char *RangingSessionStateToString(RangingSessionState state)
 } // namespace
 
 namespace Aliro::Uwb {
-
-using namespace DoorLock::Utils;
 
 void UltraWideBandImpl::UwbCoreCallback(cherry_core_event *event, void *userData)
 {
@@ -319,12 +325,27 @@ void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, v
 		case ALIRO_UWB_SESSION_EVENT_TYPE_SESSION_CONTROLEE_REPORT: {
 			const cherry_ccc_session_controlee_measurements *currentMeasurement =
 				sessionData.controlee_report->measurements;
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+			const size_t activeRangingSessions = uwbImpl->CountActiveRangingSessions();
+#endif
 			while (currentMeasurement) {
 				if (!currentMeasurement->frame_status) {
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+					LOG_INF("[sess:%p|total:%zu] Controlee report distance %d [cm]",
+						sessionCtx->mSessionContextData.GetRaw(), activeRangingSessions,
+						currentMeasurement->distance_cm);
+#else
 					LOG_INF("Controlee report distance %d [cm]", currentMeasurement->distance_cm);
+#endif
 
 					if (currentMeasurement->distance_cm > kUwbMaximumReportableDistanceCm) {
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+						LOG_INF("[sess:%p|total:%zu] Ignoring measured distance",
+							sessionCtx->mSessionContextData.GetRaw(),
+							activeRangingSessions);
+#else
 						LOG_INF("Ignoring measured distance");
+#endif
 						break;
 					}
 
@@ -334,11 +355,20 @@ void UltraWideBandImpl::SessionHandlerCallback(aliro_uwb_session_event *event, v
 						      UwbRangingData{ .mData = uwbImpl->mCurrentDistanceCm.data(),
 								      .mLength = uwbImpl->mCurrentDistanceCm.size() });
 				} else {
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+					LOG_INF("[sess:%p|total:%zu] error: 0x%x (%s) slot: %d",
+						sessionCtx->mSessionContextData.GetRaw(), activeRangingSessions,
+						static_cast<unsigned int>(currentMeasurement->frame_status),
+						ControleeFrameStatusStr(static_cast<cherry_common_frame_status>(
+							currentMeasurement->frame_status)),
+						currentMeasurement->slot_index);
+#else
 					LOG_INF("error: 0x%x (%s) slot: %d",
 						static_cast<unsigned int>(currentMeasurement->frame_status),
 						ControleeFrameStatusStr(static_cast<cherry_common_frame_status>(
 							currentMeasurement->frame_status)),
 						currentMeasurement->slot_index);
+#endif
 				}
 				currentMeasurement = currentMeasurement->next;
 			}
@@ -427,6 +457,7 @@ exit:
 
 int UltraWideBandImpl::_Init(const Callbacks &callbacks)
 {
+	using namespace DoorLock::Utils;
 	auto onRadarMeasurement = [](const uint8_t *data, size_t size) {
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 		Instance().mFrontBackDetection.HandleRadarMeasurement(data, size);
@@ -647,6 +678,7 @@ int UltraWideBandImpl::_ResumeRangingSession(SessionContextHandle sessionContext
 
 int UltraWideBandImpl::AddSession(UwbSessionContext uwbSessionContext, SessionContextHandle sessionContextHandle)
 {
+	using DoorLock::Utils::MutexGuard;
 	auto newCtx = new_nothrow<SessionContext>(uwbSessionContext, sessionContextHandle);
 	VerifyOrReturnValue(newCtx, -ENOMEM, LOG_ERR("Memory allocation failed for session context."));
 
@@ -655,7 +687,7 @@ int UltraWideBandImpl::AddSession(UwbSessionContext uwbSessionContext, SessionCo
 	sys_slist_append(&mActiveSessionsList, &newCtx->mSessionContextNode);
 
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-	return mFrontBackDetection.AssignSessionIndex(*newCtx);
+	return mFrontBackDetection.AssignSessionIndex(*newCtx, lock);
 #else
 	return 0;
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
@@ -663,13 +695,14 @@ int UltraWideBandImpl::AddSession(UwbSessionContext uwbSessionContext, SessionCo
 
 void UltraWideBandImpl::RemoveSession(SessionContext *sessionCtx)
 {
+	using DoorLock::Utils::MutexGuard;
 	{
 		MutexGuard lock{ mMutex };
 		VerifyOrReturn(sys_slist_find_and_remove(&mActiveSessionsList, &sessionCtx->mSessionContextNode),
 			       LOG_WRN("Session doesn't exist"));
 
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-		mFrontBackDetection.ReleaseSessionIndex(*sessionCtx);
+		mFrontBackDetection.ReleaseSessionIndex(*sessionCtx, lock);
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 	}
 
@@ -679,6 +712,7 @@ void UltraWideBandImpl::RemoveSession(SessionContext *sessionCtx)
 
 void UltraWideBandImpl::RemoveAllSessions()
 {
+	using DoorLock::Utils::MutexGuard;
 	while (true) {
 		SessionContext *sessionCtx = nullptr;
 
@@ -689,7 +723,7 @@ void UltraWideBandImpl::RemoveAllSessions()
 			sessionCtx = CONTAINER_OF(node, SessionContext, mSessionContextNode);
 
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-			mFrontBackDetection.ReleaseSessionIndex(*sessionCtx);
+			mFrontBackDetection.ReleaseSessionIndex(*sessionCtx, lock);
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 		}
 
@@ -715,6 +749,7 @@ void UltraWideBandImpl::_StopRadarSession()
 
 SessionContext *UltraWideBandImpl::FindSession(const UwbSessionContext uwbSessionCtx)
 {
+	using DoorLock::Utils::MutexGuard;
 	SessionContext *sessionCtx{};
 
 	MutexGuard lock{ mMutex };
@@ -729,6 +764,7 @@ SessionContext *UltraWideBandImpl::FindSession(const UwbSessionContext uwbSessio
 
 SessionContext *UltraWideBandImpl::FindSession(SessionContextHandle sessionContextData)
 {
+	using DoorLock::Utils::MutexGuard;
 	SessionContext *sessionCtx{};
 
 	MutexGuard lock{ mMutex };
@@ -744,11 +780,17 @@ SessionContext *UltraWideBandImpl::FindSession(SessionContextHandle sessionConte
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 std::optional<uint8_t> UltraWideBandImpl::_GetDisambiguationSessionIdx(SessionContextHandle sessionContextData)
 {
-	const auto *sessionCtx = FindSession(sessionContextData);
-	if (!sessionCtx) {
-		return std::nullopt;
+	using DoorLock::Utils::MutexGuard;
+	// Hold the mutex for the entire lookup+read to prevent a session from being removed and
+	// freed between FindSession() releasing the lock and reading mDisambiguationSessionIdx.
+	MutexGuard lock{ mMutex };
+	SessionContext *sessionCtx{};
+	SYS_SLIST_FOR_EACH_CONTAINER (&mActiveSessionsList, sessionCtx, mSessionContextNode) {
+		if (sessionCtx->mSessionContextData == sessionContextData) {
+			return sessionCtx->mDisambiguationSessionIdx;
+		}
 	}
-	return sessionCtx->mDisambiguationSessionIdx;
+	return std::nullopt;
 }
 #endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 
@@ -793,14 +835,33 @@ void UltraWideBandImpl::PrintCccCapabilities()
 
 int UltraWideBandImpl::SetCalibrationData()
 {
-	// Use full calibration data for the QM35825 device.
-	// This needs to be done only once during initialization, or after a power cycle.
-	const auto calibData = &util_calib_qm35825;
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_ANTENNA_4PORT
+	const auto calibData = &qm35825_calib_4port;
+	LOG_INF("Using 4-port antenna calibration (ANT2+ANT3)");
+#else
+	const auto calibData = &qm35825_calib_2port;
+#endif
 	const auto cErr = cherry_set_calib(mCtx, calibData);
 	VerifyOrReturnValue(cErr == CHERRY_ERR_NONE, -EIO,
 			    LOG_ERR("Failed to set calibration data: %s", cherry_err_str(cErr)));
 
 	return 0;
 }
+
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
+size_t UltraWideBandImpl::CountActiveRangingSessions()
+{
+	size_t count = 0;
+	SessionContext *sessionCtx{};
+	MutexGuard lock{ mMutex };
+	SYS_SLIST_FOR_EACH_CONTAINER (&mActiveSessionsList, sessionCtx, mSessionContextNode) {
+		if (sessionCtx->mRangingSessionState == RangingSessionState::Ranging ||
+		    sessionCtx->mRangingSessionState == RangingSessionState::RangingResumed) {
+			count++;
+		}
+	}
+	return count;
+}
+#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
 
 } // namespace Aliro::Uwb

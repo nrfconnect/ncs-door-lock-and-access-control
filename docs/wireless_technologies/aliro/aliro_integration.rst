@@ -26,7 +26,7 @@ Aliro stack library
 ===================
 
 The Aliro stack library files are located in :file:`lib/aliro`.
-The stack can be built from source or linked as a precompiled binary, depending on the Kconfig configuration.
+The stack is precompiled and linked as a static library to the application.
 
 Application interface contract
 ==============================

@@ -39,4 +39,6 @@ if DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_SMP_SERVICE || DOOR_LOCK_NUS_SERVICE
 rsource "Kconfig.ble.defconfig"
 endif # DOOR_LOCK_BLE_UWB || DOOR_LOCK_DFU_SMP_SERVICE || DOOR_LOCK_NUS_SERVICE
 
+rsource "Kconfig.crypto.defconfig"
+
 source "Kconfig.zephyr"

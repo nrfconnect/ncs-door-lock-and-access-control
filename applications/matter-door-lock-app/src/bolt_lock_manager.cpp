@@ -96,13 +96,13 @@ DlStatus BoltLockManager::SetHolidaySchedule(uint8_t holidayIndex, DlScheduleSta
 
 #endif /* CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES */
 
-#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
-
-bool BoltLockManager::ValidatePIN(const Optional<chip::ByteSpan> &pinCode, OperationErrorEnum &err,
-				  Nullable<ValidatePINResult> &result)
+bool BoltLockManager::ValidateCredential(CredentialTypeEnum credentialType, const chip::ByteSpan &secret,
+					 OperationErrorEnum &error, Nullable<ValidateCredentialResult> &result)
 {
-	return AccessMgr::Instance().ValidatePIN(pinCode, err, result);
+	return AccessMgr::Instance().ValidateCredential(credentialType, secret, error, result);
 }
+
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 void BoltLockManager::SetRequirePIN(bool require)
 {
@@ -116,20 +116,22 @@ bool BoltLockManager::GetRequirePIN()
 #endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 void BoltLockManager::Lock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx,
-			   const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)
+			   const Nullable<chip::NodeId> &nodeId,
+			   const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
 	VerifyOrReturn(mStateData.mState != State::kLockingCompleted);
-	StateData newStateData{ State::kLockingInitiated, source, fabricIdx, nodeId, validatePINResult };
+	StateData newStateData{ State::kLockingInitiated, source, fabricIdx, nodeId, validateCredentialResult };
 	SetStateData(newStateData);
 
 	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);
 }
 
 void BoltLockManager::Unlock(const OperationSource source, const Nullable<chip::FabricIndex> &fabricIdx,
-			     const Nullable<chip::NodeId> &nodeId, const Nullable<ValidatePINResult> &validatePINResult)
+			     const Nullable<chip::NodeId> &nodeId,
+			     const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
 	VerifyOrReturn(mStateData.mState != State::kUnlockingCompleted);
-	StateData newStateData{ State::kUnlockingInitiated, source, fabricIdx, nodeId, validatePINResult };
+	StateData newStateData{ State::kUnlockingInitiated, source, fabricIdx, nodeId, validateCredentialResult };
 	SetStateData(newStateData);
 
 	k_timer_start(&mActuatorTimer, K_MSEC(kActuatorMovementTimeMs), K_NO_WAIT);

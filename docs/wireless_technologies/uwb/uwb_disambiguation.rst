@@ -10,10 +10,15 @@ UWB front/back disambiguation
 The front/back disambiguation algorithm determines whether a user is standing in front of or behind the door lock, so that the door is opened only for users on the front side.
 
 .. note::
-   This feature is available only with the reference QM35825 integration.
+   This feature is available only with the QM35825 integration.
    The disambiguation algorithm is Qorvo intellectual property and depends on QM35-specific radar and diagnostic measurements.
    It is not included in third-party UWB ports and cannot be reused with other UWB radios.
    See :ref:`uwb_custom_integration`.
+
+.. note::
+   The disambiguation algorithm depends heavily on the antenna design and placement of the UWB module in the device.
+   To improve the reliability, tune the parameters in the calibration files (:file:`subsys/aliro/uwb/qm35_impl/calibration/`).
+   You might also need to adapt the Kconfig options in :file:`subsys/aliro/disambiguation/Kconfig` and :file:`subsys/aliro/uwb/qm35_impl/front_back_detection/Kconfig` to meet your specific requirements.
 
 Overview
 ********
@@ -60,7 +65,6 @@ The radar session is managed in :file:`subsys/aliro/uwb/qm35_impl/radar/radar.cp
 ``UwbRadar`` subscribes to session events directly and reacts to controlee distance reports and session state changes.
 
 * Started — when a valid controlee distance report is less than or equal to ``CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_RADAR_ACTIVATION_DISTANCE_CM`` (default 150 cm).
-  Start is scheduled with a 300 ms delay (``kRadarStartDelayMs``) to avoid starting on transient close-range samples.
   Reports with an error status or with a distance above 500 cm do not trigger a start.
 * Stopped — ``UwbRadar::Stop()`` runs when any of the following occurs:
 
@@ -70,7 +74,7 @@ The radar session is managed in :file:`subsys/aliro/uwb/qm35_impl/radar/radar.cp
   * ``UnlockAction()`` stops the radar for UWB sessions via ``UltraWideBandImpl::StopRadarSession()`` (see :ref:`uwb_disambiguation_access_manager`).
 
   The radar session is not stopped when the user simply moves beyond the activation distance.
-  ``UwbRadar::Stop()`` also cancels any pending (scheduled but not yet started) radar start and always invokes the ``onSessionStopped`` callback.
+  ``UwbRadar::Stop()`` also cancels any pending (scheduled but not yet started) radar start and always invokes the ``mOnSessionStopped`` callback.
   ``LockAction()`` does not stop the radar session.
 
 Front/back processing lifecycle
@@ -88,7 +92,7 @@ Managed in :file:`subsys/aliro/uwb/qm35_impl/front_back_detection/front_back_det
   It is invoked:
 
   * Directly, when the CCC ranging session transitions from ``ACTIVE`` to ``IDLE``.
-  * From the radar ``onSessionStopped`` callback registered in :file:`subsys/aliro/uwb/qm35_impl/uwb_impl.cpp`, which runs whenever ``UwbRadar::Stop()`` runs.
+  * From the radar ``mOnSessionStopped`` callback registered in :file:`subsys/aliro/uwb/qm35_impl/uwb_impl.cpp`, which runs whenever ``UwbRadar::Stop()`` runs.
 
   ``CancelProcessing()`` does not clear the last FRONT/BACK result stored in the disambiguator.
 
@@ -139,7 +143,7 @@ Implementation details
 If no result is available yet, or the last result is BACK, the front/back gate blocks open.
 
 On unlock, ``SetOpenAllowed()`` calls ``UnlockAction(false)``, which invokes ``UltraWideBandImpl::StopRadarSession()`` for UWB sessions.
-That stops the radar and triggers ``FrontBackDetection::CancelProcessing()`` through the radar ``onSessionStopped`` callback.
+That stops the radar and triggers ``FrontBackDetection::CancelProcessing()`` through the radar ``mOnSessionStopped`` callback.
 ``LockAction()`` does not stop the radar or front/back processing directly.
 
 Configuration parameters
@@ -222,9 +226,9 @@ At runtime they are loaded into ``kFrontBackDetectionParams`` in :file:`subsys/a
      - 800
      - Maximum absolute CIR; above this the previous FRONT/BACK decision is reused instead of computing ``p_ratio``.
    * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_P_RATIO``
-     - 3000
+     - 7500 (4-port), 6000 (2-port)
      - Minimum ``p_ratio`` for FRONT.
-       The value is divided by 10000 at runtime (e.g. 3000 → 0.3).
+       The value is divided by 10000 at runtime (e.g. 7500 → 0.75).
    * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_NB_BLOCKS``
      - 10
      - Maximum number of noise blocks allowed for a FRONT decision.
@@ -238,15 +242,28 @@ At runtime they are loaded into ``kFrontBackDetectionParams`` in :file:`subsys/a
      - 30
      - Minimum distance for the algorithm to engage; below this the result is unreliable.
    * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_SECURE_BUBBLE_CM``
-     - 80
-     - Secure-bubble radius in centimeters.
+     - 150 (4-port), 80 (2-port)
+     - Maximum distance (cm) at which the disambiguation algorithm starts processing.
+       Has no effect when approaching purely from the back side.
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_FRONT_TO_BACK_CONFIRM``
+     - 8
+     - Consecutive BACK results required to transition the side decision from FRONT to BACK.
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_BACK_TO_FRONT_CONFIRM``
+     - 6
+     - Consecutive FRONT results required to transition the side decision from BACK to FRONT.
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_PDOA_OFFSET_DEG``
+     - 0
+     - PDOA calibration offset in degrees, subtracted from raw PDOA before processing.
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_DISTANCE_OFFSET_CM``
+     - 0
+     - Distance calibration offset in centimeters, subtracted from raw range before processing.
 
 The Access Manager front/back gate uses the ``Result::IsFront()`` side classification, not the algorithm's internal secure-bubble door-open result.
 ``Disambiguator::Process()`` stores ``results.side`` and ignores the ``disambiguation()`` door-open return value, so ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_SECURE_BUBBLE_CM`` does not influence the FRONT/BACK decision consumed by the Access Manager.
 
 Post-processing in :file:`subsys/aliro/disambiguation/src/disambiguator.cpp` (``Disambiguator::Process()``):
 
-* Temporal hysteresis — FRONT→BACK requires eight consecutive BACK results (``kFrontToBackConfirmCount``) before the side flips; BACK→FRONT flips immediately.
+* Temporal hysteresis — FRONT→BACK requires ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_FRONT_TO_BACK_CONFIRM`` (default 8) consecutive BACK results; BACK→FRONT requires ``CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION_BACK_TO_FRONT_CONFIRM`` (default 6) consecutive FRONT results.
 
 Distance and access thresholds
 ==============================
@@ -260,10 +277,10 @@ UWB unlock/lock distance limits are configured under the Access Manager menu in 
      - Default
      - Description
    * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM``
-     - 100
+     - 150
      - Maximum UWB ranging distance (cm) to enter the open-allowed state.
    * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM``
-     - 50
+     - 30
      - Additional margin (cm) above the maximum distance before the door locks again (exit range).
        Set to 0 to disable the exit margin.
 
@@ -279,7 +296,7 @@ For example, to build the Aliro access control application for the nRF54LM20 DK 
 
 .. code-block:: bash
 
-   west build -p -b nrf54lm20dk/nrf54lm20a/cpuapp applications/aliro-access-control-app -- \
+   west build -p -b nrf54lm20dk/nrf54lm20b/cpuapp applications/aliro-access-control-app -- \
        -Daliro-access-control-app_SNIPPET=uwb_qm35 \
        -DCONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION=y
 
@@ -298,7 +315,7 @@ Testing
 
       [side] FRONT | dist: 65cm | pratio_u6: 420000 | cir: 312 | blk: 3 | pdoa:+58.123
 
-   The ``[side]`` field shows ``FRONT`` or ``BACK``, followed by the distance, ``p_ratio`` (scaled by 1e6), absolute CIR, noise-block count, and mean PDOA in degrees.
+   The ``[side]`` field shows ``FRONT`` or ``BACK``, followed by the distance, ``p_ratio`` (scaled by 1,000,000), absolute CIR, noise-block count, and mean PDOA in degrees.
 #. Verify the gating behavior:
 
    * Approaching from the front within ``MAX_ALLOWED_DISTANCE_CM`` should produce ``FRONT`` results and allow the door to open once both the distance and front/back gates pass.
@@ -312,5 +329,5 @@ Related documentation
 
 * :ref:`wireless_technologies_uwb` — How UWB fits into the add-on, including access policy overview.
 * :ref:`aliro_access_manager` — Distance thresholds and exit margin Kconfig options.
-* :ref:`uwb_integration` — Reference QM35825 architecture and stack interaction.
+* :ref:`uwb_integration` — QM35825 UWB integration architecture and stack interactions.
 * :ref:`uwb_custom_integration` — Porting a third-party UWB module (does not include this feature).

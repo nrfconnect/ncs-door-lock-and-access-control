@@ -155,7 +155,22 @@ void AppTask::LockStateChanged(const BoltLockManager::StateData &stateData)
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 
-	Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(stateData.mAliroSource, stateData.mState);
+	Aliro::CryptoTypes::PublicKey publicKey;
+	const Aliro::CryptoTypes::PublicKey *publicKeyPtr{ nullptr };
+
+	if (!stateData.mValidateCredentialResult.IsNull()) {
+		const auto &validateCredentialResult = stateData.mValidateCredentialResult.Value();
+		EmberAfPluginDoorLockCredentialInfo credential;
+
+		if (BoltLockMgr().GetCredential(validateCredentialResult.mCredential.credentialIndex,
+						validateCredentialResult.mCredential.credentialType, credential)) {
+			std::copy_n(credential.credentialData.data(), publicKey.size(), publicKey.data());
+			publicKeyPtr = &publicKey;
+		}
+	}
+
+	Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(stateData.mAliroSource, stateData.mState,
+								     publicKeyPtr);
 
 #endif
 
@@ -216,15 +231,15 @@ void AppTask::UpdateClusterStateHandler(const BoltLockManager::StateData &stateD
 		List<const LockOpCredentials> credentialList;
 #endif
 
-		if (!stateData.mValidatePINResult.IsNull()) {
-			userId = { stateData.mValidatePINResult.Value().mUserId };
+		if (!stateData.mValidateCredentialResult.IsNull()) {
+			userId = { stateData.mValidateCredentialResult.Value().mUserId };
 
 #ifdef CONFIG_LOCK_PASS_CREDENTIALS_TO_SET_LOCK_STATE
 			/* `DoorLockServer::SetLockState` exptects list of `LockOpCredentials`,
 			   however in case of PIN validation it makes no sense to have more than one
 			   credential corresponding to validation result. For simplicity we wrap single
 			   credential in list here. */
-			credentialList = { &stateData.mValidatePINResult.Value().mCredential, 1 };
+			credentialList = { &stateData.mValidateCredentialResult.Value().mCredential, 1 };
 			credentials = { credentialList };
 #endif
 		}

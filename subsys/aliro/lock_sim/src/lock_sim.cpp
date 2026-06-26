@@ -55,23 +55,22 @@ void LockSim::Init(LockStateChangeCallback callback)
 #endif // CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_INDICATOR
 }
 
-bool LockSim::Lock(OperationSource source)
+bool LockSim::Lock()
 {
 	VerifyOrReturnFalse(mState != ReaderStateByte::Secured);
-	StartOperation(source, ReaderStateByte::EnteringSecured);
+	StartOperation(ReaderStateByte::EnteringSecured);
 	return true;
 }
 
-bool LockSim::Unlock(OperationSource source)
+bool LockSim::Unlock()
 {
 	VerifyOrReturnFalse(mState != ReaderStateByte::Unsecured);
-	StartOperation(source, ReaderStateByte::EnteringUnsecured);
+	StartOperation(ReaderStateByte::EnteringUnsecured);
 	return true;
 }
 
-void LockSim::StartOperation(OperationSource source, ReaderStateByte state)
+void LockSim::StartOperation(ReaderStateByte state)
 {
-	mSource = source;
 	mState = state;
 
 	std::ignore = AliroWorkqueueSubmit(&mNotifyWork);
@@ -140,7 +139,7 @@ void LockSim::NotifyWorkHandler()
 		break;
 	}
 
-	VerifyAndCall(mLockStateChangeCallback, mSource, mState);
+	VerifyAndCall(mLockStateChangeCallback, mState);
 }
 
 #ifdef CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_AUTO_RELOCK
@@ -161,7 +160,7 @@ void LockSim::AutoRelockTimerEventHandler(k_timer *timer)
 void LockSim::AutoRelockTimerEventHandler()
 {
 	if (mState == ReaderStateByte::Unsecured) {
-		StartOperation(OperationSource::Auto, ReaderStateByte::EnteringSecured);
+		StartOperation(ReaderStateByte::EnteringSecured);
 	}
 }
 

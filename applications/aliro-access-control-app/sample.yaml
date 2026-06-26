@@ -16,7 +16,7 @@ tests:
     - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
   app.door_lock.nfc-ble-uwb.dfu_smp-step_up:
     platform_allow: &id002
-    - nrf54lm20dk/nrf54lm20a/cpuapp
+    - nrf54lm20dk/nrf54lm20b/cpuapp
     integration_platforms: *id002
     extra_args:
     - aliro-access-control-app_SNIPPET="uwb_qm35;dfu_smp"
@@ -37,7 +37,7 @@ tests:
   app.door_lock.nfc-ble-uwb.exp_fast-step_up-ca_cert:
     platform_allow: &id004
     - nrf5340dk/nrf5340/cpuapp
-    - nrf54lm20dk/nrf54lm20a/cpuapp
+    - nrf54lm20dk/nrf54lm20b/cpuapp
     integration_platforms: *id004
     extra_args:
     - aliro-access-control-app_SNIPPET=uwb_qm35
@@ -52,7 +52,7 @@ tests:
     - nrf52840dk/nrf52840
     - nrf5340dk/nrf5340/cpuapp
     - nrf54l15dk/nrf54l15/cpuapp
-    - nrf54lm20dk/nrf54lm20a/cpuapp
+    - nrf54lm20dk/nrf54lm20b/cpuapp
     integration_platforms: *id005
     extra_args:
     - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y

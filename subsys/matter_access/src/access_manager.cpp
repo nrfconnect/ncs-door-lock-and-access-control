@@ -107,54 +107,49 @@ bool AccessManager<CRED_BIT_MASK>::ValidateCustom(CredentialTypeEnum type, chip:
 	return false;
 }
 
-#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 template <Data::CredentialsBits CRED_BIT_MASK>
-bool AccessManager<CRED_BIT_MASK>::ValidatePIN(const Optional<ByteSpan> &pinCode, OperationErrorEnum &err,
-					       Nullable<ValidatePINResult> &result)
+bool AccessManager<CRED_BIT_MASK>::ValidateCredential(CredentialTypeEnum credentialType, const ByteSpan &secret,
+						      OperationErrorEnum &error,
+						      Nullable<ValidateCredentialResult> &result)
 {
-	/* Optionality of the PIN code is validated by the caller, so assume it is OK not to provide the PIN
-	 * code. */
-	if (!pinCode.HasValue()) {
-		return true;
+	bool success{ false };
+	auto &credentials = mCredentials.GetCredentialsTypes(credentialType, success);
+	if (!success) {
+		error = OperationErrorEnum::kInvalidCredential;
+		return false;
 	}
 
-	EmberAfPluginDoorLockCredentialInfo credential;
-
-	/* Check the PIN code */
 	for (size_t index = 1; index <= CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_CREDENTIALS_PER_TYPE; ++index) {
-		if (CHIP_NO_ERROR != mCredentials.GetCredentials(CredentialTypeEnum::kPin, credential, index)) {
-			err = OperationErrorEnum::kInvalidCredential;
+		const auto &cred = credentials[index - 1];
+
+		if (static_cast<DlCredentialStatus>(cred.mInfo.mFields.mStatus) == DlCredentialStatus::kAvailable) {
 			continue;
 		}
 
-		if (credential.status == DlCredentialStatus::kAvailable) {
+		const ByteSpan stored{ cred.mSecret.mData, cred.mSecret.mDataLength };
+		if (!stored.data_equal(secret)) {
 			continue;
 		}
 
-		if (!credential.credentialData.data_equal(pinCode.Value())) {
-			err = OperationErrorEnum::kInvalidCredential;
-			continue;
-		}
-
-		uint32_t credentialUserId;
-		if (GetCredentialUserId(index, CredentialTypeEnum::kPin, credentialUserId) == CHIP_NO_ERROR) {
-			result = ValidatePINResult{
-				.mUserId = static_cast<uint16_t>(credentialUserId),
-				.mCredential =
-					LockOpCredentials{ CredentialTypeEnum::kPin, static_cast<uint16_t>(index) },
+		Data::User *user{ nullptr };
+		if (GetCredentialUser(static_cast<uint16_t>(index), credentialType, &user) == CHIP_NO_ERROR) {
+			result = ValidateCredentialResult{
+				.mUserId = static_cast<uint16_t>(user->mInfo.mFields.mUserUniqueId),
+				.mCredential = LockOpCredentials{ credentialType, static_cast<uint16_t>(index) },
 			};
 		} else {
 			result = {};
 		}
 
-		LOG_DBG("Valid lock PIN code provided");
-		err = OperationErrorEnum::kUnspecified;
+		LOG_DBG("Valid lock credential provided");
+		error = OperationErrorEnum::kUnspecified;
 		return true;
 	}
-	LOG_DBG("Invalid lock PIN code provided");
+
+	LOG_DBG("Invalid lock credential provided");
+	error = OperationErrorEnum::kInvalidCredential;
 	return false;
 }
-#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_PIN
 
 template <Data::CredentialsBits CRED_BIT_MASK> void AccessManager<CRED_BIT_MASK>::InitializeUsers()
 {

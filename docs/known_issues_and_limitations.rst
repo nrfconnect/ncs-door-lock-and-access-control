@@ -61,6 +61,78 @@ A known issue can list one or both of the following entries:
   Some known issues have a workaround.
   Sometimes, they are discovered later and added over time.
 
+The |REPO_NAME| v1.1.0
+**********************
+
+.. toggle::
+
+  AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|
+    Matter onboarding using NFC does not work in the |MATTER_ALIRO_APP_NAME|.
+
+    **Workaround:**
+    Use QR code scanning mechanism for Matter device commissioning.
+
+  AL-718: Access Document is not stored on the nRF52840 platform
+    Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
+    As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option is enabled together with ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``.
+
+    **Workaround:**
+    Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
+
+    **Affected platforms:** nRF52840 DK
+
+  AL-728: When built with Matter support, the ProductAppearance attribute is not supported
+    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
+    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
+
+    **Workaround:**
+    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
+
+  AL-851: Starting the UWB ranging session does not work reliably when testing with Apple ecosystem
+    When testing |MATTER_ALIRO_APP_NAME| with Apple ecosystem, sometimes the UWB ranging session does not start after the lock is commissioned.
+
+    **Workaround:**
+    Reboot the iPhone and try again.
+
+  AL-855: Aliro unlock does not include user identity in Apple Home notification
+    When the lock running the |MATTER_ALIRO_APP_NAME| is unlocked via Aliro (NFC or UWB), no user identity is included in the Apple Home App notification.
+    When the same lock is unlocked via Matter (for example, from the Apple Home app), the notification correctly includes the user who performed the unlock.
+
+  AL-856: Lock does not unlock via NFC after manual lock while the User Device remains in UWB range
+    After UWB unlock and manual lock while the User Device remains in UWB range, NFC authentication may complete (ACCESS GRANTED) without actuating the lock.
+    On the device, Aliro NFC authentication completes successfully (``ACCESS GRANTED``), but no physical unlock is triggered.
+
+The |REPO_NAME| v1.0.1
+**********************
+
+.. toggle::
+
+  AL-717: Matter onboarding with NFC is not supported
+    Matter onboarding using NFC does not work.
+
+    **Workaround:**
+    Use QR code scanning mechanism for Matter device commissioning.
+
+  AL-718: Access Document is not stored on the nRF52840 platform
+    Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
+    As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option is enabled together with ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``.
+
+    **Workaround:**
+    Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
+
+    **Affected platforms:** nRF52840 DK
+
+  AL-727: Credentials created during Step-up phase are not forwarded to Matter.
+    User credentials provisioned in the Step-up phase (with Access Document) are not exported to Matter.
+    As a result, they are not synchronized from the Matter controller's perspective.
+
+  AL-728: When built with Matter support, the ProductAppearance attribute is not supported.
+    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
+    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
+
+    **Workaround:**
+    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
+
 The |REPO_NAME| v1.0.0
 **********************
 

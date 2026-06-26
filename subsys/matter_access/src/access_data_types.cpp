@@ -175,8 +175,85 @@ CHIP_ERROR User::Deserialize(const void *buff, size_t buffSize)
 	}
 	unpack(mName.mValue, mName.mSize, buff, offset);
 
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+	/* Clear all Aliro evictable credentials, they will be updated later */
+	RemoveAliroEvictableCredentials();
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
 	return CHIP_NO_ERROR;
 }
+
+#ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
+
+CHIP_ERROR User::AddAliroEvictableCredential(uint16_t credentialIndex)
+{
+	constexpr auto credentialType{ CredentialTypeEnum::kAliroEvictableEndpointKey };
+
+	const size_t numCredentials = mOccupiedCredentials.mSize / sizeof(CredentialStruct);
+	for (size_t i = 0; i < numCredentials; ++i) {
+		const auto &credentialStruct = mOccupiedCredentials.mData[i];
+		if (credentialStruct.credentialType == credentialType &&
+		    credentialStruct.credentialIndex == credentialIndex) {
+			/** Credential already exists */
+			return CHIP_NO_ERROR;
+		}
+	}
+
+	const size_t insertIndex = numCredentials;
+	VerifyOrReturnError(insertIndex < CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_CREDENTIALS_PER_USER,
+			    CHIP_ERROR_NO_MEMORY);
+
+	auto &credentialStruct = mOccupiedCredentials.mData[insertIndex];
+	credentialStruct.credentialIndex = credentialIndex;
+	credentialStruct.credentialType = credentialType;
+
+	mOccupiedCredentials.mSize += sizeof(CredentialStruct);
+
+	return CHIP_NO_ERROR;
+}
+
+void User::RemoveAliroEvictableCredential(uint16_t credentialIndex)
+{
+	constexpr auto credentialType{ CredentialTypeEnum::kAliroEvictableEndpointKey };
+
+	for (size_t idxCred = 0; idxCred < mOccupiedCredentials.mSize / sizeof(CredentialStruct); ++idxCred) {
+		const auto &credentialStruct = mOccupiedCredentials.mData[idxCred];
+		if (credentialStruct.credentialType == credentialType &&
+		    credentialStruct.credentialIndex == credentialIndex) {
+			const size_t credentialsToMove =
+				mOccupiedCredentials.mSize / sizeof(CredentialStruct) - idxCred - 1;
+			memmove(&mOccupiedCredentials.mData[idxCred], &mOccupiedCredentials.mData[idxCred + 1],
+				credentialsToMove * sizeof(CredentialStruct));
+
+			mOccupiedCredentials.mSize -= sizeof(CredentialStruct);
+
+			return;
+		}
+	}
+}
+
+void User::RemoveAliroEvictableCredentials()
+{
+	size_t writeIdx = 0;
+	const size_t numCredentials = mOccupiedCredentials.mSize / sizeof(CredentialStruct);
+
+	for (size_t readIdx = 0; readIdx < numCredentials; ++readIdx) {
+		const auto &credential = mOccupiedCredentials.mData[readIdx];
+
+		if (credential.credentialType == CredentialTypeEnum::kAliroEvictableEndpointKey) {
+			continue;
+		}
+
+		if (writeIdx != readIdx) {
+			mOccupiedCredentials.mData[writeIdx] = credential;
+		}
+		++writeIdx;
+	}
+
+	mOccupiedCredentials.mSize = writeIdx * sizeof(CredentialStruct);
+}
+
+#endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_CREDENTIAL_TYPES_ALIRO
 
 #ifdef CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
