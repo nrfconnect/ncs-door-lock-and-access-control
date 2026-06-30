@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+name: uwb_tsrr250
+append:
+  EXTRA_CONF_FILE: uwb_tsrr250.conf
+
+boards:
+  nrf54lm20dk/nrf54lm20a/cpuapp:
+    append:
+      EXTRA_DTC_OVERLAY_FILE: boards/nrf54lm20dk_nrf54lm20a_cpuapp.overlay

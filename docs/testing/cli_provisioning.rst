@@ -10,6 +10,39 @@ Provisioning with CLI
 The following page describes the available methods for provisioning Aliro credentials on the door lock device using the command-line interface.
 Once you have :ref:`Set up the Aliro Test Harness <setting_up_the_aliro_test_harness>`, complete the following steps:
 
+Certification quick provisioning
+********************************
+
+For the Aliro certification test parameters provided in :file:`applications/doorlock/docs/certification_assets/aliro_certification_test_parameters.json`, provision a freshly erased DUT with the following commands:
+
+.. code-block:: console
+
+   uart:~$ dl provisioning AC_key set 0 04742df736d0fc9be978c45b00e8fdf7cea684ea105ae574c1505a2c24ab6198e3125b7f1b7e1d134c55ece69681ba8ecc18a3836dc5199c759f31e8ccf17e3efa
+   uart:~$ dl provisioning CI_key set 0 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137
+   uart:~$ dl provisioning CI_CA_key set 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137
+   uart:~$ dl reader private_key set 8aefdff8d5b47aa9a3edbac7a345ed2221021512fd55abde3b8ee0f208952693
+   uart:~$ dl reader group_id 00113344667799AA00113344667799AA
+   uart:~$ dl reader group_sub_id 113344667799AA00113344667799AA00
+   uart:~$ dl reader group_resolving_key set 00000000000000000000000000000000
+   uart:~$ dl reader issuer_public_key set 043928f322019d4757893bde6a0fe5e13e3e537b9ca0f549c0bd2f40f79060252a0a4f291192157a95cb6eb202759428c00cd834998c5d0eab192ee8873c5d34ee
+   uart:~$ dl reader certificate set 308201523081f9a003020102020101300a06082a8648ce3d0403023011310f300d06035504030c06697373756572301e170d3230303130313030303030305a170d3439303130313030303030305a30123110300e06035504030c077375626a6563743059301306072a8648ce3d020106082a8648ce3d030107034200043928f322019d4757893bde6a0fe5e13e3e537b9ca0f549c0bd2f40f79060252a0a4f291192157a95cb6eb202759428c00cd834998c5d0eab192ee8873c5d34eea341303f301f0603551d230418301680147fc93128a61c0cedf94e11732dbe46017c431901300c0603551d130101ff04023000300e0603551d0f0101ff040403020780300a06082a8648ce3d0403020348003045022100f509f4e64b31b5c8d4152158065b4eedd31c66d6e7b1f87975f837f5a3fe1235022063ee11a312731c4673382c7fcde101440767ff56654bf64595be802ec0ace3e1
+
+Use ``dut_reader_group_identifier`` for normal expedited and step-up tests.
+Before certificate-based Reader tests, switch the DUT Reader group identifier to ``dut_reader_issuer_group_identifier``:
+
+.. code-block:: console
+
+   uart:~$ dl reader group_id 00113344667799AA00113344667799AB
+
+Switch it back before tests that do not use Reader certificate authentication:
+
+.. code-block:: console
+
+   uart:~$ dl reader group_id 00113344667799AA00113344667799AA
+
+General provisioning flow
+*************************
+
 #. Generate a Reader key pair:
 
    .. code-block:: console

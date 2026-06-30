@@ -56,8 +56,10 @@ def extract_certificate_components(cert_der):
     serial_number = cert.serial_number
     issuer_cn = cert.issuer.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0].value
     subject_cn = cert.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0].value
-    not_before = cert.not_valid_before_utc.strftime("%y%m%d%H%M%SZ")
-    not_after = cert.not_valid_after_utc.strftime("%y%m%d%H%M%SZ")
+    not_valid_before = getattr(cert, "not_valid_before_utc", cert.not_valid_before)
+    not_valid_after = getattr(cert, "not_valid_after_utc", cert.not_valid_after)
+    not_before = not_valid_before.strftime("%y%m%d%H%M%SZ")
+    not_after = not_valid_after.strftime("%y%m%d%H%M%SZ")
 
     return public_key_bit_string, signature, serial_number, issuer_cn, subject_cn, not_before, not_after
 

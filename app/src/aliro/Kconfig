@@ -52,6 +52,15 @@ config DOOR_LOCK_READER_CERTIFICATE
 	help
 	  Use the reader certificate for the reader authentication.
 
+config DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+	bool "Provision Aliro certification test parameters at boot"
+	depends on !CHIP
+	select DOOR_LOCK_READER_CERTIFICATE
+	help
+	  Provision the fixed Aliro certification test credentials into persistent
+	  storage during boot. This is intended only for certification and
+	  interoperability test builds because it embeds known test keys in firmware.
+
 if DOOR_LOCK_READER_CERTIFICATE
 
 config DOOR_LOCK_READER_CERTIFICATE_MAX_SIZE

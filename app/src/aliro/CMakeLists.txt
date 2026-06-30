@@ -7,6 +7,9 @@
 target_sources(app PRIVATE
 	init.cpp
 )
+target_sources_ifdef(CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING app PRIVATE
+	certification_provisioning.cpp
+)
 
 if(NOT CONFIG_CHIP)
 	set(ALIRO_STANDALONE TRUE)

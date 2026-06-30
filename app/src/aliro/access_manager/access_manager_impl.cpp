@@ -783,14 +783,16 @@ bool AccessManagerImpl::AnalyzeUwbRangingData(const UwbRangingData &uwbData, Ses
 	const uint32_t threshold =
 		sessionWasInRange ? (mMaxAllowedDistance + mMaxAllowedDistanceExitMargin) : mMaxAllowedDistance;
 
-	LOG_DBG("Extracted distance: %u cm, threshold: %u cm (max: %u cm, exit margin: %u cm, sessionWasInRange: %d)",
-		distance.value(), threshold, mMaxAllowedDistance, mMaxAllowedDistanceExitMargin,
-		static_cast<int>(sessionWasInRange));
+	VerifyOrReturnFalse(distance.value() > 0, LOG_WRN("Ignoring invalid BLE/UWB distance: 0 cm"));
 
 	// Check if distance is within acceptable range
-	VerifyOrReturnFalse(distance.value() <= threshold, LOG_DBG("Distance check failed - User Device is too far"));
+	VerifyOrReturnFalse(distance.value() <= threshold,
+			    LOG_INF("BLE/UWB ranging distance: %u cm exceeds threshold %u cm; keeping door locked",
+				    distance.value(), threshold));
 
-	LOG_DBG("Distance check passed, User Device is within range");
+	LOG_INF("BLE/UWB ranging distance: %u cm within threshold %u cm (unlock=%u cm, relock=%u cm)",
+		distance.value(), threshold, mMaxAllowedDistance,
+		mMaxAllowedDistance + mMaxAllowedDistanceExitMargin);
 	return true;
 }
 

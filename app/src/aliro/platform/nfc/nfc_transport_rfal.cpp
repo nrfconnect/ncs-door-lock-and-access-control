@@ -21,6 +21,10 @@
 
 LOG_MODULE_REGISTER(nfc_st_rfal_impl, CONFIG_DOOR_LOCK_RFAL_LOG_LEVEL);
 
+namespace {
+constexpr uint32_t kNfcIdleStateLogRateMs = 1000;
+} // namespace
+
 K_WORK_DELAYABLE_DEFINE(nfc_pal_nfc_work, [](k_work *) { Aliro::NfcTransportRfal::Instance().Execute(); });
 
 extern "C" void ncs_pal_submit_nfc_work()
@@ -55,12 +59,13 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 {
 	switch (state) {
 	case RFAL_NFC_STATE_WAKEUP_MODE:
-		LOG_DBG("RFAL: Wake Up mode state");
+		LOG_DBG_RATELIMIT_RATE(kNfcIdleStateLogRateMs, "RFAL: Wake Up mode state");
 		break;
 	case RFAL_NFC_STATE_POLL_TECHDETECT:
-		LOG_DBG("RFAL: Poll technology detect state");
+		LOG_DBG_RATELIMIT_RATE(kNfcIdleStateLogRateMs, "RFAL: Poll technology detect state");
 		if (mNfcConfig.wakeupEnabled) {
-			LOG_DBG("RFAL: Wake Up mode terminated. Polling for devices.");
+			LOG_DBG_RATELIMIT_RATE(kNfcIdleStateLogRateMs,
+					       "RFAL: Wake Up mode terminated. Polling for devices.");
 		}
 		break;
 	case RFAL_NFC_STATE_POLL_SELECT:
@@ -79,7 +84,7 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 		}
 		break;
 	case RFAL_NFC_STATE_START_DISCOVERY:
-		LOG_DBG("RFAL: Start discovery state");
+		LOG_DBG_RATELIMIT_RATE(kNfcIdleStateLogRateMs, "RFAL: Start discovery state");
 		mMultiSel = false;
 		mSendInProgress = false;
 		mTagDetectedState = false;

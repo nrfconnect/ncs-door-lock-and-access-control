@@ -31,10 +31,6 @@ zephyr_library_import(cherry_uci_ccc_client
   ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libcherry_uci_ccc_client.a
 )
 
-zephyr_library_import(hsspi
-  ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libhsspi.a
-)
-
 zephyr_library_import(qmutils
   ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libqmutils.a
 )
@@ -46,6 +42,12 @@ zephyr_library_import(qosal
 zephyr_library_import(uci
   ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libuci.a
 )
+
+if(CONFIG_QM35_UWB_LIB)
+  zephyr_library_import(hsspi
+    ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/libhsspi.a
+  )
+endif()
 
 zephyr_library_import(libqmrom
   ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SOC_NAME}/liblibqmrom.a

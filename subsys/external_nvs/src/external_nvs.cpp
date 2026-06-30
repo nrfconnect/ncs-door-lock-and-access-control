@@ -101,29 +101,29 @@ int InitializeUniqueId(uint8_t partitionId)
 
 #ifdef CONFIG_LOG
 	if (ec == -ENOENT) {
-		LOG_INF("Unique ID not found on storage");
+		LOG_DBG("Unique ID not found on storage");
 	} else if (ec != 0) {
 		LOG_ERR("Failed to read Unique ID: %d", ec);
 	} else if (readLength != storedUniqueId.size()) {
 		LOG_ERR("Unique ID length mismatch, expected %zu, got %zu", storedUniqueId.size(), readLength);
 	} else if (storedUniqueId != internalUniqueId) {
-		LOG_ERR("Unique ID mismatch");
+		LOG_DBG("Unique ID mismatch; refreshing external storage");
 	}
 #endif // CONFIG_LOG
 
-	LOG_INF("Clearing the storage");
+	LOG_DBG("Clearing the storage");
 	ec = Storage::Clear();
 	if (ec != 0) {
 		return ec;
 	}
 
-	LOG_INF("Reinitializing the storage");
+	LOG_DBG("Reinitializing the storage");
 	ec = Storage::Init(partitionId);
 	if (ec != 0) {
 		return ec;
 	}
 
-	LOG_INF("Writing new unique ID to storage");
+	LOG_DBG("Writing new unique ID to storage");
 	ec = Storage::Write(kUniqueIdReservedId, internalUniqueId.data(), internalUniqueId.size());
 	if (ec != 0) {
 		LOG_ERR("Failed to write unique ID: %d", ec);
@@ -314,7 +314,11 @@ int ReadLocked(Id id, void *data, size_t &len)
 {
 	const auto ec = Read(id, data, len);
 	if (ec != 0) {
-		LOG_ERR("Failed to read object at Id %u: %d", id, ec);
+		if (ec == -ENOENT) {
+			LOG_DBG("Object at Id %u not found", id);
+		} else {
+			LOG_ERR("Failed to read object at Id %u: %d", id, ec);
+		}
 
 		if (ec == -EIO) {
 			Storage::Delete(id);

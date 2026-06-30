@@ -1,0 +1,19 @@
+# Copyright (c) 2026 Nordic Semiconductor ASA
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+
+description: TrueSense TSRR250 UWB module based on NXP Trimension SR250
+
+compatible: "truesense,tsrr250"
+
+include: spi-device.yaml
+
+properties:
+  reset-gpios:
+    type: phandle-array
+    required: true
+    description: Active-low reset GPIO connected to TSRR250 RST.
+
+  irq-gpios:
+    type: phandle-array
+    required: true
+    description: Interrupt GPIO connected to TSRR250 INT.

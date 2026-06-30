@@ -18,4 +18,5 @@ add_subdirectory_ifdef(CONFIG_DOOR_LOCK_BLE_NUS src/bt_nus)
 
 file(GLOB app_sources CONFIGURE_DEPENDS src/*.cpp)
 target_sources(app PRIVATE ${app_sources})
+target_sources_ifdef(CONFIG_USE_SEGGER_RTT app PRIVATE src/fatal_rtt.c)
 target_include_directories(app PRIVATE src)

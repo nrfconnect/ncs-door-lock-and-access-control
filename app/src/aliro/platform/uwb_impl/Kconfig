@@ -15,6 +15,18 @@ config TIMESYNC_PROCEDURE_1
 	help
 	  Enable the BLE and UWB time synchronization Procedure 1.
 
+config TSRR250_UWB_ALIRO_ZEPHYR
+	bool "TrueSense TSRR250 UWB Aliro implementation"
+	depends on SOC_NRF54LM20A
+	help
+	  Enable the Aliro UWB platform backend for the TrueSense TSRR250 module
+	  based on the NXP Trimension SR250. This selects the app-side backend and
+	  board wiring. The NXP SR250 UWB API port still needs to be linked before
+	  real ranging can be started.
+
+if TSRR250_UWB_ALIRO_ZEPHYR
+rsource "uwb_tsrr250_impl/Kconfig"
+endif # TSRR250_UWB_ALIRO_ZEPHYR
 
 if QM35_UWB_ALIRO_ZEPHYR || QM35_UWB_LIB
 rsource "uwb_qm35_impl/Kconfig"

@@ -422,7 +422,8 @@ AliroError BleManager::RestartAdvertising()
 
 	SetState(BleManagerState::Advertising);
 
-	LOG_HEXDUMP_DBG(mAdvertisingServiceData.data(), mAdvertisingServiceDataSize, "Advertising data:");
+	LOG_HEXDUMP_INF(mAdvertisingServiceData.data(), mAdvertisingServiceDataSize,
+			"Aliro advertising service data (UUID + payload):");
 	return ALIRO_NO_ERROR;
 }
 

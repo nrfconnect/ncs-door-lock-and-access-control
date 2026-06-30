@@ -1,0 +1,24 @@
+# Copyright (c) 2026 Nordic Semiconductor ASA
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+
+description: NXP UWB device used by the NXP SR250 Zephyr port
+
+compatible: "nxp,uwb-device"
+
+include: spi-device.yaml
+
+properties:
+  uwb,irq-gpios:
+    type: phandle-array
+    required: true
+    description: Interrupt GPIO connected to the UWB module IRQ/INT pin.
+
+  uwb,rstn-gpios:
+    type: phandle-array
+    required: true
+    description: Active-high reset-not GPIO connected to the UWB module reset pin.
+
+  uwb,cs-gpios:
+    type: phandle-array
+    required: true
+    description: Active-low chip-select GPIO connected to the UWB module CS pin.

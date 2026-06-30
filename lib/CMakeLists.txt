@@ -15,4 +15,6 @@ elseif(CONFIG_SOC_NRF54LM20A)
 endif()
 
 add_subdirectory_ifdef(CONFIG_NCS_ALIRO aliro)
-add_subdirectory_ifdef(CONFIG_QM35_UWB_LIB qm35_uwb)
+if(CONFIG_QM35_UWB_LIB OR CONFIG_TSRR250_UWB_ALIRO_ZEPHYR)
+  add_subdirectory(qm35_uwb)
+endif()

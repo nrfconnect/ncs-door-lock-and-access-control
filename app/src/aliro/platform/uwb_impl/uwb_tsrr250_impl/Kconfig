@@ -1,0 +1,38 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config TSRR250_UWB_SPI_MAX_FREQUENCY
+	int "TSRR250 SPI maximum frequency"
+	default 8000000
+	help
+	  Target SPI frequency for the SR250 transport layer. Keep this aligned
+	  with the devicetree overlay and the NXP UWB API port.
+
+config DOOR_LOCK_UWB_MIN_RAN_MULTIPLIER
+	int "Minimum RAN multiplier for UWB ranging blocks"
+	default 1
+	range 1 255
+	help
+	  Minimum RAN multiplier advertised in Aliro UWB RSS-M1.
+
+config DOOR_LOCK_UWB_MAC_MODE_OFFSET
+	int "Offset between ranging blocks in MAC mode"
+	default 0
+	range 0 63
+	help
+	  Offset between the two ranging blocks.
+
+config DOOR_LOCK_UWB_MAC_MODE_RANGING_ROUNDS
+	int "Number of ranging rounds per ranging block"
+	default 0
+	range 0 1
+	help
+	  Number of ranging rounds used in a ranging block.
+
+config DOOR_LOCK_UWB_SESSION_LOGGING
+	bool "Enable UWB session state logging"
+	help
+	  Enable logging for UWB session states and reason codes.

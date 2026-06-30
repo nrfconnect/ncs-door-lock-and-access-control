@@ -114,7 +114,7 @@ int Init()
 	size_t readLength{ 0 };
 	auto status = psa_ps_get(kPsUniqueIdUid, 0, sUniqueId.size(), sUniqueId.data(), &readLength);
 	if (status == PSA_ERROR_DOES_NOT_EXIST) {
-		LOG_INF("Unique ID not found in PSA Protected Storage, generating and storing");
+		LOG_DBG("Unique ID not found in PSA Protected Storage, generating and storing");
 		err = GenerateUniqueId(sUniqueId);
 		if (err != 0) {
 			return err;

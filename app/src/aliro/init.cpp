@@ -24,6 +24,10 @@
 #include "access_manager/access_manager.h"
 #include "psa_key_ids.h"
 
+#ifdef CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+#include "certification_provisioning.h"
+#endif // CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 #include "kpersistent_manager/kpersistent_manager_impl.h"
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
@@ -130,7 +134,14 @@ AliroError LoadIssuerCredentials()
 
 AliroError StorageInit()
 {
-	AliroError err = LoadAccessCredentials();
+	AliroError err{};
+
+#ifdef CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+	err = DoorLock::CertificationProvisioning::EnsureTestParameters();
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot provision certification test parameters"));
+#endif // CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+
+	err = LoadAccessCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Access Credentials"));
 
 	err = LoadIssuerCredentials();
@@ -148,6 +159,7 @@ AliroError StorageInit()
 
 void PrintUwbInfo()
 {
+#ifdef CONFIG_QM35_UWB_LIB
 	using namespace Aliro::Uwb;
 
 	VerifyOrReturn(UltraWideBandImpl::Instance().IsInitialized(), LOG_INF("[UWB] Not initialized yet"));
@@ -164,6 +176,11 @@ void PrintUwbInfo()
 	} else {
 		LOG_INF("[UWB] CCC: N/A");
 	}
+#elif defined(CONFIG_TSRR250_UWB_ALIRO_ZEPHYR)
+	LOG_INF("[UWB] TSRR250/SR250 backend selected");
+#else
+	LOG_INF("[UWB] No hardware backend enabled");
+#endif // CONFIG_QM35_UWB_LIB
 }
 
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
@@ -172,9 +189,9 @@ constexpr uint8_t GetApplicationFeatures()
 {
 	uint8_t features = 0;
 
-#ifdef CONFIG_NCS_ALIRO_CREDENTIAL_ISSUER_CA_PUBLIC_KEY
+#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
 	features |= kFeatureCredentialIssuerCaPublicKeySupported;
-#endif // CONFIG_NCS_ALIRO_CREDENTIAL_ISSUER_CA_PUBLIC_KEY
+#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
 
 #ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
 	features |= kFeatureReaderCertificateSupported;
@@ -294,7 +311,7 @@ int AliroInit()
 		{ .mUnlockIndicatorClb =
 			  [](OperationSource source) {
 				  const auto isNfcSession = source == OperationSource::ThisUserDeviceInNfc;
-				  LOG_DBG("Door unlocked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
+				  LOG_INF("Door unlocked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
 				  if (!LockSimInstance().Unlock(source)) {
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 					  // The lock is already unlocked, so we can send the Unsecured state
@@ -306,7 +323,7 @@ int AliroInit()
 		  .mLockIndicatorClb =
 			  [](OperationSource source) {
 				  const auto isNfcSession = source == OperationSource::ThisUserDeviceInNfc;
-				  LOG_DBG("Door locked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
+				  LOG_INF("Door locked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
 				  LockSimInstance().Lock(source);
 			  },
 		  .mAccessIndicatorClb =

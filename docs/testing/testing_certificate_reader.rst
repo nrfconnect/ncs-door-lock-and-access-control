@@ -77,6 +77,18 @@ Update your Test Harness project configuration with the following fields:
       }
       }
 
+For the certification test parameters in :file:`applications/doorlock/docs/certification_assets/aliro_certification_test_parameters.json`, use:
+
+.. code-block:: json
+
+   {
+      "test_parameters": {
+         "dut_reader_group_identifier": "00113344667799AA00113344667799AA",
+         "dut_reader_issuer_group_identifier": "00113344667799AA00113344667799AB",
+         "dut_reader_issuer_public_key": "043928f322019d4757893bde6a0fe5e13e3e537b9ca0f549c0bd2f40f79060252a0a4f291192157a95cb6eb202759428c00cd834998c5d0eab192ee8873c5d34ee"
+      }
+   }
+
 Provisioning DUT
 ================
 
@@ -109,6 +121,16 @@ Connect to the DUT through serial console and provision both the certificate and
 
       uart:~$ dl reader certificate list
       Reader certificate (XXX bytes): <COMPRESSED_CERT>
+
+For the certification test parameters, provision the short Reader certificate with:
+
+.. code-block:: console
+
+   uart:~$ dl reader group_id 00113344667799AA00113344667799AB
+   uart:~$ dl reader issuer_public_key set 043928f322019d4757893bde6a0fe5e13e3e537b9ca0f549c0bd2f40f79060252a0a4f291192157a95cb6eb202759428c00cd834998c5d0eab192ee8873c5d34ee
+   uart:~$ dl reader certificate set 3081950402000030818e854200043928f322019d4757893bde6a0fe5e13e3e537b9ca0f549c0bd2f40f79060252a0a4f291192157a95cb6eb202759428c00cd834998c5d0eab192ee8873c5d34ee8648003045022100f509f4e64b31b5c8d4152158065b4eedd31c66d6e7b1f87975f837f5a3fe1235022063ee11a312731c4673382c7fcde101440767ff56654bf64595be802ec0ace3e1
+
+For ``NFC_RDR_STANDARD_CERT_IN_LOAD_CERT_WITH_CHAINING``, replace the certificate value with the longer ``th_reader_certificate_chaining`` value from the certification test parameters JSON file.
 
 .. note::
    The certificate size is limited by ``CONFIG_DOOR_LOCK_READER_CERTIFICATE_MAX_SIZE``. 
