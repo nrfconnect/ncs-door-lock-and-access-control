@@ -346,7 +346,7 @@ std::optional<Interface::Access::AccessDocumentRequestParams> AccessManagerImpl:
 	MutexGuard lock{ sMutex };
 	VerifyOrReturnValue(
 		!IsPublicKeyStored(mAcKeys, publicKey), std::nullopt,
-		LOG_INF("Provided User Device public key found in Access Manager database, not requesting Access Document"));
+		LOG_DBG("Provided User Device public key found in Access Manager database, not requesting Access Document"));
 
 #if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 	size_t keyIndex{};
@@ -363,12 +363,12 @@ std::optional<Interface::Access::AccessDocumentRequestParams> AccessManagerImpl:
 			}
 		}
 
-		LOG_INF("Provided User Device public key found in Access Manager database, not requesting Access Document");
+		LOG_DBG("Provided User Device public key found in Access Manager database, not requesting Access Document");
 		return std::nullopt;
 	}
 #endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
-	LOG_INF("Provided User Device public key not found in Access Manager database, requesting Access Document");
+	LOG_DBG("Provided User Device public key not found in Access Manager database, requesting Access Document");
 	return kAccessDocumentRequestParams;
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
@@ -663,7 +663,7 @@ bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublic
 	}
 #endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
-	LOG_INF("Provided User Device public key not found in Access Manager database");
+	LOG_DBG("Provided User Device public key not found in Access Manager database");
 	return false;
 }
 
@@ -811,7 +811,7 @@ bool AccessManagerImpl::EvaluateUwbOpenAllowed(const UwbRangingData &uwbData, Se
 
 	// Find the session
 	auto *sessionCtx = FindRangingSession(sessionContext);
-	VerifyOrReturnFalse(sessionCtx, LOG_ERR("Session context not found for handle: %p", sessionContext.GetRaw()));
+	VerifyOrReturnFalse(sessionCtx, LOG_DBG("Session context not found for handle: %p", sessionContext.GetRaw()));
 
 	const bool wasOpenAllowed = sessionCtx->mOpenAllowed;
 
@@ -911,7 +911,8 @@ void AccessManagerImpl::RemoveRangingSession(SessionContext sessionCtx)
 	sys_snode_t *prevNode{ nullptr };
 
 	int status = Uwb::UltraWideBandInstance().TerminateRangingSession(sessionCtx);
-	VerifyOrReturn(status == 0 || status == -ENOSYS, LOG_ERR("Cannot terminate UWB ranging session: %d", status));
+	VerifyOrReturn(status == 0 || status == -ENOSYS || status == -ENOENT,
+		       LOG_ERR("Cannot terminate UWB ranging session: %d", status));
 
 	SYS_SLIST_FOR_EACH_NODE_SAFE (&mActiveSessions, node, nodeSafe) {
 		auto *ctx = CONTAINER_OF(node, RangingSessionContext, mNode);
@@ -980,7 +981,7 @@ void AccessManagerImpl::SetOpenAllowed(SessionContext sessionContext, bool openA
 		// Find the session
 		sessionCtx = FindRangingSession(sessionContext);
 		VerifyOrReturn(sessionCtx,
-			       LOG_ERR("Session context not found for handle: %p", sessionContext.GetRaw()));
+			       LOG_DBG("Session context not found for handle: %p", sessionContext.GetRaw()));
 
 		// Early return if has not changed
 		if (sessionCtx->mOpenAllowed == openAllowed) {

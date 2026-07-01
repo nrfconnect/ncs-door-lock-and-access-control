@@ -45,6 +45,10 @@
 #include "shell.h"
 #endif // CONFIG_DOOR_LOCK_CLI
 
+#ifdef CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+#include "certification_provisioning.h"
+#endif // CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+
 #include "aliro_state_control.h"
 #include "lock_sim_instance.h"
 #include "storage.h"
@@ -143,9 +147,9 @@ constexpr uint8_t GetApplicationFeatures()
 {
 	uint8_t features = 0;
 
-#ifdef CONFIG_NCS_ALIRO_CREDENTIAL_ISSUER_CA_PUBLIC_KEY
+#ifdef CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
 	features |= kFeatureCredentialIssuerCaPublicKeySupported;
-#endif // CONFIG_NCS_ALIRO_CREDENTIAL_ISSUER_CA_PUBLIC_KEY
+#endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
 
 #ifdef CONFIG_DOOR_LOCK_READER_CERTIFICATE
 	features |= kFeatureReaderCertificateSupported;
@@ -294,6 +298,12 @@ int AliroInit()
 				  LOG_INF("Access %s via %s session", isAccessGranted ? "granted" : "denied",
 					  isNfcSession ? "NFC" : "BLE/UWB");
 			  } });
+
+#ifdef CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+	ec = DoorLock::CertificationProvisioning::EnsureTestParameters();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE,
+			    LOG_ERR("Cannot provision certification test parameters"));
+#endif // CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
 
 	ec = StorageInit();
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Storage initialization failed"));

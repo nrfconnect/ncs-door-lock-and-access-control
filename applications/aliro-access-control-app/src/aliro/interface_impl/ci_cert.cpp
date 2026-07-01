@@ -80,7 +80,7 @@ AliroError VerifyCertificate(const mbedtls_x509_crt &crt)
 
 	VerifyOrReturnStatus(crt.MBEDTLS_PRIVATE(sig_md) == MBEDTLS_MD_SHA256, ALIRO_INVALID_DATA_CONTENT,
 			     LOG_ERR("Invalid signature algorithm"));
-	VerifyOrReturnStatus(crt.MBEDTLS_PRIVATE(sig_pk) == MBEDTLS_PK_ECDSA, ALIRO_INVALID_DATA_CONTENT,
+	VerifyOrReturnStatus(crt.MBEDTLS_PRIVATE(sig_pk) == MBEDTLS_PK_SIGALG_ECDSA, ALIRO_INVALID_DATA_CONTENT,
 			     LOG_ERR("Invalid signature algorithm"));
 
 	error = VerifyCertificateSignature(crt);

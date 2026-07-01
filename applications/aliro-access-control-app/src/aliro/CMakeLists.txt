@@ -10,6 +10,7 @@ target_sources(app PRIVATE
 )
 
 target_sources_ifdef(CONFIG_DOOR_LOCK_BLE_UWB app PRIVATE last_operation.cpp)
+target_sources_ifdef(CONFIG_DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING app PRIVATE certification_provisioning.cpp)
 
 add_subdirectory(access_manager)
 add_subdirectory(interface_impl)

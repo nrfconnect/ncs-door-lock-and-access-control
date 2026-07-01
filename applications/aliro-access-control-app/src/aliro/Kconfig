@@ -56,6 +56,12 @@ config DOOR_LOCK_READER_CERTIFICATE
 	help
 	  Use the reader certificate for the reader authentication.
 
+config DOOR_LOCK_CERTIFICATION_TEST_PROVISIONING
+	bool "Provision Aliro certification test parameters on boot"
+	help
+	  Provision the fixed Aliro certification Test Harness keys and identifiers
+	  into persistent storage during application boot.
+
 endmenu # Aliro features
 
 rsource "platform/Kconfig"
