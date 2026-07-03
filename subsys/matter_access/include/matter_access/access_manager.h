@@ -18,7 +18,7 @@ template <Data::CredentialsBits CRED_BIT_MASK> class AccessManager {
 
 public:
 	struct ValidateCredentialResult {
-		uint16_t mUserId;
+		uint16_t mUserIndex;
 		LockOpCredentials mCredential;
 	};
 
@@ -370,8 +370,8 @@ private:
 	void LoadSchedulesFromPersistentStorage();
 #endif // CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES
 
-	static CHIP_ERROR GetCredentialUser(uint16_t credentialIndex, CredentialTypeEnum credentialType,
-					    Data::User **userPtr);
+	static CHIP_ERROR GetCredentialUserIndex(uint16_t credentialIndex, CredentialTypeEnum credentialType,
+						 uint16_t &userIndex);
 
 	/* Similarly to SetCredential(), credentialIndex starts from 1 */
 	static bool DoSetCredential(Data::Credential &credential, uint16_t credentialIndex, chip::FabricIndex creator,
