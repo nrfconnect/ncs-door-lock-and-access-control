@@ -13,7 +13,6 @@ tests:
     integration_platforms: *platform_5340
     extra_args:
       - aliro-access-control-app_SNIPPET="uwb_qm35;dfu_smp;bt_nus"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
@@ -62,7 +61,6 @@ tests:
     integration_platforms: *platform_54lm20
     extra_args:
       - aliro-access-control-app_SNIPPET="uwb_qm35;dfu_smp"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
@@ -73,7 +71,6 @@ tests:
     integration_platforms: *platform_54l15_52840_5340
     extra_args:
       - aliro-access-control-app_SNIPPET=dfu_smp
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
@@ -85,7 +82,6 @@ tests:
     extra_args:
       - SNIPPET="uwb_qm35_dfu"
       - aliro-access-control-app_SNIPPET="uwb_qm35;dfu_smp"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
       - CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT=y
@@ -124,7 +120,6 @@ tests:
     integration_platforms: *platform_5340
     extra_args:
       - aliro-access-control-app_SNIPPET="uwb_qm35;dfu_smp;bt_nus"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
       - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y

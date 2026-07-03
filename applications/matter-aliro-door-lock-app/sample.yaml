@@ -14,7 +14,6 @@ tests:
     integration_platforms: *platform_54lm20
     extra_args:
       - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
@@ -75,7 +74,6 @@ tests:
     integration_platforms: *platform_54lm20
     extra_args:
       - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
@@ -87,7 +85,6 @@ tests:
     integration_platforms: *platform_54l15_52840_5340
     extra_args:
       - matter-aliro-door-lock-app_SNIPPET="dfu_smp"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
@@ -112,7 +109,6 @@ tests:
     integration_platforms: *platform_54lm20
     extra_args:
       - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
@@ -125,7 +121,6 @@ tests:
     integration_platforms: *platform_54l15
     extra_args:
       - matter-aliro-door-lock-app_SNIPPET="dfu_smp"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
 

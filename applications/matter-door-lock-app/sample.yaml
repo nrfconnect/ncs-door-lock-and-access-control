@@ -36,7 +36,6 @@ tests:
     build_only: true
     extra_args:
       - matter-door-lock-app_SNIPPET="dfu_smp"
-      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
     integration_platforms:
       - nrf52840dk/nrf52840
       - nrf5340dk/nrf5340/cpuapp
