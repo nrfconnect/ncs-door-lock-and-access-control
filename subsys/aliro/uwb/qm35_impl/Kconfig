@@ -46,6 +46,7 @@ config DOOR_LOCK_ALIRO_UWB_SESSION_LOGGING
 
 config DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG
 	bool "Enable session context in UWB ranging logs"
+	default y
 	help
 	  Prefix each ranging log with the session identifier and the
 	  current number of active ranging sessions.
