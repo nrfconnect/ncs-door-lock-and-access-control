@@ -28,12 +28,14 @@ endif # DOOR_LOCK_BLE_UWB
 
 config DOOR_LOCK_EXPEDITED_FAST_PHASE
     bool "Support for Aliro Expedited-fast Phase"
+    default y
     help
         If enabled, the Expedited-fast phase is supported.
         The user authentication is based on the Kpersistent keys.
 
 config DOOR_LOCK_STEP_UP_PHASE
     bool "Support for Aliro Step-up Phase"
+    default y
     select DOOR_LOCK_ALIRO_ACCESS_DOCUMENT_PARSER
     select DOOR_LOCK_EXTERNAL_NVS if !SOC_SERIES_NRF52
     help

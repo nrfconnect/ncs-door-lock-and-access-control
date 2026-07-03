@@ -42,12 +42,13 @@ Build and configuration
 =======================
 
 The following Kconfig options control Expedited-fast phase support and Kpersistent storage limits.
-Set them in the application's :file:`prj.conf` or pass along with other build options to the ``west build`` command.
-For example, to build the Aliro Access Control Application with Bluetooth LE and UWB transport and Expedited-fast phase support on the nRF5340 DK:
+Expedited-fast phase support is enabled by default, so no extra Kconfig option is required to enable it.
+Set them in the application's :file:`prj.conf` or pass along with other build options to the ``west build`` command if you need to override the defaults.
+For example, to build the Aliro Access Control Application with Bluetooth LE and UWB transport on the nRF5340 DK:
 
 .. code-block:: bash
 
-   west build -p -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=uwb_qm35 -DCONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+   west build -p -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=uwb_qm35
 
 
 .. list-table::
@@ -57,6 +58,7 @@ For example, to build the Aliro Access Control Application with Bluetooth LE and
      - Description
    * - ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE``
      - Enables Expedited-fast phase support in the Aliro stack integration.
+       It is enabled by default.
    * - ``CONFIG_MAX_NUMBER_OF_KPERSISTENT``
      - Maximum number of Kpersistent keys stored for Expedited-fast authentication.
        The default value is ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS``.
@@ -99,7 +101,8 @@ Build, configuration, and provisioning
 ======================================
 
 The following Kconfig options control Step-up phase support and credential storage limits.
-Set them in the application's :file:`prj.conf` or pass along with other build options to the ``west build`` command.
+Step-up phase support is enabled by default, so no extra Kconfig option is required to enable it.
+Set them in the application's :file:`prj.conf` or pass along with other build options to the ``west build`` command if you need to override the defaults.
 
 .. list-table::
    :header-rows: 1
@@ -108,6 +111,7 @@ Set them in the application's :file:`prj.conf` or pass along with other build op
      - Description
    * - ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``
      - Enables Step-up phase support in the Aliro stack integration.
+       It is enabled by default.
    * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS``
      - Maximum number of Access Credential public keys stored in the Access Manager during Step-up authorization.
    * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS``
@@ -115,10 +119,10 @@ Set them in the application's :file:`prj.conf` or pass along with other build op
        See :file:`applications/*/src/aliro/access_manager/Kconfig` for defaults and help text.
 
 .. note::
-   In the Matter and Aliro Door Lock Application, ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` and ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` are enabled by default.
-   Credential Issuer keys are provisioned through Matter during normal setup.
+   ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` and ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` are enabled by default in both the Aliro Access Control Application and the Matter and Aliro Door Lock Application.
+   In the Matter and Aliro Door Lock Application, Credential Issuer keys are provisioned through Matter during normal setup.
 
-When Matter support is disabled, provision Credential Issuer public keys manually before using Step-up.
+In the Aliro Access Control Application, provision Credential Issuer public keys manually before using Step-up.
 From the serial console, run the following command:
 
 .. code-block:: console
@@ -126,12 +130,6 @@ From the serial console, run the following command:
    uart:~$ dl provisioning CI_key set <key id> <65-byte public key in hex without 0x>
 
 For full provisioning instructions, see :ref:`aliro_testing_provisioning_cli`.
-
-For example, to build the Aliro Access Control Application with Step-up phase support on the nRF5340 DK:
-
-.. code-block:: bash
-
-   west build -p -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- -DCONFIG_DOOR_LOCK_STEP_UP_PHASE=y
 
 Reader certificates
 *******************
