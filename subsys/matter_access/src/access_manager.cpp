@@ -131,10 +131,10 @@ bool AccessManager<CRED_BIT_MASK>::ValidateCredential(CredentialTypeEnum credent
 			continue;
 		}
 
-		Data::User *user{ nullptr };
-		if (GetCredentialUser(static_cast<uint16_t>(index), credentialType, &user) == CHIP_NO_ERROR) {
+		uint16_t userIndex{};
+		if (GetCredentialUserIndex(static_cast<uint16_t>(index), credentialType, userIndex) == CHIP_NO_ERROR) {
 			result = ValidateCredentialResult{
-				.mUserId = static_cast<uint16_t>(user->mInfo.mFields.mUserUniqueId),
+				.mUserIndex = userIndex,
 				.mCredential = LockOpCredentials{ credentialType, static_cast<uint16_t>(index) },
 			};
 		} else {

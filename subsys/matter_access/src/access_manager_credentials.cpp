@@ -67,10 +67,11 @@ CHIP_ERROR AccessManager<CRED_BIT_MASK>::UpdateAliroEvictableCredential(uint16_t
 			    CHIP_ERROR_INVALID_ARGUMENT);
 
 	/* Find the User with Credential Issuer credential */
-	Data::User *credentialIssuerUser{ nullptr };
-	VerifyOrReturnError(CHIP_NO_ERROR == Instance().GetCredentialUser(credentialIssuerIndex,
-									  CredentialTypeEnum::kAliroCredentialIssuerKey,
-									  &credentialIssuerUser),
+	uint16_t credentialIssuerUserIndex{};
+	VerifyOrReturnError(CHIP_NO_ERROR ==
+				    Instance().GetCredentialUserIndex(credentialIssuerIndex,
+								      CredentialTypeEnum::kAliroCredentialIssuerKey,
+								      credentialIssuerUserIndex),
 			    CHIP_ERROR_NOT_FOUND);
 
 	/* Find the credential array in the credentials database */
@@ -80,7 +81,8 @@ CHIP_ERROR AccessManager<CRED_BIT_MASK>::UpdateAliroEvictableCredential(uint16_t
 	VerifyOrReturnError(success, CHIP_ERROR_INTERNAL);
 
 	/* Add Evictable Credential to the User's credentials list */
-	VerifyOrReturnError(CHIP_NO_ERROR == credentialIssuerUser->AddAliroEvictableCredential(credentialIndex),
+	auto &credentialIssuerUser = Instance().mUsers[credentialIssuerUserIndex - 1];
+	VerifyOrReturnError(CHIP_NO_ERROR == credentialIssuerUser.AddAliroEvictableCredential(credentialIndex),
 			    CHIP_ERROR_INTERNAL);
 
 	/* Update the Evictable Credential in the credentials database */
@@ -139,7 +141,7 @@ bool AccessManager<CRED_BIT_MASK>::DoSetCredential(Data::Credential &credential,
 						   DlCredentialStatus credentialStatus,
 						   CredentialTypeEnum credentialType, const ByteSpan &secret)
 {
-	Data::User *user{ nullptr };
+	uint16_t userIndex{};
 	credential.mInfo.mFields.mStatus = static_cast<uint8_t>(credentialStatus);
 	credential.mInfo.mFields.mCredentialType = static_cast<uint8_t>(credentialType);
 	credential.mInfo.mFields.mCreationSource = static_cast<uint8_t>(DlAssetSource::kMatterIM);
@@ -150,7 +152,7 @@ bool AccessManager<CRED_BIT_MASK>::DoSetCredential(Data::Credential &credential,
 	if (!secret.empty()) {
 		credential.mSecret.mDataLength = secret.size();
 		memcpy(credential.mSecret.mData, secret.data(), secret.size());
-	} else if (CHIP_NO_ERROR == Instance().GetCredentialUser(credentialIndex, credentialType, &user)) {
+	} else if (CHIP_NO_ERROR == Instance().GetCredentialUserIndex(credentialIndex, credentialType, userIndex)) {
 		/* Credential already exists, and the new secret is empty, so the credential is being cleared.
 		 * Inform the higher layer about clearing the credential and provide current credential data.
 		 */
@@ -203,7 +205,7 @@ bool AccessManager<CRED_BIT_MASK>::DoSetCredential(Data::Credential &credential,
 		credential.mInfo.mFields.mStatus == static_cast<uint8_t>(DlCredentialStatus::kAvailable) ? "available" :
 													   "occupied");
 
-	if (CHIP_NO_ERROR == Instance().GetCredentialUser(credentialIndex, credentialType, &user)) {
+	if (CHIP_NO_ERROR == Instance().GetCredentialUserIndex(credentialIndex, credentialType, userIndex)) {
 		if (Instance().mSetCredentialCallback && credential.mSecret.mDataLength > 0) {
 			ByteSpan secret = { credential.mSecret.mData, credential.mSecret.mDataLength };
 			Instance().mSetCredentialCallback(credentialIndex, credentialType, secret);
@@ -214,12 +216,10 @@ bool AccessManager<CRED_BIT_MASK>::DoSetCredential(Data::Credential &credential,
 }
 
 template <Data::CredentialsBits CRED_BIT_MASK>
-CHIP_ERROR AccessManager<CRED_BIT_MASK>::GetCredentialUser(uint16_t credentialIndex, CredentialTypeEnum credentialType,
-							   Data::User **userPtr)
+CHIP_ERROR AccessManager<CRED_BIT_MASK>::GetCredentialUserIndex(uint16_t credentialIndex,
+								CredentialTypeEnum credentialType, uint16_t &userIndex)
 {
-	VerifyOrReturnError(userPtr != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
-
-	*userPtr = nullptr;
+	userIndex = 0;
 
 	for (size_t idxUsr = 0; idxUsr < CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_USERS; ++idxUsr) {
 		auto &user = Instance().mUsers[idxUsr];
@@ -229,7 +229,7 @@ CHIP_ERROR AccessManager<CRED_BIT_MASK>::GetCredentialUser(uint16_t credentialIn
 			auto &credentialStruct = user.mOccupiedCredentials.mData[idxCred];
 			if (credentialStruct.credentialIndex == credentialIndex &&
 			    credentialStruct.credentialType == credentialType) {
-				*userPtr = &user;
+				userIndex = static_cast<uint16_t>(idxUsr + 1);
 				return CHIP_NO_ERROR;
 			}
 		}

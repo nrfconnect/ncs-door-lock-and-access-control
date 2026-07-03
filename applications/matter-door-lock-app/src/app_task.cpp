@@ -181,14 +181,14 @@ void AppTask::UpdateClusterStateHandler(const BoltLockManager::StateData &stateD
 	} else {
 		LOG_INF("Updating LockState attribute");
 
-		Nullable<uint16_t> userId;
+		Nullable<uint16_t> userIndex;
 		Nullable<List<const LockOpCredentials>> credentials;
 #ifdef CONFIG_LOCK_PASS_CREDENTIALS_TO_SET_LOCK_STATE
 		List<const LockOpCredentials> credentialList;
 #endif
 
 		if (!stateData.mValidateCredentialResult.IsNull()) {
-			userId = { stateData.mValidateCredentialResult.Value().mUserId };
+			userIndex = { stateData.mValidateCredentialResult.Value().mUserIndex };
 
 #ifdef CONFIG_LOCK_PASS_CREDENTIALS_TO_SET_LOCK_STATE
 			/* `DoorLockServer::SetLockState` exptects list of `LockOpCredentials`,
@@ -200,8 +200,9 @@ void AppTask::UpdateClusterStateHandler(const BoltLockManager::StateData &stateD
 #endif
 		}
 
-		if (!DoorLockServer::Instance().SetLockState(kLockEndpointId, newLockState, stateData.mSource, userId,
-							     credentials, stateData.mFabricIdx, stateData.mNodeId)) {
+		if (!DoorLockServer::Instance().SetLockState(kLockEndpointId, newLockState, stateData.mSource,
+							     userIndex, credentials, stateData.mFabricIdx,
+							     stateData.mNodeId)) {
 			LOG_ERR("Failed to update LockState attribute");
 		}
 	}
