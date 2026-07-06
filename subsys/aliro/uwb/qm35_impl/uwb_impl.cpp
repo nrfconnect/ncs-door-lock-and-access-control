@@ -36,9 +36,7 @@
 
 LOG_MODULE_REGISTER(UwbImpl, CONFIG_DOOR_LOCK_ALIRO_UWB_LOG_LEVEL);
 
-using DoorLock::Utils::make_unique_array_nothrow;
-using DoorLock::Utils::new_nothrow;
-using DoorLock::Utils::ToUnderlying;
+using namespace DoorLock::Utils;
 
 namespace {
 
@@ -678,7 +676,6 @@ int UltraWideBandImpl::_ResumeRangingSession(SessionContextHandle sessionContext
 
 int UltraWideBandImpl::AddSession(UwbSessionContext uwbSessionContext, SessionContextHandle sessionContextHandle)
 {
-	using DoorLock::Utils::MutexGuard;
 	auto newCtx = new_nothrow<SessionContext>(uwbSessionContext, sessionContextHandle);
 	VerifyOrReturnValue(newCtx, -ENOMEM, LOG_ERR("Memory allocation failed for session context."));
 
@@ -695,7 +692,6 @@ int UltraWideBandImpl::AddSession(UwbSessionContext uwbSessionContext, SessionCo
 
 void UltraWideBandImpl::RemoveSession(SessionContext *sessionCtx)
 {
-	using DoorLock::Utils::MutexGuard;
 	{
 		MutexGuard lock{ mMutex };
 		VerifyOrReturn(sys_slist_find_and_remove(&mActiveSessionsList, &sessionCtx->mSessionContextNode),
@@ -712,7 +708,6 @@ void UltraWideBandImpl::RemoveSession(SessionContext *sessionCtx)
 
 void UltraWideBandImpl::RemoveAllSessions()
 {
-	using DoorLock::Utils::MutexGuard;
 	while (true) {
 		SessionContext *sessionCtx = nullptr;
 
@@ -749,7 +744,6 @@ void UltraWideBandImpl::_StopRadarSession()
 
 SessionContext *UltraWideBandImpl::FindSession(const UwbSessionContext uwbSessionCtx)
 {
-	using DoorLock::Utils::MutexGuard;
 	SessionContext *sessionCtx{};
 
 	MutexGuard lock{ mMutex };
@@ -764,7 +758,6 @@ SessionContext *UltraWideBandImpl::FindSession(const UwbSessionContext uwbSessio
 
 SessionContext *UltraWideBandImpl::FindSession(SessionContextHandle sessionContextData)
 {
-	using DoorLock::Utils::MutexGuard;
 	SessionContext *sessionCtx{};
 
 	MutexGuard lock{ mMutex };
@@ -780,7 +773,6 @@ SessionContext *UltraWideBandImpl::FindSession(SessionContextHandle sessionConte
 #ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 std::optional<uint8_t> UltraWideBandImpl::_GetDisambiguationSessionIdx(SessionContextHandle sessionContextData)
 {
-	using DoorLock::Utils::MutexGuard;
 	// Hold the mutex for the entire lookup+read to prevent a session from being removed and
 	// freed between FindSession() releasing the lock and reading mDisambiguationSessionIdx.
 	MutexGuard lock{ mMutex };
