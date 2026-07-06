@@ -41,3 +41,11 @@ tests:
     - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
     - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
     - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+  sonarqube.door_lock:
+    platform_allow: *id001
+    integration_platforms: *id001
+    extra_args:
+    - SNIPPET="uwb_qm35_dfu"
+    - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp;bt_nus"
+    - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
+    - CONFIG_DOOR_LOCK_READER_CERTIFICATE=y

@@ -1,0 +1,115 @@
+name: SonarQube
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**/README.md'
+      - 'LICENSE'
+      - 'CODEOWNERS'
+      - '.gitignore'
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: sonarqube-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  board: nrf54lm20dk/nrf54lm20b/cpuapp
+  app_folder: applications/matter-aliro-door-lock-app
+
+jobs:
+  quality-check:
+    name: Quality check
+    runs-on: ubuntu-24.04
+    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:v3.3.0
+    permissions:
+      contents: read
+    defaults:
+      run:
+        # It is required to set `bash` as default shell
+        shell: bash
+
+    steps:
+      - name: Set build wrapper output directory
+        run: echo "BUILD_WRAPPER_OUT_DIR=$HOME/build_wrapper_output_directory" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Install apt dependencies
+        # The sdk-nrf-toolchain image doesn't ship curl/unzip (needed by install-build-wrapper to
+        # download and extract the wrapper archive) or gnupg (needed by the SonarQube scan action
+        # to verify the Sonar Scanner CLI download signature)
+        run: |
+          apt update
+          apt install -y curl unzip gnupg
+
+      - name: Install Build Wrapper
+        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@713881670b6b3676cda39549040e2d88c70d582e # v8.2.0
+        env:
+          # The toolchain's bundled (older) libnghttp2 on LD_LIBRARY_PATH clashes with the apt-installed
+          # curl's libcurl, which needs a newer one. Clear it so curl falls back to the system libraries.
+          LD_LIBRARY_PATH: ""
+
+      - name: Set up workspace directory
+        run: echo "WEST_WORKSPACE=$(cd .. && pwd)" >> $GITHUB_ENV
+
+      - name: Cache west modules
+        id: cache-west
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ env.WEST_WORKSPACE }}/bootloader
+            ${{ env.WEST_WORKSPACE }}/modules
+            ${{ env.WEST_WORKSPACE }}/nrf
+            ${{ env.WEST_WORKSPACE }}/nrfxlib
+            ${{ env.WEST_WORKSPACE }}/test
+            ${{ env.WEST_WORKSPACE }}/tools
+            ${{ env.WEST_WORKSPACE }}/zephyr
+            ${{ env.WEST_WORKSPACE }}/qm35-aliro-sdk
+          # Distinct from the other workflows' west caches, since this one additionally pulls in the
+          # qm35-aliro-sdk group via the manifest.group-filter override below. Still allow falling back
+          # to the regular (non-qm35) cache: west update will fetch whatever's missing anyway.
+          # Hashing patches.yml (which embeds a sha256sum per patch) alongside west.yml means any patch
+          # content change invalidates this cache entry too, so the saved tree (with patches applied)
+          # always matches the patches that were actually applied when it was cached.
+          key: ${{ runner.os }}-west-qm35-${{ hashFiles('west.yml', 'zephyr/patches.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-west-qm35-
+            ${{ runner.os }}-west-
+
+      - name: Prepare west project
+        run: |
+          west init -l
+          west config manifest.group-filter -- "+qm35-aliro-sdk"
+          west patch clean
+          west update -o=--depth=1 -n
+          west patch apply
+
+      - name: Build with sonarqube wrapper
+        run: |
+          cd ${{ env.app_folder }}
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} west build . -b ${{ env.board }} -T sonarqube.door_lock
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e # v8.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          args: >
+            -Dsonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
+            -Dsonar.scm.revision=${{ env.HEAD_SHA }}
+            -Dsonar.pullrequest.key=${{ env.PR_NUMBER }}
+            -Dsonar.pullrequest.branch=${{ env.PR_BRANCH }}
+            -Dsonar.pullrequest.base=${{ env.BASE_REF }}
