@@ -1,0 +1,6 @@
+paths:
+  - applications
+  - include
+  - lib
+  - subsys
+  - tests
