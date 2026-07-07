@@ -89,9 +89,7 @@ jobs:
         run: |
           west init -l
           west config manifest.group-filter -- "+qm35-aliro-sdk"
-          if [ "${{ steps.cache-west.outputs.cache-hit }}" == "true" ]; then
-            west patch clean
-          fi
+          west patch clean || true
           west update -o=--depth=1 -n
           west patch apply
 
