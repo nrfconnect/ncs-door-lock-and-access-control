@@ -24,6 +24,13 @@ manifest:
       revision: v1.1.0
       groups:
         - ncs-door-lock-app-extensions
+    - name: vendor1
+      url: https://gitlab.com/qorvo/qswg/public/vendor1
+      revision: release/QM35ALIRO_ENG-0.7.0
+      path: qm35-aliro-sdk/project/cherry/vendor1
+      groups:
+        - vendor1
   group-filter:
     - -qm35-aliro-sdk
     - -ncs-door-lock-app-extensions
+    - -vendor1

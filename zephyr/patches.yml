@@ -35,3 +35,9 @@ patches:
     author: Marcin Kajor
     email: marcin.kajor@nordicsemi.no
     date: 2026-04-29
+  - path: vendor1/vendor1.patch
+    sha256sum: bc557d0b0addfaf50d66f9c47699478c7e7074f9fbb03063b1a4bf9a4044d5de
+    module: qm35-aliro-sdk/project/cherry/vendor1
+    author: Marcin Kajor
+    email: marcin.kajor@nordicsemi.no
+    date: 2026-04-28
