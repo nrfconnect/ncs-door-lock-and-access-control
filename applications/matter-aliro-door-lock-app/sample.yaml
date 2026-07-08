@@ -6,46 +6,160 @@ common:
   build_only: true
 tests:
   app.door_lock.nfc-ble-uwb.dfu_smp-matter-exp_fast-step_up:
-    platform_allow: &id001
-    - nrf54lm20dk/nrf54lm20b/cpuapp
-    integration_platforms: *id001
+    tags:
+      - dfu_smp
+      - matter
+    platform_allow: &platform_54lm20
+      - nrf54lm20dk/nrf54lm20b/cpuapp
+    integration_platforms: *platform_54lm20
     extra_args:
-    - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
-    - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
-    - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
-    - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
+      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+  app.door_lock.nfc-ble-uwb.bt_nus-matter-exp_fast-release:
+    tags:
+      - matter
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;bt_nus"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_BT_APP_PASSKEY=y
+      - FILE_SUFFIX=release
+
+  app.door_lock.nfc-ble-uwb.bt_nus-matter-exp_fast:
+    tags:
+      - matter
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;bt_nus"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_BT_APP_PASSKEY=y
+
+  app.door_lock.nfc.bt_nus-matter-exp_fast-release:
+    tags:
+      - matter
+    platform_allow: &platform_54l15_52840_5340
+      - nrf54l15dk/nrf54l15/cpuapp
+      - nrf52840dk/nrf52840
+      - nrf5340dk/nrf5340/cpuapp
+    integration_platforms: *platform_54l15_52840_5340
+    extra_args:
+      - matter-aliro-door-lock-app_SNIPPET="bt_nus"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_BT_APP_PASSKEY=y
+      - FILE_SUFFIX=release
+
+  app.door_lock.nfc.bt_nus-matter-exp_fast:
+    tags:
+      - matter
+    platform_allow: *platform_54l15_52840_5340
+    integration_platforms: *platform_54l15_52840_5340
+    extra_args:
+      - matter-aliro-door-lock-app_SNIPPET="bt_nus"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_BT_APP_PASSKEY=y
+
   app.door_lock.nfc-ble-uwb.dfu_smp-matter-step_up:
-    platform_allow: *id001
-    integration_platforms: *id001
+    tags:
+      - dfu_smp
+      - matter
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
     extra_args:
-    - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
-    - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
-    - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
-    - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
+      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
   app.door_lock.nfc.dfu_smp-matter-step_up:
-    platform_allow: &id002
-    - nrf54l15dk/nrf54l15/cpuapp
-    - nrf52840dk/nrf52840
-    - nrf5340dk/nrf5340/cpuapp
-    integration_platforms: *id002
+    tags:
+      - dfu_smp
+      - matter
+    platform_allow: *platform_54l15_52840_5340
+    integration_platforms: *platform_54l15_52840_5340
     extra_args:
-    - matter-aliro-door-lock-app_SNIPPET="dfu_smp"
-    - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
-    - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
-    - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+      - matter-aliro-door-lock-app_SNIPPET="dfu_smp"
+      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+  app.door_lock.nfc-ble-uwb.matter-qm35_dfu:
+    tags:
+      - matter
+    platform_allow: &platform_5340
+      - nrf5340dk/nrf5340/cpuapp
+    integration_platforms: *platform_5340
+    extra_args:
+      - SNIPPET="uwb_qm35_dfu"
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=n
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+      - CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_DFU_VERSION_COMPARISON_DIFFERENT=y
+
   smoke.door_lock.nfc-ble-uwb.dfu_smp-matter-exp_fast-step_up:
-    platform_allow: *id001
-    integration_platforms: *id001
+    tags:
+      - dfu_smp
+      - matter
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
     extra_args:
-    - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
-    - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
-    - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
-    - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp"
+      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+
+  smoke.door_lock.nfc.dfu_smp-matter-exp_fast:
+    tags:
+      - dfu_smp
+      - matter
+    platform_allow: &platform_54l15
+      - nrf54l15dk/nrf54l15/cpuapp
+    integration_platforms: *platform_54l15
+    extra_args:
+      - matter-aliro-door-lock-app_SNIPPET="dfu_smp"
+      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_LOG_LEVEL_DBG=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
+
+  do_not_test.door_lock.nfc.matter-nfc_prop-matter_ext:
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - CONFIG_NCS_DOOR_LOCK_APP_EXTENSIONS_NFC=y
+      - CONFIG_NCS_DOOR_LOCK_APP_EXTENSIONS_MATTER=y
+
+  do_not_test.door_lock.nfc-ble-uwb.matter-nfc_prop-matter_ext-exp_fast-step_up:
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - CONFIG_NCS_DOOR_LOCK_APP_EXTENSIONS_NFC=y
+      - CONFIG_NCS_DOOR_LOCK_APP_EXTENSIONS_MATTER=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;matter-diagnostic-logs"
+
+  do_not_test.door_lock.nfc-ble-uwb.matter-front-back-detection:
+    tags:
+      - matter
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35"
+      - CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION=y
+
   sonarqube.door_lock:
-    platform_allow: *id001
-    integration_platforms: *id001
+    platform_allow: *platform_54lm20
+    integration_platforms: *platform_54lm20
     extra_args:
-    - SNIPPET="uwb_qm35_dfu"
-    - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;dfu_smp;bt_nus"
-    - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
-    - CONFIG_DOOR_LOCK_READER_CERTIFICATE=y
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35"
+      - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
+      - CONFIG_DOOR_LOCK_STEP_UP_PHASE=y
+      - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
