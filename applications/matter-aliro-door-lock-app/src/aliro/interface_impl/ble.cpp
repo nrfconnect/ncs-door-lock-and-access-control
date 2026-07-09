@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#ifdef CONFIG_NCS_ALIRO_BLE_UWB
-
 #include <aliro_service/aliro_service.h>
 
 /**
@@ -32,5 +30,3 @@ ProtocolVersion GetProtocolVersion(ConnectionHandle handle)
 }
 
 } // namespace Aliro::Interface::Ble
-
-#endif // CONFIG_NCS_ALIRO_BLE_UWB
