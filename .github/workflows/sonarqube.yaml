@@ -8,6 +8,7 @@ on:
       - 'LICENSE'
       - 'CODEOWNERS'
       - '.gitignore'
+      - '.editorconfig'
     branches:
       - main
   push:

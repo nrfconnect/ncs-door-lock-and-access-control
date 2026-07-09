@@ -16,6 +16,7 @@
 /tests/                                   @markaj-nordic @adigie
 /zephyr/                                  @markaj-nordic @adigie
 /.clang-format                            @markaj-nordic @adigie
+/.editorconfig                            @markaj-nordic @adigie
 /.gitignore                               @markaj-nordic @adigie
 /CMakeLists.txt                           @markaj-nordic @adigie
 /CODEOWNERS                               @markaj-nordic
