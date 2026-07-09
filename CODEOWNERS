@@ -1,0 +1,26 @@
+# CODEOWNERS for auto-review assigning in GitHub
+# https://help.github.com/en/articles/about-code-owners#codeowners-syntax
+
+# Root folder
+/.github/                                 @rami-nordic @markaj-nordic @adigie
+/applications/                            @markaj-nordic @adigie
+/cmake/                                   @markaj-nordic @adigie
+/docs/                                    @markaj-nordic @annwoj
+/drivers/                                 @markaj-nordic @adigie
+/dts/                                     @markaj-nordic @adigie
+/include/                                 @markaj-nordic @adigie
+/lib/                                     @markaj-nordic @adigie
+/scripts/                                 @markaj-nordic @adigie
+/snippets/                                @markaj-nordic @adigie
+/subsys/                                  @markaj-nordic @adigie
+/tests/                                   @markaj-nordic @adigie
+/zephyr/                                  @markaj-nordic @adigie
+/.clang-format                            @markaj-nordic @adigie
+/.gitignore                               @markaj-nordic @adigie
+/CMakeLists.txt                           @markaj-nordic @adigie
+/CODEOWNERS                               @markaj-nordic
+/Kconfig                                  @markaj-nordic @adigie
+/LICENSE                                  @markaj-nordic @adigie
+/README.md                                @markaj-nordic @adigie
+/sonar-project.properties                 @markaj-nordic @adigie
+/west.yml                                 @markaj-nordic @adigie
