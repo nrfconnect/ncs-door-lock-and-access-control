@@ -16,3 +16,5 @@ add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_TIME_UTILS time_utils)
 add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_UWB_DISAMBIGUATION disambiguation)
 add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_UWB uwb)
 add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM lock_sim)
+
+add_subdirectory(interface_impl)
