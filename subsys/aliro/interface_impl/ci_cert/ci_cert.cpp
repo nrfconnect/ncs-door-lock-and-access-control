@@ -36,7 +36,8 @@ AliroError VerifyKeyType(const mbedtls_pk_context *pk)
 {
 	constexpr size_t kEccP256KeyBits{ CryptoTypes::kEccP256KeyPrivateKeyLength * BITS_PER_BYTE };
 	psa_key_attributes_t attributes{};
-	mbedtls_pk_get_psa_attributes(pk, PSA_KEY_USAGE_VERIFY_HASH, &attributes);
+	const auto result = mbedtls_pk_get_psa_attributes(pk, PSA_KEY_USAGE_VERIFY_HASH, &attributes);
+	VerifyOrReturnValue(result == 0, ALIRO_INVALID_DATA_CONTENT, LOG_ERR("Failed to get PSA attributes"));
 
 	psa_key_type_t type = psa_get_key_type(&attributes);
 	VerifyOrReturnValue(type == PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1), ALIRO_INVALID_DATA_CONTENT,
