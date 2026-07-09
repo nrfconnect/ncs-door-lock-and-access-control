@@ -11,5 +11,6 @@ rsource "log/Kconfig"
 rsource "uwb/Kconfig"
 rsource "reader/Kconfig"
 rsource "crypto/Kconfig"
+rsource "ci_cert/Kconfig"
 
 endmenu

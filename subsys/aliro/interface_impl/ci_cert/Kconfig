@@ -1,0 +1,27 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_INTERFACE_IMPL_CI_CERT
+	bool "Aliro Interface Implementation - Credential Issuer Certificate"
+	depends on NCS_ALIRO
+	depends on DOOR_LOCK_ALIRO_CRYPTO_UTILS
+	help
+	  Common implementation of Aliro::Interface::CredentialIssuerCertificate.
+
+if DOOR_LOCK_ALIRO_INTERFACE_IMPL_CI_CERT
+
+module = DOOR_LOCK_ALIRO_INTERFACE_IMPL_CI_CERT
+module-str = Door Lock Aliro Interface Implementation Ci Cert
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_ALIRO_INTERFACE_IMPL_CI_CERT_VALIDATION
+	bool "Credential Issuer certificate validation"
+	select MBEDTLS_X509_LIBRARY
+	help
+	  When enabled, Credential Issuer certificates are validated.
+	  When disabled, Validate() returns ALIRO_ERROR_NOT_IMPLEMENTED.
+
+endif # DOOR_LOCK_ALIRO_INTERFACE_IMPL_CI_CERT
