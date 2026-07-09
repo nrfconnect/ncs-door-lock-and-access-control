@@ -1,0 +1,12 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_INTERFACE_IMPL_READER
+	bool "Aliro Interface Implementation - Reader"
+	depends on NCS_ALIRO
+	depends on DOOR_LOCK_ALIRO_READER_STORAGE
+	help
+	  Common implementation of Aliro::Interface::Reader.

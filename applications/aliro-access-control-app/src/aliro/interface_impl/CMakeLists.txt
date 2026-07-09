@@ -9,7 +9,6 @@ target_sources(app PRIVATE
   access.cpp
   ci_cert.cpp
   crypto.cpp
-  reader.cpp
   session.cpp
 )
 
