@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#include "aliro/interface.h"
-#include "aliro/utils.h"
+#include <aliro/interface.h>
+
+#include <doorlock/utils/utils.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/atomic.h>
 
-LOG_MODULE_REGISTER(interface_mutex, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(interface_os_mutex, CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_OS_LOG_LEVEL);
 
 namespace Aliro::Interface::Os::Mutex {
 

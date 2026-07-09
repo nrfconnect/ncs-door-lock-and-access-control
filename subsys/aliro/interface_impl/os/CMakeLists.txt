@@ -4,4 +4,10 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_OS os)
+zephyr_library()
+
+zephyr_library_sources(
+  os.cpp
+  os_mutex.cpp
+  os_timer.cpp
+)

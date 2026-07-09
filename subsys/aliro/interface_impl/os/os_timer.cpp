@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#include "aliro/interface.h"
+#include <aliro/interface.h>
 
 #include <aliro_workqueue/aliro_workqueue.h>
 
@@ -13,9 +13,8 @@
 #include <zephyr/logging/log.h>
 
 #include <array>
-#include <tuple>
 
-LOG_MODULE_REGISTER(interface_os_timer, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(interface_os_timer, CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_OS_LOG_LEVEL);
 
 namespace Aliro::Interface::Os::Timer {
 
@@ -23,11 +22,7 @@ namespace {
 
 constexpr size_t kNfcStackTimers{ 1 };
 
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-constexpr size_t kBleStackTimers{ CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS };
-#else
-constexpr size_t kBleStackTimers{ 0 };
-#endif
+constexpr size_t kBleStackTimers{ CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_OS_BLE_STACK_TIMERS };
 
 constexpr size_t kStackTimerCount{ kNfcStackTimers + kBleStackTimers };
 
@@ -161,6 +156,6 @@ bool IsRunning(Handle handle)
 	return k_timer_remaining_ticks(&slot->mTimer) != 0;
 }
 
-SYS_INIT(InitTimerSlots, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
+SYS_INIT(InitTimerSlots, APPLICATION, CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_OS_TIMER_INIT_PRIORITY);
 
 } // namespace Aliro::Interface::Os::Timer

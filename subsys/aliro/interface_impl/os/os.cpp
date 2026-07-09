@@ -7,14 +7,15 @@
 #include <aliro/aliro.h>
 #include <aliro/errors.h>
 #include <aliro/interface.h>
-#include <aliro/utils.h>
+
 #include <aliro_workqueue/aliro_workqueue.h>
+#include <doorlock/utils/utils.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/atomic.h>
 
-LOG_MODULE_REGISTER(interface_events, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(interface_os, CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_OS_LOG_LEVEL);
 
 namespace Aliro::Interface::Os {
 
@@ -81,7 +82,7 @@ K_WORK_DEFINE(sProcessEventsWork, ProcessEventsWorkHandler);
 
 AliroError QueueEvent(void *event)
 {
-	VerifyOrReturnStatus(event != nullptr, ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnValue(event != nullptr, ALIRO_INVALID_ARGUMENT);
 
 	k_fifo_put(&sEventsFifo, event);
 	/* Signal that at least one event is pending since current worker pass started. */

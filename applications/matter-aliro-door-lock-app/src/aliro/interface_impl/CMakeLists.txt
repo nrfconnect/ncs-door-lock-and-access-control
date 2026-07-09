@@ -9,9 +9,6 @@ target_sources(app PRIVATE
   access.cpp
   ci_cert.cpp
   crypto.cpp
-  os_mutex.cpp
-  os_timer.cpp
-  os.cpp
   reader.cpp
   session.cpp
 )
