@@ -1,0 +1,20 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config DOOR_LOCK_ALIRO_INTERFACE_IMPL_UWB
+	bool "Aliro Interface Implementation - Uwb"
+	depends on NCS_ALIRO
+	depends on NCS_ALIRO_BLE_UWB
+	help
+	  Common implementation of Aliro::Interface::Uwb.
+
+if DOOR_LOCK_ALIRO_INTERFACE_IMPL_UWB
+
+module = DOOR_LOCK_ALIRO_INTERFACE_IMPL_UWB
+module-str = Door Lock Aliro Interface Implementation Uwb
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_ALIRO_INTERFACE_IMPL_UWB

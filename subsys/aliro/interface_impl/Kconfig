@@ -8,5 +8,6 @@ menu "Aliro Interface Implementation"
 
 rsource "os/Kconfig"
 rsource "log/Kconfig"
+rsource "uwb/Kconfig"
 
 endmenu

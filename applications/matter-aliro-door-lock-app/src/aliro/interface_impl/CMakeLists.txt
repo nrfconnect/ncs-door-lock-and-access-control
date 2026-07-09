@@ -15,5 +15,4 @@ target_sources(app PRIVATE
 
 target_sources_ifdef(CONFIG_NCS_ALIRO_BLE_UWB app PRIVATE
   ble.cpp
-  uwb.cpp
 )
