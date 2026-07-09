@@ -42,6 +42,8 @@ AliroError ImportPrivateKey(const Aliro::CryptoTypes::PrivateKey &privateKey, bo
 AliroError ImportPublicKey(const Aliro::CryptoTypes::PublicKey &publicKey, bool persistent,
 			   Aliro::CryptoTypes::KeyId &keyId);
 
+#ifdef CONFIG_NCS_ALIRO_BLE_UWB
+
 /**
  * @brief Import a Group Resolving Key.
  *
@@ -53,6 +55,8 @@ AliroError ImportPublicKey(const Aliro::CryptoTypes::PublicKey &publicKey, bool 
  */
 AliroError ImportGroupResolvingKey(const Aliro::CryptoTypes::GroupResolvingKey &groupResolvingKey, bool persistent,
 				   Aliro::CryptoTypes::KeyId &keyId);
+
+#endif // CONFIG_NCS_ALIRO_BLE_UWB
 
 /**
  * @brief Export EC public key.

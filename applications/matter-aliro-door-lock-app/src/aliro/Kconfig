@@ -44,6 +44,7 @@ config DOOR_LOCK_STEP_UP_PHASE
 config DOOR_LOCK_CREDENTIAL_ISSUER_CA
     bool "Support for Credential Issuer CA public key"
     depends on DOOR_LOCK_STEP_UP_PHASE
+    select MBEDTLS_X509_LIBRARY
     help
         If enabled, the Credential Issuer CA public key is supported.
         The Credential Issuer CA public key is used to verify the signature of the Credential Issuer certificate.
@@ -65,7 +66,6 @@ config DOOR_LOCK_TIME_CONCEPT
 endmenu # Aliro features
 
 rsource "platform/Kconfig"
-rsource "interface_impl/Kconfig"
 rsource "access_manager/Kconfig"
 rsource "cli/Kconfig"
 rsource "kpersistent_manager/Kconfig"

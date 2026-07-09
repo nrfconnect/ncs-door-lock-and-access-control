@@ -10,5 +10,6 @@ rsource "os/Kconfig"
 rsource "log/Kconfig"
 rsource "uwb/Kconfig"
 rsource "reader/Kconfig"
+rsource "crypto/Kconfig"
 
 endmenu

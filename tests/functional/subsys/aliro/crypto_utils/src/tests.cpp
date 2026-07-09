@@ -19,7 +19,9 @@ constexpr Aliro::CryptoTypes::PrivateKey kTestPrivateKey{ 0xfd, 0xf7, 0x1a, 0x37
 							  0x61, 0xcf, 0x8a, 0xf4, 0xcc, 0x5a, 0x70, 0xa9 };
 
 constexpr Aliro::CryptoTypes::KeyId kPrivateKeyId{ 1 };
+#ifdef CONFIG_NCS_ALIRO_BLE_UWB
 constexpr Aliro::CryptoTypes::KeyId kGroupResolvingKeyId{ 2 };
+#endif // CONFIG_NCS_ALIRO_BLE_UWB
 constexpr Aliro::CryptoTypes::KeyId kKpersistentKeyId{ 3 };
 constexpr Aliro::CryptoTypes::KeyId kNonExistentKeyId{ 4 };
 
@@ -106,6 +108,8 @@ ZTEST(crypto_utils_tests, test_ImportPublicKey_ExportPublicKey)
 	zassert_equal(ec, ALIRO_NO_ERROR, "Cannot destroy public key");
 }
 
+#ifdef CONFIG_NCS_ALIRO_BLE_UWB
+
 ZTEST(crypto_utils_tests, test_ImportGroupResolvingKey_ExportKey)
 {
 	Aliro::CryptoTypes::GroupResolvingKey testGroupResolvingKey{};
@@ -143,6 +147,8 @@ ZTEST(crypto_utils_tests, test_ImportGroupResolvingKey_ExportKey)
 		zassert_equal(ec, ALIRO_NO_ERROR, "Cannot destroy group resolving key");
 	}
 }
+
+#endif // CONFIG_NCS_ALIRO_BLE_UWB
 
 ZTEST(crypto_utils_tests, test_PreserveKey_IsKeyAvailable)
 {

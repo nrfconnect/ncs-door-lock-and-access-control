@@ -6,8 +6,9 @@
 
 #include <aliro/errors.h>
 #include <aliro/interface.h>
-#include <aliro/utils.h>
+
 #include <crypto_utils/crypto_utils.h>
+#include <doorlock/utils/utils.h>
 #include <reader_storage/reader.h>
 
 #include <psa/crypto.h>
@@ -16,7 +17,7 @@
 #include <algorithm>
 #include <cstdio>
 
-LOG_MODULE_REGISTER(crypto_psa, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(crypto_psa, CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_CRYPTO_LOG_LEVEL);
 
 namespace Aliro::Interface::Crypto {
 
@@ -98,10 +99,10 @@ exit:
 	/* From PSA API spec: Key derivation does not finish in the same way as other multi-part
 	 * operations. Call psa_key_derivation_abort() to release the key derivation operation
 	 * memory when the object is no longer required. */
-	psa_status_t abortStatus = psa_key_derivation_abort(&operation);
+	const psa_status_t abortStatus = psa_key_derivation_abort(&operation);
 
-	VerifyOrReturnStatus(abortStatus == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Key derivation abort failed [Error: %d]", status));
+	VerifyOrReturnValue(abortStatus == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Key derivation abort failed [Error: %d]", abortStatus));
 
 	return (status == PSA_SUCCESS) ? ALIRO_NO_ERROR : ALIRO_ERROR_INTERNAL;
 }
@@ -110,7 +111,7 @@ exit:
 
 AliroError GenerateRandom(uint8_t *buffer, size_t bufferLength)
 {
-	VerifyOrReturnStatus(buffer && bufferLength > 0, ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnValue(buffer && bufferLength > 0, ALIRO_INVALID_ARGUMENT);
 
 	return psa_generate_random(buffer, bufferLength) == PSA_SUCCESS ? ALIRO_NO_ERROR : ALIRO_ERROR_INTERNAL;
 }
@@ -120,34 +121,34 @@ AliroError GenerateEphemeralKeyPair(CryptoTypes::KeyId &keyId, CryptoTypes::Publ
 	const auto attributes = GetEphemeralKeyAttributes();
 
 	auto status = psa_generate_key(&attributes, &keyId);
-	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Cannot generate ephemeral keys [error: %d]", status));
+	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Cannot generate ephemeral keys [error: %d]", status));
 
 	return DoorLock::CryptoUtils::ExportPublicKey(keyId, ephemeralPubKey);
 }
 
 AliroError ImportSharedKey(const uint8_t *key, size_t keyLength, CryptoTypes::KeyId &keyId)
 {
-	VerifyOrReturnStatus(key && keyLength > 0, ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnValue(key && keyLength > 0, ALIRO_INVALID_ARGUMENT);
 
 	const auto attributes = GetSharedKeyAttributes();
 
 	psa_status_t status = psa_import_key(&attributes, key, keyLength, &keyId);
-	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Could not import key [Error: %d]", status));
+	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Could not import key [Error: %d]", status));
 
 	return ALIRO_NO_ERROR;
 }
 
 AliroError ImportSymmetricKey(const uint8_t *key, size_t keyLength, CryptoTypes::KeyId &keyId)
 {
-	VerifyOrReturnStatus(key && keyLength > 0, ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnValue(key && keyLength > 0, ALIRO_INVALID_ARGUMENT);
 
 	const auto attributes = GetSymmetricKeyAttributes();
 
 	psa_status_t status = psa_import_key(&attributes, key, keyLength, &keyId);
-	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Could not import key [Error: %d]", status));
+	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Could not import key [Error: %d]", status));
 
 	return ALIRO_NO_ERROR;
 }
@@ -159,7 +160,7 @@ AliroError DestroyKey(CryptoTypes::KeyId &keyId)
 
 AliroError GenerateSignature(const uint8_t *msg, const size_t msgLength, CryptoTypes::Signature &signature)
 {
-	VerifyOrReturnStatus(msg && msgLength > 0, ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnValue(msg && msgLength > 0, ALIRO_INVALID_ARGUMENT);
 
 	psa_status_t status = PSA_SUCCESS;
 	size_t outputLen{};
@@ -167,10 +168,10 @@ AliroError GenerateSignature(const uint8_t *msg, const size_t msgLength, CryptoT
 	status = psa_sign_message(DoorLock::ReaderStorage::GetPrivateKeyId(), PSA_ALG_ECDSA(PSA_ALG_SHA_256), msg,
 				  msgLength, signature.data(), signature.size(), &outputLen);
 
-	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Cannot sign message [Error: %d]", status));
-	VerifyOrReturnStatus(outputLen == CryptoTypes::kEccP256SignatureLength, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Invalid signature length"));
+	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Cannot sign message [Error: %d]", status));
+	VerifyOrReturnValue(outputLen == CryptoTypes::kEccP256SignatureLength, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Invalid signature length"));
 
 	return ALIRO_NO_ERROR;
 }
@@ -179,9 +180,11 @@ AliroError VerifySignature(const CryptoTypes::PublicKey &publicKey, const uint8_
 			   const CryptoTypes::Signature &signature)
 {
 	CryptoTypes::KeyId pubKeyId{ 0 };
-	ReturnErrorOnFailure(DoorLock::CryptoUtils::ImportPublicKey(publicKey, false, pubKeyId));
 
-	const auto status = DoorLock::CryptoUtils::VerifySignature(pubKeyId, msg, msgLength, signature);
+	auto status = DoorLock::CryptoUtils::ImportPublicKey(publicKey, false, pubKeyId);
+	VerifyOrReturnValue(status == ALIRO_NO_ERROR, status);
+
+	status = DoorLock::CryptoUtils::VerifySignature(pubKeyId, msg, msgLength, signature);
 
 	DoorLock::CryptoUtils::DestroyKey(pubKeyId);
 
@@ -196,10 +199,10 @@ AliroError RawKeyAgreement(CryptoTypes::KeyId keyId, const CryptoTypes::PublicKe
 	psa_status_t status = psa_raw_key_agreement(PSA_ALG_ECDH, // ECKA-DH with P-256
 						    keyId, peerPublicKey.data(), peerPublicKey.size(),
 						    sharedSecret.data(), sharedSecret.size(), &outputLength);
-	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Cannot perform raw key agreement [Error: %d]", status));
-	VerifyOrReturnStatus(outputLength == sharedSecret.size(), ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Invalid raw key agreement output length"));
+	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Cannot perform raw key agreement [Error: %d]", status));
+	VerifyOrReturnValue(outputLength == sharedSecret.size(), ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Invalid raw key agreement output length"));
 
 	return ALIRO_NO_ERROR;
 }
@@ -223,7 +226,7 @@ AliroError DeriveSymmetricKey(CryptoTypes::KeyId keyId, const uint8_t *info, siz
 AliroError DeriveRawKey(CryptoTypes::KeyId keyId, const uint8_t *info, size_t infoLength, const uint8_t *salt,
 			size_t saltLength, uint8_t *outputKey, size_t outputKeyLength)
 {
-	VerifyOrReturnStatus(outputKey && outputKeyLength > 0, ALIRO_INVALID_ARGUMENT, LOG_WRN("Invalid output key"));
+	VerifyOrReturnValue(outputKey && outputKeyLength > 0, ALIRO_INVALID_ARGUMENT, LOG_WRN("Invalid output key"));
 
 	const psa_key_attributes_t attributes = GetRawKeyAttributes(outputKeyLength);
 
@@ -243,14 +246,14 @@ AliroError AeadEncrypt(CryptoTypes::KeyId keyId, const uint8_t *plainTxt, size_t
 		       const uint8_t *additionalData, size_t additionalDataLength, const CryptoTypes::Nonce &nonce,
 		       uint8_t *cipherText, CryptoTypes::AuthenticationTag &authTag)
 {
-	VerifyOrReturnStatus(nonce.size() == CryptoTypes::kNonceLength, ALIRO_INVALID_ARGUMENT);
-	VerifyOrReturnStatus(((plainTxt != nullptr) == (plainTxtLength != 0)), ALIRO_ERROR_INTERNAL);
-	VerifyOrReturnStatus(additionalData || additionalDataLength == 0, ALIRO_ERROR_INTERNAL);
-	VerifyOrReturnStatus(cipherText, ALIRO_ERROR_INTERNAL);
+	VerifyOrReturnValue(nonce.size() == CryptoTypes::kNonceLength, ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnValue(((plainTxt != nullptr) == (plainTxtLength != 0)), ALIRO_ERROR_INTERNAL);
+	VerifyOrReturnValue(additionalData || additionalDataLength == 0, ALIRO_ERROR_INTERNAL);
+	VerifyOrReturnValue(cipherText, ALIRO_ERROR_INTERNAL);
 
 	const psa_algorithm_t algorithm = PSA_ALG_GCM;
 
-#ifndef CONFIG_DOOR_LOCK_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
+#ifndef CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
 	psa_aead_operation_t operation = PSA_AEAD_OPERATION_INIT;
 	size_t outLength{};
 	size_t authTagLengthOutput{};
@@ -297,9 +300,9 @@ exit:
 	}
 	return ALIRO_ERROR_INTERNAL;
 
-#else // CONFIG_DOOR_LOCK_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
+#else // CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
 
-	constexpr size_t kPlainTextSize{ CONFIG_DOOR_LOCK_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART_BUFFER_SIZE };
+	constexpr size_t kPlainTextSize{ CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART_BUFFER_SIZE };
 	constexpr size_t kBufferSize{ kPlainTextSize + CryptoTypes::kAuthenticationTagLength };
 	const size_t expOutLen{ plainTxtLength + CryptoTypes::kAuthenticationTagLength };
 
@@ -311,8 +314,8 @@ exit:
 	psa_status_t status =
 		psa_aead_encrypt(keyId, algorithm, nonce.data(), nonce.size(), additionalData, additionalDataLength,
 				 plainTxt, plainTxtLength, buffer.data(), buffer.size(), &outLen);
-	VerifyOrReturnStatus(status == PSA_SUCCESS && outLen == expOutLen, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("AEAD encryption failed [Error: %d]", status));
+	VerifyOrReturnValue(status == PSA_SUCCESS && outLen == expOutLen, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("AEAD encryption failed [Error: %d]", status));
 
 	if (plainTxtLength) {
 		std::copy_n(buffer.data(), plainTxtLength, cipherText);
@@ -322,7 +325,7 @@ exit:
 
 	return ALIRO_NO_ERROR;
 
-#endif // CONFIG_DOOR_LOCK_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
+#endif // CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_CRYPTO_PSA_AEAD_SINGLE_PART
 }
 
 AliroError AeadDecrypt(CryptoTypes::KeyId keyId, const uint8_t *cipherTextWithTag, size_t cipherTextWithTagLength,
@@ -331,10 +334,10 @@ AliroError AeadDecrypt(CryptoTypes::KeyId keyId, const uint8_t *cipherTextWithTa
 {
 	size_t outLength{};
 
-	VerifyOrReturnStatus(cipherTextWithTagLength != 0 && cipherTextWithTag, ALIRO_INVALID_ARGUMENT,
-			     LOG_WRN("Cipher text with tag is not valid"));
-	VerifyOrReturnStatus(plainTextLength == 0 || plainText, ALIRO_INVALID_ARGUMENT,
-			     LOG_WRN("Plain text buffer is not valid"));
+	VerifyOrReturnValue(cipherTextWithTagLength != 0 && cipherTextWithTag, ALIRO_INVALID_ARGUMENT,
+			    LOG_WRN("Cipher text with tag is not valid"));
+	VerifyOrReturnValue(plainTextLength == 0 || plainText, ALIRO_INVALID_ARGUMENT,
+			    LOG_WRN("Plain text buffer is not valid"));
 
 	psa_status_t status =
 		psa_aead_decrypt(keyId, PSA_ALG_GCM, nonce.data(), nonce.size(), additionalData, additionalDataLength,
@@ -345,8 +348,8 @@ AliroError AeadDecrypt(CryptoTypes::KeyId keyId, const uint8_t *cipherTextWithTa
 		return ALIRO_INVALID_AUTHENTICATION_TAG;
 	}
 
-	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("AEAD decryption failed [Error: %d]", status));
+	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("AEAD decryption failed [Error: %d]", status));
 
 	plainTextLength = outLength;
 	return ALIRO_NO_ERROR;
@@ -359,15 +362,15 @@ AliroError Encrypt(const uint8_t *plainText, size_t plainTextLength, uint8_t *ci
 	constexpr static psa_algorithm_t algorithm = PSA_ALG_ECB_NO_PADDING;
 	constexpr static size_t blockSize = PSA_BLOCK_CIPHER_BLOCK_LENGTH(PSA_KEY_TYPE_AES);
 
-	VerifyOrReturnStatus((cipherText && plainText && plainTextLength == blockSize), ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnValue((cipherText && plainText && plainTextLength == blockSize), ALIRO_INVALID_ARGUMENT);
 
 	size_t outLength{};
 
 	psa_status_t status = psa_cipher_encrypt(DoorLock::ReaderStorage::GetGroupResolvingKeyId(), algorithm,
 						 plainText, blockSize, cipherText, blockSize, &outLength);
-	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Cannot encrypt payload [Error: %d]", status));
-	VerifyOrReturnStatus(outLength == blockSize, ALIRO_ERROR_INTERNAL, LOG_WRN("Invalid output length"));
+	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Cannot encrypt payload [Error: %d]", status));
+	VerifyOrReturnValue(outLength == blockSize, ALIRO_ERROR_INTERNAL, LOG_WRN("Invalid output length"));
 
 	return ALIRO_NO_ERROR;
 }
@@ -376,14 +379,14 @@ AliroError Encrypt(const uint8_t *plainText, size_t plainTextLength, uint8_t *ci
 
 AliroError Sha256(const uint8_t *data, size_t dataLength, CryptoTypes::Sha256Hash &hash)
 {
-	VerifyOrReturnStatus(data && dataLength > 0, ALIRO_INVALID_ARGUMENT);
+	VerifyOrReturnValue(data && dataLength > 0, ALIRO_INVALID_ARGUMENT);
 
 	size_t hashLength;
 	psa_status_t status =
 		psa_hash_compute(PSA_ALG_SHA_256, data, dataLength, hash.data(), hash.size(), &hashLength);
-	VerifyOrReturnStatus(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
-			     LOG_WRN("Cannot compute SHA-256 hash [Error: %d]", status));
-	VerifyOrReturnStatus(hashLength == hash.size(), ALIRO_ERROR_INTERNAL, LOG_WRN("Invalid SHA-256 hash length"));
+	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
+			    LOG_WRN("Cannot compute SHA-256 hash [Error: %d]", status));
+	VerifyOrReturnValue(hashLength == hash.size(), ALIRO_ERROR_INTERNAL, LOG_WRN("Invalid SHA-256 hash length"));
 
 	return ALIRO_NO_ERROR;
 }

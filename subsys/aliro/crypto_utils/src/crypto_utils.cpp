@@ -43,6 +43,8 @@ psa_key_attributes_t GetPublicKeyAttributes()
 	return attributes;
 }
 
+#ifdef CONFIG_NCS_ALIRO_BLE_UWB
+
 psa_key_attributes_t GetGroupResolvingKeyAttributes()
 {
 	psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
@@ -54,6 +56,8 @@ psa_key_attributes_t GetGroupResolvingKeyAttributes()
 
 	return attributes;
 }
+
+#endif // CONFIG_NCS_ALIRO_BLE_UWB
 
 AliroError SetPersistentLifetime(psa_key_attributes_t &attributes, CryptoTypes::KeyId keyId)
 {
@@ -102,12 +106,16 @@ AliroError ImportPublicKey(const CryptoTypes::PublicKey &publicKey, bool persist
 	return ImportKey(publicKey.data(), publicKey.size(), attributes, persistent, keyId);
 }
 
+#ifdef CONFIG_NCS_ALIRO_BLE_UWB
+
 AliroError ImportGroupResolvingKey(const CryptoTypes::GroupResolvingKey &groupResolvingKey, bool persistent,
 				   CryptoTypes::KeyId &keyId)
 {
 	auto attributes = GetGroupResolvingKeyAttributes();
 	return ImportKey(groupResolvingKey.data(), groupResolvingKey.size(), attributes, persistent, keyId);
 }
+
+#endif // CONFIG_NCS_ALIRO_BLE_UWB
 
 AliroError ExportPublicKey(CryptoTypes::KeyId keyId, CryptoTypes::PublicKey &publicKey)
 {

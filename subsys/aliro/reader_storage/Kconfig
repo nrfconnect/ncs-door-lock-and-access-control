@@ -17,6 +17,7 @@ source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
 
 config DOOR_LOCK_ALIRO_READER_STORAGE_GROUP_RESOLVING_KEY_SUPPORT
 	bool "Group Resolving Key Support"
+	depends on NCS_ALIRO_BLE_UWB
 
 config DOOR_LOCK_ALIRO_READER_STORAGE_IDENTIFIER_PSA_STORAGE_UID
 	hex "Reader Identifier PSA Storage UID"
