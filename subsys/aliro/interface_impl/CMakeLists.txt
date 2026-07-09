@@ -5,3 +5,4 @@
 #
 
 add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_OS os)
+add_subdirectory_ifdef(CONFIG_DOOR_LOCK_ALIRO_INTERFACE_IMPL_LOG log)

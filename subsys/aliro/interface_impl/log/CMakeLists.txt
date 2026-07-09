@@ -4,9 +4,6 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-menu "Aliro Interface Implementation"
+zephyr_library()
 
-rsource "os/Kconfig"
-rsource "log/Kconfig"
-
-endmenu
+zephyr_library_sources(log.cpp)

@@ -17,7 +17,3 @@ target_sources_ifdef(CONFIG_NCS_ALIRO_BLE_UWB app PRIVATE
   ble.cpp
   uwb.cpp
 )
-
-if(CONFIG_NCS_ALIRO_LOG_LEVEL_VALUE GREATER 0)
-  target_sources(app PRIVATE log.cpp)
-endif()
