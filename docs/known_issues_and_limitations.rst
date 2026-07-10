@@ -61,16 +61,41 @@ A known issue can list one or both of the following entries:
   Some known issues have a workaround.
   Sometimes, they are discovered later and added over time.
 
-The |REPO_NAME| v1.1.0
+The |REPO_NAME| v1.1.1
 **********************
 
 .. toggle::
 
-  AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|
-    Matter onboarding using NFC does not work in the |MATTER_ALIRO_APP_NAME|.
+  AL-718: Access Document is not stored on the nRF52840 platform
+    Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
+    As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` and ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig options are enabled.
 
     **Workaround:**
-    Use QR code scanning mechanism for Matter device commissioning.
+    Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
+
+    **Affected platforms:** nRF52840 DK
+
+  AL-728: When built with Matter support, the ProductAppearance attribute is not supported
+    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
+    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
+
+    **Workaround:**
+    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
+
+  AL-851: Starting the UWB ranging session does not work reliably when testing with Apple ecosystem
+    When testing |MATTER_ALIRO_APP_NAME| with Apple ecosystem, sometimes the UWB ranging session does not start after the lock is commissioned.
+
+    **Workaround:**
+    Reboot the iPhone and try again.
+
+  AL-856: Lock does not unlock through NFC after manual lock while the User Device remains in UWB range
+    After UWB unlock and manual lock while the User Device remains in UWB range, NFC authentication may complete (ACCESS GRANTED) without actuating the lock.
+    On the device, Aliro NFC authentication completes successfully (``ACCESS GRANTED``), but no physical unlock is triggered.
+
+The |REPO_NAME| v1.1.0
+**********************
+
+.. toggle::
 
   AL-718: Access Document is not stored on the nRF52840 platform
     Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
@@ -95,12 +120,32 @@ The |REPO_NAME| v1.1.0
     Reboot the iPhone and try again.
 
   AL-855: Aliro unlock does not include user identity in Apple Home notification
-    When the lock running the |MATTER_ALIRO_APP_NAME| is unlocked via Aliro (NFC or UWB), no user identity is included in the Apple Home App notification.
-    When the same lock is unlocked via Matter (for example, from the Apple Home app), the notification correctly includes the user who performed the unlock.
+    When the lock running the |MATTER_ALIRO_APP_NAME| is unlocked through Aliro (NFC or UWB), no user identity is included in the Apple Home App notification.
+    Notifications of unlocking through the Matter protocol work as expected.
 
   AL-856: Lock does not unlock via NFC after manual lock while the User Device remains in UWB range
     After UWB unlock and manual lock while the User Device remains in UWB range, NFC authentication may complete (ACCESS GRANTED) without actuating the lock.
     On the device, Aliro NFC authentication completes successfully (``ACCESS GRANTED``), but no physical unlock is triggered.
+
+  AL-860: QM35825 UWB calibration files for 2-port and 4-port antenna configurations are swapped
+    The QM35825 calibration header files have their names swapped relative to their actual content.
+    ``qm35825_calib_2port.h`` contains 4-port antenna configuration data, and ``qm35825_calib_4port.h`` contains 2-port antenna configuration data.
+    As a result, UWB ranging accuracy may be degraded when using the mismatched antenna configuration.
+
+    **Workaround:**
+    Swap the calibration header files to the correct names.
+
+  AL-874: Combining the ``uwb_qm35`` snippet with ``CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG`` Kconfig option causes a build failure
+    Building applications with the ``uwb_qm35`` snippet and ``CONFIG_DOOR_LOCK_ALIRO_UWB_RANGING_SESSION_LOG`` Kconfig options enabled causes a build failure because of missing namespace for ``MutexGuard``.
+
+  AL-642: Incorrect ``UserIndex`` value reported in the Matter ``LockOperation`` event
+    When the lock is unlocked using a provisioned credential, the Matter ``LockOperation`` event reports ``UserUniqueId`` instead of the ``UserIndex`` value expected by Matter controllers.
+
+  AL-875: Incorrect Zephyr module metadata prevents proper module registration
+    The Add-on contains a duplicate ``module.yaml`` file and an incorrect module name in ``module.yml``, which can cause Zephyr module resolution issues in some build environments.
+
+    **Workaround:**
+    Remove the duplicate ``module.yaml`` file and fix the incorrect module name in ``module.yml``.
 
 The |REPO_NAME| v1.0.1
 **********************
