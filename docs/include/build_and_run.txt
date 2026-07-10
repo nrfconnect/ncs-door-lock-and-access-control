@@ -1,0 +1,5 @@
+This application can be found under |sample path| in your folder structure.
+
+To build it, follow the instructions in `Building an application`_ for your preferred building environment.
+See also `programming <Programming an application_>`_ for programming steps and `testing <Testing and optimization_>`_ for general information about testing and debugging in the |NCS|.
+
