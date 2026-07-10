@@ -1,0 +1,28 @@
+name: PR Metadata
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+    branches:
+      - main
+      - v*-branch
+
+permissions:
+  contents: read
+
+jobs:
+  pr-description:
+    name: PR description
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Validate PR description
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [[ -z "$(printf '%s' "$PR_BODY" | tr -d '[:space:]')" ]]; then
+            echo "::error::Pull request description cannot be empty."
+            exit 1
+          fi

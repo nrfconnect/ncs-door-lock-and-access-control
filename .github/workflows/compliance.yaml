@@ -77,13 +77,5 @@ jobs:
           git rebase origin/${BASE_REF}
           git clean -f -d
 
-      - name: Check for PR description
-        if: ${{ github.event.pull_request.body == '' }}
-        continue-on-error: true
-        id: pr_description
-        run: |
-          echo "Pull request description cannot be empty."
-          exit 1
-
       - name: Run compliance checks
         run: ${{ env.WEST_WORKSPACE }}/zephyr/scripts/ci/check_compliance.py -m yamllint -m clangformat -m gitlint -c origin/${{ github.base_ref }}..
