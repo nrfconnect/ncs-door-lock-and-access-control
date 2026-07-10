@@ -1,6 +1,9 @@
 # TODO: https://github.com/zephyrproject-rtos/zephyr/blob/main/.github/workflows/compliance.yml
 name: Zephyr Compliance Checks
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   pull_request:
