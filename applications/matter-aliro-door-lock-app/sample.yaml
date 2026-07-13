@@ -26,7 +26,6 @@ tests:
       - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;bt_nus"
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
-      - CONFIG_BT_APP_PASSKEY=y
       - FILE_SUFFIX=release
 
   app.door_lock.nfc-ble-uwb.bt_nus-matter-exp_fast:
@@ -38,7 +37,6 @@ tests:
       - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;bt_nus"
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
-      - CONFIG_BT_APP_PASSKEY=y
 
   app.door_lock.nfc.bt_nus-matter-exp_fast-release:
     tags:
@@ -52,7 +50,6 @@ tests:
       - matter-aliro-door-lock-app_SNIPPET="bt_nus"
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
-      - CONFIG_BT_APP_PASSKEY=y
       - FILE_SUFFIX=release
 
   app.door_lock.nfc.bt_nus-matter-exp_fast:
@@ -64,7 +61,6 @@ tests:
       - matter-aliro-door-lock-app_SNIPPET="bt_nus"
       - CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE=y
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
-      - CONFIG_BT_APP_PASSKEY=y
 
   app.door_lock.nfc-ble-uwb.dfu_smp-matter-step_up:
     tags:
