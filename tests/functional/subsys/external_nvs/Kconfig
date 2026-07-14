@@ -7,4 +7,7 @@
 config ZMS
 	default y if SOC_FLASH_NRF_RRAM
 
+config PSA_CRYPTO
+	default y
+
 source "Kconfig.zephyr"

@@ -7,7 +7,7 @@
 #include "storage.h"
 
 #include <stdint.h>
-#include <zephyr/fs/nvs.h>
+#include <zephyr/kvss/nvs.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/storage/flash_map.h>
 

@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+config PSA_CRYPTO
+	default y
+
 config MBEDTLS_ENABLE_HEAP
 	default y
 

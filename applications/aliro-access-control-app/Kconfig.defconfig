@@ -52,9 +52,6 @@ config SETTINGS
 config EVENTS
 	default y
 
-config NRF_SECURITY
-	default y
-
 choice NVS_LOG_LEVEL_CHOICE
 	default NVS_LOG_LEVEL_ERR
 endchoice

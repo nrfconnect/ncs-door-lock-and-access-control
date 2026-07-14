@@ -19,6 +19,7 @@ source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
 
 config DOOR_LOCK_ALIRO_INTERFACE_IMPL_CI_CERT_VALIDATION
 	bool "Credential Issuer certificate validation"
+	select MBEDTLS
 	select MBEDTLS_X509_LIBRARY
 	help
 	  When enabled, Credential Issuer certificates are validated.

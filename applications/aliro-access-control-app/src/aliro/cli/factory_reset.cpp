@@ -10,9 +10,9 @@
 #include <zephyr/shell/shell.h>
 
 #ifdef CONFIG_SETTINGS_NVS
-#include <zephyr/fs/nvs.h>
+#include <zephyr/kvss/nvs.h>
 #else // CONFIG_SETTINGS_ZMS
-#include <zephyr/fs/zms.h>
+#include <zephyr/kvss/zms.h>
 #endif // CONFIG_SETTINGS_NVS || CONFIG_SETTINGS_ZMS
 
 #include <zephyr/settings/settings.h>

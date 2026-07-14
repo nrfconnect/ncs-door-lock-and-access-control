@@ -27,7 +27,7 @@ jobs:
   quality-check:
     name: Quality check
     runs-on: ubuntu-24.04
-    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:v3.3.0
+    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:v3.4.0
     permissions:
       contents: read
     defaults:

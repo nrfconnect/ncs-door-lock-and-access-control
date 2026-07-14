@@ -59,11 +59,6 @@
 	chosen {
 		nordic,pm-ext-flash = &mx25r64;
 	};
-
-	psa_rng: psa-rng {
-		compatible = "zephyr,psa-crypto-rng";
-		status = "okay";
-	};
 };
 
 &mx25r64 {

@@ -12,9 +12,9 @@
 
 #include <external_nvs/external_nvs.h>
 #include <psa/crypto.h>
-#include <zephyr/fs/nvs.h>
-#include <zephyr/fs/zms.h>
 #include <zephyr/kernel.h>
+#include <zephyr/kvss/nvs.h>
+#include <zephyr/kvss/zms.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/settings/settings.h>
 #include <zephyr/storage/flash_map.h>
@@ -25,11 +25,7 @@ using namespace DoorLock;
 
 namespace {
 
-#if CONFIG_PARTITION_MANAGER_ENABLED
-constexpr uint8_t kExternalNvsPartitionId{ FIXED_PARTITION_ID(external_nvs) };
-#else
-constexpr uint8_t kExternalNvsPartitionId{ FIXED_PARTITION_ID(external_nvs_partition) };
-#endif // CONFIG_PARTITION_MANAGER_ENABLED
+constexpr uint8_t kExternalNvsPartitionId{ PARTITION_ID(external_nvs_partition) };
 
 using Buffer = std::array<uint8_t, CONFIG_DOOR_LOCK_EXTERNAL_NVS_MAX_DATA_SIZE>;
 

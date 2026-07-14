@@ -60,11 +60,6 @@
 		nordic,pm-ext-flash = &mx25r64;
 	};
 
-	psa_rng: psa-rng {
-		compatible = "zephyr,psa-crypto-rng";
-		status = "okay";
-	};
-
 	aliases {
 		lock-sim-indicator = &led1; /* green LED2 on nRF52840DK */
 		dfu-smp-button = &button0; /* Button 1 on nRF52840DK */

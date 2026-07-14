@@ -11,8 +11,8 @@
 #include <crypto_utils/crypto_utils.h>
 
 #include <psa/crypto.h>
-#include <zephyr/fs/nvs.h>
-#include <zephyr/fs/zms.h>
+#include <zephyr/kvss/nvs.h>
+#include <zephyr/kvss/zms.h>
 #include <zephyr/settings/settings.h>
 
 namespace {

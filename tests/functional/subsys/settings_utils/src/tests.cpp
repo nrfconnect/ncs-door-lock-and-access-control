@@ -7,8 +7,8 @@
 #include <zephyr/ztest.h>
 
 #include <settings_utils/settings_utils.h>
-#include <zephyr/fs/nvs.h>
-#include <zephyr/fs/zms.h>
+#include <zephyr/kvss/nvs.h>
+#include <zephyr/kvss/zms.h>
 #include <zephyr/settings/settings.h>
 
 #include <array>
