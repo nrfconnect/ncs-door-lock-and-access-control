@@ -141,7 +141,7 @@ int AliroInit()
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Cannot initialize Reader storage"));
 
 #ifdef CONFIG_DOOR_LOCK_EXTERNAL_NVS
-	auto initRc = DoorLock::ExternalNvs::Init(FIXED_PARTITION_ID(external_nvs));
+	auto initRc = DoorLock::ExternalNvs::Init(PARTITION_ID(external_nvs_partition));
 	VerifyOrReturnValue(initRc == 0, EXIT_FAILURE, LOG_ERR("External NVS init failed: %d", initRc));
 #endif // CONFIG_DOOR_LOCK_EXTERNAL_NVS
 
@@ -243,7 +243,7 @@ void ClearStorageAliro(bool reinitializeStorage)
 #ifdef CONFIG_DOOR_LOCK_EXTERNAL_NVS
 	DoorLock::ExternalNvs::Clear();
 	if (reinitializeStorage) {
-		DoorLock::ExternalNvs::Init(FIXED_PARTITION_ID(external_nvs));
+		DoorLock::ExternalNvs::Init(PARTITION_ID(external_nvs_partition));
 	}
 #else // CONFIG_DOOR_LOCK_EXTERNAL_NVS
 	ARG_UNUSED(reinitializeStorage);

@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include <door_lock/common/nrf54lm20_cpuapp_partitions.dtsi>
+
 &pinctrl {
 	spi21_default: spi21_default {
 		group1 {
@@ -77,15 +79,15 @@
 	status = "okay";
 };
 
-&rram_controller {
-	cpuapp_rram: rram@0 {
-		reg = <0x0 DT_SIZE_K(2036)>;
-		ranges = <0x0 0x0 DT_SIZE_K(2036)>;
-	};
-};
-
 &mx25r64 {
 	status = "okay";
+
+	partitions {
+		external_nvs_partition: partition@1E3000 {
+			label = "external-nvs";
+			reg = <0x001E3000 DT_SIZE_K(128)>;
+		};
+	};
 };
 
 &wdt31 {

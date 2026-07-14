@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include <door_lock/common/nrf54l15_cpuapp_partitions.dtsi>
+
 / {
 	/* Disable buttons to avoid collision with interrupt and SCK pins for NFC tag reader.
 	 * It also allows to use the button with the same label (1) on all supported dev kits.
@@ -89,18 +91,15 @@
 	status = "okay";
 };
 
-&cpuapp_sram {
-	reg = <0x20000000 DT_SIZE_K(256)>;
-	ranges = <0x0 0x20000000 0x40000>;
-};
-
-/* restore full RRAM and SRAM space - by default some parts are dedicated to FLRP */
-&cpuapp_rram {
-	reg = <0x0 DT_SIZE_K(1524)>;
-};
-
 &mx25r64 {
 	status = "okay";
+
+	partitions {
+		external_nvs_partition: partition@165000 {
+			label = "external-nvs";
+			reg = <0x00165000 DT_SIZE_K(128)>;
+		};
+	};
 };
 
 &wdt31 {
