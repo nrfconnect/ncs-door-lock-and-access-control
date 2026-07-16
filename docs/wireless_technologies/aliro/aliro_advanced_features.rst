@@ -41,9 +41,10 @@ This reduces transaction latency for returning User Devices while keeping crypto
 Build and configuration
 =======================
 
-The following Kconfig options control Expedited-fast phase support and Kpersistent storage limits.
-Expedited-fast phase support is enabled by default, so no extra Kconfig option is required to enable it.
-Set them in the application's :file:`prj.conf` or pass along with other build options to the ``west build`` command if you need to override the defaults.
+Expedited-fast phase support is enabled by default.
+The following Kconfig options configure Kpersistent storage limits.
+You can adjust them and disable the feature.
+Add them to the application's :file:`prj.conf`, or pass them to ``west build`` with your other build options.
 For example, to build the Aliro Access Control Application with Bluetooth LE and UWB transport on the nRF5340 DK, run the following command:
 
 .. code-block:: bash
@@ -100,9 +101,10 @@ The Step-up phase works as follows:
 Build, configuration, and provisioning
 ======================================
 
-The following Kconfig options control Step-up phase support and credential storage limits.
-Step-up phase support is enabled by default, so no extra Kconfig option is required to enable it.
-Set them in the application's :file:`prj.conf` or pass along with other build options to the ``west build`` command if you need to override the defaults.
+Step-up phase support is enabled by default.
+The following Kconfig options configure credential storage limits.
+You can adjust them and disable the feature.
+Add them to the application's :file:`prj.conf`, or pass them to ``west build`` with your other build options.
 
 .. list-table::
    :header-rows: 1
