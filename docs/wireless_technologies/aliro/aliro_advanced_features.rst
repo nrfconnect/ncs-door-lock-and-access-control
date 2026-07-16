@@ -44,7 +44,7 @@ Build and configuration
 The following Kconfig options control Expedited-fast phase support and Kpersistent storage limits.
 Expedited-fast phase support is enabled by default, so no extra Kconfig option is required to enable it.
 Set them in the application's :file:`prj.conf` or pass along with other build options to the ``west build`` command if you need to override the defaults.
-For example, to build the Aliro Access Control Application with Bluetooth LE and UWB transport on the nRF5340 DK:
+For example, to build the Aliro Access Control Application with Bluetooth LE and UWB transport on the nRF5340 DK, run the following command:
 
 .. code-block:: bash
 
@@ -122,7 +122,7 @@ Set them in the application's :file:`prj.conf` or pass along with other build op
    ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` and ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` are enabled by default in both the Aliro Access Control Application and the Matter and Aliro Door Lock Application.
    In the Matter and Aliro Door Lock Application, Credential Issuer keys are provisioned through Matter during normal setup.
 
-In the Aliro Access Control Application, provision Credential Issuer public keys manually before using Step-up.
+In the Aliro Access Control Application, provision Credential Issuer public keys manually before the Step-up phase.
 From the serial console, run the following command:
 
 .. code-block:: console
