@@ -10,7 +10,11 @@
 #include "uwb_dfu.h"
 #include <doorlock/utils/utils.h>
 
-#include <pm_config.h>
+#include <bootutil/bootutil_public.h>
+#include <bootutil/image.h>
+
+#include <zephyr/devicetree.h>
+#include <zephyr/devicetree/partitions.h>
 #include <zephyr/dfu/mcuboot.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/storage/flash_map.h>
@@ -28,6 +32,16 @@ extern "C" const struct qmrom_spi_ops zephyr_spi_ops;
 namespace Aliro::Uwb::Dfu {
 
 namespace {
+
+#if !DT_HAS_CHOSEN(qorvo_qm35_fw_partition)
+#error "UWB firmware partition not configured (set chosen qorvo,qm35-fw-partition)"
+#endif
+
+#define UWB_FW_PARTITION_NODE DT_CHOSEN(qorvo_qm35_fw_partition)
+
+BUILD_ASSERT(DT_PARTITION_EXISTS(UWB_FW_PARTITION_NODE), "UWB firmware partition must be a fixed or mapped partition");
+
+constexpr uint8_t kUwbFwPartitionId{ DT_PARTITION_ID(UWB_FW_PARTITION_NODE) };
 
 constexpr size_t kMaxChunkSize = 2000;
 
@@ -79,7 +93,7 @@ bool ShouldUpdate(const char *currentVersionString)
 	mcuboot_img_header header;
 	mcuboot_img_sem_ver currentVersion;
 
-	err = boot_read_bank_header(QM35_DFU_IMAGE_PARTITION_ID, &header, sizeof(mcuboot_img_header));
+	err = boot_read_bank_header(kUwbFwPartitionId, &header, sizeof(mcuboot_img_header));
 	VerifyOrReturnFalse(!err, LOG_ERR("Error when reading QM35 FW primary slot: %d", err));
 
 	VerifyOrReturnFalse(ParseVersionString(currentVersionString, &currentVersion),
@@ -102,14 +116,12 @@ int PerformFirmwareUpdate()
 	struct qmrom_hsspi_handle *hsspi_handle = NULL;
 	struct qmrom_handle *handle = NULL;
 	const struct flash_area *fap;
-	uint32_t offset = 0;
-	mcuboot_img_header header;
+	uint32_t read_offset = 0;
+	uint32_t write_offset = 0;
+	struct image_header hdr;
 	uint8_t firmwareChunkBuffer[kMaxChunkSize];
 
 	LOG_INF("Starting firmware update");
-
-	ret = boot_read_bank_header(QM35_DFU_IMAGE_PARTITION_ID, &header, sizeof(mcuboot_img_header));
-	VerifyOrReturnValue(ret == 0, ret, LOG_WRN("Error when reading QM35 FW primary slot: %d", ret));
 
 	ret = qmrom_spi_register_driver(&zephyr_spi_ops);
 	VerifyOrReturnValue(ret == 0, ret, LOG_ERR("Failed to register zephyr SPI driver: %d", ret));
@@ -135,23 +147,29 @@ int PerformFirmwareUpdate()
 	ret = qmrom_enter_chunk_mode(handle);
 	VerifyOrExit(ret == 0, LOG_ERR("Entering chunk mode failed with error %d", ret));
 
-	ret = flash_area_open(QM35_DFU_FIRMWARE_PARTITION_ID, &fap);
+	ret = flash_area_open(kUwbFwPartitionId, &fap);
 	VerifyOrExit(ret == 0, LOG_ERR("Failed to open flash area, error: %d", ret));
 
-	while (offset < header.h.v1.image_size) {
+	ret = boot_image_load_header(fap, &hdr);
+	VerifyOrExit(ret == 0, LOG_ERR("Failed to load QM35 FW image header, error: %d", ret));
+
+	read_offset = hdr.ih_hdr_size;
+
+	while (write_offset < hdr.ih_img_size) {
 		uint32_t to_send = kMaxChunkSize;
 
-		if (offset + to_send > header.h.v1.image_size) {
-			to_send = header.h.v1.image_size - offset;
+		if (write_offset + to_send > hdr.ih_img_size) {
+			to_send = hdr.ih_img_size - write_offset;
 		}
 
-		ret = flash_area_read(fap, offset, firmwareChunkBuffer, to_send);
+		ret = flash_area_read(fap, read_offset, firmwareChunkBuffer, to_send);
 		VerifyOrExit(ret == 0, LOG_ERR("Failed to read firmware from flash, error: %d", ret));
 
 		ret = qmrom_write_chunk(handle, reinterpret_cast<const char *>(firmwareChunkBuffer), to_send);
-		VerifyOrExit(ret == 0, LOG_ERR("Writing chunk at offset %d failed with error %d", offset, ret));
+		VerifyOrExit(ret == 0, LOG_ERR("Writing chunk at offset %u failed with error %d", write_offset, ret));
 
-		offset += to_send;
+		read_offset += to_send;
+		write_offset += to_send;
 	}
 
 	flash_area_close(fap);

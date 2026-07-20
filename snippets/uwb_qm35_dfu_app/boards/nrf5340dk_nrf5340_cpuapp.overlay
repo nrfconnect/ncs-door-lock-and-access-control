@@ -1,0 +1,34 @@
+/*
+ * Copyright (c) 2026 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/delete-node/ &external_nvs_partition;
+
+/ {
+	chosen {
+		qorvo,qm35-fw-partition = &slot4_partition;
+	};
+};
+
+&mx25r64 {
+	status = "okay";
+
+	partitions {
+		slot4_partition: partition@12f000 {
+			label = "image-4";
+			reg = <0x0012f000 DT_SIZE_K(516)>;
+		};
+
+		slot5_partition: partition@1b0000 {
+			label = "image-5";
+			reg = <0x001b0000 DT_SIZE_K(516)>;
+		};
+
+		external_nvs_partition: partition@231000 {
+			label = "external-nvs";
+			reg = <0x00231000 DT_SIZE_K(128)>;
+		};
+	};
+};

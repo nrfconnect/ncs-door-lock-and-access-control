@@ -1,0 +1,21 @@
+/*
+ * Copyright (c) 2026 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+&mx25r64 {
+	status = "okay";
+
+	partitions {
+		slot2_partition: partition@1e3000 {
+			label = "image-2";
+			reg = <0x001e3000 DT_SIZE_K(516)>;
+		};
+
+		slot3_partition: partition@264000 {
+			label = "image-3";
+			reg = <0x00264000 DT_SIZE_K(516)>;
+		};
+	};
+};

@@ -1,19 +1,15 @@
 #
-# Copyright (c) 2025 Nordic Semiconductor ASA
+# Copyright (c) 2026 Nordic Semiconductor ASA
 #
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-name: uwb_qm35_dfu_app
-append:
-  EXTRA_CONF_FILE: uwb_qm35_dfu_app.conf
+name: uwb_qm35_dfu_mcuboot
 
 boards:
   nrf5340dk/nrf5340/cpuapp:
     append:
-      EXTRA_CONF_FILE: boards/nrf5340dk_nrf5340_cpuapp.conf
       EXTRA_DTC_OVERLAY_FILE: boards/nrf5340dk_nrf5340_cpuapp.overlay
   /nrf54lm20dk\/nrf54lm20[ab]\/cpuapp/:
     append:
-      EXTRA_CONF_FILE: boards/nrf54lm20dk_cpuapp.conf
       EXTRA_DTC_OVERLAY_FILE: boards/nrf54lm20dk_cpuapp.overlay

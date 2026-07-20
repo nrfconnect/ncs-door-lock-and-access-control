@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#define QM35_DFU_IMAGE_PARTITION_ID PM_QM35_FW_MCUBOOT_PAD_ID
-#define QM35_DFU_FIRMWARE_PARTITION_ID PM_QM35_FW_ID
-
 namespace Aliro::Uwb::Dfu {
 
 /**
