@@ -120,11 +120,18 @@ AliroError GenerateEphemeralKeyPair(CryptoTypes::KeyId &keyId, CryptoTypes::Publ
 {
 	const auto attributes = GetEphemeralKeyAttributes();
 
-	auto status = psa_generate_key(&attributes, &keyId);
+	const auto status = psa_generate_key(&attributes, &keyId);
 	VerifyOrReturnValue(status == PSA_SUCCESS, ALIRO_ERROR_INTERNAL,
 			    LOG_WRN("Cannot generate ephemeral keys [error: %d]", status));
 
-	return DoorLock::CryptoUtils::ExportPublicKey(keyId, ephemeralPubKey);
+	const auto exportStatus = DoorLock::CryptoUtils::ExportPublicKey(keyId, ephemeralPubKey);
+
+	if (exportStatus != ALIRO_NO_ERROR) {
+		DoorLock::CryptoUtils::DestroyKey(keyId);
+		return exportStatus;
+	}
+
+	return ALIRO_NO_ERROR;
 }
 
 AliroError ImportSharedKey(const uint8_t *key, size_t keyLength, CryptoTypes::KeyId &keyId)
