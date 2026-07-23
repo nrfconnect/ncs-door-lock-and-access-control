@@ -78,10 +78,7 @@ jobs:
           # Distinct from the other workflows' west caches, since this one additionally pulls in the
           # qm35-aliro-sdk group via the manifest.group-filter override below. Still allow falling back
           # to the regular (non-qm35) cache: west update will fetch whatever's missing anyway.
-          # Hashing patches.yml (which embeds a sha256sum per patch) alongside west.yml means any patch
-          # content change invalidates this cache entry too, so the saved tree (with patches applied)
-          # always matches the patches that were actually applied when it was cached.
-          key: ${{ runner.os }}-west-qm35-${{ hashFiles('west.yml', 'zephyr/patches.yml') }}
+          key: ${{ runner.os }}-west-qm35-${{ hashFiles('west.yml') }}
           restore-keys: |
             ${{ runner.os }}-west-qm35-
             ${{ runner.os }}-west-
@@ -90,9 +87,9 @@ jobs:
         run: |
           west init -l
           west config manifest.group-filter -- "+qm35-aliro-sdk"
-          west patch clean || true
+          west forall -a -c 'git reset --hard && git clean -fdx'
           west update -o=--depth=1 -n
-          west patch apply
+          west patch apply --roll-back
 
       - name: Build with sonarqube wrapper
         run: |
@@ -114,3 +111,7 @@ jobs:
             -Dsonar.pullrequest.key=${{ env.PR_NUMBER }}
             -Dsonar.pullrequest.branch=${{ env.PR_BRANCH }}
             -Dsonar.pullrequest.base=${{ env.BASE_REF }}
+
+      - name: Clean patches before saving cache
+        if: always()
+        run: west patch clean
