@@ -1,0 +1,51 @@
+From aba16831da80fa00675ee2ee53bb651853753690 Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Thu, 23 Jul 2026 20:10:02 +0200
+Subject: [PATCH 1/1] sysbuild: Fix signing DFU extra images
+
+Pass `--rom-fixed` option to imgtool when
+CONFIG_NCS_MCUBOOT_IMGTOOL_SET_ROM_FIXED_ADDRESS is enabled.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+ cmake/sysbuild/image_signing_extra.cmake | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/cmake/sysbuild/image_signing_extra.cmake b/cmake/sysbuild/image_signing_extra.cmake
+index 6c40559447..aed732d106 100644
+--- a/cmake/sysbuild/image_signing_extra.cmake
++++ b/cmake/sysbuild/image_signing_extra.cmake
+@@ -137,6 +137,12 @@ if(num_binaries GREATER 0)
+     else()
+       dt_nodelabel(slot_flash TARGET ${DEFAULT_IMAGE} NODELABEL "slot${slot_id}_partition" REQUIRED)
+       dt_reg_size(slot_size TARGET ${DEFAULT_IMAGE} PATH ${slot_flash})
++      dt_partition_addr(slot_address PATH "${slot_flash}" TARGET ${DEFAULT_IMAGE} ABSOLUTE)
++
++      set(imgtool_rom_command)
++      if(CONFIG_NCS_MCUBOOT_IMGTOOL_SET_ROM_FIXED_ADDRESS)
++        set(imgtool_rom_command --rom-fixed ${slot_address})
++      endif()
+ 
+       set(imgtool_sign
+         ${PYTHON_EXECUTABLE} ${IMGTOOL} sign
+@@ -145,6 +151,7 @@ if(num_binaries GREATER 0)
+         --slot-size ${slot_size}
+         --pad-header
+         --header-size ${CONFIG_ROM_START_OFFSET}
++        ${imgtool_rom_command}
+       )
+     endif()
+ 
+@@ -185,9 +192,6 @@ if(num_binaries GREATER 0)
+         VERBATIM
+       )
+     else()
+-      dt_nodelabel(slot_flash TARGET ${DEFAULT_IMAGE} NODELABEL "slot${slot_id}_partition" REQUIRED)
+-      dt_partition_addr(slot_address PATH "${slot_flash}" TARGET ${DEFAULT_IMAGE} ABSOLUTE)
+-
+       foreach(partition_node ${fixed_partition_nodes})
+         if(${slot_flash} MATCHES ${partition_node}/.*$)
+           dt_prop(partition_node_compatible TARGET ${DEFAULT_IMAGE} PATH "${partition_node}"
+-- 
+2.52.0
+

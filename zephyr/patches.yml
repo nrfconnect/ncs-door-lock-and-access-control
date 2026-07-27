@@ -11,3 +11,9 @@ patches:
     author: Marcin Kajor
     email: marcin.kajor@nordicsemi.no
     date: 2026-04-28
+  - path: nrf/dfu_extra.patch
+    sha256sum: 9ddd8de5dbda9722de0f93f93ba12911878e0b1feaedc725feb2102f75ac3406
+    module: nrf
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-07-23
