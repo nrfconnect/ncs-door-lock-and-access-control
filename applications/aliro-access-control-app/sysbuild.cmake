@@ -5,11 +5,14 @@
 #
 
 if("uwb_qm35_dfu" IN_LIST SNIPPET)
-  set(PM_STATIC_YML_FILE ${CMAKE_CURRENT_LIST_DIR}/pm_static_${NORMALIZED_BOARD_TARGET}_uwb_dfu.yml CACHE INTERNAL "")
-
   # Set the uwb_qm35_dfu_app for app image
   if(NOT "uwb_qm35_dfu_app" IN_LIST ${DEFAULT_IMAGE}_SNIPPET)
     set(${DEFAULT_IMAGE}_SNIPPET ${${DEFAULT_IMAGE}_SNIPPET} uwb_qm35_dfu_app CACHE STRING "" FORCE)
+  endif()
+
+  # Set the uwb_qm35_dfu_mcuboot for mcuboot image
+  if(NOT "uwb_qm35_dfu_mcuboot" IN_LIST mcuboot_SNIPPET)
+    set(mcuboot_SNIPPET ${mcuboot_SNIPPET} uwb_qm35_dfu_mcuboot CACHE STRING "" FORCE)
   endif()
 
   if(DEFINED QM35_IMAGE_PATH)
@@ -30,7 +33,7 @@ if("uwb_qm35_dfu" IN_LIST SNIPPET)
   add_custom_target(ext_fw_target DEPENDS ${ext_fw})
   dfu_extra_add_binary(
     BINARY_PATH ${ext_fw}
-    NAME "qm35_fw"
+    NAME "ext_img1"
     VERSION ${ext_fw_version}
     DEPENDS ext_fw_target
   )

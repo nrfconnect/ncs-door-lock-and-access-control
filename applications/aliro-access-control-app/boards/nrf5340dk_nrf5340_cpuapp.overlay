@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include <door_lock/common/nrf5340_cpuapp_partitions.dtsi>
+
 / {
 	chosen {
 		nordic,pm-ext-flash = &mx25r64;
@@ -56,6 +58,13 @@
 
 &mx25r64 {
 	status = "okay";
+
+	partitions {
+		external_nvs_partition: partition@12f000 {
+			label = "external-nvs";
+			reg = <0x0012f000 DT_SIZE_K(128)>;
+		};
+	};
 };
 
 &gpio0 {

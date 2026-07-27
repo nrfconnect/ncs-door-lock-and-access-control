@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include <door_lock/common/nrf52840_partitions.dtsi>
+
 / {
 	chosen {
 		zephyr,code-partition = &boot_partition;
