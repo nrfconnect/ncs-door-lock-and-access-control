@@ -26,6 +26,12 @@
 
 #include <cherry/cherry_common.h>
 
+#include <drivers/uwb/hsspi.h>
+
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/dt-bindings/gpio/nordic-nrf-gpio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
@@ -74,6 +80,30 @@ K_EVENT_DEFINE(sUwbEvents);
 
 constexpr uint32_t kUwbWaitForEventsTimeoutMs{ 1000 };
 constexpr uint16_t kUwbMaximumReportableDistanceCm{ 500 };
+
+#define QM35_NODE DT_NODELABEL(qm35)
+
+int ConfigureQm35SpiDriveStrength()
+{
+#if DT_NODE_HAS_STATUS(QM35_NODE, okay)
+	const struct device *dev = DEVICE_DT_GET(QM35_NODE);
+
+	if (!device_is_ready(dev)) {
+		LOG_ERR("QM35 device is not ready");
+		return -ENODEV;
+	}
+
+	const auto *config = static_cast<const struct hsspi_driver_config *>(dev->config);
+	const int ret = gpio_pin_configure_dt(&config->bus.config.cs.gpio, GPIO_OUTPUT_INACTIVE | NRF_GPIO_DRIVE_H0H1);
+
+	if (ret < 0) {
+		LOG_ERR("Failed to configure QM35 SPI CS drive strength: %d", ret);
+		return ret;
+	}
+#endif
+
+	return 0;
+}
 
 /**
  * @brief Converts aliro_uwb_err to int error code.
@@ -482,6 +512,9 @@ int UltraWideBandImpl::_Init(const Callbacks &callbacks)
 	VerifyOrReturnValue(k_mutex_init(&mMutex) == 0, -EIO, LOG_ERR("Failed to initialize mutex"));
 	sys_slist_init(&mActiveSessionsList);
 
+	VerifyOrReturnValue(ConfigureQm35SpiDriveStrength() == 0, -EIO,
+			    LOG_ERR("Failed to configure QM35 SPI drive strength"));
+
 	mCtx = cherry_create("qm35", &UwbCoreCallback, this);
 	VerifyOrReturnValue(mCtx, -ENODEV, LOG_ERR("Failed to create Cherry context"));
 
@@ -495,6 +528,9 @@ int UltraWideBandImpl::_Init(const Callbacks &callbacks)
 
 		const auto ret = Dfu::PerformFirmwareUpdate();
 		VerifyOrReturnValue(ret == 0, -EIO, LOG_ERR("Firmware update failed"));
+
+		VerifyOrReturnValue(ConfigureQm35SpiDriveStrength() == 0, -EIO,
+				    LOG_ERR("Failed to configure QM35 SPI drive strength"));
 
 		mCtx = cherry_create("qm35", &UwbCoreCallback, this);
 		VerifyOrReturnValue(mCtx, -ENODEV, LOG_ERR("Failed to create Cherry context"));
