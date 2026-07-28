@@ -10,7 +10,7 @@ tests:
     sysbuild: true
     build_only: true
     tags:
-      - smoke
+      - dfu_supported
     integration_platforms:
       - nrf54l15dk/nrf54l15/cpuapp
     platform_allow:
@@ -21,6 +21,8 @@ tests:
   sample.matter.lock.release:
     sysbuild: true
     build_only: true
+    tags:
+      - dfu_supported
     extra_args:
       - FILE_SUFFIX=release
     integration_platforms:
@@ -34,6 +36,8 @@ tests:
   sample.matter.lock.smp_dfu:
     sysbuild: true
     build_only: true
+    tags:
+      - dfu_supported
     extra_args:
       - matter-door-lock-app_SNIPPET="dfu_smp"
     integration_platforms:
@@ -48,6 +52,8 @@ tests:
   sample.matter.lock.nus:
     sysbuild: true
     build_only: true
+    tags:
+      - dfu_supported
     extra_args:
       - matter-door-lock-app_SNIPPET=bt_nus
       - CONFIG_DOOR_LOCK_BLE_MANAGER_AUTH_APP_PASSKEY=112233
@@ -61,6 +67,8 @@ tests:
   sample.matter.lock.schedules:
     sysbuild: true
     build_only: true
+    tags:
+      - dfu_supported
     extra_args:
       - EXTRA_CONF_FILE=schedules.conf
     integration_platforms:
