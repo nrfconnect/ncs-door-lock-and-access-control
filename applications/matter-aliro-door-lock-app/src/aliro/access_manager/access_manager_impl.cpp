@@ -1230,16 +1230,16 @@ AliroError AccessManagerImpl::UpdateValidityIteration(size_t credentialIssuerKey
 		iterations.mAccessIteration = validityIteration;
 	}
 
+#if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
+	ReturnErrorOnFailure(RemoveOldCredentials(credentialIssuerKeyIndex, iterations.mAccessIteration));
+#endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
+
 	if (iterations != currentIterations) {
 		LOG_DBG("Updating Validity Iterations for Credential Issuer Key Index: %u, New Access Iteration: %" PRIu64,
 			credentialIssuerKeyIndex, iterations.mAccessIteration);
 
 		ReturnErrorOnFailure(StoreValidityIterations(credentialIssuerKeyIndex, iterations));
 	}
-
-#if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
-	ReturnErrorOnFailure(RemoveOldCredentials(credentialIssuerKeyIndex, iterations.mAccessIteration));
-#endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
 	return ALIRO_NO_ERROR;
 }
