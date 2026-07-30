@@ -25,8 +25,9 @@ The following optional Aliro features are out-of-scope for the |APP_NAME|:
      - --
    * - Mailbox
      - --
-   * - Time concept
-     - --
+   * - Access Document time verification in the |ALIRO_APP_NAME|
+     - Time verification in the |MATTER_ALIRO_APP_NAME|, which obtains the current time from the Matter Time Synchronization cluster.
+       See :ref:`aliro_step_up_time_verification`.
    * - Revocation Document
      - --
    * - Sending the Reader certificate in the AUTH1 command

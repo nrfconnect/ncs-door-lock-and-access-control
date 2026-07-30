@@ -95,8 +95,36 @@ The Step-up phase works as follows:
 
    * The digital signature
    * The access rights granted to the User Device
+   * The validity period, if the Reader can verify the current time
 
 #. The :ref:`aliro_access_manager` applies the access policy based on the verification result.
+
+.. _aliro_step_up_time_verification:
+
+Access Document time verification
+=================================
+
+An Access Document defines a validity period, and its Credential Issuer can mark the document as requiring time verification.
+A Reader will only honor such a document if it has a trusted source of the current time.
+
+The applications differ in this respect:
+
+* The Matter and Aliro Door Lock Application verifies the current time.
+  It obtains the time from the Matter Time Synchronization cluster.
+  As a result, it enforces Access Document validity periods, including for documents that require time verification.
+
+* The Aliro Access Control Application does not verify the current time.
+  Because it has no trusted time source, it does not enforce validity periods and denies access to Access Documents that require time verification.
+
+.. note::
+   The Step-up phase is only fully supported when the Reader can verify the current time.
+   Without a trusted time source, a Reader cannot honor Access Documents that require time verification, and it cannot detect an expired or not-yet-valid Access Document.
+   To accept such documents, a product needs a time source it trusts.
+   The Matter and Aliro Door Lock Application uses Matter time synchronization, while a product without Matter needs an equivalent mechanism.
+
+The applications also do not process Revocation Documents or support Aliro schedules.
+Products that require offline revocation or schedule-based access need an additional access policy implementation combined with a trusted time source.
+For the full list of out-of-scope Aliro features, see :ref:`known_issues_and_limitations`.
 
 Build, configuration, and provisioning
 ======================================
