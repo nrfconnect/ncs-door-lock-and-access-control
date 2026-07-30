@@ -8,6 +8,8 @@ Firmware update
    :depth: 2
 
 The |ALIRO_APP_NAME| supports field firmware update over Bluetooth LE Simple Management Protocol (SMP) (:ref:`aliro_dfu_bluetooth_smp`).
+SMP DFU is enabled by default.
+Set ``CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n`` to disable it.
 
 When built with QM35 Ultra-Wideband (UWB) support, the update image can also bundle QM35825 module firmware (:ref:`aliro_qm35_firmware_upgrade`).
 In the standalone application, SMP DFU is the only way to upload that QM35 image to the device in the field.
@@ -26,6 +28,10 @@ See :ref:`door_lock_app_ble_smp` for transport details and :ref:`door_lock_dfu_s
 
 Prerequisites
 =============
+
+Before starting the DFU update process, ensure that:
+
+* SMP DFU is enabled in your build (``CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=y``, the default).
 
 .. include:: /include/firmware_update_dfu_smp_prerequisites.txt
 
@@ -94,7 +100,6 @@ In the standalone application, SMP DFU is the only way to upload the QM35 firmwa
 Before you start, ensure that:
 
 * The application is built with the ``uwb_qm35_dfu`` sysbuild snippet (which enables the ``uwb_qm35_dfu_app`` application snippet).
-* The application is built with the ``dfu_smp`` snippet.
 * A QM35 firmware image is included in the build.
 * The QM35 module is connected and initialized.
 
@@ -118,12 +123,11 @@ Enabling QM35 firmware update
 -----------------------------
 
 Build with the ``uwb_qm35_dfu`` snippet together with ``uwb_qm35``.
-To update both the main application and QM35 over SMP, also include the ``dfu_smp`` snippet.
 
 .. code-block:: bash
 
    west build -p -b <build_target> applications/aliro-access-control-app -- \
-     -DSNIPPET=uwb_qm35_dfu -Daliro-access-control-app_SNIPPET='uwb_qm35;dfu_smp'
+     -DSNIPPET=uwb_qm35_dfu -Daliro-access-control-app_SNIPPET=uwb_qm35
 
 The QM35 firmware image is managed automatically during application initialization.
 Flash the full image set with ``west flash --erase`` (see :ref:`aliro_access_control_application`).
