@@ -159,6 +159,10 @@ See :ref:`door_lock_app_ble_smp` and :ref:`door_lock_dfu_smp_service`.
 Prerequisites
 =============
 
+Before starting the DFU update process, ensure that:
+
+* The application is built with the ``dfu_smp`` snippet.
+
 .. include:: /include/firmware_update_dfu_smp_prerequisites.txt
 
 Enabling Bluetooth LE SMP advertising

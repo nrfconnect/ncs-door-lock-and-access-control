@@ -7,7 +7,8 @@ The |ALIRO_APP_NAME| runs on Nordic Semiconductor :ref:`supported SoCs <hw_requi
 
 Aliro standardizes the interaction that lets a phone or wearable act as a digital key at an opening, and does not dictate how the Reader connects to the rest of the ecosystem.
 
-In addition, the application supports optional Bluetooth® LE–based features, such as the Nordic UART Service (NUS) and Device Firmware Update over Simple Management Protocol (DFU SMP), depending on the configuration.
+The application includes Device Firmware Update over Simple Management Protocol (DFU SMP) by default.
+You can enable optional Bluetooth® LE–based features, such as the Nordic UART Service (NUS), through configuration.
 This application focuses exclusively on Aliro access control functionality without Matter integration, making it ideal for standalone Aliro implementations and commercial access control systems.
 
 .. toctree::

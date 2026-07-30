@@ -72,7 +72,7 @@ The |ALIRO_APP_NAME| supports the following capabilities:
   See :ref:`aliro_ble_transport` and :ref:`uwb_integration`.
 * CLI provisioning — Provision reader credentials through shell.
   See :ref:`aliro_testing_provisioning_cli`.
-* Device Firmware Update over SMP — Optional field updates over Bluetooth LE.
+* Device Firmware Update over SMP — Field updates over Bluetooth LE (enabled by default).
   See :ref:`aliro_firmware_update` and :ref:`door_lock_dfu_smp_service`.
 * Nordic UART Service — Optional Bluetooth LE command channel.
   See :ref:`door_lock_nus_service`.
@@ -104,6 +104,9 @@ They are not required for the default NFC-only build.
      - Available when ``CONFIG_DOOR_LOCK_BLE_UWB`` is enabled.
        Sets the maximum number of concurrent Aliro Bluetooth LE and UWB sessions.
        When changing the session count, set ``CONFIG_BT_MAX_CONN`` to at least that value plus any connections used on the default identity by other services.
+   * - ``CONFIG_DOOR_LOCK_DFU_SMP_SERVICE``
+     - Enables Device Firmware Update over Bluetooth LE SMP.
+       Enabled by default.
 
 For Bluetooth LE transport and session-limit details, see :ref:`aliro_ble_transport`.
 
@@ -161,7 +164,7 @@ Development kit interface
 =========================
 
 Button 1:
-   When the application is built with the ``dfu_smp`` snippet, toggles Bluetooth LE advertising for DFU over SMP.
+   Toggles Bluetooth LE advertising for DFU over SMP.
    You can also use the ``dfu_smp on`` and ``dfu_smp off`` shell commands.
 
 LED 2:
@@ -226,7 +229,7 @@ Building and running
 Build variants
 ==============
 
-The default quick-start build is Aliro over NFC only.
+The default quick-start build is Aliro over NFC only with SMP DFU enabled.
 Use the variants below when you need Bluetooth LE with UWB, optional Bluetooth LE services, release optimizations, or QM35 firmware update support.
 
 Replace ``<build_target>`` with your DK target from :ref:`hw_requirements_development_kit`.
@@ -247,18 +250,16 @@ For UWB hardware setup, see :ref:`hw_requirements_uwb_module` and :ref:`uwb_inte
    * - QM35825 UWB
      - ``west build -p -b <build_target> applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=uwb_qm35``
        See :ref:`aliro_qm35_sdk_repository` for the required workspace setup.
-   * - SMP DFU over Bluetooth LE
-     - ``west build -p -b <build_target> applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=dfu_smp``
-       See :ref:`aliro_firmware_update` and :ref:`door_lock_dfu_smp_service`.
    * - Nordic UART Service (NUS)
      - ``west build -p -b <build_target> applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=bt_nus``
        See :ref:`door_lock_nus_service`.
    * - Combined snippets
-     - Separate snippet names with semicolons, for example ``-Daliro-access-control-app_SNIPPET='uwb_qm35;dfu_smp'``.
+     - Separate snippet names with semicolons, for example ``-Daliro-access-control-app_SNIPPET='uwb_qm35;bt_nus'``.
    * - QM35 firmware update (DFU)
      - Pass the sysbuild ``uwb_qm35_dfu`` snippet together with ``uwb_qm35``, for example ``-- -DSNIPPET=uwb_qm35_dfu -Daliro-access-control-app_SNIPPET=uwb_qm35``.
-       You must add ``dfu_smp`` to the application snippet when you update the main application over SMP.
        See :ref:`aliro_firmware_update`.
+   * - Disable SMP DFU
+     - ``west build -p -b <build_target> applications/aliro-access-control-app -- -DCONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n``
    * - Release build
      - ``west build -p -b <build_target> applications/aliro-access-control-app -- -DFILE_SUFFIX=release``
        Combine with snippets when needed.
@@ -342,7 +343,7 @@ This application uses the following |REPO_NAME| and |NCS| components:
 * :ref:`nfc_integration` — NFC transport and RFAL driver
 * PSA Crypto
 
-When DFU is enabled, the application also uses `MCUboot`_ for image management.
+The application uses `MCUboot`_ for image management.
 
 The application depends on the following Zephyr facilities:
 

@@ -17,12 +17,14 @@ config BT_PHY_UPDATE
 	default n
 
 config BT_BUF_ACL_RX_SIZE
+	default 502 if DOOR_LOCK_DFU_SMP_SERVICE
 	default 271
 
 config BT_BUF_ACL_TX_SIZE
 	default 271
 
 config BT_L2CAP_TX_MTU
+	default 498 if DOOR_LOCK_DFU_SMP_SERVICE
 	default 267
 
 config BT_BUF_ACL_TX_COUNT

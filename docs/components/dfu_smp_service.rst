@@ -31,7 +31,7 @@ When shell commands are enabled (``CONFIG_DOOR_LOCK_DFU_SMP_SERVICE_SHELL=y``, d
    uart:~$ dfu_smp on
    uart:~$ dfu_smp off
 
-In reference applications, a development kit button can also toggle SMP advertising when the ``dfu_smp`` snippet is enabled.
+In reference applications, a development kit button can also toggle SMP advertising when SMP DFU is enabled.
 See the User interface section in :ref:`aliro_access_control_application` (**Button 1**) or :ref:`matter_ui` (**Button 3**).
 
 In Matter release builds, the UART shell is disabled by default, so use the button or re-enable the shell if you rely on ``dfu_smp`` commands.
@@ -40,7 +40,9 @@ Kconfig options
 ===============
 
 Configure the DFU SMP service through Kconfig options in :file:`prj.conf` as listed below.
-The ``dfu_smp`` snippet sets the wrapper options and the MCUmgr and Bluetooth LE transport options in :file:`snippets/dfu_smp/dfu_smp.conf`.
+In the |ALIRO_APP_NAME|, SMP DFU is enabled by default (``CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=y``).
+Build Matter applications with the ``dfu_smp`` snippet.
+This snippet sets the wrapper options along with the MCUmgr and Bluetooth LE transport options in :file:`snippets/dfu_smp/dfu_smp.conf`.
 
 .. list-table::
    :header-rows: 1
@@ -63,14 +65,19 @@ Option definitions and defaults are in :file:`subsys/dfu_smp_service/Kconfig`.
 Usage
 =====
 
-Enable the module by building the application with the ``dfu_smp`` snippet.
+|ALIRO_APP_NAME|
+----------------
 
+SMP DFU is enabled by default.
+Set ``CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n`` in :file:`prj.conf` to disable it.
+
+|MATTER_ALIRO_APP_NAME|
+-----------------------
+
+Enable SMP DFU by building with the ``dfu_smp`` snippet.
 Pass the snippet to ``west build`` using the application-specific symbol:
 
 .. code-block:: console
-
-   west build -p -b <build_target> applications/aliro-access-control-app -- \
-       -Daliro-access-control-app_SNIPPET=dfu_smp
 
    west build -p -b <build_target> applications/matter-aliro-door-lock-app -- \
        -Dmatter-aliro-door-lock-app_SNIPPET=dfu_smp
@@ -79,6 +86,6 @@ To combine with other snippets, separate their names with semicolons, for exampl
 
 .. code-block:: console
 
-   -Daliro-access-control-app_SNIPPET='uwb_qm35;dfu_smp'
+   -Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35;dfu_smp'
 
 After flashing, enable SMP advertising, then follow the update steps in :ref:`aliro_firmware_update` or :ref:`firmware_update`.

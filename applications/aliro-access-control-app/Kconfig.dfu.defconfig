@@ -1,0 +1,59 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config MCUMGR
+	default y
+
+config ZCBOR
+	default y
+
+config STREAM_FLASH
+	default y
+
+config IMG_MANAGER
+	default y
+
+config MCUMGR_GRP_IMG
+	default y
+
+config MCUMGR_GRP_OS
+	default y
+
+config MCUMGR_TRANSPORT_BT
+	default y
+
+config MCUMGR_TRANSPORT_BT_REASSEMBLY
+	default y
+
+choice MCUMGR_TRANSPORT_BT_PERM
+	default MCUMGR_TRANSPORT_BT_PERM_RW
+endchoice
+
+config MCUMGR_TRANSPORT_NETBUF_COUNT
+	default 6
+
+# Must fit MAX MTU + overhead; the single-image DFU default of 384 B is too small.
+config MCUMGR_TRANSPORT_NETBUF_SIZE
+	default 1024
+
+config MCUMGR_MGMT_NOTIFICATION_HOOKS
+	default y
+
+config MCUMGR_GRP_IMG_STATUS_HOOKS
+	default y
+
+config MCUMGR_GRP_IMG_UPLOAD_CHECK_HOOK
+	default y
+
+config MCUMGR_SMP_COMMAND_STATUS_HOOKS
+	default y
+
+# Custom SMP request to erase the settings partition.
+config MCUMGR_GRP_ZBASIC
+	default y
+
+config MCUMGR_GRP_ZBASIC_STORAGE_ERASE
+	default y
