@@ -9,9 +9,6 @@ cmake_minimum_required(VERSION 3.20.0)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(matter-lock)
 
-# Enable GNU STD support.
-include(${ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR}/config/nrfconnect/app/enable-gnu-std.cmake)
-
 # NORDIC SDK APP START
 
 # Include Data Model and ZAP utils

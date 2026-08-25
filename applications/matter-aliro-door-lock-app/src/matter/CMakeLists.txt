@@ -4,9 +4,6 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-# Enable GNU STD support.
-include(${ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR}/config/nrfconnect/app/enable-gnu-std.cmake)
-
 # NORDIC SDK APP START
 
 if(NOT CONFIG_MATTER_ZAP_FILE_PATH)
