@@ -13,6 +13,11 @@ manifest:
       repo-path: sdk-nrf
       revision: v3.4.0
       import: true
+    - name: ncs-matter
+      remote: ncs
+      repo-path: ncs-matter
+      revision: 9cac491c1948604af1f914fa11561256c757722c
+      import: true
     - name: qm35-aliro-sdk
       url: https://gitlab.com/qorvo_sdk/public/devkits/qm35-aliro-sdk
       revision: v1.1.0
