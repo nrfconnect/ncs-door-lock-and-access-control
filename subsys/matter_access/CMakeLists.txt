@@ -22,7 +22,5 @@ target_sources_ifdef(CONFIG_DOOR_LOCK_MATTER_ACCESS_SCHEDULES ${lib_name} INTERF
 target_sources_ifdef(CONFIG_DOOR_LOCK_MATTER_ACCESS_PRINT_STORAGE_STATUS ${lib_name} INTERFACE src/access_storage_print.cpp)
 
 if(CONFIG_DOOR_LOCK_MATTER_ACCESS_STORAGE_PERSISTENT_STORAGE)
-  set(MATTER_COMMONS_SRC_DIR ${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/src)
-  zephyr_include_directories(${MATTER_COMMONS_SRC_DIR})
   target_sources(${lib_name} INTERFACE src/access_storage.cpp)
 endif()

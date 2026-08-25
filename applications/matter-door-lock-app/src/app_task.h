@@ -13,7 +13,7 @@
 struct k_timer;
 struct Identify;
 
-#ifdef CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS
+#ifdef CONFIG_MATTER_TEST_EVENT_TRIGGERS
 #include "event_triggers/event_triggers.h"
 #endif
 
@@ -45,7 +45,7 @@ private:
 	static void NUSUnlockCallback(void *context);
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
 
-#ifdef CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS
+#ifdef CONFIG_MATTER_TEST_EVENT_TRIGGERS
 	constexpr static Nrf::Matter::TestEventTrigger::EventTriggerId kDoorLockJammedEventTriggerId =
 		0xFFFF'FFF3'2774'0000;
 	static CHIP_ERROR DoorLockJammedEventCallback(Nrf::Matter::TestEventTrigger::TriggerValue);

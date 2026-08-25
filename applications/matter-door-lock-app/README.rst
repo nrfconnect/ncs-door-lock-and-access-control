@@ -296,7 +296,7 @@ Custom board with Nordic SoC
       #. Refer to the `Advanced Matter Kconfig options`_ user guide, create your list of advanced configurations for your board, and apply the selected Kconfig options in the :file:`prj.conf` file.
       #. See the `List of threads used in Matter application`_ and adjust stack sizes according to your board and project requirements.
       #. A custom board does not have support for LEDs and buttons by default.
-         Therefore, you need to provide your own implementation of the :file:`nrf/samples/matter/common/src/board/board.cpp` board file.
+         Therefore, you need to provide your own implementation of the :file:`ncs-matter/subsys/board/board.cpp` board file.
 
    For more information, see the following guides:
 

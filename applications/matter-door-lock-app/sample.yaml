@@ -81,8 +81,8 @@ tests:
     build_only: true
     extra_args:
       - FILE_SUFFIX=release
-      - CONFIG_NCS_SAMPLE_MATTER_LEDS=n
-      - CONFIG_NCS_SAMPLE_MATTER_WATCHDOG=n
+      - CONFIG_MATTER_LEDS=n
+      - CONFIG_MATTER_WATCHDOG=n
       - CONFIG_CHIP_ENABLE_PAIRING_AUTOSTART=y
     integration_platforms:
       - nrf5340dk/nrf5340/cpuapp

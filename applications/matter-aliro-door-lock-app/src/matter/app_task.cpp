@@ -276,7 +276,7 @@ void AppTask::NUSUnlockCallback(void *context)
 }
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
 
-#ifdef CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS
+#ifdef CONFIG_MATTER_TEST_EVENT_TRIGGERS
 CHIP_ERROR AppTask::DoorLockJammedEventCallback(Nrf::Matter::TestEventTrigger::TriggerValue)
 {
 	VerifyOrReturnError(DoorLockServer::Instance().SendLockAlarmEvent(kLockEndpointId, AlarmCodeEnum::kLockJammed),
@@ -330,7 +330,7 @@ CHIP_ERROR AppTask::Init()
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
 
 	/* Register Door Lock test event trigger */
-#ifdef CONFIG_NCS_SAMPLE_MATTER_TEST_EVENT_TRIGGERS
+#ifdef CONFIG_MATTER_TEST_EVENT_TRIGGERS
 	ReturnErrorOnFailure(Nrf::Matter::TestEventTrigger::Instance().RegisterTestEventTrigger(
 		kDoorLockJammedEventTriggerId,
 		Nrf::Matter::TestEventTrigger::EventTrigger{ 0, DoorLockJammedEventCallback }));

@@ -1,10 +1,4 @@
 patches:
-  - path: nrf/diag.patch
-    sha256sum: ec2af608da2df6e12ec1b0b77500bd51a0cdc15bb1c01213a4f87758b1b461d5
-    module: nrf
-    author: Adrian Gielniewski
-    email: adrian.gielniewski@nordicsemi.no
-    date: 2026-06-23
   - path: vendor1/vendor1.patch
     sha256sum: bc557d0b0addfaf50d66f9c47699478c7e7074f9fbb03063b1a4bf9a4044d5de
     module: qm35-aliro-sdk/project/cherry/vendor1
