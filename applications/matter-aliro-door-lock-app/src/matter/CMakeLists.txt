@@ -9,21 +9,17 @@ include(${ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR}/config/nrfconnect/app/enable-gnu-st
 
 # NORDIC SDK APP START
 
-# Include all source files that are located in the Matter common directory.
-include(${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/cmake/source_common.cmake)
-
-if(NOT CONFIG_NCS_SAMPLE_MATTER_ZAP_FILE_PATH)
+if(NOT CONFIG_MATTER_ZAP_FILE_PATH)
   if(CONFIG_DOOR_LOCK_BLE_UWB)
-    set(CONFIG_NCS_SAMPLE_MATTER_ZAP_FILE_PATH "${APPLICATION_CONFIG_DIR}/src/matter/zap_uwb/lock.zap")
+    set(CONFIG_MATTER_ZAP_FILE_PATH "${APPLICATION_CONFIG_DIR}/src/matter/zap_uwb/lock.zap")
   else()
-    set(CONFIG_NCS_SAMPLE_MATTER_ZAP_FILE_PATH "${APPLICATION_CONFIG_DIR}/src/matter/zap_nfc/lock.zap")
+    set(CONFIG_MATTER_ZAP_FILE_PATH "${APPLICATION_CONFIG_DIR}/src/matter/zap_nfc/lock.zap")
   endif()
 endif()
 
-# Include Data Model utils
-include(${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/cmake/data_model.cmake)
+# Include Data Model and ZAP utils
+include(${ZEPHYR_NCS_MATTER_MODULE_DIR}/cmake/sample.cmake)
 
-include(${ZEPHYR_NRF_MODULE_DIR}/samples/matter/common/cmake/zap_helpers.cmake)
 ncs_get_zap_parent_dir(ZAP_PARENT_DIR)
 zephyr_include_directories(${ZAP_PARENT_DIR})
 
