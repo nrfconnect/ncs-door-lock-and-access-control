@@ -8,11 +8,11 @@ manifest:
     - name: ncs
       url-base: https://github.com/nrfconnect
   projects:
-    - name: nrf
-      remote: ncs
-      repo-path: sdk-nrf
-      revision: v3.4.0
-      import: true
+    # - name: nrf
+    #   remote: ncs
+    #   repo-path: sdk-nrf
+    #   revision: v3.4.0
+    #   import: true
     - name: ncs-matter
       remote: ncs
       repo-path: ncs-matter
