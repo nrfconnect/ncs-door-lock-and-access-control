@@ -69,6 +69,7 @@ jobs:
           path: |
             ${{ env.WEST_WORKSPACE }}/bootloader
             ${{ env.WEST_WORKSPACE }}/modules
+            ${{ env.WEST_WORKSPACE }}/ncs-matter
             ${{ env.WEST_WORKSPACE }}/nrf
             ${{ env.WEST_WORKSPACE }}/nrfxlib
             ${{ env.WEST_WORKSPACE }}/test
@@ -87,8 +88,8 @@ jobs:
         run: |
           west init -l
           west config manifest.group-filter -- "+qm35-aliro-sdk"
-          west forall -a -c 'git reset --hard && git clean -fdx'
           west update -o=--depth=1 -n
+          west forall -a -c 'git reset --hard && git clean -fdx'
           west patch apply --roll-back
 
       - name: Build with sonarqube wrapper
