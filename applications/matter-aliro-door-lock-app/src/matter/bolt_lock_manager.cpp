@@ -145,7 +145,7 @@ void BoltLockManager::Init(StateChangeCallback callback)
 				Aliro::AccessManager::PublicKeyType::CredentialIssuer, keyIndex);
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
-			Aliro::ClearValidityIterations(credentialIndex);
+			Aliro::ClearValidityIterations(keyIndex);
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 		}
 	};
