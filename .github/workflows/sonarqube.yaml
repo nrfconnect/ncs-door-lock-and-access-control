@@ -88,7 +88,7 @@ jobs:
           west init -l
           west config manifest.group-filter -- "+qm35-aliro-sdk"
           west forall -a -c 'git reset --hard && git clean -fdx'
-          west update -o=--depth=1 -n
+          west update -o=--depth=1
           west patch apply --roll-back
 
       - name: Build with sonarqube wrapper
