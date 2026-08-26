@@ -18,6 +18,9 @@
 #if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 #include "access_document.h"
 #endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+#include "credential_issuer_keys.h"
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
@@ -458,6 +461,12 @@ AliroError AccessManagerImpl::_AddPublicKey(const CryptoTypes::PublicKey &public
 		return AddKeyToContainer(mCiKeys, publicKey, keyIndex);
 	}
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	else if (publicKeyType == PublicKeyType::CertificateCredentialIssuer) {
+		LOG_DBG("Adding Certificate Credential Issuer public key to storage");
+		return AddKeyToContainer(mCiCertKeys, publicKey, keyIndex);
+	}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 #if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 	else if (publicKeyType == PublicKeyType::AccessDocument) {
 		LOG_DBG("Adding Access Document public key to storage");
@@ -496,6 +505,15 @@ AliroError AccessManagerImpl::_RemovePublicKey(PublicKeyType publicKeyType, size
 		return ALIRO_NO_ERROR;
 	}
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS > 0
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	else if (publicKeyType == PublicKeyType::CertificateCredentialIssuer) {
+		LOG_DBG("Removing Certificate Credential Issuer public key from storage");
+		ReturnErrorOnFailure(RemoveKeyFromContainer(mCiCertKeys, keyIndex));
+		ReturnErrorOnFailure(ClearCertificateCredentialIssuerKey(keyIndex));
+		ReturnErrorOnFailure(ClearValidityIterations(kCiCertKeyIndexOffset + keyIndex));
+		return ALIRO_NO_ERROR;
+	}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 #if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 	else if (publicKeyType == PublicKeyType::AccessDocument) {
 		LOG_DBG("Removing Access Document public key from storage");
@@ -538,6 +556,13 @@ void AccessManagerImpl::_ClearStoredKeys()
 		key.reset();
 	}
 	mCiKeys.mCount = 0;
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	for (auto &key : mCiCertKeys.mKeys) {
+		key.reset();
+	}
+	mCiCertKeys.mCount = 0;
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 
 	for (auto &key : mAdKeys.mKeys) {
 		key.reset();
@@ -1109,10 +1134,65 @@ AliroError AccessManagerImpl::_GetCredentialIssuerPublicKey(const CryptoTypes::K
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
+bool AccessManagerImpl::FindCredentialIssuerKeyIndex(const CryptoTypes::PublicKey &publicKey, size_t &index) const
+{
+	size_t localIndex{};
+
+	if (IsPublicKeyStored(mCiKeys, publicKey, &localIndex)) {
+		index = localIndex;
+		return true;
+	}
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	if (IsPublicKeyStored(mCiCertKeys, publicKey, &localIndex)) {
+		index = kCiCertKeyIndexOffset + localIndex;
+		return true;
+	}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+
+	return false;
+}
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+AliroError
+AccessManagerImpl::AddCertificateCredentialIssuerKey(const CryptoTypes::PublicKey &publicKey,
+						     const std::optional<ValidityIteration> &validityIteration,
+						     size_t &index)
+{
+	size_t localIndex{};
+	const AliroError error = GetFirstFreeIndex(mCiCertKeys, localIndex);
+	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, error,
+			     LOG_ERR("No free slot for certificate Credential Issuer public key storage"));
+	index = kCiCertKeyIndexOffset + localIndex;
+
+	if (validityIteration.has_value()) {
+		ReturnErrorOnFailure(
+			StoreValidityIterations(index, ValidityIterations{ .mAccessIteration = *validityIteration }));
+	}
+
+	ReturnErrorOnFailure(StoreCertificateCredentialIssuerKey(localIndex, publicKey));
+	ReturnErrorOnFailure(AddKeyToContainer(mCiCertKeys, publicKey, localIndex));
+	return ALIRO_NO_ERROR;
+}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+
 AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey &userPublicKey,
 						    const AccessDocumentTypes::AccessDocument &ad)
 {
-	ReturnErrorOnFailure(ProcessValidityIteration(ad.mCredentialIssuerPublicKey, ad.mValidityIteration));
+	size_t ciKeyIndex{};
+	const bool ciKeyKnown = FindCredentialIssuerKeyIndex(ad.mCredentialIssuerPublicKey, ciKeyIndex);
+
+	if (ciKeyKnown) {
+		ReturnErrorOnFailure(ProcessValidityIteration(ciKeyIndex, ad.mValidityIteration));
+	} else {
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+		ReturnErrorOnFailure(AddCertificateCredentialIssuerKey(ad.mCredentialIssuerPublicKey,
+								       ad.mValidityIteration, ciKeyIndex));
+#else
+		LOG_WRN("Credential Issuer public key not found and certificate key storage is disabled");
+		return ALIRO_ERROR_NOT_IMPLEMENTED;
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	}
 
 	auto error = ValidateAccessData(ad.mDataElement);
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, error,
@@ -1123,6 +1203,13 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 			     LOG_WRN("Public key mismatch"));
 
 #if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	// Storing Access Documents for Credential Issuers learned from certificates is not supported.
+	if (ciKeyIndex >= kCiCertKeyIndexOffset) {
+		return ALIRO_NO_ERROR;
+	}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+
 	MutexGuard lock{ sMutex };
 
 	size_t keyIndex = 0;
@@ -1140,15 +1227,9 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 	}
 
 	if (error == ALIRO_NO_ERROR) {
-		size_t credentialIssuerKeyIndex{};
-		const bool credentialIssuerKeyStored =
-			IsPublicKeyStored(mCiKeys, ad.mCredentialIssuerPublicKey, &credentialIssuerKeyIndex);
-
-		if (credentialIssuerKeyStored) {
-			error = StoreAccessDocument(keyIndex, credentialIssuerKeyIndex, ad);
-			if (error == ALIRO_NO_ERROR && !adKeyStored) {
-				AddKeyToContainer(mAdKeys, userPublicKey, keyIndex);
-			}
+		error = StoreAccessDocument(keyIndex, ciKeyIndex, ad);
+		if (error == ALIRO_NO_ERROR && !adKeyStored) {
+			AddKeyToContainer(mAdKeys, userPublicKey, keyIndex);
 		}
 	}
 #endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
@@ -1196,26 +1277,19 @@ AliroError AccessManagerImpl::RemoveOldestCredential(size_t &keyIndex)
 
 #endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
-AliroError AccessManagerImpl::ProcessValidityIteration(const CryptoTypes::PublicKey &credentialIssuerPublicKey,
+AliroError AccessManagerImpl::ProcessValidityIteration(size_t credentialIssuerKeyIndex,
 						       const std::optional<ValidityIteration> &validityIteration)
 {
 	VerifyOrReturnStatus(validityIteration.has_value(), ALIRO_NO_ERROR,
 			     LOG_DBG("Validity iteration is not present"));
 
-	// Check if the Credential Issuer public key is stored in the storage.
-	// If not, we can ignore the validity iteration, until storing the Credential Issuer public keys
-	// from certificate is supported.
-	size_t keyIndex{};
-	VerifyOrReturnStatus(IsPublicKeyStored(mCiKeys, credentialIssuerPublicKey, &keyIndex), ALIRO_NO_ERROR,
-			     LOG_INF("Credential Issuer public key not found in storage"));
-
 	ValidityIterations iterations{};
-	ReturnErrorOnFailure(GetCurrentValidityIterations(keyIndex, iterations));
+	ReturnErrorOnFailure(GetCurrentValidityIterations(credentialIssuerKeyIndex, iterations));
 
 	VerifyOrReturnStatus(VerifyValidityIteration(iterations, validityIteration.value()), ALIRO_PUBLIC_KEY_EXPIRED,
 			     LOG_WRN("Validity Iteration is not valid, ignoring Access Document for access decision"));
 
-	ReturnErrorOnFailure(UpdateValidityIteration(keyIndex, iterations, validityIteration.value()));
+	ReturnErrorOnFailure(UpdateValidityIteration(credentialIssuerKeyIndex, iterations, validityIteration.value()));
 
 	return ALIRO_NO_ERROR;
 }

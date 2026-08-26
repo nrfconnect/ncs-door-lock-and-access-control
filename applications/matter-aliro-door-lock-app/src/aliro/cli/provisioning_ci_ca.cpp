@@ -15,10 +15,35 @@
 
 #include <zephyr/shell/shell.h>
 
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+#include "access_manager.h"
+#endif
+
 namespace {
 using namespace Aliro;
 
 constexpr size_t kPublicKeyStringLength{ 2 * CryptoTypes::kEccP256PublicKeyLength };
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+int ClearCertificateCredentialIssuerKeys(const struct shell *shell)
+{
+	constexpr size_t kCiCertMaxKeys{ CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS };
+
+	for (size_t keyId = 0; keyId < kCiCertMaxKeys; keyId++) {
+		const auto error = AccessManagerInstance().RemovePublicKey(
+			AccessManager::PublicKeyType::CertificateCredentialIssuer, keyId);
+		if (error == ALIRO_PUBLIC_KEY_NOT_FOUND) {
+			continue;
+		}
+		VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
+				     shell_warn(shell,
+						"Cannot clear Certificate Credential Issuer public key at index %u\n",
+						keyId));
+	}
+
+	return 0;
+}
+#endif
 
 int ShellCmdHandleCredentialIssuerCAList(const struct shell *shell, size_t argc, char **)
 {
@@ -64,6 +89,9 @@ int ShellCmdHandleCredentialIssuerCASet(const struct shell *shell, size_t argc, 
 	CryptoTypes::KeyId keyId{ DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId };
 	const auto keyAvailable = DoorLock::CryptoUtils::IsKeyAvailable(keyId) == ALIRO_NO_ERROR;
 	if (keyAvailable) {
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+		VerifyOrReturnValue(ClearCertificateCredentialIssuerKeys(shell) == 0, -EINVAL);
+#endif
 		const auto error = DoorLock::CryptoUtils::DestroyKey(keyId);
 		VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 				     shell_warn(shell, "Cannot remove Credential Issuer CA public key\n"));
@@ -83,6 +111,16 @@ int ShellCmdHandleCredentialIssuerCAClear(const struct shell *shell, size_t argc
 	VerifyOrReturnValue(IsShellInitialized(), -EIO, shell_warn(shell, "Not initialized yet\n"));
 
 	CryptoTypes::KeyId keyId{ DoorLock::Storage::PsaKeyIds::kCredentialIssuerCAPublicKeyId };
+	const auto keyAvailable = DoorLock::CryptoUtils::IsKeyAvailable(keyId) == ALIRO_NO_ERROR;
+	if (!keyAvailable) {
+		shell_warn(shell, "Credential Issuer CA public key is not set\n");
+		return 0;
+	}
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	VerifyOrReturnValue(ClearCertificateCredentialIssuerKeys(shell) == 0, -EINVAL);
+#endif
+
 	const auto error = DoorLock::CryptoUtils::DestroyKey(keyId);
 	VerifyOrReturnStatus(error == ALIRO_NO_ERROR, -EINVAL,
 			     shell_warn(shell, "Cannot remove Credential Issuer CA public key\n"));

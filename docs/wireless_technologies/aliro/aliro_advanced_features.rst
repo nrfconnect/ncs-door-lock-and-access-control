@@ -145,21 +145,72 @@ Add them to the application's :file:`prj.conf`, or pass them to ``west build`` w
    * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS``
      - Maximum number of Access Credential public keys stored in the Access Manager during Step-up authorization.
    * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS``
-     - Maximum number of Credential Issuer public keys stored for Access Document signature verification.
+     - Maximum number of provisioned Credential Issuer public keys stored for Access Document signature verification.
        See :file:`applications/*/src/aliro/access_manager/Kconfig` for defaults and help text.
+   * - ``CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA``
+     - Enables Credential Issuer certificate validation against a provisioned Credential Issuer CA public key.
+       It is enabled by default when Step-up phase support is enabled.
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS``
+     - Maximum number of Credential Issuer public keys learned from certificates and stored for reuse.
+       Requires ``CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA``.
+       The default value is ``5``.
+       Set to ``0`` to disable storage of certificate-derived issuer keys.
 
 .. note::
    ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` and ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` are enabled by default in both the Aliro Access Control Application and the Matter and Aliro Door Lock Application.
    In the Matter and Aliro Door Lock Application, Credential Issuer keys are provisioned through Matter during normal setup.
+   Additional Credential Issuer public keys may be learned from certificates during runtime.
 
-In the Aliro Access Control Application, provision Credential Issuer public keys manually before the Step-up phase.
-From the serial console, run the following command:
+Credential Issuer keys
+----------------------
+The :ref:`aliro_access_manager` stores Credential Issuer public keys in two ways, and the difference determines how much work each unlock takes:
+
+* Provisioned keys — Installed manually through the CLI or through Matter.
+  Access Documents signed by a provisioned issuer are cached, so once a document is stored, repeat unlocks can skip the Step-up phase.
+  Set the number of keys the device can hold with the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS`` Kconfig option.
+* Certificate-derived keys — Learned automatically when the User Device presents a Credential Issuer certificate that validates against the provisioned Credential Issuer CA public key.
+  The Access Manager stores each key together with their validity iteration, but it never caches the corresponding Access Documents.
+  Every presentation from a certificate-derived issuer therefore repeats the Step-up phase, and the User Device must supply the certificate again on each unlock.
+  Set the limit for these keys with the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS`` Kconfig option.
+
+Once the storage for certificate-derived issuer keys is full, the Access Manager denies access to Access Documents from any new issuer.
+In the Aliro Access Control Application, Credential Issuer public keys must be provisioned manually before the Step-up phase.
+Run the following command from the serial console:
 
 .. code-block:: console
 
    uart:~$ dl provisioning CI_key set <key id> <65-byte public key in hex without 0x>
 
 For full provisioning instructions, see :ref:`aliro_testing_provisioning_cli`.
+
+Credential Issuer CA
+--------------------
+
+Enable the ``CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA`` Kconfig option to let the User Device identify its Credential Issuer by X.509 certificate instead of a key identifier.
+During the Step-up phase, the Reader verifies the certificate signature against the provisioned Credential Issuer CA public key, then extracts the issuer public key from the certificate.
+
+.. note::
+   Certificate-based authentication also requires key storage.
+   Set the ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS`` Kconfig option to a value greater than ``0``.
+
+Before you test certificate-based Step-up flows, provision the Credential Issuer CA public key from the serial console:
+
+.. code-block:: console
+
+   uart:~$ dl provisioning CI_CA_key set <65-byte public key in hex without 0x>
+
+To inspect or clear the issuer keys the Reader learned at runtime, run:
+
+.. code-block:: console
+
+   uart:~$ dl provisioning CI_cert_key list
+   uart:~$ dl provisioning CI_cert_key clear <key id>
+
+.. note::
+   Setting or clearing the Credential Issuer CA public key discards all certificate-derived
+   Credential Issuer keys, together with their validity iterations.
+
+For more information about the provisioning CLI, see :ref:`aliro_testing_provisioning_cli` and :ref:`testing_provisioning_cli`.
 
 Reader certificates
 *******************

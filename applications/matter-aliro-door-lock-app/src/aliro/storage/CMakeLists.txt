@@ -9,6 +9,10 @@ target_sources(app PRIVATE
 )
 target_sources_ifdef(CONFIG_DOOR_LOCK_STEP_UP_PHASE app PRIVATE validity_iterations.cpp)
 
+target_sources_ifdef(CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS app PRIVATE
+  credential_issuer_keys.cpp
+)
+
 if(CONFIG_DOOR_LOCK_STEP_UP_PHASE AND CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS GREATER 0)
   target_sources(app PRIVATE
     access_document.cpp

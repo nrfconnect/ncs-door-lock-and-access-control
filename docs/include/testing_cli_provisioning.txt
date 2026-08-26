@@ -160,9 +160,34 @@
       * ``uart:~$ dl provisioning CI_CA_key list`` - This command retrieves the Credential Issuer CA public key stored in the DUT.
       * ``uart:~$ dl provisioning CI_CA_key clear`` - This command clears the Credential Issuer CA public key stored in the DUT.
 
+      Setting or clearing the Credential Issuer CA public key also discards all certificate-derived Credential Issuer keys and their stored Validity Iterations.
+
       For example:
 
       .. code-block:: console
 
          uart:~$ dl provisioning CI_CA_key list
          047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137
+
+#. When ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS`` is greater than zero, the Reader learns Credential Issuer public keys from validated certificates and stores them in a separate pool.
+   These keys are not provisioned manually.
+   Use the following ``dl provisioning`` shell commands to inspect or remove them:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning CI_cert_key list
+      uart:~$ dl provisioning CI_cert_key clear <key id>
+      uart:~$ dl provisioning CI_cert_key clear all
+
+   For example:
+
+   .. code-block:: console
+
+      uart:~$ dl provisioning CI_cert_key list
+      [0]: 047BA31938492E3F5E97BC91806B5835B5D9E426609139006711E5FB7A670EE4E12FC9F25396C013CC20166029D761A105DEA5E071E84A9E499920524CE2301137
+      [1]: (null)
+
+   .. note::
+
+      Clearing a certificate-derived issuer key also removes its stored validity iteration.
+      Access Documents signed by certificate-derived issuers are never cached.

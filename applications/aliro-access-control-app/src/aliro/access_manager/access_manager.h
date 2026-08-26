@@ -36,6 +36,7 @@ public:
 		AccessCredential = 0,
 		CredentialIssuer = 1,
 		AccessDocument = 2,
+		CertificateCredentialIssuer = 3,
 	};
 
 	/**

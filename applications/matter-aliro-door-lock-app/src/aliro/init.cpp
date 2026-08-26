@@ -31,6 +31,11 @@
 #include "access_document.h"
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE AND CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+#include "credential_issuer_keys.h"
+#include "validity_iterations.h"
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+
 #ifdef CONFIG_DOOR_LOCK_EXTERNAL_NVS
 #include <external_nvs/external_nvs.h>
 #include <zephyr/storage/flash_map.h>
@@ -150,6 +155,12 @@ int AliroInit()
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Cannot load Access Documents"));
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE && CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	ec = LoadCertificateCredentialIssuerKeys();
+	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE,
+			    LOG_ERR("Cannot load Certificate Credential Issuer keys"));
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+
 #ifdef CONFIG_DOOR_LOCK_CLI
 	InitShellCommands(kpersistentManager);
 #endif // CONFIG_DOOR_LOCK_CLI
@@ -233,6 +244,26 @@ void ClearStorageAliro(bool reinitializeStorage)
 	}
 
 #endif // CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	for (size_t index = 0; index < CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS;
+	     index++) {
+		err = ClearCertificateCredentialIssuerKey(index);
+		if (err != ALIRO_NO_ERROR) {
+			LOG_ERR("Failed to clear Certificate Credential Issuer key at index %zu: %d", index,
+				err.ToInt());
+		}
+
+		const size_t validityIterationIndex =
+			CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS + index;
+		err = ClearValidityIterations(validityIterationIndex);
+		if (err != ALIRO_NO_ERROR) {
+			LOG_ERR("Failed to clear Validity Iterations for Certificate Credential Issuer key at "
+				"index %zu: %d",
+				index, err.ToInt());
+		}
+	}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
