@@ -9,8 +9,8 @@
  *
  * Provides the implementation of AccessStorage class that utilizes the persistent storage interface.
  * The persistent storage backend is chosen based on the Kconfig settings:
- * - NCS_SAMPLE_MATTER_SETTINGS_STORAGE_BACKEND or
- * - NCS_SAMPLE_MATTER_SECURE_STORAGE_BACKEND [DEPRECATED].
+ * - MATTER_SETTINGS_STORAGE_BACKEND or
+ * - MATTER_SECURE_STORAGE_BACKEND [DEPRECATED].
  *
  * This implementation uses the following persistent storage keys for the access items:
  *
@@ -44,17 +44,17 @@
 
 /* Currently the secure storage is available only for non-Wi-Fi builds,
    because NCS Wi-Fi implementation does not support PSA API yet. */
-#if defined(CONFIG_NCS_SAMPLE_MATTER_SECURE_STORAGE_BACKEND) && defined(CONFIG_CHIP_WIFI)
-#error CONFIG_NCS_SAMPLE_MATTER_SECURE_STORAGE_BACKEND is currently not available if CONFIG_CHIP_WIFI is set.
+#if defined(CONFIG_MATTER_SECURE_STORAGE_BACKEND) && defined(CONFIG_CHIP_WIFI)
+#error CONFIG_MATTER_SECURE_STORAGE_BACKEND is currently not available if CONFIG_CHIP_WIFI is set.
 #endif
 
-/* Prefer to use CONFIG_NCS_SAMPLE_MATTER_SECURE_STORAGE_BACKEND if both backends are set simultaneously */
-#ifdef CONFIG_NCS_SAMPLE_MATTER_SECURE_STORAGE_BACKEND
+/* Prefer to use CONFIG_MATTER_SECURE_STORAGE_BACKEND if both backends are set simultaneously */
+#ifdef CONFIG_MATTER_SECURE_STORAGE_BACKEND
 #define PSInit SecureInit
 #define PSStore SecureStore
 #define PSRemove SecureRemove
 #define PSLoad SecureLoad
-#elif defined(CONFIG_NCS_SAMPLE_MATTER_SETTINGS_STORAGE_BACKEND)
+#elif defined(CONFIG_MATTER_SETTINGS_STORAGE_BACKEND)
 #define PSInit NonSecureInit
 #define PSStore NonSecureStore
 #define PSLoad NonSecureLoad

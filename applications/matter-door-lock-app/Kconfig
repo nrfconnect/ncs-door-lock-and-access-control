@@ -43,9 +43,9 @@ endif # OPENTHREAD
 # This also implies increasing of the OT and Matter stacks because some operations
 # performed during commissioning seem to allocate stack buffers based on the
 # maximum possible secure asset size.
-if DOOR_LOCK_MATTER_ACCESS_SCHEDULES && NCS_SAMPLE_MATTER_SECURE_STORAGE_BACKEND
+if DOOR_LOCK_MATTER_ACCESS_SCHEDULES && MATTER_SECURE_STORAGE_BACKEND
 
-config NCS_SAMPLE_MATTER_SECURE_STORAGE_MAX_ENTRY_NUMBER
+config MATTER_SECURE_STORAGE_MAX_ENTRY_NUMBER
 	default 128
 
 config TRUSTED_STORAGE_BACKEND_AEAD_MAX_DATA_SIZE
@@ -71,5 +71,4 @@ endchoice
 
 source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.features"
 source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.defaults"
-source "$(ZEPHYR_NRF_MODULE_DIR)/samples/matter/common/src/Kconfig"
 source "Kconfig.zephyr"

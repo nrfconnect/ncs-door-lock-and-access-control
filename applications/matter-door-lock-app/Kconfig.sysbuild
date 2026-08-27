@@ -57,7 +57,7 @@ endif # SOC_SERIES_NRF53
 endif # BOOTLOADER_MCUBOOT
 
 #### Enable generating factory data
-config MATTER_FACTORY_DATA_GENERATE
+config MATTER_ADD_ON_FACTORY_DATA_GENERATE
 	default y
 
 source "share/sysbuild/Kconfig"

@@ -12,6 +12,13 @@ manifest:
       remote: ncs
       repo-path: sdk-nrf
       revision: v3.4.0
+      import:
+        name-blocklist:
+          - matter
+    - name: ncs-matter
+      remote: ncs
+      repo-path: ncs-matter
+      revision: v1.0.0
       import: true
     - name: qm35-aliro-sdk
       url: https://gitlab.com/qorvo_sdk/public/devkits/qm35-aliro-sdk
@@ -21,7 +28,7 @@ manifest:
     - name: ncs-door-lock-app-extensions
       remote: ncs
       repo-path: ncs-door-lock-app-extensions
-      revision: v1.1.0
+      revision: efb54f781d2fee491e68e3cfeb94b3c1e0c8f756
       groups:
         - ncs-door-lock-app-extensions
     - name: vendor1

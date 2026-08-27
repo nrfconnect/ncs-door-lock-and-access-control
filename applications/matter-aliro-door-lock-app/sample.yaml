@@ -131,7 +131,7 @@ tests:
     extra_args:
       - CONFIG_NCS_DOOR_LOCK_APP_EXTENSIONS_NFC=y
       - CONFIG_NCS_DOOR_LOCK_APP_EXTENSIONS_MATTER=y
-      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;matter-diagnostic-logs"
+      - matter-aliro-door-lock-app_SNIPPET="uwb_qm35;diagnostic-logs"
   sonarqube.door_lock:
     tags:
       - sonarqube

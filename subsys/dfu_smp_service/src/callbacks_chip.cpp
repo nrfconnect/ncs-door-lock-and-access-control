@@ -70,7 +70,10 @@ mgmt_callback sUploadCallback{
 
 enum mgmt_cb_return DfuStoppedHandler(uint32_t, enum mgmt_cb_return, int32_t *, uint16_t *, bool *, void *, size_t)
 {
-	FreeDfuSyncMutex();
+	const auto err = FreeDfuSyncMutex();
+	if (err != CHIP_NO_ERROR) {
+		LOG_ERR("Cannot release DFU sync mutex: %" CHIP_ERROR_FORMAT, err.Format());
+	}
 
 	sDfuInProgress = false;
 
@@ -96,7 +99,10 @@ void Disconnected(bt_conn *conn, [[maybe_unused]] uint8_t reason)
 	VerifyOrReturn(btInfo.role == BT_CONN_ROLE_PERIPHERAL);
 
 	sDfuInProgress = false;
-	FreeDfuSyncMutex();
+	const auto err = FreeDfuSyncMutex();
+	if (err != CHIP_NO_ERROR) {
+		LOG_ERR("Cannot release DFU sync mutex: %" CHIP_ERROR_FORMAT, err.Format());
+	}
 }
 
 BT_CONN_CB_DEFINE(sConnCallbacks) = {
