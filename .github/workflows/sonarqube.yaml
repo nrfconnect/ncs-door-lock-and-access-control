@@ -69,6 +69,7 @@ jobs:
           path: |
             ${{ env.WEST_WORKSPACE }}/bootloader
             ${{ env.WEST_WORKSPACE }}/modules
+            ${{ env.WEST_WORKSPACE }}/ncs-matter
             ${{ env.WEST_WORKSPACE }}/nrf
             ${{ env.WEST_WORKSPACE }}/nrfxlib
             ${{ env.WEST_WORKSPACE }}/test

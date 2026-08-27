@@ -8,6 +8,7 @@ name: ncs-door-lock-and-access-control
 build:
   kconfig: Kconfig
   cmake: .
+  sysbuild-kconfig: Kconfig.sysbuild
   settings:
     dts_root: .
     snippet_root: .

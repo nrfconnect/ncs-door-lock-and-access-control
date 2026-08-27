@@ -42,6 +42,7 @@ Prepare the environment:
       cd project-workspace
 
    This command clones the `ncs-door-lock-and-access-control`_ manifest repository into :file:`project-workspace`.
+   The manifest imports the ``ncs-matter`` add-on, which provides the compatible |NCS| and Matter SDK revisions.
 
 #. (Optional) Add the QM35 SDK repository to your workspace.
    See the :ref:`aliro_qm35_sdk_repository` section for more information.
@@ -79,6 +80,7 @@ Prepare the environment:
          ├─── bootloader
          ├─── modules
          ├─── ncs-door-lock-and-access-control
+         ├─── ncs-matter
          ├─── nrf
          ├─── nrfxlib
          ├─── zephyr
