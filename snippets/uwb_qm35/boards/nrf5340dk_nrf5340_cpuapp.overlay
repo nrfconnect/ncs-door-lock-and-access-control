@@ -12,7 +12,7 @@
 		status = "okay";
 		compatible = "qorvo,hsspi";
 		reg = <1>;
-		spi-max-frequency = <DT_FREQ_M(8)>;
+		spi-max-frequency = <DT_FREQ_M(4)>;
 		ss-irq-gpios = <&gpio0 26 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
 		reset-gpios = <&gpio1 9 (GPIO_ACTIVE_LOW | GPIO_OPEN_DRAIN)>;
 		exton-gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>;

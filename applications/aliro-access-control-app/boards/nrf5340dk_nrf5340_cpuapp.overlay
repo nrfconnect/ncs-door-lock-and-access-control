@@ -48,7 +48,7 @@
 	nucleo_nfc@0 {
 		compatible = "x-nucleo-nfc";
 		reg = <0>;
-		spi-max-frequency = <DT_FREQ_M(8)>;
+		spi-max-frequency = <DT_FREQ_M(4)>;
 		spi-cs-setup-delay-ns = <1000>;
 		spi-cs-hold-delay-ns = <1000>;
 		irq-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
