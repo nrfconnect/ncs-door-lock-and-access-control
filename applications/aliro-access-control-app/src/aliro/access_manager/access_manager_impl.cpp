@@ -1339,7 +1339,7 @@ AliroError AccessManagerImpl::RemoveOldCredentials(size_t credentialIssuerKeyInd
 			}
 
 			const auto diff = validityIteration - ad.mAccessIteration;
-			if (diff > kMaxValidityIterationDiff) {
+			if (diff >= kMaxValidityIterationDiff) {
 				LOG_DBG("Removing old credentials with index %u due to Validity Iteration difference: %" PRIu64,
 					i, diff);
 				ReturnErrorOnFailure(_RemovePublicKey(PublicKeyType::AccessDocument, i));
