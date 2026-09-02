@@ -231,8 +231,13 @@ CHIP_ERROR AccessManager<CRED_BIT_MASK>::GetCredentialUserIndex(uint16_t credent
 
 	for (size_t idxUsr = 0; idxUsr < CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_USERS; ++idxUsr) {
 		auto &user = Instance().mUsers[idxUsr];
-		const size_t numCredentials = user.mOccupiedCredentials.mSize / sizeof(CredentialStruct);
 
+		const auto userStatus = static_cast<UserStatusEnum>(user.mInfo.mFields.mUserStatus);
+		if (userStatus != UserStatusEnum::kOccupiedEnabled && userStatus != UserStatusEnum::kOccupiedDisabled) {
+			continue;
+		}
+
+		const size_t numCredentials = user.mOccupiedCredentials.mSize / sizeof(CredentialStruct);
 		for (size_t idxCred = 0; idxCred < numCredentials; ++idxCred) {
 			auto &credentialStruct = user.mOccupiedCredentials.mData[idxCred];
 			if (credentialStruct.credentialIndex == credentialIndex &&
