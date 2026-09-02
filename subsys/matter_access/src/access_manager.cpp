@@ -133,6 +133,14 @@ bool AccessManager<CRED_BIT_MASK>::ValidateCredential(CredentialTypeEnum credent
 
 		uint16_t userIndex{};
 		if (GetCredentialUserIndex(static_cast<uint16_t>(index), credentialType, userIndex) == CHIP_NO_ERROR) {
+			const auto &user = mUsers[userIndex - 1];
+			const auto userStatus = static_cast<UserStatusEnum>(user.mInfo.mFields.mUserStatus);
+			if (userStatus == UserStatusEnum::kOccupiedDisabled) {
+				LOG_DBG("User %u is disabled, access is denied", static_cast<unsigned>(userIndex));
+				error = OperationErrorEnum::kDisabledUserDenied;
+				return false;
+			}
+
 			LOG_DBG("Valid credential found, user index: %u, credential type: %u, credential index: %zu",
 				static_cast<unsigned>(userIndex), static_cast<unsigned>(credentialType), index);
 			error = OperationErrorEnum::kUnspecified;
