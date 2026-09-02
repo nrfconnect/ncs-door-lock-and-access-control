@@ -36,6 +36,10 @@
 #include "access_document.h"
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE AND CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+#include "credential_issuer_keys.h"
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+
 #ifdef CONFIG_DOOR_LOCK_EXTERNAL_NVS
 #include <external_nvs/external_nvs.h>
 #include <zephyr/storage/flash_map.h>
@@ -135,6 +139,11 @@ AliroError StorageInit()
 
 	err = LoadIssuerCredentials();
 	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Issuer Credentials"));
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	err = LoadCertificateCredentialIssuerKeys();
+	VerifyOrReturnStatus(err == ALIRO_NO_ERROR, err, LOG_ERR("Cannot load Certificate Credential Issuer keys"));
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 
 	return ALIRO_NO_ERROR;
 }

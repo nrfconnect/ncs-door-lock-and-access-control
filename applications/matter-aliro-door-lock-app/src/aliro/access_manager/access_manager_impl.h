@@ -298,10 +298,22 @@ private:
 	template <size_t T> AliroError GetFirstFreeIndex(StoredKeys<T> &container, size_t &keyIndex) const;
 
 #ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	static constexpr size_t kCiCertKeyIndexOffset{
+		CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS
+	};
+
+	AliroError AddCertificateCredentialIssuerKey(const CryptoTypes::PublicKey &publicKey,
+						     const std::optional<ValidityIteration> &validityIteration,
+						     size_t &index);
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+
+	bool FindCredentialIssuerKeyIndex(const CryptoTypes::PublicKey &publicKey, size_t &index) const;
+
 	AliroError ProcessAccessDocument(const CryptoTypes::PublicKey &userPublicKey,
 					 const AccessDocumentTypes::AccessDocument &accessDocument);
 	AliroError RemoveOldestCredential(size_t &keyIndex);
-	AliroError ProcessValidityIteration(const CryptoTypes::PublicKey &credentialIssuerPublicKey,
+	AliroError ProcessValidityIteration(size_t credentialIssuerKeyIndex,
 					    const std::optional<ValidityIteration> &validityIteration);
 	AliroError UpdateValidityIteration(size_t credentialIssuerKeyIndex, const ValidityIterations &currentIterations,
 					   ValidityIteration validityIteration);
@@ -374,6 +386,9 @@ private:
 
 	StoredKeys<CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS> mAcKeys{};
 	StoredKeys<CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS> mCiKeys{};
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+	StoredKeys<CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS> mCiCertKeys{};
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 	StoredKeys<CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS> mAdKeys{};
 };
 

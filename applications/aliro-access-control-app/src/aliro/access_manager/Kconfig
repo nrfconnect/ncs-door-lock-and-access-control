@@ -17,6 +17,20 @@ config DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS
       public key is used to verify the signature of the access document.
       If this option is set to 0, the access document is not supported.
 
+config DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS
+    int "Maximum number of stored Credential Issuer public keys learned from certificates"
+    depends on DOOR_LOCK_CREDENTIAL_ISSUER_CA
+    default 5
+    help
+      Specifies the maximum number of Credential Issuer public keys that can be
+      learned from certificates and stored. These keys are
+      kept in a separate pool from provisioned Credential Issuer keys.
+
+config DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
+    bool
+    depends on DOOR_LOCK_CREDENTIAL_ISSUER_CA
+    default y if DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_MAX_STORED_KEYS > 0
+
 config DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS
     int "Maximum number of stored public keys"
     default 5
