@@ -133,17 +133,18 @@ bool AccessManager<CRED_BIT_MASK>::ValidateCredential(CredentialTypeEnum credent
 
 		uint16_t userIndex{};
 		if (GetCredentialUserIndex(static_cast<uint16_t>(index), credentialType, userIndex) == CHIP_NO_ERROR) {
+			LOG_DBG("Valid credential found, user index: %u, credential type: %u, credential index: %zu",
+				static_cast<unsigned>(userIndex), static_cast<unsigned>(credentialType), index);
+			error = OperationErrorEnum::kUnspecified;
 			result = ValidateCredentialResult{
 				.mUserIndex = userIndex,
 				.mCredential = LockOpCredentials{ credentialType, static_cast<uint16_t>(index) },
 			};
+			return true;
 		} else {
-			result = {};
+			LOG_DBG("Cannot find user index for given credential");
+			break;
 		}
-
-		LOG_DBG("Valid lock credential provided");
-		error = OperationErrorEnum::kUnspecified;
-		return true;
 	}
 
 	LOG_DBG("Invalid lock credential provided");
