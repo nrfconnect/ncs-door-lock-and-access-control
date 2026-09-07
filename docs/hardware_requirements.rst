@@ -271,8 +271,3 @@ Test harness hardware
 
 If you are developing a door lock with Aliro support, for testing purposes, use the official `Aliro Certification Tool`_ as a test harness.
 To set it up, you must first meet the `test harness hardware requirements`_.
-
-.. note::
-
-   In case you do not have access to this repository, send a request to the help@csa-iot.org providing your GitHub username.
-   Be aware that you must first become a member of the `Connectivity Standards Alliance`_ (CSA).
