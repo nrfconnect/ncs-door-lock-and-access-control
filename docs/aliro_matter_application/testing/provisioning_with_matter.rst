@@ -604,13 +604,11 @@ Complete the following steps to create and enroll the driver:
 
 #. Fork the `SmartThingsEdgeDrivers`_ repository.
 
-#. Add your device's VID, PID, brand, and model name to the `fingerprints.lua file`_.
+#. Add your device's VID, PID, brand, and model name to the fingerprints file for Matter locks in the `SmartThingsEdgeDrivers`_ repository.
 
-   .. figure:: /images/testing_with_samsung/driver_lua_file.png
-      :alt: fingerprints.lua file with device VID and PID
-      :scale: 70%
+    .. note::
 
-      Adding the device fingerprint to the Matter lock driver
+      If you have problems finding the fingerprints file, contact the SmartThings team for assistance.
 
 #. Create a pull request to the main branch.
 
