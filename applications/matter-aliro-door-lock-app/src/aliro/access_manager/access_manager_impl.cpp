@@ -298,12 +298,8 @@ AliroError StoreAccessDocument(size_t keyIndex, size_t credentialIssuerKeyIndex,
 	return ALIRO_NO_ERROR;
 }
 
-bool IsCurrentAccessDocumentUpToDate(size_t keyIndex, const Timestamp &credentialSignedTimestamp)
+bool IsAccessDocumentUpToDate(const AccessDocument &ad, const Timestamp &credentialSignedTimestamp)
 {
-	AccessDocument ad;
-	const auto error = ReadAccessDocument(keyIndex, ad);
-	VerifyOrReturnFalse(error == ALIRO_NO_ERROR);
-
 	LOG_DBG("Saved timestamp: %.*s", ad.mSignedTimestamp.size(), ad.mSignedTimestamp.data());
 	LOG_DBG("New timestamp  : %.*s", credentialSignedTimestamp.size(), credentialSignedTimestamp.data());
 
@@ -354,9 +350,17 @@ std::optional<Interface::Access::AccessDocumentRequestParams> AccessManagerImpl:
 #if CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 	size_t keyIndex{};
 	if (IsPublicKeyStored(mAdKeys, publicKey, &keyIndex)) {
+		AccessDocument ad;
+		const auto error = ReadAccessDocument(keyIndex, ad);
+		if (error != ALIRO_NO_ERROR) {
+			LOG_WRN("Failed to read Access Document at index: %zu, error code: %d", keyIndex,
+				error.ToInt());
+			LOG_INF("Cached Access Document is missing or invalid, requesting Access Document");
+			return kAccessDocumentRequestParams;
+		}
+
 		if (credentialSignedTimestamp.has_value()) {
-			const auto isUpToDate =
-				IsCurrentAccessDocumentUpToDate(keyIndex, credentialSignedTimestamp.value());
+			const auto isUpToDate = IsAccessDocumentUpToDate(ad, credentialSignedTimestamp.value());
 			if (!isUpToDate) {
 				LOG_INF("User Device has newer Access Document");
 				return kAccessDocumentRequestParams;
@@ -383,17 +387,16 @@ AliroError AccessManagerImpl::_VerifyAccessCredential(
 	[[maybe_unused]] const std::optional<AccessDocumentTypes::AccessDocument> &accessDocument)
 {
 	AliroError status{ ALIRO_NO_ERROR };
+
+#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
+	if (accessDocument.has_value()) {
+		status = ProcessAccessDocument(userPublicKey, accessDocument.value());
+	} else
+#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 	{
 		MutexGuard lock{ sMutex };
 		status = VerifyPublicKey(userPublicKey) ? ALIRO_NO_ERROR : ALIRO_PUBLIC_KEY_NOT_FOUND;
 	}
-
-#ifdef CONFIG_DOOR_LOCK_STEP_UP_PHASE
-	if (status != ALIRO_NO_ERROR && accessDocument.has_value()) {
-		const auto &ad = accessDocument.value();
-		status = ProcessAccessDocument(userPublicKey, ad);
-	}
-#endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
 
 #ifdef CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 	if (status == ALIRO_NO_ERROR && mKpersistentManager) {
