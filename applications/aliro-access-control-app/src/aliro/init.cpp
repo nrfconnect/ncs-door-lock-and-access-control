@@ -259,6 +259,11 @@ int AliroInit()
 	LockSimInstance().Init([](ReaderStateByte state) {
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 		SendReaderStatusChangedMessage(state);
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
+		if (state == ReaderStateByte::Unsecured) {
+			AccessManagerInstance().SuspendActiveRangingSessions();
+		}
+#endif
 #ifdef CONFIG_DOOR_LOCK_NUS_SERVICE
 		const auto [message, messageLength] = GetNusServiceMessage(state);
 		DoorLock::NUSService::Send(message, messageLength);

@@ -218,6 +218,15 @@ public:
 	 */
 	void HandleRangingSessionStateChanged(SessionContext sessionContext, RangingSessionState state);
 
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
+	/**
+	 * @brief Suspends all active UWB ranging sessions.
+	 *
+	 * Sessions suspended by this method do not trigger a lock action.
+	 */
+	void SuspendActiveRangingSessions();
+#endif
+
 	/**
 	 * @brief Handles the session termination.
 	 *
