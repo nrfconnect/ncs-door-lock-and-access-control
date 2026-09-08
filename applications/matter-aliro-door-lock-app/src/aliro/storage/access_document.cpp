@@ -88,12 +88,19 @@ AliroError StoreAccessDocument(size_t index, const AccessDocument &ad)
 	VerifyOrReturnStatus(IsIndexInRange(index), ALIRO_INVALID_ARGUMENT,
 			     LOG_ERR("Access Document index out of range: %zu", index));
 
+	ReturnErrorOnFailure(UpdateAliroEvictableCredential(index, ad.mPublicKey, ad.mCredentialIssuerKeyIndex));
+
 	const auto id = GetExternalNvsId(index);
 	const auto error = DoorLock::ExternalNvs::Write(id, &ad, sizeof(AccessDocument));
-	VerifyOrReturnStatus(error == 0, AliroError::FromInt(error),
-			     LOG_ERR("Failed to store Access Document at index: %zu", index));
-
-	ReturnErrorOnFailure(UpdateAliroEvictableCredential(index, ad.mPublicKey, ad.mCredentialIssuerKeyIndex));
+	if (error != 0) {
+		LOG_ERR("Failed to store Access Document at index: %zu", index);
+		const auto rollbackError = RemoveAliroEvictableCredential(index, true);
+		if (rollbackError != ALIRO_NO_ERROR) {
+			LOG_ERR("Failed to revert Aliro evictable credential at index: %zu, error code: %d", index,
+				rollbackError.ToInt());
+		}
+		return AliroError::FromInt(error);
+	}
 
 	return ALIRO_NO_ERROR;
 }
