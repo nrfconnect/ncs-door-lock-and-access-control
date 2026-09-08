@@ -62,6 +62,16 @@ A known issue can list one or both of the following entries:
   Some known issues have a workaround.
   Sometimes, they are discovered later and added over time.
 
+The |REPO_NAME| v1.2.0
+**********************
+
+.. toggle::
+
+  AL-931: Access Manager is not aware of final unlock decision
+    In the |MATTER_ALIRO_APP_NAME|, the Aliro Access Manager makes its access decision based only on the Access Credential public key, before the Matter user data is evaluated.
+    When the public key belongs to a Matter user whose UserStatus is ``OccupiedDisabled``, the Access Manager still grants access over Aliro.
+    The Matter validation runs afterwards, denies the credential with the ``DisabledUserDenied`` error, and the bolt is not actuated, so the door remains locked and no lock operation event is generated.
+
 The |REPO_NAME| v1.1.0
 **********************
 
