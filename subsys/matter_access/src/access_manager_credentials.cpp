@@ -126,7 +126,15 @@ CHIP_ERROR AccessManager<CRED_BIT_MASK>::RemoveAliroEvictableCredential(uint16_t
 		/* Update the users credentials list */
 		auto &users = Instance().mUsers;
 		for (size_t idxUsr = 0; idxUsr < CONFIG_DOOR_LOCK_MATTER_ACCESS_MAX_NUM_USERS; ++idxUsr) {
-			users[idxUsr].RemoveAliroEvictableCredential(credentialIndex);
+			auto &user = users[idxUsr];
+
+			const auto userStatus = static_cast<UserStatusEnum>(user.mInfo.mFields.mUserStatus);
+			if (userStatus != UserStatusEnum::kOccupiedEnabled &&
+			    userStatus != UserStatusEnum::kOccupiedDisabled) {
+				continue;
+			}
+
+			user.RemoveAliroEvictableCredential(credentialIndex);
 		}
 	}
 
