@@ -5,6 +5,7 @@
  */
 
 #include "app_task.h"
+#include "aliro/access_manager/access_manager.h"
 #include "bolt_lock_manager.h"
 #include "clusters/identify.h"
 
@@ -171,6 +172,12 @@ void AppTask::LockStateChanged(const BoltLockManager::StateData &stateData)
 
 	Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(stateData.mAliroSource, stateData.mState,
 								     publicKeyPtr);
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
+	if (stateData.mState == Aliro::ReaderStateByte::Unsecured) {
+		Aliro::AccessManagerInstance().SuspendActiveRangingSessions();
+	}
+#endif
 
 #endif
 
