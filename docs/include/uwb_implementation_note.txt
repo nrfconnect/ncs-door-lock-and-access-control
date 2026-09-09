@@ -1,0 +1,3 @@
+.. note::
+   Bluetooth LE and UWB ranging requires a working UWB implementation.
+   The in-tree stub built by default does not perform ranging; provide a UWB backend as described in :ref:`uwb_custom_integration`.

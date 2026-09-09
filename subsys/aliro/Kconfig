@@ -19,6 +19,4 @@ rsource "time_utils/Kconfig"
 rsource "uwb/Kconfig"
 rsource "lock_sim/Kconfig"
 
-orsource "disambiguation/Kconfig"
-
 endmenu

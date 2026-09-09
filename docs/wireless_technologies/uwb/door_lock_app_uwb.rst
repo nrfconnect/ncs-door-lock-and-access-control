@@ -41,16 +41,11 @@ Role in the add-on
 UWB is not implemented on the nRF SoC itself.
 The |REPO_NAME| drives an external UWB module connected over SPI and provides the application integration layer and Aliro stack interfaces to interact with it.
 
-The reference implementation supports the Qorvo `QM35825`_ UWB SoC and ships an adapter library that maps Aliro UWB session semantics onto the Qorvo firmware.
+The core repository provides the generic UWB abstraction (the ``UltraWideBand`` facade) and an in-tree stub implementation.
+The concrete radio driver is supplied by a UWB implementation selected at build time: the in-tree stub or an external UWB provider module.
+See :ref:`uwb_integration` for architecture and build options, and :ref:`uwb_custom_integration` for the integration guide.
 
-.. note::
-
-   |QM35_EXPERIMENTAL_NOTE|
-   See :ref:`uwb_integration` for architecture and build options.
-
-Platform abstraction APIs allow replacing the default module with a UWB radio from another vendor; see :ref:`uwb_custom_integration` for the porting guide.
-
-For architecture, layering, and default hardware, see :ref:`uwb_integration`, :ref:`aliro_application_interactions`, and :ref:`hw_requirements_uwb_module`.
+For architecture, layering, and hardware, see :ref:`uwb_integration`, :ref:`aliro_application_interactions`, and :ref:`hw_requirements_uwb_module`.
 
 Access policy
 =============
@@ -63,13 +58,6 @@ The Aliro Access Manager translates UWB distance measurements into lock actions:
 The exit margin prevents rapid lock and unlock toggling when the measured distance fluctuates around the threshold.
 See :ref:`aliro_access_manager` for Kconfig options.
 
-Front/back disambiguation
-=========================
-
-When front/back disambiguation is enabled, an additional UWB radar session determines whether the user is in front of or behind the door.
-This prevents an unlock when the user is on the wrong side of the entry point.
-See :ref:`uwb_disambiguation` for algorithm details and configuration parameters.
-
 The following pages cover UWB integration in more detail:
 
 .. toctree::
@@ -79,4 +67,3 @@ The following pages cover UWB integration in more detail:
 
    uwb_integration.rst
    uwb_custom_integration.rst
-   uwb_disambiguation.rst

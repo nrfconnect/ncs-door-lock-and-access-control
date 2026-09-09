@@ -11,9 +11,38 @@ config DOOR_LOCK_ALIRO_UWB
 
 if DOOR_LOCK_ALIRO_UWB
 
-if QM35_UWB_ALIRO_ZEPHYR
-rsource "qm35_impl/Kconfig"
-endif # QM35_UWB_ALIRO_ZEPHYR
+choice DOOR_LOCK_ALIRO_UWB_IMPL
+	prompt "Aliro UWB implementation"
+	default DOOR_LOCK_ALIRO_UWB_IMPL_STUB
+	help
+	  Select which UltraWideBand implementation is built for the Aliro UWB
+	  subsystem. The generic UltraWideBand facade is always built; this
+	  choice only controls which backend provides the implementation
+	  (uwb_impl.h and its sources).
+
+config DOOR_LOCK_ALIRO_UWB_IMPL_STUB
+	bool "In-tree stub implementation"
+	help
+	  Build the generic in-tree implementation from the stub_impl
+	  directory. All operations return -ENOSYS. Use it as a starting point
+	  for integrating a real UWB backend.
+
+config DOOR_LOCK_ALIRO_UWB_IMPL_EXTERNAL
+	bool "Out-of-tree implementation"
+	help
+	  Do not build any in-tree UWB implementation. An external module
+	  provides the UltraWideBand implementation (uwb_impl.h and its sources)
+	  through the external-provider seam. Select this when using an
+	  out-of-tree UWB provider module.
+
+endchoice # DOOR_LOCK_ALIRO_UWB_IMPL
+
+config DOOR_LOCK_ALIRO_UWB_RADAR
+	bool "Enable UWB radar session support"
+	help
+	  Enable UWB radar sessions. When enabled, the application drives the
+	  radar session (start/stop) through the vendor-agnostic UltraWideBand
+	  facade. The active UWB implementation must support radar operations
 
 module = DOOR_LOCK_ALIRO_UWB
 module-str = DOOR_LOCK_ALIRO_UWB

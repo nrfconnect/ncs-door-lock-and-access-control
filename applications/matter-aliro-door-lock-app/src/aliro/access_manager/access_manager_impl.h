@@ -352,9 +352,6 @@ private:
 	};
 
 	bool EvaluateUwbOpenAllowed(const UwbRangingData &uwbData, SessionContext sessionContext);
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-	bool DisambiguationAllowsOpen() const;
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 	std::optional<uint16_t> ExtractDistanceFromUwbData(const UwbRangingData &uwbData) const;
 	AliroError AllocateRangingSession(SessionContext sessionCtx,
 					  const CryptoTypes::PublicKey &accessCredentialPublicKey);

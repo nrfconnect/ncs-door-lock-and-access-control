@@ -45,11 +45,11 @@ Expedited-fast phase support is enabled by default.
 The following Kconfig options configure Kpersistent storage limits.
 You can adjust them and disable the feature.
 Add them to the application's :file:`prj.conf`, or pass them to ``west build`` with your other build options.
-For example, to build the Aliro Access Control Application with Bluetooth LE and UWB transport on the nRF5340 DK, run the following command:
+For example, to build the Aliro Access Control Application on the nRF5340 DK, run the following command:
 
 .. code-block:: bash
 
-   west build -p -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=uwb_qm35
+   west build -p -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app
 
 
 .. list-table::

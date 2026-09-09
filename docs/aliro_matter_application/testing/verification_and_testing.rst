@@ -27,6 +27,8 @@ Once you have successfully provisioned Aliro credentials, perform tests to ensur
 
 .. code-block:: bash
 
-   west build -b nrf5340dk/nrf5340/cpuapp applications/matter-aliro-door-lock-app -- -Dmatter-aliro-door-lock-app_SNIPPET=uwb_qm35 -DCONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
+   west build -b nrf5340dk/nrf5340/cpuapp applications/matter-aliro-door-lock-app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y -DCONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
+
+.. include:: /include/uwb_implementation_note.txt
 
 .. include:: /include/testing_verification_tail.txt

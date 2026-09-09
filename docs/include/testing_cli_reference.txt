@@ -24,10 +24,6 @@ This page lists commonly used command-line commands for inspecting device state,
    * - ``dl btaddr``
      - Displays the Bluetooth LE address of the device.
 
-   * - ``uwb qm35_fw_version``
-     - Displays the firmware version of the QM35825 SoC.
-
-       This command is available only when the application is built with the ``uwb_qm35`` snippet.
    * - ``dl kpersistent list``
      - Lists all Kpersistent keys currently stored on the device, including their index, ID, and public key.
    * - ``dl kpersistent clear <index>``

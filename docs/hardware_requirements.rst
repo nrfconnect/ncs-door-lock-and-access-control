@@ -203,61 +203,13 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
 Ultra-wideband (UWB) module
 ***************************
 
-The |REPO_NAME| supports the following UWB module that you can use with the |APPS_NAME| when using Aliro over UWB transport:
+Aliro over the Bluetooth LE and UWB transport requires an external UWB module connected to the development kit, typically over SPI.
+This transport is supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_.
 
-+-------------------+-------------------------------------------------------------+
-| UWB module        | UWB module expansion board                                  |
-+===================+=============================================================+
-| `QM35825`_        | Reworked `QM35825DK-05`_                                    |
-+-------------------+-------------------------------------------------------------+
-
-.. note::
-
-   |QM35_EXPERIMENTAL_NOTE|
-
-The Qorvo Arduino Interface Board is one of the boards that make up the Qorvo QM35825DK.
-It requires a custom rework to become compatible with Nordic Development Kits.
-The following table shows the pin mapping for the reworked board:
-
-.. tabs::
-
-   .. group-tab:: nRF54LM20 DK
-
-      The `nRF54LM20 DK`_ does not have Arduino-compatible header, therefore, you must connect your board using wires.
-      To connect the Qorvo Arduino Interface Board to the DK, refer to the following pin mapping.
-
-      +-------------------+---------------------------+
-      | nRF54LM20 DK      | Qorvo Arduino Interface   |
-      |                   | Board                     |
-      +===================+===========================+
-      | P1.13             | SPI0_CLK (D13)            |
-      +-------------------+---------------------------+
-      | P1.12             | SPI0_MISO (D12)           |
-      +-------------------+---------------------------+
-      | P1.11             | SPI0_MOSI (D11)           |
-      +-------------------+---------------------------+
-      | P3.11             | SPI0_CS (D2)              |
-      +-------------------+---------------------------+
-      | P0.0              | SS_IRQ (A5)               |
-      +-------------------+---------------------------+
-      | P3.7              | RST_HOST (D7)             |
-      +-------------------+---------------------------+
-      | P3.12             | EXTON (D5)                |
-      +-------------------+---------------------------+
-      | VBUS              | 5V_HOST                   |
-      +-------------------+---------------------------+
-      | VDDIO             | 3V3_HOST                  |
-      +-------------------+---------------------------+
-      | GND               | GND                       |
-      +-------------------+---------------------------+
-
-   .. group-tab:: nRF5340 DK
-
-      The `nRF5340 DK`_ has Arduino-compatible headers, so you can connect the Qorvo Arduino Interface Board directly to the development kit.
-
-.. note::
-
-   Contact your local Nordic Regional Sales Manager to obtain a bundle consisting of the `nRF54LM20 DK`_, the Qorvo `QM35825DK-05`_ with the required custom rework, and the Arduino-compatible adapter, which enables easy connection of the Nordic and Qorvo DKs.
+The core repository provides only the generic UWB abstraction.
+An external UWB provider module supplies the concrete radio driver, and that module determines which UWB module, expansion board, and wiring you need.
+Refer to the provider module's documentation for the supported UWB hardware and pin mapping.
+For details on providing a UWB implementation, see :ref:`uwb_custom_integration`.
 
 .. note::
 
