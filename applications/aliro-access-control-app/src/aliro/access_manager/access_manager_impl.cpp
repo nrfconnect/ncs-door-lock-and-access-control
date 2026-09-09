@@ -283,6 +283,12 @@ AliroError StoreAccessDocument(size_t keyIndex, size_t credentialIssuerKeyIndex,
 	ad.mVersion = AccessDocument::kVersion;
 	ad.mCredentialIssuerKeyIndex = credentialIssuerKeyIndex;
 	ad.mSignedTimestamp = accessDocument.mSignedTimestamp;
+	ad.mValidFrom = accessDocument.mValidityPeriod.mValidFrom;
+	ad.mValidUntil = accessDocument.mValidityPeriod.mValidUntil;
+	ad.mTimeVerificationRequired = accessDocument.mTimeVerificationRequired;
+	ad.mExpectedUpdatePresent = accessDocument.mExpectedUpdate.has_value();
+	ad.mExpectedUpdate =
+		accessDocument.mExpectedUpdate.has_value() ? accessDocument.mExpectedUpdate.value() : Timestamp{};
 	ad.mAccessIteration = accessDocument.mValidityIteration.value_or(0);
 	ad.mPublicKey = accessDocument.mPublicKey;
 	ad.mAccessDocumentSize = accessDocument.mDataElement.mLength;

@@ -46,6 +46,11 @@ int ReadAccessDocumentHelper(size_t index, AccessDocument &ad)
 		return -EIO;
 	}
 
+	if (ad.mVersion != AccessDocument::kVersion) {
+		LOG_ERR("Unsupported Access Document version at index %zu: %u", index, ad.mVersion);
+		return -EIO;
+	}
+
 	return 0;
 }
 
