@@ -37,4 +37,16 @@ config DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENT_SIZE
     help
       Specifies the maximum size of the stored Access Document.
 
+config DOOR_LOCK_STORAGE_MIGRATE_ACCESS_DOCUMENT_V1
+    bool "Remove version 1 Access Documents (DEPRECATED)"
+    default y
+    depends on DOOR_LOCK_STEP_UP_PHASE
+    select DEPRECATED
+    help
+      Deprecated migration option. Enable it only on firmware that may contain
+      version 1 Access Documents, then disable it once migration is no longer
+      needed. Version 1 documents cannot be converted to version 2 because they
+      do not contain a validity period, so they are removed and restored through
+      the normal Step-up flow.
+
 endmenu # Storage
