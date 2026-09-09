@@ -46,14 +46,14 @@ Aliro::CryptoTypes::KeyId GetCredentialIssuerCAPublicKeyId();
 /**
  * @brief Verifies the current time against a Credential Issuer certificate validity period.
  *
- * Checks whether the current time falls within the validity period defined by the
- * certificate timestamps.
+ * Checks whether the current time falls within the certificate validity period.
  *
- * @param timestamps Certificate validity timestamps to check against the current time.
+ * @param validFrom Start of the certificate validity period.
+ * @param validUntil End of the certificate validity period.
  *
  * @return Verification result.
  */
 ValidityPeriodVerificationResult
-VerifyCertificateValidityPeriod(const Aliro::Interface::CredentialIssuerCertificate::CertificateTimestamps &timestamps);
+VerifyCertificateValidityPeriod(const Aliro::Time &validFrom, const Aliro::Time &validUntil);
 
 } // namespace DoorLock::InterfaceImpl::CiCert

@@ -16,8 +16,7 @@ Aliro::CryptoTypes::KeyId DoorLock::InterfaceImpl::CiCert::GetCredentialIssuerCA
 }
 
 DoorLock::InterfaceImpl::CiCert::ValidityPeriodVerificationResult
-DoorLock::InterfaceImpl::CiCert::VerifyCertificateValidityPeriod(
-	const Aliro::Interface::CredentialIssuerCertificate::CertificateTimestamps &)
+DoorLock::InterfaceImpl::CiCert::VerifyCertificateValidityPeriod(const Aliro::Time &, const Aliro::Time &)
 {
 	return ValidityPeriodVerificationResult::NotSupported;
 }
