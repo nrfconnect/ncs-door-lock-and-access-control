@@ -86,11 +86,4 @@ bool UltraWideBand::IsInitialized()
 	return Impl()->_IsInitialized();
 }
 
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-std::optional<uint8_t> UltraWideBand::GetDisambiguationSessionIdx(SessionContextHandle sessionContextData)
-{
-	return Impl()->_GetDisambiguationSessionIdx(sessionContextData);
-}
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-
 } // namespace Aliro::Uwb

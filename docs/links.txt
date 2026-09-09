@@ -149,7 +149,6 @@
 .. _`LBUA0VG2BP-EVK-P`: https://www.murata.com/en-eu/products/connectivitymodule/ultra-wide-band/nxp/type2bp
 
 .. _`QM35825` : https://www.qorvo.com/products/p/QM35825
-.. _`QM35825DK-05`: https://www.qorvo.com/products/p/QM35825DK-05
 
 .. ### External links
 
@@ -158,7 +157,6 @@
 .. _`Aliro Technology`: https://www.nordicsemi.com/Products/Technologies/Aliro
 .. _`Aliro protocol`: https://docs.nordicsemi.com/bundle/ncs-3.4.0/page/nrf/protocols/aliro/index.html
 .. _`Aliro`: https://www.nordicsemi.com/Products/Technologies/Aliro
-.. _`qm35-aliro-sdk`: https://gitlab.com/qorvo_sdk/public/devkits/qm35-aliro-sdk
 
 .. _`SmartThingsEdgeDrivers`: https://github.com/SmartThingsCommunity/SmartThingsEdgeDrivers
 .. _`Samsung Wallet device compatibility list`: https://developer.samsung.com/wallet/references/devicecompatibility.html

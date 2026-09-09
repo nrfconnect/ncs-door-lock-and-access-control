@@ -28,10 +28,6 @@
 #include "uwb_impl.h"
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-#include <disambiguator.h>
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-
 #include <crypto_utils/crypto_utils.h>
 #include <doorlock/utils/mutex_guard.h>
 
@@ -674,18 +670,7 @@ void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext,
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	const auto openAllowed = EvaluateUwbOpenAllowed(uwbData, sessionContext);
 
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-	{
-		const auto id = Uwb::UltraWideBandInstance().GetDisambiguationSessionIdx(sessionContext);
-		const auto result =
-			id ? Aliro::Uwb::Disambiguation::Disambiguator::Instance().TryGetLastResult(*id) : std::nullopt;
-		const char *sideStr = result.has_value() ? (result->IsFront() ? "FRONT" : "BACK") : "----";
-		LOG_INF("session %p | %-16s | %s", sessionContext.GetRaw(),
-			openAllowed ? "OPEN ALLOWED" : "OPEN NOT ALLOWED", sideStr);
-	}
-#else
 	LOG_INF("session %p | %s", sessionContext.GetRaw(), openAllowed ? "OPEN ALLOWED" : "OPEN NOT ALLOWED");
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 
 	SetOpenAllowed(sessionContext, openAllowed);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
@@ -811,9 +796,9 @@ void AccessManagerImpl::UnlockAction(bool isNfcSession, const CryptoTypes::Publi
 {
 	VerifyAndCall(mCallbacks.mUnlockIndicatorClb, isNfcSession, accessCredentialPublicKey);
 
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_RADAR
+#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_RADAR
 	Uwb::UltraWideBandInstance().StopRadarSession();
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_RADAR
+#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_RADAR
 }
 
 void AccessManagerImpl::LockAction(bool isNfcSession, const CryptoTypes::PublicKey &accessCredentialPublicKey) const
@@ -885,16 +870,8 @@ bool AccessManagerImpl::EvaluateUwbOpenAllowed(const UwbRangingData &uwbData, Se
 
 	const bool wasOpenAllowed = sessionCtx->mOpenAllowed;
 
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-	if (!wasOpenAllowed) {
-		VerifyOrReturnFalse(DisambiguationAllowsOpen());
-		return true;
-	}
-	const uint32_t threshold = mMaxAllowedDistance + mMaxAllowedDistanceExitMargin;
-#else
 	const uint32_t threshold =
 		wasOpenAllowed ? (mMaxAllowedDistance + mMaxAllowedDistanceExitMargin) : mMaxAllowedDistance;
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 
 	LOG_DBG("Extracted distance: %u cm, threshold: %u cm (max: %u cm, exit margin: %u cm, wasOpenAllowed: %d)",
 		distance.value(), threshold, mMaxAllowedDistance, mMaxAllowedDistanceExitMargin,
@@ -906,13 +883,6 @@ bool AccessManagerImpl::EvaluateUwbOpenAllowed(const UwbRangingData &uwbData, Se
 	LOG_DBG("Distance check passed, open allowed from UWB for this update");
 	return true;
 }
-
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-bool AccessManagerImpl::DisambiguationAllowsOpen() const
-{
-	return Aliro::Uwb::Disambiguation::Disambiguator::Instance().IsAnyUnlockAllowed();
-}
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 
 std::optional<uint16_t> AccessManagerImpl::ExtractDistanceFromUwbData(const UwbRangingData &uwbData) const
 {

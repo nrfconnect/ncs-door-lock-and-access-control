@@ -247,7 +247,9 @@ Build the firmware with the appropriate configuration for your testing scenario,
 
   .. code-block:: console
 
-     west build -b nrf54lm20dk/nrf54lm20b/cpuapp applications/matter-aliro-door-lock-app -- -Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'
+     west build -b nrf54lm20dk/nrf54lm20b/cpuapp applications/matter-aliro-door-lock-app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y
+
+.. include:: /include/uwb_implementation_note.txt
 
 .. note::
    Before commissioning the door lock, ensure that the Apple Home Hub is set up and added to your Apple Home.
@@ -273,7 +275,8 @@ Complete the following steps to commission the device:
 
       .. tab:: NFC + Bluetooth LE + UWB
 
-         a. Flash the Aliro door lock firmware with UWB support enabled to your Nordic development kit (see :ref:`aliro_matter_access_control_application` with the ``-Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'`` option).
+         a. Flash the Aliro door lock firmware with UWB support to your Nordic development kit.
+            Build the :ref:`aliro_matter_access_control_application` with the ``-DCONFIG_DOOR_LOCK_BLE_UWB=y`` option and a UWB implementation (see :ref:`uwb_custom_integration`).
          #. Connect the required hardware:
 
             * :ref:`NFC reader expansion board<hw_requirements_nfc_reader>` (required for NFC unlock)
@@ -542,7 +545,7 @@ Problems with the Home Key appearing in Apple Wallet or other related issues can
 * The door does not unlock automatically when approaching (Bluetooth LE + UWB):
 
   * Verify that the UWB module is properly connected to the development kit (check physical connections).
-  * Ensure the firmware includes UWB support by checking the build configuration (``-Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35'``).
+  * Ensure the firmware includes UWB support with a working UWB implementation by checking the build configuration (``-DCONFIG_DOOR_LOCK_BLE_UWB=y``; see :ref:`uwb_custom_integration`).
   * Ensure your iPhone is within ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_CM`` (default: 150 cm) of the door lock.
   * Check the device serial console for UWB ranging messages and distance measurements.
   * Verify that Bluetooth is enabled on your iPhone and that the Home app has permission to access location services.

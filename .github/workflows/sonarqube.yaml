@@ -75,20 +75,14 @@ jobs:
             ${{ env.WEST_WORKSPACE }}/test
             ${{ env.WEST_WORKSPACE }}/tools
             ${{ env.WEST_WORKSPACE }}/zephyr
-            ${{ env.WEST_WORKSPACE }}/qm35-aliro-sdk
-          # Distinct from the other workflows' west caches, since this one additionally pulls in the
-          # qm35-aliro-sdk group via the manifest.group-filter override below. Still allow falling back
-          # to the regular (non-qm35) cache: west update will fetch whatever's missing anyway.
-          key: ${{ runner.os }}-west-qm35-${{ hashFiles('west.yml') }}
+          key: ${{ runner.os }}-west-${{ hashFiles('west.yml') }}
           restore-keys: |
-            ${{ runner.os }}-west-qm35-
             ${{ runner.os }}-west-
 
       - name: Prepare west project
         run: |
           west init -l
-          west config manifest.group-filter -- "+qm35-aliro-sdk"
-          west update -o=--depth=1 -n
+          west update -o=--depth=1
           west patch apply --roll-back
 
       - name: Build with sonarqube wrapper

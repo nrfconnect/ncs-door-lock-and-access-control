@@ -11,7 +11,6 @@
 #include "aliro/types.h"
 
 #include <cstddef>
-#include <optional>
 
 namespace Aliro::Uwb {
 
@@ -212,17 +211,6 @@ public:
 	 * When true, device is ready to be used.
 	 */
 	bool IsInitialized();
-
-#ifdef CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
-	/**
-	 * @brief Returns the disambiguation session index associated with a session handle.
-	 *
-	 * @param sessionContextData Session context handle.
-	 *
-	 * @return Disambiguation session index if found, std::nullopt otherwise.
-	 */
-	std::optional<uint8_t> GetDisambiguationSessionIdx(SessionContextHandle sessionContextData);
-#endif // CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION
 
 private:
 	UltraWideBandImpl *Impl();

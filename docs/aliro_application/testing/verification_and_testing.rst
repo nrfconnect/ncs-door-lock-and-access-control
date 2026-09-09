@@ -27,6 +27,8 @@ Once you have successfully provisioned Aliro credentials, perform tests to ensur
 
 .. code-block:: bash
 
-   west build -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=uwb_qm35
+   west build -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y
+
+.. include:: /include/uwb_implementation_note.txt
 
 .. include:: /include/testing_verification_tail.txt

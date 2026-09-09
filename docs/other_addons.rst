@@ -31,10 +31,7 @@ See the following diagram for deployment of software components used by the |REP
 
    Aliro add-ons deployment
 
-The Aliro UWB adapter is provided by the public `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository.
-The repository is pulled into the workspace through the ``qm35-aliro-sdk`` west manifest group, which is disabled by default.
-For information on how to build it, see the :ref:`aliro_matter_access_control_application` page.
-
-The |REPO_NAME| also provides a vendor-neutral UWB platform interface under :file:`subsys/aliro/uwb/`.
-The Qorvo QM35825 integration in :file:`subsys/aliro/uwb/qm35_impl/` is an example port.
-To integrate a different UWB chip, start from :file:`subsys/aliro/uwb/custom_impl/` and follow the :ref:`uwb_custom_integration` documentation page.
+The |REPO_NAME| provides a vendor-neutral UWB platform interface under :file:`subsys/aliro/uwb/`.
+The core repository ships the generic ``UltraWideBand`` facade and an in-tree stub implementation in :file:`subsys/aliro/uwb/stub_impl/`.
+A real UWB backend is provided by an external UWB provider module, which you can select through the ``DOOR_LOCK_ALIRO_UWB_IMPL`` Kconfig choice.
+To integrate a UWB chip, follow the :ref:`uwb_custom_integration` documentation page.

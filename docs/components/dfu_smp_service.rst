@@ -86,6 +86,6 @@ To combine with other snippets, separate their names with semicolons, for exampl
 
 .. code-block:: console
 
-   -Dmatter-aliro-door-lock-app_SNIPPET='uwb_qm35;dfu_smp'
+   -Dmatter-aliro-door-lock-app_SNIPPET='bt_nus;dfu_smp'
 
 After flashing, enable SMP advertising, then follow the update steps in :ref:`aliro_firmware_update` or :ref:`firmware_update`.

@@ -9,6 +9,7 @@
 #include "uwb.h"
 
 #include <cstddef>
+#include <errno.h>
 
 namespace Aliro::Uwb {
 
@@ -46,9 +47,10 @@ private:
 	int _TerminateRangingSession(SessionContextHandle sessionContextData);
 	int _SuspendRangingSession(SessionContextHandle sessionContextData);
 	int _ResumeRangingSession(SessionContextHandle sessionContextData);
+	int _StartRadarSession() { return -ENOSYS; }
+	void _StopRadarSession() {}
 	const char *_GetFirmwareVersion() { return nullptr; }
 	bool _IsInitialized() { return false; }
-	void _StopRadarSession() {}
 
 	UltraWideBandImpl() = default;
 	~UltraWideBandImpl() = default;

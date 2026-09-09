@@ -44,9 +44,6 @@ Prepare the environment:
    This command clones the `ncs-door-lock-and-access-control`_ manifest repository into :file:`project-workspace`.
    The manifest imports the ``ncs-matter`` add-on, which provides the compatible |NCS| and Matter SDK revisions.
 
-#. (Optional) Add the QM35 SDK repository to your workspace.
-   See the :ref:`aliro_qm35_sdk_repository` section for more information.
-
 #. Use the following command to clone the project repository and all of its submodules:
 
    .. code-block:: console
@@ -92,28 +89,10 @@ Prepare the environment:
 
    Once you have completed all the steps, the development environment will be correctly configured.
 
-.. _aliro_qm35_sdk_repository:
-
-Aliro QM35 SDK repository
-*************************
-
-The |REPO_NAME| integrates the `QM35825`_ UWB (Ultra Wideband) module in applications that support the Aliro technology.
-This support uses the UWB stack and QM35 host driver from the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ Qorvo SDK repository.
-If you are using QM35 UWB in your application, add the repository to your workspace.
-To do that, execute the following command before running ``west update``:
-
-.. code-block:: bash
-
-   west config manifest.group-filter -- "+qm35-aliro-sdk"
-
-If you are using more group filters in your application, you need to pass them all to the ``west config manifest.group-filter`` command using comma-separated values.
-For example:
-
-.. code-block:: bash
-
-   west config manifest.group-filter -- "+qm35-aliro-sdk,+group1,+group2,+group3"
-
-Before the first use of the QM35 hardware, make sure you have the correct firmware programmed on the coprocessor module (see :ref:`flashing_qm35_using_nrf53_dk`).
+.. note::
+   Aliro over Bluetooth LE and UWB requires a UWB implementation.
+   The core repository builds the in-tree stub by default; a real UWB backend is provided by an external UWB provider module.
+   For details, see :ref:`uwb_custom_integration`.
 
 Aliro Certification Tool
 ************************

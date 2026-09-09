@@ -8,8 +8,15 @@ zephyr_include_directories(.)
 
 zephyr_library_sources(uwb.cpp)
 
-if(CONFIG_QM35_UWB_ALIRO_ZEPHYR)
-  add_subdirectory(qm35_impl)
-else()
-  add_subdirectory(custom_impl)
+# The generic UltraWideBand facade (uwb.cpp) is always built. The backend that
+# provides uwb_impl.h and its sources is selected by the DOOR_LOCK_ALIRO_UWB_IMPL
+# choice:
+#  - STUB (default): build the in-tree implementation from stub_impl/.
+#  - EXTERNAL:       build no in-tree implementation; an out-of-tree
+#                    module provides uwb_impl.h and its sources through the
+#                    external-provider seam.
+if(CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_STUB)
+  add_subdirectory(stub_impl)
+elseif(CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_EXTERNAL)
+  # Intentionally left empty: the implementation is provided out-of-tree.
 endif()

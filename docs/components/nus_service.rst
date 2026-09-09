@@ -81,6 +81,6 @@ To combine with other snippets, separate their names with semicolons, for exampl
 
 .. code-block:: console
 
-   -Daliro-access-control-app_SNIPPET='uwb_qm35;bt_nus'
+   -Daliro-access-control-app_SNIPPET='dfu_smp;bt_nus'
 
 After flashing, pair with the device and send commands using the steps in :ref:`aliro_testing_ble_nordic_uart` or :ref:`aliro_matter_testing_ble_nordic_uart`.

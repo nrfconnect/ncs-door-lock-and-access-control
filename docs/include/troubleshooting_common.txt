@@ -46,14 +46,15 @@ This error indicates that the Murata `LBUA0VG2BP-EVK-P`_ module on the Test Harn
        Power-cycle or restart the Murata board if the harness requests it.
        If the error persists, update the Murata module to the firmware version required by your Test Harness release (see the harness documentation or release notes).
 
-QM35825 UWB module issues
-*************************
+UWB module issues
+*****************
 
-Problems with the QM35825 UWB module usually occur at boot or when creating a UWB session.
-Most cases come from wiring, board configuration, or QM35 firmware that does not match the image bundled with the application.
+Problems with an external UWB module usually occur at boot or when creating a UWB session.
+Most cases come from wiring, board configuration, or a UWB firmware or driver mismatch in the UWB implementation.
 
-For build snippets, flashing, and QM35 DFU, see |troubleshooting_app_guide| and |troubleshooting_firmware_update|.
-When the module fails to initialize, confirm hardware and firmware before testing Aliro UWB flows.
+The core repository builds the in-tree UWB stub by default, which does not perform ranging.
+Working UWB ranging requires a UWB implementation; see :ref:`uwb_integration` and :ref:`uwb_custom_integration`.
+For UWB module hardware, wiring, and firmware, refer to the documentation of your external UWB provider module.
 
 .. list-table::
    :header-rows: 1
@@ -62,13 +63,10 @@ When the module fails to initialize, confirm hardware and firmware before testin
    * - Symptom
      - What to check
    * - UWB module fails to initialize during boot
-     - Verify SPI connections (MOSI, MISO, SCK, CS), IRQ and reset GPIO assignments, and QM35 power supply.
-       On first boot, complete |troubleshooting_qm35_flash| if the module has never been programmed.
-   * - ``QM35 FW version not available`` in logs
-     - Run ``uart:~$ uwb qm35_fw_version``.
-       Build with the ``uwb_qm35_dfu`` snippet (see |troubleshooting_firmware_update|) and review firmware update logs during boot.
+     - Verify SPI connections (MOSI, MISO, SCK, CS), IRQ and reset GPIO assignments, and UWB module power supply.
+       Confirm the UWB module runs firmware compatible with your UWB implementation.
    * - UWB sessions cannot be created
-     - Confirm ``uwb_qm35`` snippet usage, the board device tree overlay, and SPI bus configuration.
+     - Confirm that ``CONFIG_DOOR_LOCK_BLE_UWB`` is enabled with a working UWB implementation, and check the board device tree overlay and SPI bus configuration.
        See :ref:`uwb_integration` and :ref:`uwb_custom_integration`.
 
 NFC reader issues

@@ -139,7 +139,7 @@ UWB session establishment and handling
 **************************************
 
 This diagram shows how an Ultra Wideband (UWB) ranging session is established and handled when the Bluetooth LE and UWB transport is enabled.
-For UWB and QM35 example integration, see :ref:`uwb_integration`.
+For the UWB integration architecture, see :ref:`uwb_integration`.
 
 .. figure:: sequence_diagrams/d2/uwb_session_establishment_and_handling.png
    :scale: 40%
@@ -151,7 +151,7 @@ The workflow is as follows:
 
 * When the Aliro Stack enters the ``UwbRanging`` state (after Bluetooth LE session setup), it calls the ``StartRangingSession()`` function on the ``Interface::Session`` interface from the Aliro Stack Interface.
   The application's ``AccessManager`` creates a ranging session context and calls ``UltraWideBandInstance().ConfigureRangingSession()``.
-  This creates the UWB session in the platform UWB implementation. For example, the Qorvo QM35 example implementation uses the Qorvo UWB library.
+  This creates the UWB session in the platform UWB implementation, which forwards it to the vendor UWB driver or SDK.
   The stack does not manage UWB session objects.
   The application and its UWB implementation own them.
 * UWB setup and control messages (for example, M1-M4 and other Aliro UWB protocol messages) are carried over Bluetooth LE Transport.
@@ -173,4 +173,4 @@ UWB setup messages are exchanged over Bluetooth LE - the stack receives data thr
 The application uses the vendor UWB stack and sends responses back through the Aliro Stack Interface.
 Ranging state and distance data is delivered from the UWB implementation to the ``AccessManager``, so the application can enforce access policy based on UWB ranging.
 
-To learn how to integrate a UWB module from a vendor other than Qorvo, see the :ref:`uwb_custom_integration` documentation page.
+To learn how to integrate a UWB module, see the :ref:`uwb_custom_integration` documentation page.

@@ -45,7 +45,7 @@ The application supports the following development kits:
      - ``nrf52840dk/nrf52840``
 
 You also need an :ref:`NFC reader expansion board <hw_requirements_nfc_reader>` connected to the DK.
-For Aliro over Bluetooth LE and UWB, add a :ref:`QM35825 UWB module <hw_requirements_uwb_module>` on the `nRF5340 DK`_ or `nRF54LM20 DK`_.
+For Aliro over Bluetooth LE and UWB, add an :ref:`external UWB module <hw_requirements_uwb_module>` on the `nRF5340 DK`_ or `nRF54LM20 DK`_.
 
 See :ref:`hw_requirements` for wiring diagrams, VDDIO configuration on nRF54L-series DKs, and the full hardware setup.
 
@@ -99,7 +99,8 @@ They are not required for the default NFC-only build.
    * - ``CONFIG_DOOR_LOCK_BLE_UWB``
      - Enables Aliro over Bluetooth LE and UWB.
        When disabled, the application uses NFC-only Aliro transport.
-       Prefer the ``uwb_qm35`` snippet instead of enabling this option in isolation.
+       By default, the in-tree ``stub_impl`` is built as the backend for the UWB facade. 
+       Provide a functional UWB implementation as described in :ref:`uwb_custom_integration` to make the Aliro UWB transport operational.
    * - ``CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS``
      - Available when ``CONFIG_DOOR_LOCK_BLE_UWB`` is enabled.
        Sets the maximum number of concurrent Aliro Bluetooth LE and UWB sessions.
@@ -230,14 +231,10 @@ Build variants
 ==============
 
 The default quick-start build is Aliro over NFC only with SMP DFU enabled.
-Use the variants below when you need Bluetooth LE with UWB, optional Bluetooth LE services, release optimizations, or QM35 firmware update support.
+Use the following variants when you need Bluetooth LE with UWB, optional Bluetooth LE services, or release optimizations.
 
 Replace ``<build_target>`` with your DK target from :ref:`hw_requirements_development_kit`.
 For UWB hardware setup, see :ref:`hw_requirements_uwb_module` and :ref:`uwb_integration`.
-
-.. note::
-
-   |QM35_EXPERIMENTAL_NOTE|
 
 .. list-table::
    :header-rows: 1
@@ -247,43 +244,25 @@ For UWB hardware setup, see :ref:`hw_requirements_uwb_module` and :ref:`uwb_inte
      - Example build command
    * - Aliro standalone (NFC only)
      - ``west build -p -b <build_target> applications/aliro-access-control-app``
-   * - QM35825 UWB
-     - ``west build -p -b <build_target> applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=uwb_qm35``
-       See :ref:`aliro_qm35_sdk_repository` for the required workspace setup.
+   * - Aliro over Bluetooth LE and UWB
+     - ``west build -p -b <build_target> applications/aliro-access-control-app -- -DCONFIG_DOOR_LOCK_BLE_UWB=y``
+       Builds the in-tree UWB stub by default.
+       Provide a UWB backend as described in :ref:`uwb_custom_integration`.
    * - Nordic UART Service (NUS)
      - ``west build -p -b <build_target> applications/aliro-access-control-app -- -Daliro-access-control-app_SNIPPET=bt_nus``
        See :ref:`door_lock_nus_service`.
    * - Combined snippets
-     - Separate snippet names with semicolons, for example ``-Daliro-access-control-app_SNIPPET='uwb_qm35;bt_nus'``.
-   * - QM35 firmware update (DFU)
-     - Pass the sysbuild ``uwb_qm35_dfu`` snippet together with ``uwb_qm35``, for example ``-- -DSNIPPET=uwb_qm35_dfu -Daliro-access-control-app_SNIPPET=uwb_qm35``.
-       See :ref:`aliro_firmware_update`.
+     - Separate snippet names with semicolons, for example, ``-Daliro-access-control-app_SNIPPET='bt_nus'``.
    * - Disable SMP DFU
      - ``west build -p -b <build_target> applications/aliro-access-control-app -- -DCONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n``
    * - Release build
      - ``west build -p -b <build_target> applications/aliro-access-control-app -- -DFILE_SUFFIX=release``
        Combine with snippets when needed.
-   * - QM35 front/back disambiguation
-     - Add ``-DCONFIG_DOOR_LOCK_ALIRO_UWB_QM35_FRONT_BACK_DETECTION=y`` to a QM35 UWB build.
-       See :ref:`uwb_disambiguation`.
 
-The ``uwb_qm35`` snippet enables the ``CONFIG_DOOR_LOCK_BLE_UWB`` Kconfig option and configures the board overlay so the NFC and UWB modules share the same SPI bus.
-Use the snippet rather than setting ``CONFIG_DOOR_LOCK_BLE_UWB`` alone, which enables the transport without the Qorvo QM35825 implementation.
-The snippet uses the UWB stack and QM35 host driver from the `qm35-aliro-sdk <qm35-aliro-sdk_>`_ repository, so you must first add it to your workspace (see :ref:`aliro_qm35_sdk_repository`).
-
-Example for the nRF5340 DK with QM35825 UWB:
-
-.. code-block:: bash
-
-   west build -p -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- \
-       -Daliro-access-control-app_SNIPPET=uwb_qm35
-
-Example for the nRF54LM20 DK with QM35825 UWB:
-
-.. code-block:: bash
-
-   west build -p -b nrf54lm20dk/nrf54lm20b/cpuapp applications/aliro-access-control-app -- \
-       -Daliro-access-control-app_SNIPPET=uwb_qm35
+The ``CONFIG_DOOR_LOCK_BLE_UWB`` Kconfig option enables the Bluetooth LE and Aliro UWB transport.
+By default, ``DOOR_LOCK_ALIRO_UWB_IMPL`` selects the in-tree ``stub_impl`` implementation, in which all methods return ``-ENOSYS``.
+This lets the application build and run without ranging support.
+To get working ranging, plug in a UWB implementation as described in :ref:`uwb_custom_integration`.
 
 .. _aliro_building_and_running_verify:
 
@@ -316,16 +295,7 @@ Verify that the application runs correctly:
 
          Starting nRF Door Lock and Access Control Application
 
-      When QM35 UWB is enabled, you should also see UWB initialization logs ending with:
-
-      .. code-block:: console
-
-         uwb: Initializing UWB device...
-         uwb: UWB device initialized successfully.
-
-      An ``Awake frame not received`` line from ``hsspi_helpers`` can appear during init and does not necessarily indicate a fault if initialization completes successfully.
-
-      If UWB initialization fails on first boot, complete :ref:`aliro_flashing_qm35_using_nrf53_dk` before retesting.
+      With the default in-tree stub, UWB reports as not implemented and the application continues without ranging.
 
    .. tab:: Release configuration
 

@@ -1,16 +1,18 @@
 .. _uwb_custom_integration:
 
-Integrating a third-party UWB chip
-##################################
+Integrating a UWB implementation
+################################
 
 .. contents::
    :local:
    :depth: 2
 
-This guide explains how to integrate a UWB radio from a vendor other than Qorvo into the |REPO_NAME| and the Aliro stack.
-The Qorvo QM35825 (QM35) implementation shipped in this repository is an example integration — it shows one way to map Aliro session semantics onto a vendor SDK, but it is not the only supported hardware path.
+This guide explains how to plug a UWB radio into the |REPO_NAME| and the Aliro stack through the stable external-provider contract.
+The core repository ships the generic UWB abstraction (the ``UltraWideBand`` facade) and an in-tree stub implementation.
+Provide the concrete radio driver by either editing the in-tree stub or supplying an out-of-tree module.
+Select your implementation with the DOOR_LOCK_ALIRO_UWB_IMPL Kconfig option
 
-For the reference QM35825 architecture and stack interaction, see :ref:`uwb_integration`.
+For the layered architecture and stack interaction, see :ref:`uwb_integration`.
 
 .. _uwb_custom_integration_prerequisites:
 
@@ -24,10 +26,10 @@ This guide assumes familiarity with the following:
 * Aliro specification — In particular, the Bluetooth LE message layout (Protocol Header, Message ID, Length, Payload) and the ranging session setup flow (M1-M4 exchange).
   Several integration points require you to forward complete Aliro messages unchanged, so a working understanding of this layout is essential.
   See :ref:`aliro_application_interactions` for the relevant sequence diagrams.
-* Facade pattern used in the add-on — The platform code separates a stable public API (``UltraWideBand``) from a vendor-specific implementation (``UltraWideBandImpl``).
+* Facade pattern used in the add-on — The platform code separates a stable public API (``UltraWideBand``) from an implementation (``UltraWideBandImpl``).
   You implement only the private methods; you do not modify the facade or the stack interface wiring.
   See :ref:`uwb_custom_integration_door_lock_addon` for details.
-* nRF Connect SDK and Zephyr build system — You configure the port through Kconfig options and adapt one or two CMake files.
+* nRF Connect SDK and Zephyr build system — You configure the port through Kconfig options and adapt one or two CMake files, or supply the implementation from an out-of-tree Zephyr module.
 
 Vendor SDK requirements
 =======================
@@ -67,10 +69,10 @@ If your SDK cannot satisfy one of the required capabilities, the corresponding A
 Starting point
 ==============
 
-The :file:`subsys/aliro/uwb/custom_impl/` directory is the starting point for your port.
+The :file:`subsys/aliro/uwb/stub_impl/` directory is the starting point for an in-tree port.
 It contains skeleton :file:`uwb_impl.h` and :file:`uwb_impl.cpp` files whose methods return ``-ENOSYS``.
 
-When the QM35 Kconfig options are disabled, the build system selects this directory automatically, so you can build, link, and run the reference application before writing any vendor code.
+With the default ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_STUB`` choice, the build system selects this directory automatically, so you can build, link, and run the reference application before writing any vendor code.
 This is the basis for the first step of the :ref:`porting workflow <uwb_custom_integration_sequence>`.
 
 To confirm your environment is ready, build a reference application with the :ref:`specific options set <uwb_custom_integration_door_lock_addon>` and verify that it links and logs ``UWB is not implemented``.
@@ -105,7 +107,7 @@ The sections that follow divide the port into stack integration and application 
      - :file:`subsys/aliro/uwb/uwb.h`, :file:`subsys/aliro/uwb/uwb.cpp`
      - Stable public API used by the application; forwards to private ``UltraWideBandImpl`` methods.
    * - ``UltraWideBandImpl``
-     - :file:`subsys/aliro/uwb/custom_impl/` (your code) or :file:`qm35_impl/` (an example)
+     - :file:`subsys/aliro/uwb/stub_impl/` (in-tree) or an external UWB provider module (out-of-tree)
      - Vendor-specific driver and SDK glue, session bookkeeping, and callback invocation.
    * - ``AccessManager``
      - :file:`applications/*/src/aliro/access_manager/`
@@ -117,7 +119,7 @@ The sections that follow divide the port into stack integration and application 
 Integration steps
 *****************
 
-Integration of a third-party UWB chip consists of the following steps:
+Integration of a UWB chip consists of the following steps:
 
 #. :ref:`Integration with the Aliro stack <uwb_custom_integration_aliro_stack>`
 #. :ref:`Integration with the door lock add-on <uwb_custom_integration_door_lock_addon>`
@@ -152,7 +154,7 @@ When the ``CONFIG_NCS_ALIRO_BLE_UWB`` Kconfig option is enabled (automatically e
      - The ``data`` buffer is a complete Aliro message, not a bare payload.
        It must include, in order: Protocol Header (1 byte), Message ID (1 byte), Length (16-bit, big-endian, payload size), and Payload — the Aliro Bluetooth LE message layout from the Aliro specification.
        The ``length`` argument is the total byte count of that complete message (four-byte header plus payload).
-       Your implementation should pass this buffer unchanged to the vendor stack (the Qorvo example copies the full message into ``aliro_uwb_session_message_handle()``).
+       Your implementation should pass this buffer unchanged to the vendor stack.
        Return ``0`` on success or a negative ``errno`` value on failure.
        Depending on the internal state of the Aliro session machine state, any error returned by this function may eventually cause the stack to terminate the Bluetooth LE session.
    * - ``Aliro::Interface::Session::StartRangingSession()``
@@ -169,7 +171,7 @@ The following example shows the reference ``HandleBleMessage()`` implementation 
 
 .. note::
 
-   In most ports you only adapt :file:`uwb_impl.cpp` (and :file:`uwb_impl.h`).
+   In most ports you only provide :file:`uwb_impl.cpp` (and :file:`uwb_impl.h`).
    You normally do not modify :file:`interface_impl/uwb.cpp` or :file:`interface_impl/session.cpp`.
    Keep that wiring as-is and implement ranging setup in ``UltraWideBandImpl::_ConfigureRangingSession()``.
 
@@ -261,27 +263,26 @@ Integration with the door lock add-on
 *************************************
 
 Platform UWB code is located under the :file:`subsys/aliro/uwb/` directory.
-The build selects the implementation as follows (:file:`subsys/aliro/uwb/CMakeLists.txt`):
+The build selects the implementation through the ``DOOR_LOCK_ALIRO_UWB_IMPL`` Kconfig choice:
 
-.. code-block:: cmake
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
 
-   if(CONFIG_QM35_UWB_ALIRO_ZEPHYR)
-     add_subdirectory(qm35_impl)    # Qorvo example implementation
-   else()
-     add_subdirectory(custom_impl)  # Your starting point
-   endif()
+   * - Choice option
+     - Result
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_STUB`` (default)
+     - Builds the in-tree :file:`subsys/aliro/uwb/stub_impl/` stub.
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_EXTERNAL``
+     - Builds no in-tree implementation; an out-of-tree module provides :file:`uwb_impl.h` and its sources.
 
-To use a third-party chip:
+Choose the integration path that matches how you ship your driver:
 
-* Do not enable the ``CONFIG_QM35_UWB_ALIRO_ZEPHYR`` Kconfig option.
-* Do not apply the ``uwb_qm35`` snippet.
+* In-tree — Keep the default ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_STUB`` Kconfig option and replace the stub in :file:`stub_impl/` with your driver logic.
+* Out-of-tree — Select the ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_EXTERNAL`` Kconfig option and supply the implementation from an external UWB provider module (see :ref:`uwb_custom_integration_external_module`).
 
-Enable only the following options:
-
-.. code-block:: kconfig
-
-   CONFIG_DOOR_LOCK_BLE_UWB=y
-   CONFIG_DOOR_LOCK_ALIRO_UWB=y
+Additionally, enable the ``CONFIG_DOOR_LOCK_BLE_UWB`` Kconfig option.
+The option selects ``CONFIG_DOOR_LOCK_ALIRO_UWB`` (the platform module in :file:`subsys/aliro/uwb/`) and ``CONFIG_NCS_ALIRO_BLE_UWB`` (the UWB support in the Aliro stack).
 
 The ``UltraWideBand`` facade pattern
 ====================================
@@ -298,7 +299,7 @@ The public ``UltraWideBand`` API in :file:`subsys/aliro/uwb/uwb.h` defines the c
 
 To use it:
 
-* Implement ``UltraWideBandImpl`` in :file:`custom_impl/uwb_impl.h` and :file:`custom_impl/uwb_impl.cpp`, using the files in that directory as a skeleton.
+* Implement ``UltraWideBandImpl`` in :file:`uwb_impl.h` and :file:`uwb_impl.cpp`, using the files in :file:`stub_impl/` as a skeleton.
   Replace each ``-ENOSYS`` stub with real driver logic.
 * Implement only the methods declared in the facade. 
   Keep any additional chip-specific types and helpers private to ``UltraWideBandImpl``.
@@ -364,74 +365,37 @@ Methods marked *Optional* can remain no-op or ``-ENOSYS`` stubs if your hardware
    * - ``IsInitialized()``
      - ``_IsInitialized()``
      - Return whether ``Init()`` completed successfully.
-   * - ``StopRadarSession()``
-     - ``_StopRadarSession()``
-     - Optional: stop any background sensing your hardware uses.
-       The ``custom_impl`` stub leaves this as a no-op.
 
 .. note::
 
    Currently, UWB setup and suspend/resume in the reference applications are driven by Bluetooth LE messages from the User Device (relayed through the Aliro stack and ``HandleBleMessage()``), not by explicit calls to ``InitiateRangingSession()``, ``SuspendRangingSession()``, or ``ResumeRangingSession()``.
    Those methods remain part of the public API for integrators who need the application to initiate setup or control ranging directly.
 
-Using the Qorvo QM35 implementation as an example
-=================================================
-
-The QM35 port (:file:`subsys/aliro/uwb/qm35_impl/`) demonstrates a complete production-style integration.
-Study it for patterns, not as a mandatory structure:
-
-* Vendor SDK boundary — Qorvo host driver libraries and APIs wrap the communication with the QM35825 firmware.
-  Your port replaces this layer with your vendor's equivalent while keeping the same ``UltraWideBandImpl`` method signatures.
-* Session list — QM35 keeps a Zephyr ``sys_slist_t`` of ``SessionContext`` objects mapping ``ConnectionHandle`` to vendor session pointers.
-  Replicate this pattern if your driver supports multiple concurrent sessions.
-* Callback translation — ``SessionHandlerCallback()`` maps vendor session events to ``RangingSessionState`` and encodes distance into two big-endian bytes before calling ``mRangingData``.
-* Bluetooth LE relay — ``TransmitBleMessage()`` invokes ``mBleMessageTransmit`` with raw bytes from the vendor stack.
-
-UWB integration in the reference applications
-=============================================
-
-The reference applications already contain the glue code that is used for the integration with the Aliro stack, the Access Manager, and the UWB implementation.
-The entries follow the data path, from initialization through to the unlock decision.
-
-Initialization — :file:`applications/*/src/main.cpp`
-  Register callbacks and call ``Init()`` **before** ``AliroInit()``:
-
-  .. code-block:: cpp
-
-     #ifdef CONFIG_DOOR_LOCK_BLE_UWB
-     constexpr Aliro::Uwb::UltraWideBand::Callbacks uwbCallbacks = { /* ... */ };
-     int uwbError = Aliro::Uwb::UltraWideBandInstance().Init(uwbCallbacks);
-     #endif
-
-  The reference applications connect callbacks as follows:
-
-  * ``mRangingData`` → ``AccessManagerInstance().HandleRangingSessionData()``
-  * ``mRangingSessionStateChanged`` → ``AccessManagerInstance().HandleRangingSessionStateChanged()``
-  * ``mBleMessageTransmit`` → ``AliroStack::Instance().SendBleMessage()``
-
-Aliro stack interface — :file:`applications/*/src/aliro/interface_impl/uwb.cpp`
-  Implements ``Interface::Uwb::HandleBleMessage()`` by forwarding to ``UltraWideBandInstance().HandleBleMessage()``.
-
-Session lifecycle — :file:`applications/*/src/aliro/interface_impl/session.cpp`
-  Forwards stack session events to ``AccessManager``: ranging start on ``StartRangingSession()``, cleanup (including UWB teardown) on ``HandleTermination()``.
-
-Access policy and ranging sessions — :file:`applications/*/src/aliro/access_manager/access_manager_impl.cpp`
-  * ``AddRangingSession()`` calls ``UltraWideBandInstance().ConfigureRangingSession()``
-  * ``RemoveRangingSession()`` calls ``UltraWideBandInstance().TerminateRangingSession()``
-  * ``EvaluateUwbOpenAllowed()`` and ``ExtractDistanceFromUwbData()`` define the distance-based unlock policy
-
 CMake integration
 =================
 
-The build is wired across three places:
+When the ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_STUB`` Kconfig option is selected, the build is wired up in the following places:
 
-* Subsystem library — :file:`subsys/aliro/uwb/custom_impl/CMakeLists.txt` compiles your :file:`uwb_impl.cpp`.
+* Subsystem library — :file:`subsys/aliro/uwb/stub_impl/CMakeLists.txt` compiles your :file:`uwb_impl.cpp`.
   The parent :file:`subsys/aliro/uwb/CMakeLists.txt` always builds the shared facade :file:`uwb.cpp`.
-* Application interface — :file:`applications/*/src/aliro/interface_impl/CMakeLists.txt` adds :file:`uwb.cpp` when the ``CONFIG_NCS_ALIRO_BLE_UWB`` Kconfig option is set.
-* Include path — Application code includes :file:`uwb_impl.h`. 
-  With the custom implementation selected, Zephyr resolves that header from :file:`custom_impl/`.
+* Application interface — :file:`applications/*/src/aliro/interface_impl/CMakeLists.txt` adds :file:`uwb.cpp` when you set the ``CONFIG_NCS_ALIRO_BLE_UWB`` Kconfig option.
+* Include path — Application code includes the :file:`uwb_impl.h` file.
+  With the stub implementation selected, Zephyr resolves that header from :file:`stub_impl/`.
 
-To use your own directory instead of ``custom_impl``, either change the ``else()`` branch in :file:`subsys/aliro/uwb/CMakeLists.txt`, or edit the files in place.
+.. _uwb_custom_integration_external_module:
+
+Providing the implementation from an external module
+====================================================
+
+Select the ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_EXTERNAL`` Kconfig option to keep the UWB backend outside the core repository.
+In this configuration, the core repository does not build an in-tree ``UltraWideBandImpl``.
+
+The external module must do the following:
+
+* Provide the :file:`uwb_impl.h` file and its implementation sources. 
+* Place :file:`uwb_impl.h` on the include path, so that application code including it resolves the header from your module.
+* Implement the ``UltraWideBandImpl`` methods declared by the facade in :file:`subsys/aliro/uwb/uwb.h`, following the :ref:`implementation methods table <uwb_custom_integration_implementation_methods>`.
+* Add the module to your workspace, for example through a west manifest project, and register it as a Zephyr module so that the build picks up its Kconfig and CMake files.
 
 Kconfig checklist
 =================
@@ -440,23 +404,24 @@ Kconfig checklist
    :header-rows: 1
 
    * - Option
-     - Required for custom UWB
+     - Required for UWB
      - Notes
+   * - ``CONFIG_DOOR_LOCK_BLE_UWB``
+     - Yes
+     - Application-level Bluetooth LE with UWB integration.
+       Selects ``CONFIG_DOOR_LOCK_ALIRO_UWB`` and ``CONFIG_NCS_ALIRO_BLE_UWB``.
    * - ``CONFIG_NCS_ALIRO_BLE_UWB``
      - Yes (via ``CONFIG_DOOR_LOCK_BLE_UWB``)
      - Enables stack UWB HSM and interface symbols.
-   * - ``CONFIG_DOOR_LOCK_BLE_UWB``
-     - Yes
-     - Application-level Bluetooth with UWB integration.
    * - ``CONFIG_DOOR_LOCK_ALIRO_UWB``
-     - Yes
+     - Yes (via ``CONFIG_DOOR_LOCK_BLE_UWB``)
      - Builds ``subsys/aliro/uwb/`` platform module.
-   * - ``CONFIG_QM35_UWB_ALIRO_ZEPHYR``
-     - No
-     - Selects Qorvo example implementation instead of ``custom_impl``.
-   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_QM35_*``
-     - No
-     - QM35-only features (DFU, disambiguation, radar).
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_STUB``
+     - Default
+     - Builds the in-tree ``stub_impl`` stub.
+   * - ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_EXTERNAL``
+     - Optional
+     - Builds no in-tree implementation; an external module provides ``uwb_impl.h`` and sources.
 
 .. _uwb_custom_integration_sequence:
 
@@ -470,7 +435,7 @@ With these in place, the Aliro stack can drive a complete UWB setup exchange thr
 The later stages refine reporting and validate the integration.
 Each stage adds a verification point, so you can confirm progress before moving on.
 
-#. Build with stubs — Enable ``CONFIG_DOOR_LOCK_BLE_UWB`` without QM35 snippets, as described in :ref:`uwb_custom_integration_prerequisites`.
+#. Build with stubs — Enable ``CONFIG_DOOR_LOCK_BLE_UWB`` with the default ``CONFIG_DOOR_LOCK_ALIRO_UWB_IMPL_STUB`` choice, as described in :ref:`uwb_custom_integration_prerequisites`.
    Confirm the application links and logs ``UWB is not implemented`` (``-ENOSYS`` from ``_Init()``).
 
 #. Initialize the hardware — Implement ``_Init()``, ``_Deinit()``, and ``_IsInitialized()``.
@@ -494,7 +459,6 @@ Related documentation
 
 For more background on UWB integration, see the following resources:
 
-* :ref:`uwb_integration` — QM35825 UWB integration architecture and stack interactions.
-* :ref:`wireless_technologies_uwb` — How UWB fits into the add-on, including access policy and front/back disambiguation.
+* :ref:`uwb_integration` — UWB integration architecture and stack interactions.
+* :ref:`wireless_technologies_uwb` — How UWB fits into the add-on, including access policy.
 * :ref:`aliro_application_interactions` — Sequence diagrams for UWB session establishment.
-* :ref:`uwb_disambiguation` — QM35-specific front and back detection (not required for generic ports).
