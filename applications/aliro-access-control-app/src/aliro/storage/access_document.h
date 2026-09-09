@@ -20,7 +20,7 @@ struct AccessDocument {
 	/** @brief Maximum size of the Access Document data buffer. */
 	static constexpr size_t kAccessDocumentSize{ CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENT_SIZE };
 	/** @brief Current version of the Access Document structure. */
-	static constexpr uint32_t kVersion{ 1 };
+	static constexpr uint32_t kVersion{ 2 };
 
 	/** @brief Version of the Access Document structure that is stored in persistent storage. */
 	uint32_t mVersion;
@@ -28,6 +28,16 @@ struct AccessDocument {
 	size_t mCredentialIssuerKeyIndex;
 	/** @brief Timestamp when the Access Document was signed. */
 	Aliro::Timestamp mSignedTimestamp;
+	/** @brief First time at which the Access Document is valid. */
+	Aliro::Timestamp mValidFrom;
+	/** @brief Last time at which the Access Document is valid. */
+	Aliro::Timestamp mValidUntil;
+	/** @brief Whether verification of the Access Document validity period is required. */
+	uint8_t mTimeVerificationRequired;
+	/** @brief Whether the expected update time is present. */
+	uint8_t mExpectedUpdatePresent;
+	/** @brief Time at which an updated Access Document is expected, when present. */
+	Aliro::Timestamp mExpectedUpdate;
 	/** @brief Validity iteration number for this Access Document. */
 	ValidityIteration mAccessIteration;
 	/** @brief Access Credential public key associated with this Access Document. */
