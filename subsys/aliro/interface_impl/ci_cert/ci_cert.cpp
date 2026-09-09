@@ -91,8 +91,16 @@ AliroError VerifyCertificate(const mbedtls_x509_crt &crt)
 
 AliroError VerifyCertificateValidityPeriod(const CertificateTimestamps &timestamps)
 {
-	const auto &validFrom = timestamps.mValidFrom;
-	const auto &validUntil = timestamps.mValidUntil;
+	const auto validFromOpt = Time::FromTimestamp(timestamps.mValidFrom);
+	VerifyOrReturnValue(validFromOpt.has_value(), ALIRO_INVALID_DATA_CONTENT,
+			    LOG_ERR("Invalid certificate validFrom timestamp"));
+
+	const auto validUntilOpt = Time::FromTimestamp(timestamps.mValidUntil);
+	VerifyOrReturnValue(validUntilOpt.has_value(), ALIRO_INVALID_DATA_CONTENT,
+			    LOG_ERR("Invalid certificate validUntil timestamp"));
+
+	const auto &validFrom = validFromOpt.value();
+	const auto &validUntil = validUntilOpt.value();
 
 	LOG_DBG("validFrom   : %04d-%02d-%02d %02d:%02d:%02d", validFrom.mYear, validFrom.mMonth, validFrom.mDay,
 		validFrom.mHour, validFrom.mMinute, validFrom.mSecond);
@@ -101,7 +109,7 @@ AliroError VerifyCertificateValidityPeriod(const CertificateTimestamps &timestam
 
 	VerifyOrReturnValue(validFrom <= validUntil, ALIRO_INVALID_ARGUMENT, LOG_ERR("Invalid validity period"));
 
-	switch (DoorLock::InterfaceImpl::CiCert::VerifyCertificateValidityPeriod(timestamps)) {
+	switch (DoorLock::InterfaceImpl::CiCert::VerifyCertificateValidityPeriod(validFrom, validUntil)) {
 	case DoorLock::InterfaceImpl::CiCert::ValidityPeriodVerificationResult::NotSupported:
 		LOG_WRN("Certificate validity period verification is not supported");
 		return ALIRO_NO_ERROR;
@@ -120,7 +128,7 @@ AliroError VerifyCertificateValidityPeriod(const CertificateTimestamps &timestam
 } // namespace
 
 AliroError Validate(const ConstData &certificate, CryptoTypes::PublicKey &publicKey,
-		    std::optional<CertificateTimestamps> &timestamps)
+		    CertificateTimestamps &timestamps)
 {
 #ifndef MBEDTLS_PK_USE_PSA_EC_DATA
 
@@ -162,13 +170,26 @@ AliroError Validate(const ConstData &certificate, CryptoTypes::PublicKey &public
 
 #endif // MBEDTLS_PK_USE_PSA_EC_DATA
 
-	timestamps.emplace(
-		CertificateTimestamps{ .mValidFrom = Time(crt.valid_from.year, crt.valid_from.mon, crt.valid_from.day,
-							  crt.valid_from.hour, crt.valid_from.min, crt.valid_from.sec),
-				       .mValidUntil = Time(crt.valid_to.year, crt.valid_to.mon, crt.valid_to.day,
-							   crt.valid_to.hour, crt.valid_to.min, crt.valid_to.sec) });
+	{
+		const auto validFrom = Time(crt.valid_from.year, crt.valid_from.mon, crt.valid_from.day,
+					    crt.valid_from.hour, crt.valid_from.min, crt.valid_from.sec)
+					       .ToTimestamp();
+		VerifyOrExit(validFrom.has_value(), error = ALIRO_INVALID_DATA_CONTENT;
+			     LOG_ERR("Failed to encode certificate validFrom timestamp"));
 
-	error = VerifyCertificateValidityPeriod(timestamps.value());
+		const auto validUntil = Time(crt.valid_to.year, crt.valid_to.mon, crt.valid_to.day, crt.valid_to.hour,
+					     crt.valid_to.min, crt.valid_to.sec)
+						.ToTimestamp();
+		VerifyOrExit(validUntil.has_value(), error = ALIRO_INVALID_DATA_CONTENT;
+			     LOG_ERR("Failed to encode certificate validUntil timestamp"));
+
+		timestamps = CertificateTimestamps{
+			.mValidFrom = validFrom.value(),
+			.mValidUntil = validUntil.value(),
+		};
+	}
+
+	error = VerifyCertificateValidityPeriod(timestamps);
 	VerifyOrExit(error == ALIRO_NO_ERROR, LOG_ERR("Failed to verify certificate validity period"));
 
 exit:
@@ -178,7 +199,7 @@ exit:
 
 #else
 
-AliroError Validate(const ConstData &, CryptoTypes::PublicKey &, std::optional<CertificateTimestamps> &)
+AliroError Validate(const ConstData &, CryptoTypes::PublicKey &, CertificateTimestamps &)
 {
 	return ALIRO_ERROR_NOT_IMPLEMENTED;
 }
