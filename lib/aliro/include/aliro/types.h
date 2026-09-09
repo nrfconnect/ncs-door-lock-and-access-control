@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "aliro/timestamp.h"
+
 #include <array>
 #include <cstdint>
 #include <cstring>
@@ -113,14 +115,14 @@ enum class OperationSource : uint8_t {
 using ValidityIteration = uint64_t;
 
 /**
- * @brief Length of the timestamp.
+ * @brief Validity period with start and end times.
  */
-constexpr size_t kTimestampLength{ 20 };
-
-/**
- * @brief Type alias for timestamp.
- */
-using Timestamp = std::array<uint8_t, kTimestampLength>;
+struct ValidityPeriod {
+	/** @brief RFC 3339 timestamp from which the object is valid. */
+	Timestamp mValidFrom;
+	/** @brief RFC 3339 timestamp until which the object is valid. */
+	Timestamp mValidUntil;
+};
 
 } // namespace Aliro
 
@@ -313,15 +315,36 @@ enum class DocumentType {
 };
 
 /**
- * @brief Structure representing an access document data.
- * The mPublicKey is the public key retrieved from the IssuerAuth structure in the Access Document.
- * The mDataElement contains data elements (IssuerSignedItems) retrieved from the Access Document.
+ * @brief Metadata available when the Credential Issuer was authenticated by a certificate.
+ */
+struct CredentialIssuerCertificate {
+	/** @brief Optional validity period of the Credential Issuer certificate. */
+	const std::optional<ValidityPeriod> &mValidityPeriod;
+};
+
+/**
+ * @brief Data extracted from a verified Access Document.
+ *
+ * All referenced objects must remain valid for the duration of the access request callback.
  */
 struct AccessDocument {
+	/** @brief Access Credential public key from the Mobile Security Object. */
 	const CryptoTypes::PublicKey &mPublicKey;
-	ConstData mDataElement;
+	/** @brief Credential Issuer public key used to verify IssuerAuth. */
 	const CryptoTypes::PublicKey &mCredentialIssuerPublicKey;
+	/** @brief Certificate metadata, present only when IssuerAuth used a certificate. */
+	const std::optional<CredentialIssuerCertificate> &mCredentialIssuerCertificate;
+	/** @brief Requested IssuerSignedItem data element. */
+	ConstData mDataElement;
+	/** @brief Time at which the Mobile Security Object was signed. */
 	const Timestamp &mSignedTimestamp;
+	/** @brief Validity period of the Access Document. */
+	const ValidityPeriod &mValidityPeriod;
+	/** @brief Whether verification of the Access Document validity period is required. */
+	bool mTimeVerificationRequired;
+	/** @brief Optional time at which an updated Access Document is expected. */
+	const std::optional<Timestamp> &mExpectedUpdate;
+	/** @brief Optional monotonic validity iteration of the Access Document. */
 	std::optional<uint64_t> mValidityIteration;
 };
 

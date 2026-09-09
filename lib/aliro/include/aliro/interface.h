@@ -301,10 +301,7 @@ namespace CredentialIssuerCertificate {
 /**
  * @brief Structure representing certificate validity timestamps.
  */
-struct CertificateTimestamps {
-	Time mValidFrom;
-	Time mValidUntil;
-};
+using CertificateTimestamps = ValidityPeriod;
 
 /**
  * @brief Validates an X.509 certificate and extracts the public key and timestamps.
