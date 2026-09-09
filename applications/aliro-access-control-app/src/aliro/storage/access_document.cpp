@@ -19,6 +19,20 @@ namespace Aliro {
 
 namespace {
 
+#ifdef CONFIG_DOOR_LOCK_STORAGE_MIGRATE_ACCESS_DOCUMENT_V1
+constexpr int kAccessDocumentV1Found{ 1 };
+
+struct AccessDocumentV1 {
+	uint32_t mVersion;
+	size_t mCredentialIssuerKeyIndex;
+	Aliro::Timestamp mSignedTimestamp;
+	ValidityIteration mAccessIteration;
+	Aliro::CryptoTypes::PublicKey mPublicKey;
+	size_t mAccessDocumentSize;
+	std::array<uint8_t, AccessDocument::kAccessDocumentSize> mAccessDocument;
+};
+#endif // CONFIG_DOOR_LOCK_STORAGE_MIGRATE_ACCESS_DOCUMENT_V1
+
 DoorLock::ExternalNvs::Id GetExternalNvsId(size_t index)
 {
 	return DoorLock::Storage::ExternalNvsIds::kAccessDocumentRangeStart +
@@ -39,6 +53,12 @@ int ReadAccessDocumentHelper(size_t index, AccessDocument &ad)
 	if (error != 0) {
 		return error;
 	}
+
+#ifdef CONFIG_DOOR_LOCK_STORAGE_MIGRATE_ACCESS_DOCUMENT_V1
+	if (len == sizeof(AccessDocumentV1) && ad.mVersion == 1) {
+		return kAccessDocumentV1Found;
+	}
+#endif // CONFIG_DOOR_LOCK_STORAGE_MIGRATE_ACCESS_DOCUMENT_V1
 
 	if (len != sizeof(AccessDocument)) {
 		LOG_ERR("Invalid Access Document size at index: %zu, expected: %zu, got: %zu", index,
@@ -64,6 +84,17 @@ AliroError LoadAccessDocuments()
 		if (error == -ENOENT) {
 			continue;
 		}
+
+#ifdef CONFIG_DOOR_LOCK_STORAGE_MIGRATE_ACCESS_DOCUMENT_V1
+		if (error == kAccessDocumentV1Found) {
+			LOG_INF("Removing version 1 Access Document at index: %zu", index);
+			ReturnErrorOnFailure(AccessManagerInstance().AddPublicKey(
+				CryptoTypes::PublicKey{}, AccessManager::PublicKeyType::AccessDocument, index));
+			ReturnErrorOnFailure(AccessManagerInstance().RemovePublicKey(
+				AccessManager::PublicKeyType::AccessDocument, index));
+			continue;
+		}
+#endif // CONFIG_DOOR_LOCK_STORAGE_MIGRATE_ACCESS_DOCUMENT_V1
 
 		VerifyOrReturnStatus(error == 0, AliroError::FromInt(error),
 				     LOG_ERR("Failed to read Access Document at index: %zu, error code: %d", index,
