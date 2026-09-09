@@ -24,8 +24,8 @@ Aliro::CryptoTypes::KeyId DoorLock::InterfaceImpl::CiCert::GetCredentialIssuerCA
 }
 
 DoorLock::InterfaceImpl::CiCert::ValidityPeriodVerificationResult
-DoorLock::InterfaceImpl::CiCert::VerifyCertificateValidityPeriod(
-	const Aliro::Interface::CredentialIssuerCertificate::CertificateTimestamps &timestamps)
+DoorLock::InterfaceImpl::CiCert::VerifyCertificateValidityPeriod(const Aliro::Time &validFrom,
+								 const Aliro::Time &validUntil)
 {
 #ifdef CONFIG_DOOR_LOCK_TIME_CONCEPT
 	const auto currentTimeOpt = DoorLock::TimeUtils::GetCurrentTime();
@@ -34,8 +34,6 @@ DoorLock::InterfaceImpl::CiCert::VerifyCertificateValidityPeriod(
 	}
 
 	const auto &currentTime = currentTimeOpt.value();
-	const auto &validFrom = timestamps.mValidFrom;
-	const auto &validUntil = timestamps.mValidUntil;
 
 	LOG_DBG("Current time: %04d-%02d-%02d %02d:%02d:%02d", currentTime.mYear, currentTime.mMonth, currentTime.mDay,
 		currentTime.mHour, currentTime.mMinute, currentTime.mSecond);
@@ -50,6 +48,8 @@ DoorLock::InterfaceImpl::CiCert::VerifyCertificateValidityPeriod(
 
 	return ValidityPeriodVerificationResult::WithinPeriod;
 #else
+	ARG_UNUSED(validFrom);
+	ARG_UNUSED(validUntil);
 	return ValidityPeriodVerificationResult::NotSupported;
 #endif // CONFIG_DOOR_LOCK_TIME_CONCEPT
 }
