@@ -301,10 +301,7 @@ namespace CredentialIssuerCertificate {
 /**
  * @brief Structure representing certificate validity timestamps.
  */
-struct CertificateTimestamps {
-	Time mValidFrom;
-	Time mValidUntil;
-};
+using CertificateTimestamps = ValidityPeriod;
 
 /**
  * @brief Validates an X.509 certificate and extracts the public key and timestamps.
@@ -316,7 +313,7 @@ struct CertificateTimestamps {
  * @return ALIRO_NO_ERROR on success, error code otherwise.
  */
 AliroError Validate(const ConstData &certificate, CryptoTypes::PublicKey &publicKey,
-		    std::optional<CertificateTimestamps> &timestamps);
+		    CertificateTimestamps &timestamps);
 
 } // namespace CredentialIssuerCertificate
 
