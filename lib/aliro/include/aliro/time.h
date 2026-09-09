@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "aliro/types.h"
+#include "aliro/timestamp.h"
 
 #include <optional>
 
@@ -141,6 +141,13 @@ struct Time {
 	 *         or std::nullopt if the timestamp is invalid.
 	 */
 	static std::optional<Time> FromTimestamp(const uint8_t *timestamp, size_t length);
+
+	/**
+	 * @brief Converts this time to an RFC 3339 timestamp.
+	 *
+	 * @return The encoded timestamp, or std::nullopt if this time is invalid.
+	 */
+	[[nodiscard]] std::optional<Timestamp> ToTimestamp() const;
 
 	/** @brief The year component (e.g., 2025). */
 	int mYear;
