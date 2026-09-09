@@ -22,6 +22,7 @@ The reference can support Aliro alone, Matter alone, or both protocols, dependin
 
    solution_overview.rst
    hardware_requirements.rst
+   memory_requirements.rst
    software_requirements.rst
    wireless_technologies.rst
    applications.rst
