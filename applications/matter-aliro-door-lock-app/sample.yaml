@@ -5,6 +5,15 @@ common:
   sysbuild: true
   build_only: true
 tests:
+  smoke.door_lock.nfc.matter-reader_cert-ci_ca_key:
+    tags:
+      - dfu_supported
+    platform_allow: &platform_54lm20
+      - nrf54lm20dk/nrf54lm20b/cpuapp
+    integration_platforms: *platform_54lm20
+    extra_args:
+      - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
+      - CONFIG_DOOR_LOCK_READER_CERTIFICATE=y
   app.door_lock.nfc.matter-ci_ca_key-reader_cert:
     tags:
       - dfu_supported
@@ -49,8 +58,7 @@ tests:
       - matter-aliro-door-lock-app_SNIPPET="bt_nus"
       - FILE_SUFFIX=release
   do_not_test.door_lock.nfc.matter-nfc_prop-matter_ext:
-    platform_allow: &platform_54lm20
-      - nrf54lm20dk/nrf54lm20b/cpuapp
+    platform_allow: *platform_54lm20
     integration_platforms: *platform_54lm20
     extra_args:
       - CONFIG_NCS_DOOR_LOCK_APP_EXTENSIONS_NFC=y
