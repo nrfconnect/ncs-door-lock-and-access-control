@@ -67,6 +67,32 @@ The |REPO_NAME| v1.2.0
 
 .. toggle::
 
+  AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|
+    Matter onboarding using NFC does not work in the |MATTER_ALIRO_APP_NAME|.
+
+    **Workaround:**
+    Use QR code scanning mechanism for Matter device commissioning.
+
+  AL-718: Access Document is not stored on the nRF52840 platform
+    Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
+    As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option is enabled together with ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``.
+
+    **Workaround:**
+    Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
+
+    **Affected platforms:** nRF52840 DK
+
+  AL-728: When built with Matter support, the ProductAppearance attribute is not supported
+    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
+    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
+
+    **Workaround:**
+    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
+
+  AL-856: Lock does not unlock via NFC after manual lock while the User Device remains in UWB range
+    After UWB unlock and manual lock while the User Device remains in UWB range, NFC authentication may complete (ACCESS GRANTED) without actuating the lock.
+    On the device, Aliro NFC authentication completes successfully (``ACCESS GRANTED``), but no physical unlock is triggered.
+
   AL-931: Access Manager is not aware of final unlock decision
     In the |MATTER_ALIRO_APP_NAME|, the Aliro Access Manager makes its access decision based only on the Access Credential public key, before the Matter user data is evaluated.
     When the public key belongs to a Matter user whose UserStatus is ``OccupiedDisabled``, the Access Manager still grants access over Aliro.
