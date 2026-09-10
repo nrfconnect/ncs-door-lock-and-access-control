@@ -609,7 +609,6 @@ void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext session
 	case RangingSessionState::RangingSuspended:
 		LOG_INF("Ranging state changed to Ranging Suspended (session: %p)", sessionContext.GetRaw());
 
-		// Only update ReaderState if no other session allows open (prevents rapid toggling after Suspend).
 		SetOpenAllowed(sessionContext, false, !IsOpenAllowed());
 		break;
 	case RangingSessionState::RangingResumed:
@@ -629,6 +628,17 @@ void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext session
 	ARG_UNUSED(state);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
+void AccessManagerImpl::_SuspendActiveRangingSessions()
+{
+	const int status = Uwb::UltraWideBandInstance().SuspendActiveRangingSessions();
+
+	if (status != 0) {
+		LOG_ERR("Failed to suspend all active UWB ranging sessions: %d", status);
+	}
+}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
 
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData)
 {

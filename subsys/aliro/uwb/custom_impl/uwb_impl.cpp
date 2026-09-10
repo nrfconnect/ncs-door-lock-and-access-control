@@ -51,6 +51,11 @@ int UltraWideBandImpl::_SuspendRangingSession([[maybe_unused]] SessionContextHan
 	return -ENOSYS;
 }
 
+int UltraWideBandImpl::_SuspendActiveRangingSessions()
+{
+	return -ENOSYS;
+}
+
 int UltraWideBandImpl::_ResumeRangingSession([[maybe_unused]] SessionContextHandle)
 {
 	return -ENOSYS;

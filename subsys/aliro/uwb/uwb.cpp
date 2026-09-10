@@ -61,6 +61,11 @@ int UltraWideBand::SuspendRangingSession(SessionContextHandle sessionContextData
 	return Impl()->_SuspendRangingSession(sessionContextData);
 }
 
+int UltraWideBand::SuspendActiveRangingSessions()
+{
+	return Impl()->_SuspendActiveRangingSessions();
+}
+
 int UltraWideBand::ResumeRangingSession(SessionContextHandle sessionContextData)
 {
 	return Impl()->_ResumeRangingSession(sessionContextData);

@@ -32,7 +32,9 @@
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/util.h>
 
+#include <array>
 #include <errno.h>
+#include <optional>
 
 LOG_MODULE_REGISTER(UwbImpl, CONFIG_DOOR_LOCK_ALIRO_UWB_LOG_LEVEL);
 
@@ -659,6 +661,46 @@ int UltraWideBandImpl::_SuspendRangingSession(SessionContextHandle sessionContex
 			    LOG_ERR("Failed to suspend UWB session: 0x%x", ToUnderlying(err)));
 
 	return 0;
+}
+
+int UltraWideBandImpl::_SuspendActiveRangingSessions()
+{
+	std::array<std::optional<SessionContextHandle>, CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS> activeSessions{};
+	size_t activeSessionCount = 0;
+
+	{
+		MutexGuard lock{ mMutex };
+		SessionContext *sessionCtx{};
+
+		SYS_SLIST_FOR_EACH_CONTAINER (&mActiveSessionsList, sessionCtx, mSessionContextNode) {
+			const bool isActive = sessionCtx->mRangingSessionState == RangingSessionState::Ranging ||
+					      sessionCtx->mRangingSessionState == RangingSessionState::RangingResumed;
+
+			if (!isActive) {
+				continue;
+			}
+
+			VerifyOrReturnValue(activeSessionCount < activeSessions.size(), -ENOSPC,
+					    LOG_ERR("Too many active UWB ranging sessions"));
+			activeSessions[activeSessionCount++] = sessionCtx->mSessionContextData;
+		}
+	}
+
+	int firstError = 0;
+
+	for (size_t i = 0; i < activeSessionCount; ++i) {
+		const int status = _SuspendRangingSession(activeSessions[i].value());
+
+		if (status != 0) {
+			LOG_ERR("Failed to suspend active UWB ranging session %p: %d",
+				activeSessions[i]->GetRaw(), status);
+			if (firstError == 0) {
+				firstError = status;
+			}
+		}
+	}
+
+	return firstError;
 }
 
 int UltraWideBandImpl::_ResumeRangingSession(SessionContextHandle sessionContextData)

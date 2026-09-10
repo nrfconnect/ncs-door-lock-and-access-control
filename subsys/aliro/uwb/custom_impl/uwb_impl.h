@@ -45,6 +45,7 @@ private:
 	int _InitiateRangingSession(SessionContextHandle sessionContextData);
 	int _TerminateRangingSession(SessionContextHandle sessionContextData);
 	int _SuspendRangingSession(SessionContextHandle sessionContextData);
+	int _SuspendActiveRangingSessions();
 	int _ResumeRangingSession(SessionContextHandle sessionContextData);
 	const char *_GetFirmwareVersion() { return nullptr; }
 	bool _IsInitialized() { return false; }

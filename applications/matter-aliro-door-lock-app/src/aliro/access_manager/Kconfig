@@ -72,6 +72,12 @@ config DOOR_LOCK_ACCESS_MANAGER_MAX_ALLOWED_DISTANCE_EXIT_MARGIN_CM
       Set to 0 to disable the exit margin (door will lock immediately when
       distance exceeds MAX_ALLOWED_DISTANCE_CM).
 
+config DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
+    bool "Suspend active ranging sessions when the lock is unsecured"
+    help
+      Suspend all active UWB ranging sessions when the lock enters the
+      Unsecured state.
+
 choice DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION
     prompt "Terminate session on given condition"
     default DOOR_LOCK_ACCESS_MANAGER_TERMINATE_SESSION_DISABLED

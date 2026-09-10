@@ -116,6 +116,7 @@ class UltraWideBandImpl final : public UltraWideBand {
 	int _InitiateRangingSession(SessionContextHandle sessionContextData);
 	int _TerminateRangingSession(SessionContextHandle sessionContextData);
 	int _SuspendRangingSession(SessionContextHandle sessionContextData);
+	int _SuspendActiveRangingSessions();
 	int _ResumeRangingSession(SessionContextHandle sessionContextData);
 	const char *_GetFirmwareVersion() { return mQm35FirmwareVersion.get(); }
 	bool _IsInitialized() { return mInitialized; }

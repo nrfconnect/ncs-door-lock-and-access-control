@@ -169,6 +169,14 @@ public:
 	int SuspendRangingSession(SessionContextHandle sessionContextData);
 
 	/**
+	 * @brief Suspends all active UWB ranging sessions.
+	 *
+	 * @return 0 if all active sessions were suspended successfully, or the
+	 * first negative error code returned while suspending a session.
+	 */
+	int SuspendActiveRangingSessions();
+
+	/**
 	 * @brief Resumes the suspended UWB ranging session.
 	 *
 	 * This method resumes the UWB ranging session that was previously suspended by
