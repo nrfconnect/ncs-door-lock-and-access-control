@@ -4,6 +4,7 @@
 .. ### Source: github.com
 
 .. _`ncs-door-lock-and-access-control`: https://github.com/nrfconnect/ncs-door-lock-and-access-control
+.. _`ncs-matter Add-on`: https://github.com/nrfconnect/ncs-matter
 .. _`Aliro Certification Tool`: https://github.com/aliro-access-control/aliro-certification-tool
 .. _`aliro-sve-v1.0`: https://github.com/aliro-access-control/aliro-certification-tool/releases/tag/aliro-sve-v1.0
 .. _`test harness hardware requirements`: https://github.com/aliro-access-control/aliro-certification-tool/tree/aliro-sve-v1.0#requirements
