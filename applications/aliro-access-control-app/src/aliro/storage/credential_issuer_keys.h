@@ -13,8 +13,10 @@
 
 namespace Aliro {
 
-AliroError StoreCertificateCredentialIssuerKey(size_t index, const CryptoTypes::PublicKey &publicKey);
-AliroError ReadCertificateCredentialIssuerKey(size_t index, CryptoTypes::PublicKey &publicKey);
+AliroError StoreCertificateCredentialIssuerKey(size_t index, const CryptoTypes::PublicKey &publicKey,
+					       const ValidityPeriod &validityPeriod);
+AliroError ReadCertificateCredentialIssuerKey(size_t index, CryptoTypes::PublicKey &publicKey,
+					      ValidityPeriod *validityPeriod = nullptr);
 AliroError ClearCertificateCredentialIssuerKey(size_t index);
 AliroError LoadCertificateCredentialIssuerKeys();
 

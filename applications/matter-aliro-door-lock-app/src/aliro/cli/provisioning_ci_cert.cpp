@@ -71,7 +71,8 @@ int ShellCmdHandleCertificateCredentialIssuerList(const struct shell *shell, siz
 	CryptoTypes::PublicKey publicKey{};
 
 	for (size_t keyId = 0; keyId < kCiCertMaxKeys; keyId++) {
-		const auto error = ReadCertificateCredentialIssuerKey(keyId, publicKey);
+		ValidityPeriod validityPeriod{};
+		const auto error = ReadCertificateCredentialIssuerKey(keyId, publicKey, &validityPeriod);
 		if (error == ALIRO_PUBLIC_KEY_NOT_FOUND) {
 			snprintf(hexString.data(), hexString.size(), "(null)");
 		} else {
@@ -85,6 +86,12 @@ int ShellCmdHandleCertificateCredentialIssuerList(const struct shell *shell, siz
 		}
 
 		shell_print(shell, "[%u]: %s", keyId, hexString.data());
+		if (error == ALIRO_NO_ERROR) {
+			shell_print(shell, "  Valid from:  %.*s", static_cast<int>(validityPeriod.mValidFrom.size()),
+				    reinterpret_cast<const char *>(validityPeriod.mValidFrom.data()));
+			shell_print(shell, "  Valid until: %.*s", static_cast<int>(validityPeriod.mValidUntil.size()),
+				    reinterpret_cast<const char *>(validityPeriod.mValidUntil.data()));
+		}
 	}
 
 	return 0;
