@@ -24,9 +24,9 @@ The following updates were introduced in this release.
 
   * QM35825 UWB (experimental support):
 
-    * Integration with the public Qorvo Aliro SDK for the QM35825 UWB module (see :ref:`aliro_qm35_sdk_repository`).
+    * Integration with the public Qorvo Aliro SDK for the QM35825 UWB module.
     * Experimental support for UWB diagnostic data and radar sessions using the QM35825 UWB module (see :ref:`uwb_integration`).
-    * Experimental implementation of the front/back disambiguation algorithm using the QM35825 UWB module (see :ref:`uwb_disambiguation`).
+    * Experimental implementation of the front/back disambiguation algorithm using the QM35825 UWB module.
 
   * Documentation:
 
