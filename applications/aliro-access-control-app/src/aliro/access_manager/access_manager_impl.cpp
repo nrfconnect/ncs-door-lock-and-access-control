@@ -1163,10 +1163,10 @@ bool AccessManagerImpl::FindCredentialIssuerKeyIndex(const CryptoTypes::PublicKe
 }
 
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
-AliroError
-AccessManagerImpl::AddCertificateCredentialIssuerKey(const CryptoTypes::PublicKey &publicKey,
-						     const std::optional<ValidityIteration> &validityIteration,
-						     size_t &index)
+AliroError AccessManagerImpl::AddCertificateCredentialIssuerKey(
+	const CryptoTypes::PublicKey &publicKey,
+	const AccessDocumentTypes::CredentialIssuerCertificate &credentialIssuerCertificate,
+	const std::optional<ValidityIteration> &validityIteration, size_t &index)
 {
 	size_t localIndex{};
 	const AliroError error = GetFirstFreeIndex(mCiCertKeys, localIndex);
@@ -1179,7 +1179,8 @@ AccessManagerImpl::AddCertificateCredentialIssuerKey(const CryptoTypes::PublicKe
 			StoreValidityIterations(index, ValidityIterations{ .mAccessIteration = *validityIteration }));
 	}
 
-	ReturnErrorOnFailure(StoreCertificateCredentialIssuerKey(localIndex, publicKey));
+	ReturnErrorOnFailure(StoreCertificateCredentialIssuerKey(localIndex, publicKey,
+								 credentialIssuerCertificate.mValidityPeriod));
 	ReturnErrorOnFailure(AddKeyToContainer(mCiCertKeys, publicKey, localIndex));
 	return ALIRO_NO_ERROR;
 }
@@ -1195,8 +1196,11 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 		ReturnErrorOnFailure(ProcessValidityIteration(ciKeyIndex, ad.mValidityIteration));
 	} else {
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
-		ReturnErrorOnFailure(AddCertificateCredentialIssuerKey(ad.mCredentialIssuerPublicKey,
-								       ad.mValidityIteration, ciKeyIndex));
+		VerifyOrReturnStatus(ad.mCredentialIssuerCertificate.has_value(), ALIRO_INVALID_DATA_CONTENT,
+				     LOG_WRN("Credential Issuer certificate metadata required to store learned key"));
+		ReturnErrorOnFailure(AddCertificateCredentialIssuerKey(
+			ad.mCredentialIssuerPublicKey, ad.mCredentialIssuerCertificate.value(),
+			ad.mValidityIteration, ciKeyIndex));
 #else
 		LOG_WRN("Credential Issuer public key not found and certificate key storage is disabled");
 		return ALIRO_ERROR_NOT_IMPLEMENTED;

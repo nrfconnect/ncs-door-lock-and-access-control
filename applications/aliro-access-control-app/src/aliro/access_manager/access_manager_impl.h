@@ -302,9 +302,10 @@ private:
 		CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_MAX_STORED_KEYS
 	};
 
-	AliroError AddCertificateCredentialIssuerKey(const CryptoTypes::PublicKey &publicKey,
-						     const std::optional<ValidityIteration> &validityIteration,
-						     size_t &index);
+	AliroError AddCertificateCredentialIssuerKey(
+		const CryptoTypes::PublicKey &publicKey,
+		const AccessDocumentTypes::CredentialIssuerCertificate &credentialIssuerCertificate,
+		const std::optional<ValidityIteration> &validityIteration, size_t &index);
 #endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 
 	bool FindCredentialIssuerKeyIndex(const CryptoTypes::PublicKey &publicKey, size_t &index) const;
