@@ -1,0 +1,2 @@
+.. warning::
+   The Qorvo QM35825 UWB SoC integration has been deprecated and is no longer supported.
