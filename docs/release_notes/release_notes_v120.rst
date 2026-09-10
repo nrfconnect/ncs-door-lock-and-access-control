@@ -5,7 +5,7 @@ Release notes for |REPO_NAME| v1.2.0
 
 This release upgrades the Add-on to the |NCS| v3.4.0 long-term support (LTS) release, providing a stable, long-term foundation for the next five years.
 It also migrates the Matter integration to the `ncs-matter Add-on`_ with Matter v1.6 support and moves all applications to a shared DTS-based partition layout.
-In addition, common Aliro interface implementations have been extracted into a shared subsystem, and the deprecated native Qorvo QM35 UWB integration has been replaced by the vendor-agnostic UWB platform abstraction.
+In addition, common Aliro interface implementations have been extracted into a shared subsystem, and the deprecated native Qorvo QM35 UWB integration has been removed in favor of the vendor-agnostic UWB platform abstraction
 
 .. note::
 
