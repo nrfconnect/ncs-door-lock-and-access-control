@@ -318,6 +318,30 @@ bool IsAccessDocumentUpToDate(const AccessDocument &ad, const Timestamp &credent
 	return savedTimestamp.value() >= newTimestamp.value();
 }
 
+bool IsStoredAccessDocumentValid(const AccessDocument &ad)
+{
+	const auto validFromTime = Time::FromTimestamp(ad.mValidFrom);
+	VerifyOrReturnFalse(validFromTime.has_value(), LOG_ERR("Invalid validFrom timestamp"));
+
+	const auto validUntilTime = Time::FromTimestamp(ad.mValidUntil);
+	VerifyOrReturnFalse(validUntilTime.has_value(), LOG_ERR("Invalid validUntil timestamp"));
+
+	VerifyOrReturnFalse(validFromTime.value() <= validUntilTime.value(),
+			    LOG_ERR("Invalid validity period, validFrom is after validUntil"));
+
+	const auto result =
+		Interface::AccessDocument::VerifyValidityPeriod(validFromTime.value(), validUntilTime.value());
+
+	if (result.has_value()) {
+		VerifyOrReturnFalse(result.value(), LOG_WRN("Stored Access Document validity period expired"));
+		return true;
+	}
+
+	VerifyOrReturnFalse(ad.mTimeVerificationRequired == 0,
+			    LOG_WRN("Stored Access Document requires time verification but time is unavailable"));
+	return true;
+}
+
 #endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
 
 #endif // CONFIG_DOOR_LOCK_STEP_UP_PHASE
@@ -431,6 +455,13 @@ AliroError AccessManagerImpl::_VerifyKPersistentKey([[maybe_unused]] CryptoTypes
 	CryptoTypes::PublicKey publicKey{};
 	VerifyOrReturnStatus(mKpersistentManager, ALIRO_INVALID_STATE, LOG_ERR("Kpersistent manager not set"));
 	AliroError status = mKpersistentManager->GetAccessCredentialPublicKey(kpersistentKeyId, publicKey);
+
+	if (status == ALIRO_NO_ERROR) {
+		MutexGuard lock{ sMutex };
+		if (!VerifyPublicKey(publicKey)) {
+			status = ALIRO_PUBLIC_KEY_NOT_FOUND;
+		}
+	}
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 	if (status == ALIRO_NO_ERROR && sessionContext.IsBle()) {
@@ -675,7 +706,7 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
-bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey) const
+bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey)
 {
 	LOG_DBG("Verifying public key against %zu stored keys", mAcKeys.mCount + mAdKeys.mCount);
 
@@ -693,6 +724,11 @@ bool AccessManagerImpl::VerifyPublicKey(const CryptoTypes::PublicKey &userPublic
 					    error.ToInt()));
 		VerifyOrReturnFalse(ad.mPublicKey == userPublicKey,
 				    LOG_WRN("Public key mismatch with stored Access Document at index: %zu", keyIndex));
+		if (!IsStoredAccessDocumentValid(ad)) {
+			LOG_WRN("Removing invalid or expired Access Document at index: %zu", keyIndex);
+			_RemovePublicKey(PublicKeyType::AccessDocument, keyIndex);
+			return false;
+		}
 		return true;
 	}
 #endif // CONFIG_DOOR_LOCK_STORAGE_MAX_STORED_ACCESS_DOCUMENTS > 0
