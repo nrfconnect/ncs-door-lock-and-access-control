@@ -75,6 +75,8 @@ The |REPO_NAME| v1.2.0
 The |REPO_NAME| v1.1.0
 **********************
 
+.. include:: /include/qm35_deprecation_warning.txt
+
 .. toggle::
 
   AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|
@@ -116,6 +118,8 @@ The |REPO_NAME| v1.1.0
 The |REPO_NAME| v1.0.1
 **********************
 
+.. include:: /include/qm35_deprecation_warning.txt
+
 .. toggle::
 
   AL-717: Matter onboarding with NFC is not supported
@@ -147,6 +151,7 @@ The |REPO_NAME| v1.0.1
 The |REPO_NAME| v1.0.0
 **********************
 
+.. include:: /include/qm35_deprecation_warning.txt
 .. toggle::
 
   AL-717: Matter onboarding with NFC is not supported
