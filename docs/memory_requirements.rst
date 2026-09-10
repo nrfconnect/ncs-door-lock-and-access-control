@@ -22,13 +22,15 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
     The provided values might differ between the |REPO_NAME| releases.
     The Application ROM, Total ROM, and Total RAM depend on the build configuration in use and are different if non-default options are enabled.
 
+.. include:: /include/memory_values_commit.txt
+
 .. tabs::
 
    .. group-tab:: nRF52840 DK
 
       The following table lists memory requirements for the applications running on the nRF52840 DK.
 
-      .. list-table::
+      .. list-table:: |mem_values_caption|
          :header-rows: 1
 
          * - Application
@@ -57,10 +59,10 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 28
-           - 891
+           - 892
            - 4
            - 32
-           - 955
+           - 956
            - 207
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
@@ -73,25 +75,25 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 28
-           - 396
+           - 400
            - 4
            - 32
-           - 460
+           - 464
            - 92
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 28
-           - 299
+           - 301
            - 4
            - 32
-           - 363
+           - 365
            - 80
 
    .. group-tab:: nRF5340 DK
 
       The following table lists memory requirements for the applications running on the nRF5340 DK.
 
-      .. list-table::
+      .. list-table:: |mem_values_caption|
          :header-rows: 1
 
          * - Application
@@ -120,41 +122,41 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 32
-           - 833
+           - 834
            - 4
            - 32
-           - 901
+           - 902
            - 223
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
            - 32
-           - 757
+           - 758
            - 4
            - 32
-           - 825
+           - 826
            - 204
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 32
-           - 367
+           - 372
            - 4
            - 32
-           - 435
+           - 440
            - 89
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 32
-           - 262
+           - 265
            - 4
            - 32
-           - 330
-           - 76
+           - 333
+           - 77
 
    .. group-tab:: nRF54L15 DK
 
       The following table lists memory requirements for the applications running on the nRF54L15 DK.
 
-      .. list-table::
+      .. list-table:: |mem_values_caption|
          :header-rows: 1
 
          * - Application
@@ -183,10 +185,10 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 52
-           - 899
+           - 901
            - 4
            - 40
-           - 995
+           - 997
            - 216
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
@@ -199,25 +201,25 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 52
-           - 408
+           - 413
            - 4
            - 40
-           - 504
+           - 509
            - 93
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 52
-           - 304
+           - 307
            - 4
            - 40
-           - 400
-           - 80
+           - 403
+           - 81
 
    .. group-tab:: nRF54LM20 DK
 
       The following table lists memory requirements for the applications running on the nRF54LM20 DK.
 
-      .. list-table::
+      .. list-table:: |mem_values_caption|
          :header-rows: 1
 
          * - Application
@@ -246,32 +248,32 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 52
-           - 899
+           - 901
            - 4
            - 48
-           - 1003
+           - 1005
            - 216
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
            - 52
-           - 824
+           - 825
            - 4
            - 48
-           - 928
+           - 929
            - 197
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 52
-           - 407
+           - 412
            - 4
            - 48
-           - 511
+           - 516
            - 93
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 52
-           - 304
+           - 307
            - 4
            - 48
-           - 408
+           - 411
            - 81
