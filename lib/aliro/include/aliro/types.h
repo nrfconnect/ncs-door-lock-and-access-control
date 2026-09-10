@@ -318,8 +318,8 @@ enum class DocumentType {
  * @brief Metadata available when the Credential Issuer was authenticated by a certificate.
  */
 struct CredentialIssuerCertificate {
-	/** @brief Optional validity period of the Credential Issuer certificate. */
-	const std::optional<ValidityPeriod> &mValidityPeriod;
+	/** @brief Validity period of the Credential Issuer certificate. */
+	const ValidityPeriod &mValidityPeriod;
 };
 
 /**

@@ -313,7 +313,7 @@ using CertificateTimestamps = ValidityPeriod;
  * @return ALIRO_NO_ERROR on success, error code otherwise.
  */
 AliroError Validate(const ConstData &certificate, CryptoTypes::PublicKey &publicKey,
-		    std::optional<CertificateTimestamps> &timestamps);
+		    CertificateTimestamps &timestamps);
 
 } // namespace CredentialIssuerCertificate
 
