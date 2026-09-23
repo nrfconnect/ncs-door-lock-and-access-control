@@ -82,7 +82,7 @@ jobs:
       - name: Prepare west project
         run: |
           west init -l
-          west update -o=--depth=1
+          west update -o=--depth=1 -n
           west patch apply --roll-back
 
       - name: Build with sonarqube wrapper
