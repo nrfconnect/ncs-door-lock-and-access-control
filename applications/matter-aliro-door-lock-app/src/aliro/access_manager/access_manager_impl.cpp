@@ -688,6 +688,8 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 	SetOpenAllowed(sessionContext, false);
 	RemoveRangingSession(sessionContext);
 
+#else
+	ARG_UNUSED(sessionContext);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
@@ -1194,9 +1196,9 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 		VerifyOrReturnStatus(ad.mCredentialIssuerCertificate.has_value(), ALIRO_INVALID_DATA_CONTENT,
 				     LOG_WRN("Credential Issuer certificate metadata required to store learned key"));
-		ReturnErrorOnFailure(AddCertificateCredentialIssuerKey(
-			ad.mCredentialIssuerPublicKey, ad.mCredentialIssuerCertificate.value(),
-			ad.mValidityIteration, ciKeyIndex));
+		ReturnErrorOnFailure(AddCertificateCredentialIssuerKey(ad.mCredentialIssuerPublicKey,
+								       ad.mCredentialIssuerCertificate.value(),
+								       ad.mValidityIteration, ciKeyIndex));
 #else
 		LOG_WRN("Credential Issuer public key not found and certificate key storage is disabled");
 		return ALIRO_ERROR_NOT_IMPLEMENTED;
