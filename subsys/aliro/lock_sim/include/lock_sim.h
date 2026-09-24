@@ -33,16 +33,18 @@ public:
 	/**
 	 * @brief Locks the lock.
 	 *
-	 * @return True if the lock was locked successfully, false if the lock is already locked.
+	 * @return True if locking was started, false if the lock is already locked or locking.
 	 */
 	bool Lock();
 
 	/**
 	 * @brief Unlocks the lock.
 	 *
-	 * @return True if the lock was unlocked successfully, false if the lock is already unlocked.
+	 * @return True if unlocking was started, false if the lock is already unlocked or unlocking.
 	 */
 	bool Unlock();
+
+	ReaderStateByte GetState() const { return mState; }
 
 private:
 	static constexpr uint32_t kActuatorMovementTimeMs{ CONFIG_DOOR_LOCK_ALIRO_LOCK_SIM_MOVEMENT_TIME_MS };

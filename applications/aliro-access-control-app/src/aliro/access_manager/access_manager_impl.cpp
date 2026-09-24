@@ -635,6 +635,17 @@ uint32_t AccessManagerImpl::_GetMaxAllowedDistance()
 void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext sessionContext, RangingSessionState state)
 {
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
+	{
+		MutexGuard lock{ sMutex };
+		auto *rangingSessionCtx = FindRangingSession(sessionContext);
+
+		if (rangingSessionCtx) {
+			rangingSessionCtx->mRangingState = state;
+		}
+	}
+#endif
+
 	switch (state) {
 	case RangingSessionState::Ranging:
 		LOG_INF("Ranging state changed to Ranging (session: %p)", sessionContext.GetRaw());
@@ -642,7 +653,6 @@ void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext session
 	case RangingSessionState::RangingSuspended:
 		LOG_INF("Ranging state changed to Ranging Suspended (session: %p)", sessionContext.GetRaw());
 
-		// Only update ReaderState if no other session allows open (prevents rapid toggling after Suspend).
 		SetOpenAllowed(sessionContext, false, !IsOpenAllowed());
 		break;
 	case RangingSessionState::RangingResumed:
@@ -662,6 +672,41 @@ void AccessManagerImpl::_HandleRangingSessionStateChanged(SessionContext session
 	ARG_UNUSED(state);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
+
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
+void AccessManagerImpl::_SuspendActiveRangingSessions()
+{
+	std::array<std::optional<SessionContext>, CONFIG_DOOR_LOCK_BLE_UWB_MAX_SESSIONS> activeSessions{};
+	size_t activeSessionCount = 0;
+
+	{
+		MutexGuard lock{ sMutex };
+		RangingSessionContext *rangingSessionCtx{};
+
+		SYS_SLIST_FOR_EACH_CONTAINER (&mActiveSessions, rangingSessionCtx, mNode) {
+			const bool isActive = rangingSessionCtx->mRangingState == RangingSessionState::Ranging ||
+					      rangingSessionCtx->mRangingState == RangingSessionState::RangingResumed;
+
+			if (!isActive) {
+				continue;
+			}
+
+			VerifyOrReturn(activeSessionCount < activeSessions.size(),
+				       LOG_ERR("Too many active UWB ranging sessions"));
+			activeSessions[activeSessionCount++] = rangingSessionCtx->mSessionContext;
+		}
+	}
+
+	for (size_t i = 0; i < activeSessionCount; ++i) {
+		const int status = Uwb::UltraWideBandInstance().SuspendRangingSession(activeSessions[i].value());
+
+		if (status != 0) {
+			LOG_ERR("Failed to suspend UWB ranging session %p: %d",
+				activeSessions[i]->GetRaw(), status);
+		}
+	}
+}
+#endif // CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
 
 void AccessManagerImpl::_HandleRangingSessionData(SessionContext sessionContext, const UwbRangingData &uwbData)
 {
@@ -833,20 +878,10 @@ void AccessManagerImpl::HandleAccessGranted(bool isNfcSession, bool granted,
 
 bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
 {
-	VerifyOrReturnFalse(isNfcSession);
-
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-	// For NFC sessions with UWB enabled, only unlock immediately if open is not already allowed via UWB.
-	// Avoids double unlock when another session already has open allowed from ranging.
-	return !IsOpenAllowed();
-
-#else // CONFIG_DOOR_LOCK_BLE_UWB
-
-	// For NFC sessions without UWB, always unlock immediately.
-	return true;
-
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
+	// UWB open-allowed is an access decision, not the physical lock state. The lock can be
+	// secured manually while a ranging session remains open-allowed, so a successful NFC
+	// authentication must always request an unlock.
+	return isNfcSession;
 }
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
