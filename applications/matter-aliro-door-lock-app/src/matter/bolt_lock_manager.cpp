@@ -60,6 +60,36 @@ bool ValidateAliroCredential(const Aliro::CryptoTypes::PublicKey &accessCredenti
 	return success;
 }
 
+void PerformAliroUnlock(Aliro::OperationSource source,
+			const Nullable<BoltLockManager::ValidateCredentialResult> &result)
+{
+	auto &lock = BoltLockMgr();
+
+	if (lock.Unlock(source, result)) {
+		return;
+	}
+
+#ifdef CONFIG_DOOR_LOCK_BLE_UWB
+	if (lock.GetState().mState == Aliro::ReaderStateByte::Unsecured) {
+		// The lock is already unlocked, so we can send the Unsecured state
+		Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(Aliro::OperationSource::Unspecified,
+									    Aliro::ReaderStateByte::Unsecured);
+	}
+#endif // CONFIG_DOOR_LOCK_BLE_UWB
+}
+
+void HandleAliroUnlock(bool isNfcSession, const Aliro::CryptoTypes::PublicKey &accessCredentialPublicKey)
+{
+	const auto source = isNfcSession ? Aliro::OperationSource::ThisUserDeviceInNfc :
+					  Aliro::OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow;
+
+	Nullable<BoltLockManager::ValidateCredentialResult> result;
+	const auto success = ValidateAliroCredential(accessCredentialPublicKey, result);
+	VerifyOrReturn(success);
+
+	Nrf::PostTask([source, result] { PerformAliroUnlock(source, result); });
+}
+
 } // namespace
 
 void BoltLockManager::Init(StateChangeCallback callback)
@@ -71,27 +101,7 @@ void BoltLockManager::Init(StateChangeCallback callback)
 
 	// Set Aliro AccessManager application callbacks
 	Aliro::AccessManagerInstance().SetApplicationCallbacks({
-		.mUnlockIndicatorClb =
-			[](bool isNfcSession, const Aliro::CryptoTypes::PublicKey &accessCredentialPublicKey) {
-				const auto source =
-					isNfcSession ? Aliro::OperationSource::ThisUserDeviceInNfc :
-						       Aliro::OperationSource::ThisUserDeviceInBluetoothLeUwbAliroFlow;
-
-				Nullable<ValidateCredentialResult> result;
-				const auto success = ValidateAliroCredential(accessCredentialPublicKey, result);
-				VerifyOrReturn(success);
-
-				Nrf::PostTask([source, result] {
-					if (!BoltLockMgr().Unlock(source, result)) {
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-						// The lock is already unlocked, so we can send the Unsecured state
-						Aliro::AliroStack::Instance().SendReaderStatusChangedMessage(
-							Aliro::OperationSource::Unspecified,
-							Aliro::ReaderStateByte::Unsecured);
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
-					}
-				});
-			},
+		.mUnlockIndicatorClb = HandleAliroUnlock,
 		.mLockIndicatorClb =
 			[](bool isNfcSession, const Aliro::CryptoTypes::PublicKey &accessCredentialPublicKey) {
 				const auto source =
@@ -249,7 +259,8 @@ void BoltLockManager::Lock(const OperationSource source, const Nullable<chip::Fa
 			   const Nullable<chip::NodeId> &nodeId,
 			   const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
-	VerifyOrReturn(mStateData.mState != Aliro::ReaderStateByte::Secured);
+	VerifyOrReturn(mStateData.mState != Aliro::ReaderStateByte::Secured &&
+		       mStateData.mState != Aliro::ReaderStateByte::EnteringSecured);
 	mStateData = { Aliro::ReaderStateByte::EnteringSecured,
 		       source,
 		       ToAliroOperationSource(source),
@@ -264,7 +275,8 @@ void BoltLockManager::Unlock(const OperationSource source, const Nullable<chip::
 			     const Nullable<chip::NodeId> &nodeId,
 			     const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
-	VerifyOrReturn(mStateData.mState != Aliro::ReaderStateByte::Unsecured);
+	VerifyOrReturn(mStateData.mState != Aliro::ReaderStateByte::Unsecured &&
+		       mStateData.mState != Aliro::ReaderStateByte::EnteringUnsecured);
 	mStateData = { Aliro::ReaderStateByte::EnteringUnsecured,
 		       source,
 		       ToAliroOperationSource(source),
@@ -278,7 +290,9 @@ void BoltLockManager::Unlock(const OperationSource source, const Nullable<chip::
 bool BoltLockManager::Lock(Aliro::OperationSource source,
 			   const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
-	VerifyOrReturnValue(mStateData.mState != Aliro::ReaderStateByte::Secured, false);
+	VerifyOrReturnValue(mStateData.mState != Aliro::ReaderStateByte::Secured &&
+				    mStateData.mState != Aliro::ReaderStateByte::EnteringSecured,
+			    false);
 	mStateData = { Aliro::ReaderStateByte::EnteringSecured,
 		       OperationSource::kAliro,
 		       source,
@@ -293,7 +307,9 @@ bool BoltLockManager::Lock(Aliro::OperationSource source,
 bool BoltLockManager::Unlock(Aliro::OperationSource source,
 			     const Nullable<ValidateCredentialResult> &validateCredentialResult)
 {
-	VerifyOrReturnValue(mStateData.mState != Aliro::ReaderStateByte::Unsecured, false);
+	VerifyOrReturnValue(mStateData.mState != Aliro::ReaderStateByte::Unsecured &&
+				    mStateData.mState != Aliro::ReaderStateByte::EnteringUnsecured,
+			    false);
 	mStateData = { Aliro::ReaderStateByte::EnteringUnsecured,
 		       OperationSource::kAliro,
 		       source,

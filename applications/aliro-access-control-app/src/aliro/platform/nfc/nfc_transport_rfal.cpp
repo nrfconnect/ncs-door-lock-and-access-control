@@ -162,8 +162,8 @@ void NfcTransportRfal::SelectTag()
 void NfcTransportRfal::CaptureRxData()
 {
 	ReturnCode status = rfalNfcDataExchangeGetStatus();
-	if (status == RFAL_ERR_BUSY) {
-		LOG_ERR("RFAL: Data transaction has not been completed [status: %d]", status);
+	if (status != RFAL_ERR_NONE) {
+		LOG_ERR("RFAL: Data transaction failed [status: %d]", status);
 		mTagDetectedState = false;
 		AliroStack::Instance().DestroySession(ConnectionHandle::Nfc());
 		return;

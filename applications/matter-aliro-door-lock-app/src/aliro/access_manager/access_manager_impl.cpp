@@ -688,6 +688,8 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 	SetOpenAllowed(sessionContext, false);
 	RemoveRangingSession(sessionContext);
 
+#else
+	ARG_UNUSED(sessionContext);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
@@ -833,20 +835,10 @@ void AccessManagerImpl::HandleAccessGranted(bool isNfcSession, bool granted,
 
 bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
 {
-	VerifyOrReturnFalse(isNfcSession);
-
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-	// For NFC sessions with UWB enabled, only unlock immediately if open is not already allowed via UWB.
-	// Avoids double unlock when another session already has open allowed from ranging.
-	return !IsOpenAllowed();
-
-#else // CONFIG_DOOR_LOCK_BLE_UWB
-
-	// For NFC sessions without UWB, always unlock immediately.
-	return true;
-
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
+	// UWB open-allowed is an access decision, not the physical lock state. The lock can be
+	// secured manually while a ranging session remains open-allowed, so a successful NFC
+	// authentication must always request an unlock.
+	return isNfcSession;
 }
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
@@ -1204,9 +1196,9 @@ AliroError AccessManagerImpl::ProcessAccessDocument(const CryptoTypes::PublicKey
 #ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_CREDENTIAL_ISSUER_CERTIFICATE_KEYS
 		VerifyOrReturnStatus(ad.mCredentialIssuerCertificate.has_value(), ALIRO_INVALID_DATA_CONTENT,
 				     LOG_WRN("Credential Issuer certificate metadata required to store learned key"));
-		ReturnErrorOnFailure(AddCertificateCredentialIssuerKey(
-			ad.mCredentialIssuerPublicKey, ad.mCredentialIssuerCertificate.value(),
-			ad.mValidityIteration, ciKeyIndex));
+		ReturnErrorOnFailure(AddCertificateCredentialIssuerKey(ad.mCredentialIssuerPublicKey,
+								       ad.mCredentialIssuerCertificate.value(),
+								       ad.mValidityIteration, ciKeyIndex));
 #else
 		LOG_WRN("Credential Issuer public key not found and certificate key storage is disabled");
 		return ALIRO_ERROR_NOT_IMPLEMENTED;
