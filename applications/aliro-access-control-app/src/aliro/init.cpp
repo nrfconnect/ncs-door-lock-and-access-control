@@ -282,16 +282,14 @@ int AliroInit()
 				  auto &lock = LockSimInstance();
 				  VerifyOrReturn(lock.GetState() != ReaderStateByte::EnteringUnsecured);
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
+				  if (lock.GetState() == ReaderStateByte::Unsecured) {
+					  AliroStack::Instance().SendReaderStatusChangedMessage(
+						  OperationSource::Unspecified, ReaderStateByte::Unsecured);
+					  return;
+				  }
 				  SetLastOperation(isNfcSession, accessCredentialPublicKey);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
-				  if (!lock.Unlock()) {
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-					  if (lock.GetState() == ReaderStateByte::Unsecured) {
-						  // The lock is already unlocked, so we can send the Unsecured state
-						  SendReaderStatusChangedMessage(ReaderStateByte::Unsecured);
-					  }
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
-				  }
+				  lock.Unlock();
 			  },
 		  .mLockIndicatorClb =
 			  []([[maybe_unused]] bool isNfcSession,
