@@ -1,2 +1,7 @@
-# For now, no patches are applied
-patches: []
+patches:
+  - path: zcbor-cbor2-6.1.2.patch
+    sha256sum: c1c4e64cc5bb1423375cf943de5473d311d6a39559479b7339e47287acc4cc71
+    module: modules/lib/zcbor
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-10-01
