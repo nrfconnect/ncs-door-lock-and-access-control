@@ -1,0 +1,37 @@
+From 6c3dad831ec7a327b9d2e9e7be15a0ffa8bbd343 Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Fri, 2 Oct 2026 16:29:42 +0200
+Subject: [PATCH 1/1] Fix compatiblity with cbor2>=6.0
+
+Fix compatibility.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+ zcbor/zcbor.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/zcbor/zcbor.py b/zcbor/zcbor.py
+index ea649a0..4af4c03 100755
+--- a/zcbor/zcbor.py
++++ b/zcbor/zcbor.py
+@@ -15,7 +15,7 @@ from argparse import ArgumentParser, ArgumentTypeError, RawDescriptionHelpFormat
+ from datetime import datetime
+ from copy import copy
+ from itertools import tee, chain
+-from cbor2 import (loads, dumps, CBORTag, load, CBORDecodeValueError, CBORDecodeEOF, undefined,
++from cbor2 import (loads, dumps, CBORTag, load, CBORDecodeError, CBORDecodeEOF, undefined,
+                    CBORSimpleValue)
+ from yaml import safe_load as yaml_load, dump as yaml_dump
+ from json import loads as json_load, dumps as json_dump
+@@ -1792,7 +1792,7 @@ CBOR-formatted bstr, all elements must be bstrs. If not, it is a programmer erro
+             f = BytesIO(obj)
+             try:
+                 bstr_obj = self._to_yaml_obj(load(f))
+-            except (CBORDecodeValueError, CBORDecodeEOF):
++            except CBORDecodeError:
+                 # failed decoding
+                 bstr_obj = obj.hex()
+             else:
+-- 
+2.52.0
+
