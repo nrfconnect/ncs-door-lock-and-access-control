@@ -11,14 +11,14 @@ manifest:
     - name: nrf
       remote: ncs
       repo-path: sdk-nrf
-      revision: v3.4.0
+      revision: 8b65ab0fb67016fb73981e0f8ea1f929e23c3194 # v3.5.0-preview2
       import:
         name-blocklist:
           - matter
     - name: ncs-matter
       remote: ncs
       repo-path: ncs-matter
-      revision: v1.0.0
+      revision: ee8f274231909b919b41365e2866917dbc439d22 # preview-nrf7120-branch
       import: true
     - name: ncs-door-lock-app-extensions
       remote: ncs
