@@ -69,6 +69,12 @@ choice BT_LL_SOFTDEVICE_VARIANT
 	default BT_LL_SOFTDEVICE_MULTIROLE if SOC_SERIES_NRF54L && BT_SMP
 endchoice
 
+configdefault CHIP_DEVICE_PRODUCT_FINISH
+    default "matte"
+
+configdefault CHIP_DEVICE_PRODUCT_COLOR
+    default "navy"
+
 source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.features"
 source "$(ZEPHYR_CONNECTEDHOMEIP_MODULE_DIR)/config/nrfconnect/chip-module/Kconfig.defaults"
 source "Kconfig.zephyr"
