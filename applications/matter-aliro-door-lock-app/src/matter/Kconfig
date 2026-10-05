@@ -40,3 +40,9 @@ endif # OPENTHREAD
 
 configdefault DOOR_LOCK_ALIRO_DOOR_LOCK_DELEGATE
 	default y
+
+configdefault CHIP_DEVICE_PRODUCT_FINISH
+	default "matte"
+
+configdefault CHIP_DEVICE_PRODUCT_COLOR
+	default "navy"
