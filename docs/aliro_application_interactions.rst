@@ -51,6 +51,8 @@ This section explains the components and layers shown in the interaction diagram
      - Cryptographic primitives.
    * - ``Interface::Reader``
      - Reader identity and certificate provisioning.
+   * - ``AliroStack::Init()``
+     - See :ref:`aliro_reader_descriptor`.
    * - ``Interface::CredentialIssuerCertificate``
      - Credential Issuer certificate validation.
    * - ``Interface::AccessDocument``
@@ -59,6 +61,14 @@ This section explains the components and layers shown in the interaction diagram
      - Bluetooth LE transport integration.
    * - ``Interface::Logging``
      - Platform logging for stack messages.
+
+.. _aliro_reader_descriptor:
+
+Reader Descriptor
+*****************
+
+The application supplies optional Reader Descriptor metadata through
+``AliroStack::Init(const Aliro::ReaderDescriptor *readerDescriptor)``.
 
 High-level design: Layers and interface contract
 ************************************************

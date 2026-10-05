@@ -18,9 +18,8 @@ Once you have successfully provisioned Aliro credentials, perform tests to ensur
   * ``NFC_RDR_NEG_STEPUP_AD_SCHEDULE_TIME_VERIFY_REQUIRED``
   * ``NFC_RDR_NEG_STEPUP_AD_TIME_VERIFICATION_REQUIRED``
   * ``BLEUWB_RDR_ADVERTISEMENT_FORMAT``
-
-* Tests that should not be executed (but might be selected):
-
+  * ``NFC_RDR_EXCHANGE_RDR_DESCRIPTOR_TAG``
+  * ``NFC_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG``
   * ``BLEUWB_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG``
 
 .. include:: /include/testing_verification_command.txt
