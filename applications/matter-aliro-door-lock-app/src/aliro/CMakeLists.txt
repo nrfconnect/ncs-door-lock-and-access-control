@@ -7,6 +7,7 @@
 target_sources(app PRIVATE
 	aliro_state_control.cpp
 	init.cpp
+	reader_descriptor.cpp
 )
 
 add_subdirectory(access_manager)

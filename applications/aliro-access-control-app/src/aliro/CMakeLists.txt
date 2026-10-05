@@ -7,6 +7,7 @@
 target_sources(app PRIVATE
 	aliro_state_control.cpp
 	init.cpp
+	reader_descriptor.cpp
 )
 
 target_sources_ifdef(CONFIG_DOOR_LOCK_BLE_UWB app PRIVATE last_operation.cpp)

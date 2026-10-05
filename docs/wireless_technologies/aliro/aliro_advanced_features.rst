@@ -264,3 +264,38 @@ For example, to build the Aliro Access Control Application with Reader certifica
    west build -p -b nrf5340dk/nrf5340/cpuapp applications/aliro-access-control-app -- -DCONFIG_DOOR_LOCK_READER_CERTIFICATE=y
 
 For instructions on generating, provisioning, and testing Reader certificates, see :ref:`aliro_testing_reader_certificate`.
+
+.. _aliro_reader_descriptor:
+
+Reader Descriptor
+*****************
+
+Overview
+========
+
+The Reader Descriptor is optional metadata that the Reader sends to the User Device during an Aliro session.
+It identifies the Reader product and firmware to the User Device.
+The fields are defined by ``Aliro::ReaderDescriptor`` in :file:`lib/aliro/include/aliro/types.h`:
+
+* **Vendor OUI/CID** — Three-byte organizationally unique identifier or company identifier.
+* **Product identifier** — Variable-length product ID chosen by the vendor.
+* **Firmware version** — Variable-length firmware version string.
+
+Configuration
+=============
+
+The application passes the descriptor to ``AliroStack::Init(const Aliro::ReaderDescriptor *readerDescriptor)``.
+The stack copies the descriptor and retains it for the lifetime of the stack instance.
+Pass ``nullptr`` to omit the Reader Descriptor from the protocol exchange.
+
+Application defaults
+====================
+
+Each Aliro-enabled application implements ``GetReaderDescriptor()`` in :file:`applications/*/src/aliro/reader_descriptor.cpp`.
+Both sample applications use the Nordic Semiconductor IEEE OUI ``F4:CE:36`` and ``APP_VERSION_STRING`` for the firmware version.
+The product identifier differs between applications:
+
+* **Aliro Access Control Application** — Fixed sample product ID ``0x8007``.
+* **Matter and Aliro Door Lock Application** — Two-byte product ID derived from ``CONFIG_CHIP_DEVICE_PRODUCT_ID``.
+
+Product makers should replace the vendor OUI and product identifier with values that identify their own Reader hardware and firmware.
