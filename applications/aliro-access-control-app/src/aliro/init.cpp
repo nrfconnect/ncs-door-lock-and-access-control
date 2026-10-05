@@ -25,6 +25,7 @@
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
 #include "access_manager/access_manager.h"
+#include "aliro/reader_descriptor.h"
 #include "psa_key_ids.h"
 #include "psa_ps_ids.h"
 
@@ -240,7 +241,8 @@ int AliroInit()
 			    LOG_ERR("Aliro service initialization failed: %d", aliroServiceRc));
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 
-	AliroError ec = AliroStack::Instance().Init();
+	const Aliro::ReaderDescriptor readerDescriptor = DoorLock::GetReaderDescriptor();
+	AliroError ec = AliroStack::Instance().Init(&readerDescriptor);
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack initialization failed"));
 
 	ec = Aliro::NfcTransportRfal::Instance().Init();
