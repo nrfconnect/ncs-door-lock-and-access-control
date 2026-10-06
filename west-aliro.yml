@@ -9,7 +9,7 @@ manifest:
     - name: ncs-aliro
       remote: ncs
       repo-path: ncs-aliro
-      revision: 809d189160658ed4163f8e098057f83ac5743d54
+      revision: pull/790/head
       import: true
   self:
     import: west.yml

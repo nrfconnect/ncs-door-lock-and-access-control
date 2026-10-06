@@ -48,9 +48,14 @@ public:
 	/**
 	 * @brief Initializes the Aliro stack.
 	 *
+	 * When @p readerDescriptor is non-null, the Reader Descriptor is copied and retained for the lifetime of the
+	 * stack. Pass nullptr when Reader Descriptor should not be sent.
+	 *
+	 * @param readerDescriptor Reader Descriptor for this reader, or nullptr.
+	 *
 	 * @return ALIRO_NO_ERROR if the stack was initialized successfully, an error code otherwise.
 	 */
-	AliroError Init();
+	AliroError Init(const ReaderDescriptor *readerDescriptor = nullptr);
 
 	/**
 	 * @brief Gets the Aliro library version string.
