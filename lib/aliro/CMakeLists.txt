@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-if(CONFIG_ZEPHYR_NCS_ALIRO_MODULE AND CONFIG_NCS_ALIRO_SRC)
+zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+if((CONFIG_ZEPHYR_NCS_ALIRO_MODULE AND CONFIG_NCS_ALIRO_SRC) OR NOT CONFIG_NCS_ALIRO_LIB)
   return()
 endif()
 
@@ -35,5 +37,3 @@ if(NOT EXISTS ${ALIRO_LIB_PATH})
 endif()
 
 zephyr_library_import(aliro ${ALIRO_LIB_PATH})
-
-zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
