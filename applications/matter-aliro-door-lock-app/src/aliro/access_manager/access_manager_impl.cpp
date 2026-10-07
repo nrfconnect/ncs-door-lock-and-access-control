@@ -688,6 +688,8 @@ void AccessManagerImpl::_HandleSessionTermination(SessionContext sessionContext)
 	SetOpenAllowed(sessionContext, false);
 	RemoveRangingSession(sessionContext);
 
+#else
+	ARG_UNUSED(sessionContext);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
