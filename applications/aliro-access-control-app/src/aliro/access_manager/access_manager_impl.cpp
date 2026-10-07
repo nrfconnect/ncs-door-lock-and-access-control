@@ -823,30 +823,12 @@ void AccessManagerImpl::HandleAccessGranted(bool isNfcSession, bool granted,
 {
 	if (granted) {
 		AccessGrantedAction(isNfcSession);
-		if (ShouldUnlockImmediately(isNfcSession)) {
+		if (isNfcSession) {
 			UnlockAction(isNfcSession, accessCredentialPublicKey);
 		}
 	} else {
 		AccessDeniedAction(isNfcSession);
 	}
-}
-
-bool AccessManagerImpl::ShouldUnlockImmediately(bool isNfcSession) const
-{
-	VerifyOrReturnFalse(isNfcSession);
-
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-
-	// For NFC sessions with UWB enabled, only unlock immediately if open is not already allowed via UWB.
-	// Avoids double unlock when another session already has open allowed from ranging.
-	return !IsOpenAllowed();
-
-#else // CONFIG_DOOR_LOCK_BLE_UWB
-
-	// For NFC sessions without UWB, always unlock immediately.
-	return true;
-
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
 }
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
