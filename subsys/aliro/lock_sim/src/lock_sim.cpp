@@ -57,14 +57,14 @@ void LockSim::Init(LockStateChangeCallback callback)
 
 bool LockSim::Lock()
 {
-	VerifyOrReturnFalse(mState != ReaderStateByte::Secured);
+	VerifyOrReturnFalse(mState != ReaderStateByte::Secured && mState != ReaderStateByte::EnteringSecured);
 	StartOperation(ReaderStateByte::EnteringSecured);
 	return true;
 }
 
 bool LockSim::Unlock()
 {
-	VerifyOrReturnFalse(mState != ReaderStateByte::Unsecured);
+	VerifyOrReturnFalse(mState != ReaderStateByte::Unsecured && mState != ReaderStateByte::EnteringUnsecured);
 	StartOperation(ReaderStateByte::EnteringUnsecured);
 	return true;
 }

@@ -279,24 +279,25 @@ int AliroInit()
 			  []([[maybe_unused]] bool isNfcSession,
 			     [[maybe_unused]] const CryptoTypes::PublicKey &accessCredentialPublicKey) {
 				  LOG_DBG("Door unlocked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
+				  auto &lock = LockSimInstance();
+				  VerifyOrReturn(lock.GetState() != ReaderStateByte::Unsecured &&
+						 lock.GetState() != ReaderStateByte::EnteringUnsecured);
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 				  SetLastOperation(isNfcSession, accessCredentialPublicKey);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
-				  if (!LockSimInstance().Unlock()) {
-#ifdef CONFIG_DOOR_LOCK_BLE_UWB
-					  // The lock is already unlocked, so we can send the Unsecured state
-					  SendReaderStatusChangedMessage(ReaderStateByte::Unsecured);
-#endif // CONFIG_DOOR_LOCK_BLE_UWB
-				  }
+				  lock.Unlock();
 			  },
 		  .mLockIndicatorClb =
 			  []([[maybe_unused]] bool isNfcSession,
 			     [[maybe_unused]] const CryptoTypes::PublicKey &accessCredentialPublicKey) {
 				  LOG_DBG("Door locked via %s session", isNfcSession ? "NFC" : "BLE/UWB");
+				  auto &lock = LockSimInstance();
+				  VerifyOrReturn(lock.GetState() != ReaderStateByte::Secured &&
+						 lock.GetState() != ReaderStateByte::EnteringSecured);
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 				  SetLastOperation(isNfcSession, accessCredentialPublicKey);
 #endif // CONFIG_DOOR_LOCK_BLE_UWB
-				  LockSimInstance().Lock();
+				  lock.Lock();
 			  },
 		  .mAccessIndicatorClb =
 			  []([[maybe_unused]] bool isAccessGranted, [[maybe_unused]] bool isNfcSession) {
