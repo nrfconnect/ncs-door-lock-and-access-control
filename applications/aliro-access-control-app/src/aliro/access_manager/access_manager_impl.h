@@ -288,7 +288,6 @@ private:
 	void HandleAccessGranted(bool isNfcSession, bool granted,
 				 const CryptoTypes::PublicKey &accessCredentialPublicKey);
 	bool VerifyPublicKey(const CryptoTypes::PublicKey &userPublicKey);
-	bool ShouldUnlockImmediately(bool isNfcSession) const;
 
 	template <size_t T>
 	bool IsPublicKeyStored(const StoredKeys<T> &container, const CryptoTypes::PublicKey &userPublicKey,
