@@ -1,19 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-Generated date:2024-06-18
-ACWG CSG TT Test Plan v0.9.0k
-XML PICS -Ref Document:
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+Generated date:2026-01-29
+ACWG ALIRO Test Plan v1.0
+XML PICS -Ref Document
 
-Draft
-2024-06-18
-r0
-2025-06-23
-r1
-2025-07-01
-r2
-2025-10-07
---><clusterPICS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Generic-PICS-XML-Schema.xsd">
+-->
+<clusterPICS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Generic-PICS-XML-Schema.xsd">
 	<!--General cluster information-->
-	<name>Aliro</name>
+    <name>Aliro</name>
 	<clusterId> </clusterId>
 	<picsRoot> </picsRoot>
 	<!--Cluster role information-->
@@ -130,7 +124,7 @@ r2
 			<picsItem>
 				<itemNumber>UD6</itemNumber>
 				<feature>Verification of reader_Cert with CA public key- reader_Cert expiration time validation</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">O</status>
 				<support>false</support>
 			</picsItem>
@@ -220,7 +214,7 @@ r2
 			<picsItem>
 				<itemNumber>UD15</itemNumber>
 				<feature>Subset of mailbox in AUTH1 command response</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">M</status>
 				<support>false</support>
 			</picsItem>
@@ -274,14 +268,14 @@ r2
 			<picsItem>
 				<itemNumber>UD21</itemNumber>
 				<feature>Support for credential_signed_timestamp in AUTH0/AUTH1</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">M</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>UD22</itemNumber>
 				<feature>Support for revocation_signed_timestamp in AUTH0/AUTH1</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">M</status>
 				<support>false</support>
 			</picsItem>
@@ -295,7 +289,7 @@ r2
 			<picsItem>
 				<itemNumber>UD24</itemNumber>
 				<feature>User Device has a method to use all Access Credentials bound to the reader identifier</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">M</status>
 				<support>false</support>
 			</picsItem>
@@ -312,21 +306,21 @@ r2
 			<picsItem>
 				<itemNumber>UD26</itemNumber>
 				<feature>EXCHANGE command – notify credential issuer in EXCHANGE</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD25">O</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>UD27</itemNumber>
 				<feature>EXCHANGE command – notify bound application in EXCHANGE</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD25">O</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>UD28</itemNumber>
 				<feature>EXCHANGE command – Update document in EXCHANGE</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD25">O</status>
 				<support>false</support>
 			</picsItem>
@@ -389,28 +383,28 @@ r2
 			<picsItem>
 				<itemNumber>UD36</itemNumber>
 				<feature>NFC-Step-Up AID SELECT</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">O</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>UD37</itemNumber>
 				<feature>Bluetooth LE- send sensor triggered bit</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">O</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>UD38</itemNumber>
 				<feature>Bluetooth LE- Dynamic advertisement tag</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">O</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>UD39</itemNumber>
 				<feature>Bluetooth LE- Pass Through Message</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="UD">O</status>
 				<support>false</support>
 			</picsItem>
@@ -666,28 +660,28 @@ r2
 			<picsItem>
 				<itemNumber>RD15</itemNumber>
 				<feature>EXCHANGE command</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD">M</status>
 				<support>true</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>RD16</itemNumber>
 				<feature>EXCHANGE command – notify credential issuer in EXCHANGE</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD">O</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>RD17</itemNumber>
 				<feature>EXCHANGE command – notify bound application in EXCHANGE</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD">O</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>RD18</itemNumber>
 				<feature>EXCHANGE command – Update document in EXCHANGE</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD">O</status>
 				<support>false</support>
 			</picsItem>
@@ -701,14 +695,14 @@ r2
 			<picsItem>
 				<itemNumber>RD20</itemNumber>
 				<feature>Read from Mailbox</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD">O</status>
 				<support>false</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>RD21</itemNumber>
 				<feature>Write to Mailbox</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD">O</status>
 				<support>false</support>
 			</picsItem>
@@ -720,7 +714,7 @@ r2
 						BLEUWB_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG
 				</reference>
 				<status cond="RD">O</status>
-				<support>false</support>
+				<support>true</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>RD23</itemNumber>
@@ -860,7 +854,7 @@ r2
 			<picsItem>
 				<itemNumber>RD33</itemNumber>
 				<feature>Access data element verification – Access extension criticality</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD26">M</status>
 				<support>true</support>
 			</picsItem>
@@ -908,7 +902,7 @@ r2
 			<picsItem>
 				<itemNumber>RD39</itemNumber>
 				<feature>BLE – send sensor triggered bit</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD AND BLEUWB">O</status>
 				<support>false</support>
 			</picsItem>
@@ -926,7 +920,7 @@ r2
 			<picsItem>
 				<itemNumber>RD41</itemNumber>
 				<feature>Pass Through</feature>
-				<reference/>
+				<reference></reference>
 				<status cond="RD AND BLEUWB">O</status>
 				<support>false</support>
 			</picsItem>
