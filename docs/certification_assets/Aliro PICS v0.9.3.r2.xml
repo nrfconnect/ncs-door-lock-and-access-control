@@ -720,7 +720,7 @@ r2
 						BLEUWB_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG
 				</reference>
 				<status cond="RD">O</status>
-				<support>false</support>
+				<support>true</support>
 			</picsItem>
 			<picsItem>
 				<itemNumber>RD23</itemNumber>

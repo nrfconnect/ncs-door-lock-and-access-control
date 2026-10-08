@@ -36,6 +36,9 @@ constexpr size_t kReaderGroupSubIdentifierLength{ 16 };
  */
 constexpr size_t kReaderIdentifierLength{ kReaderGroupIdentifierLength + kReaderGroupSubIdentifierLength };
 
+/** Length of the Reader Descriptor vendor OUI/CID field in bytes. */
+inline constexpr size_t kReaderDescriptorVendorOuCidLength{ 3 };
+
 /**
  * @brief Type alias for Reader identifier.
  */
@@ -59,6 +62,18 @@ struct Data {
 struct ConstData {
 	const uint8_t *mData{ nullptr };
 	size_t mLength{ 0 };
+};
+
+/**
+ * @brief Reader Descriptor fields supplied at stack initialization.
+ */
+struct ReaderDescriptor {
+	/** @brief Vendor OUI/CID. */
+	std::array<uint8_t, kReaderDescriptorVendorOuCidLength> mVendorOuCid{};
+	/** @brief Product identifier. */
+	ConstData mProductId{};
+	/** @brief Firmware version. */
+	ConstData mFirmwareVersion{};
 };
 
 /**

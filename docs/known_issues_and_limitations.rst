@@ -21,8 +21,6 @@ The following optional Aliro features are out-of-scope for the |APP_NAME|:
 
    * - Out-of-scope Aliro feature
      - Supported instead
-   * - Reader Descriptor
-     - --
    * - Mailbox
      - --
    * - Access Document time verification in the |ALIRO_APP_NAME|
