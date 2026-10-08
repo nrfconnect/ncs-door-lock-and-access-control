@@ -69,38 +69,44 @@
       +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
       | NFC_RDR_STEPUP_AD_UNKNOWN_NON_CRITICAL_ACCESS_EXTENSION   | Verify parsing of Access Document with unknown non-critical access extension.           | PASS   |              |
       +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_EXCHANGE_RDR_DESCRIPTOR_TAG                       | Verify conformance of Reader UT when exchanging the Reader Descriptor tag.              | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
+      | NFC_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG                   | Verify conformance of Reader UT control flow using the Reader Descriptor tag.           | PASS   |              |
+      +-----------------------------------------------------------+-----------------------------------------------------------------------------------------+--------+--------------+
 
    .. tab:: Bluetooth LE + UWB
 
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | Test case                                 | Description                                                              | Result | Comment                     |
-      +===========================================+==========================================================================+========+=============================+
-      | BLEUWB_RDR_EXPEDITED_STANDARD_PHASE       | Verify conformance of Reader UT in standard phase expedited transaction. | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_RANGING_SUSPEND                | Verify conformance of Reader UT in ranging suspend functionality.        | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_RANGING_RESUME                 | Verify conformance of Reader UT in ranging resume functionality.         | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_NEG_FAILED_L2CAP               | Verify conformance of Reader UT in L2CAP connection failure handling.    | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_NEG_FAILED_SPSM_L2CAP          | Verify conformance of Reader UT in SPSM L2CAP failure handling.          | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_NEG_TIMEOUT_BEFORE_AUTH0       | Verify conformance of Reader UT in timeout handling before AUTH0.        | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_TIMEOUT_EXTENSION              | Verify conformance of Reader UT in timeout extension handling.           | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_NEG_M2_MISMATCH_PARAMETER      | Verify conformance of Reader UT in M2 parameter mismatch handling.       | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_NEG_M4_MISMATCH_PARAMETER      | Verify conformance of Reader UT in M4 parameter mismatch handling.       | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_ADVERTISEMENT_FORMAT           | Verify conformance of Reader UT in advertisement format.                 | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_NEG_SUSPEND_MISMATCH_PARAMETER | Verify conformance of Reader UT in suspend parameter mismatch handling.  | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_STEPUP_PHASE                   | Verify conformance of Reader UT in step-up phase.                        | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
-      | BLEUWB_RDR_EXPEDITED_FAST_PHASE           | Verify conformance of Reader UT in expedited fast phase.                 | PASS   |                             |
-      +-------------------------------------------+--------------------------------------------------------------------------+--------+-----------------------------+
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | Test case                                  | Description                                                                 | Result | Comment                     |
+      +============================================+=============================================================================+========+=============================+
+      | BLEUWB_RDR_EXPEDITED_STANDARD_PHASE        | Verify conformance of Reader UT in standard phase expedited transaction.    | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_RANGING_SUSPEND                 | Verify conformance of Reader UT in ranging suspend functionality.           | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_RANGING_RESUME                  | Verify conformance of Reader UT in ranging resume functionality.            | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_FAILED_L2CAP                | Verify conformance of Reader UT in L2CAP connection failure handling.       | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_FAILED_SPSM_L2CAP           | Verify conformance of Reader UT in SPSM L2CAP failure handling.             | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_TIMEOUT_BEFORE_AUTH0        | Verify conformance of Reader UT in timeout handling before AUTH0.           | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_TIMEOUT_EXTENSION               | Verify conformance of Reader UT in timeout extension handling.              | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_M2_MISMATCH_PARAMETER       | Verify conformance of Reader UT in M2 parameter mismatch handling.          | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_M4_MISMATCH_PARAMETER       | Verify conformance of Reader UT in M4 parameter mismatch handling.          | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_ADVERTISEMENT_FORMAT            | Verify conformance of Reader UT in advertisement format.                    | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_NEG_SUSPEND_MISMATCH_PARAMETER  | Verify conformance of Reader UT in suspend parameter mismatch handling.     | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_STEPUP_PHASE                    | Verify conformance of Reader UT in step-up phase.                           | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_EXPEDITED_FAST_PHASE            | Verify conformance of Reader UT in expedited fast phase.                    | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
+      | BLEUWB_RDR_CONTROL_FLOW_RDR_DESCRIPTOR_TAG | Verify conformance of Reader control flow using the Reader Descriptor tag.  | PASS   |                             |
+      +--------------------------------------------+-----------------------------------------------------------------------------+--------+-----------------------------+
 
 Running the test
 ****************
@@ -209,7 +215,7 @@ Complete the following steps for the required tests:
 Execute the Aliro certification tests
 *************************************
 
-This guide assumes that you have uploaded the PICS file :file:`ncs-door-lock-and-access-control/docs/certification_assets/Aliro PICS v0.9.3.r2.xml` to the Test Harness.
+This guide assumes that you have uploaded the PICS file :file:`ncs-door-lock-and-access-control/docs/certification_assets/Aliro PICS v1.0.xml` to the Test Harness.
 You can also select tests manually.
 
 .. figure:: /images/pics_upload.png
