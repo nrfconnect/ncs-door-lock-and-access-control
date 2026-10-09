@@ -7,6 +7,9 @@
 config BT_DEVICE_NAME
 	default "AliroDL"
 
+config NCS_ALIRO_LIB
+	default y
+
 config TRUSTED_STORAGE
 	default y
 

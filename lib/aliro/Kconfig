@@ -19,6 +19,12 @@ menuconfig NCS_ALIRO
 
 if NCS_ALIRO
 
+config NCS_ALIRO_LIB
+	bool "Precompiled Aliro stack library"
+	depends on !NCS_ALIRO_SRC
+	help
+	  Build with the precompiled Aliro stack library.
+
 config NCS_ALIRO_RELEASE
 	bool "Enable Aliro release configuration"
 	help
