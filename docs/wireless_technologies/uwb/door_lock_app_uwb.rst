@@ -53,6 +53,7 @@ The Aliro Access Manager translates UWB distance measurements into lock actions:
 
 * Unlock — When the measured distance is at or below the configured maximum allowed distance.
 * Lock — When the measured distance exceeds the allowed distance plus a configurable exit margin.
+* Suspend ranging — Optionally, when the lock enters the ``Unsecured`` state, the application requests suspension of all active UWB ranging sessions.
 
 The exit margin prevents rapid lock and unlock toggling when the measured distance fluctuates around the threshold.
 See :ref:`aliro_access_manager` for Kconfig options.
