@@ -353,7 +353,7 @@ Methods marked *Optional* can remain no-op or ``-ENOSYS`` stubs if your hardware
    * - ``SuspendRangingSession(handle)``
      - ``_SuspendRangingSession()``
      - Pause active ranging (Aliro suspend and resume flow).
-       Currently not used by the reference applications.
+       When ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED`` is enabled, the reference applications call this method directly for every active session when the lock enters the ``Unsecured`` state.
    * - ``ResumeRangingSession(handle)``
      - ``_ResumeRangingSession()``
      - Resume after suspend.
@@ -368,8 +368,8 @@ Methods marked *Optional* can remain no-op or ``-ENOSYS`` stubs if your hardware
 
 .. note::
 
-   Currently, UWB setup and suspend/resume in the reference applications are driven by Bluetooth LE messages from the User Device (relayed through the Aliro stack and ``HandleBleMessage()``), not by explicit calls to ``InitiateRangingSession()``, ``SuspendRangingSession()``, or ``ResumeRangingSession()``.
-   Those methods remain part of the public API for integrators who need the application to initiate setup or control ranging directly.
+   UWB setup and resume in the reference applications are driven by Bluetooth LE messages from the User Device, relayed through the Aliro stack and ``HandleBleMessage()``.
+   The applications do not call ``InitiateRangingSession()`` or ``ResumeRangingSession()`` directly.
 
 CMake integration
 =================

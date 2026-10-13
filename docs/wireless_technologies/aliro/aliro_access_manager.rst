@@ -47,6 +47,8 @@ The following table lists the options you are most likely to adjust for UWB prox
          * The exit margin applies per UWB ranging session based on the previous session state.
 
        Set this option to ``0`` to disable the exit margin, causing the door to lock immediately when the distance exceeds ``MAX_ALLOWED_DISTANCE_CM``.
+   * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED``
+     - Suspends all active UWB ranging sessions when the lock enters the ``Unsecured`` state.
    * - ``CONFIG_DOOR_LOCK_ACCESS_MANAGER_ACCESS_CREDENTIAL_MAX_STORED_KEYS``
      - Sets the maximum number of public keys that can be stored in the Access Manager.
        This option determines the size of the statically allocated memory for the Access Manager cache.
