@@ -1,3 +1,5 @@
+:orphan:
+
 .. _known_issues_and_limitations:
 
 Known issues and limitations
@@ -46,8 +48,8 @@ The following optional Aliro features are out-of-scope for the |APP_NAME|:
 Known issues
 ************
 
-Known issues listed on this page are valid for the current state of development.
-Refer to the following sections for more information on specific items.
+Known issues are tagged with the releases they affect.
+Use the release filter to view issues for a specific release.
 
 A known issue can list one or both of the following entries:
 
@@ -60,380 +62,71 @@ A known issue can list one or both of the following entries:
   Some known issues have a workaround.
   Sometimes, they are discovered later and added over time.
 
-The |REPO_NAME| v1.2.0
-**********************
+.. known-issues-filter::
+   :default: 1.2.1
 
-.. toggle::
+.. rst-class:: v1-2-1 v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
 
-  AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|
-    Matter onboarding using NFC does not work in the |MATTER_ALIRO_APP_NAME|.
+AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|
+   Matter onboarding using NFC does not work in the |MATTER_ALIRO_APP_NAME|.
 
-    **Workaround:**
-    Use QR code scanning mechanism for Matter device commissioning.
+   **Workaround:**
+   Use the QR code scanning mechanism for Matter device commissioning.
 
-  AL-718: Access Document is not stored on the nRF52840 platform
-    Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
-    As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option is enabled together with ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``.
+.. rst-class:: v1-2-1 v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
 
-    **Workaround:**
-    Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
+AL-718: Access Document is not stored on the nRF52840 platform
+   Access Document (AD) is not stored persistently on the nRF52840 platform when using the ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
+   As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option is enabled together with ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``.
 
-    **Affected platforms:** nRF52840 DK
+   **Workaround:**
+   Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
 
-  AL-728: When built with Matter support, the ProductAppearance attribute is not supported
-    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
-    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
+   **Affected platforms:** nRF52840 DK
 
-    **Workaround:**
-    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
+.. rst-class:: v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
 
-  AL-856: Lock does not unlock via NFC after manual lock while the User Device remains in UWB range
-    After UWB unlock and manual lock while the User Device remains in UWB range, NFC authentication may complete (ACCESS GRANTED) without actuating the lock.
-    On the device, Aliro NFC authentication completes successfully (``ACCESS GRANTED``), but no physical unlock is triggered.
+AL-728: When built with Matter support, the ProductAppearance attribute is not supported
+   The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
+   As a result, the ProductAppearance attribute cannot be read by the Matter controller.
 
-  AL-931: Access Manager is not aware of final unlock decision
-    In the |MATTER_ALIRO_APP_NAME|, the Aliro Access Manager makes its access decision based only on the Access Credential public key, before the Matter user data is evaluated.
-    When the public key belongs to a Matter user whose UserStatus is ``OccupiedDisabled``, the Access Manager still grants access over Aliro.
-    The Matter validation runs afterwards, denies the credential with the ``DisabledUserDenied`` error, and the bolt is not actuated, so the door remains locked and no lock operation event is generated.
+   **Workaround:**
+   Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
 
-The |REPO_NAME| v1.1.0
-**********************
+.. rst-class:: v1-2-0 v1-1-1 v1-1-0
 
-.. include:: /include/qm35_deprecation_warning.txt
+AL-856: Lock does not unlock via NFC after manual lock while the User Device remains in UWB range
+   After UWB unlock and manual lock while the User Device remains in UWB range, NFC authentication may complete (ACCESS GRANTED) without actuating the lock.
+   On the device, Aliro NFC authentication completes successfully (``ACCESS GRANTED``), but no physical unlock is triggered.
 
-.. toggle::
+.. rst-class:: v1-2-1 v1-2-0
 
-  AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|
-    Matter onboarding using NFC does not work in the |MATTER_ALIRO_APP_NAME|.
+AL-931: Access Manager is not aware of the final unlock decision
+   In the |MATTER_ALIRO_APP_NAME|, the Aliro Access Manager makes its access decision based only on the Access Credential public key, before the Matter user data is evaluated.
+   When the public key belongs to a Matter user whose UserStatus is ``OccupiedDisabled``, the Access Manager still grants access over Aliro.
+   The Matter validation runs afterwards, denies the credential with the ``DisabledUserDenied`` error, and the bolt is not actuated, so the door remains locked and no lock operation event is generated.
 
-    **Workaround:**
-    Use QR code scanning mechanism for Matter device commissioning.
+.. rst-class:: v1-1-1 v1-1-0 v1-0-1 v1-0-0
 
-  AL-718: Access Document is not stored on the nRF52840 platform
-    Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
-    As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option is enabled together with ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``.
+QM35825 UWB SoC integration is deprecated
+   The Qorvo QM35825 UWB SoC integration has been deprecated and is no longer supported.
 
-    **Workaround:**
-    Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
+.. rst-class:: v1-1-1 v1-1-0
 
-    **Affected platforms:** nRF52840 DK
+AL-851: Starting the UWB ranging session does not work reliably when testing with Apple ecosystem
+   When testing |MATTER_ALIRO_APP_NAME| with Apple ecosystem, sometimes the UWB ranging session does not start after the lock is commissioned.
 
-  AL-728: When built with Matter support, the ProductAppearance attribute is not supported
-    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
-    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
+   **Workaround:**
+   Reboot the iPhone and try again.
 
-    **Workaround:**
-    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
+.. rst-class:: v1-1-0
 
-  AL-851: Starting the UWB ranging session does not work reliably when testing with Apple ecosystem
-    When testing |MATTER_ALIRO_APP_NAME| with Apple ecosystem, sometimes the UWB ranging session does not start after the lock is commissioned.
+AL-855: Aliro unlock does not include user identity in Apple Home notification
+   When the lock running the |MATTER_ALIRO_APP_NAME| is unlocked via Aliro (NFC or UWB), no user identity is included in the Apple Home App notification.
+   When the same lock is unlocked via Matter (for example, from the Apple Home app), the notification correctly includes the user who performed the unlock.
 
-    **Workaround:**
-    Reboot the iPhone and try again.
+.. rst-class:: v1-0-1 v1-0-0
 
-  AL-855: Aliro unlock does not include user identity in Apple Home notification
-    When the lock running the |MATTER_ALIRO_APP_NAME| is unlocked via Aliro (NFC or UWB), no user identity is included in the Apple Home App notification.
-    When the same lock is unlocked via Matter (for example, from the Apple Home app), the notification correctly includes the user who performed the unlock.
-
-  AL-856: Lock does not unlock via NFC after manual lock while the User Device remains in UWB range
-    After UWB unlock and manual lock while the User Device remains in UWB range, NFC authentication may complete (ACCESS GRANTED) without actuating the lock.
-    On the device, Aliro NFC authentication completes successfully (``ACCESS GRANTED``), but no physical unlock is triggered.
-
-The |REPO_NAME| v1.0.1
-**********************
-
-.. include:: /include/qm35_deprecation_warning.txt
-
-.. toggle::
-
-  AL-717: Matter onboarding with NFC is not supported
-    Matter onboarding using NFC does not work.
-
-    **Workaround:**
-    Use QR code scanning mechanism for Matter device commissioning.
-
-  AL-718: Access Document is not stored on the nRF52840 platform
-    Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
-    As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option is enabled together with ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``.
-
-    **Workaround:**
-    Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
-
-    **Affected platforms:** nRF52840 DK
-
-  AL-727: Credentials created during Step-up phase are not forwarded to Matter.
-    User credentials provisioned in the Step-up phase (with Access Document) are not exported to Matter.
-    As a result, they are not synchronized from the Matter controller's perspective.
-
-  AL-728: When built with Matter support, the ProductAppearance attribute is not supported.
-    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
-    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
-
-    **Workaround:**
-    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
-
-The |REPO_NAME| v1.0.0
-**********************
-
-.. include:: /include/qm35_deprecation_warning.txt
-.. toggle::
-
-  AL-717: Matter onboarding with NFC is not supported
-    Matter onboarding using NFC does not work.
-
-    **Workaround:**
-    Use QR code scanning mechanism for Matter device commissioning.
-
-  AL-718: Access Document is not stored on the nRF52840 platform
-    Access Document (AD) is not stored persistently on the nRF52840 platform when using the  ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
-    As a result, Kpersistent is also not stored persistently on the nRF52840 device when the ``CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE`` Kconfig option is enabled together with ``CONFIG_DOOR_LOCK_STEP_UP_PHASE``.
-
-    **Workaround:**
-    Implement a custom persistent storage mechanism for the Access Document on the nRF52840 platform.
-
-    **Affected platforms:** nRF52840 DK
-
-  AL-727: Credentials created during Step-up phase are not forwarded to Matter.
-    User credentials provisioned in the Step-up phase (with Access Document) are not exported to Matter.
-    As a result, they are not synchronized from the Matter controller's perspective.
-
-  AL-728: When built with Matter support, the ProductAppearance attribute is not supported.
-    The ProductAppearance attribute from the BasicInformation cluster is not supported when the application is built with Matter support.
-    As a result, the ProductAppearance attribute cannot be read by the Matter controller.
-
-    **Workaround:**
-    Add the ProductAppearance attribute to the ZAP configuration file and regenerate the Matter data model.
-
-The |REPO_NAME| v0.6.0
-**********************
-
-.. toggle::
-
-  The application crashes when using UWB and NFC on the same SPI bus has been resolved.
-    The `QM35825`_ UWB module and the X-NUCLEO NFC reader board can now be used together on the same SPI bus.
-    Use the ``uwb_qm35`` snippet when building the application to configure both NFC and UWB modules to share the same SPI bus.
-    The snippet configures both devices to use different chip select (CS) pins on the same SPI bus.
-
-The |REPO_NAME| v0.5.0
-**********************
-
-.. toggle::
-
-  AL-493: Expedited-fast phase does not work after the Step-up phase
-    When the Step-up phase is completed, the Kpersistent key is not preserved and the Reader does not proceed to the Expedited-fast phase.
-
-  AL-377: Error messages visible in the Reader's serial console during ranging session
-    When the Reader is close to the Test Harness during a ranging session, the following error messages may appear in the Reader's serial console:
-
-    .. code-block::
-
-        uwb: Controlee report error status: 0x22 on slot id: 0
-        uwb: Controlee report error status: 0x21 on slot id: 0
-
-  The application crashes when the UWB module QM35825, used with Qorvo Arduino Interface Board, is connected to the nRF5340 DK and the X-NUCLEO-NFC09A1 board.
-    This issue arises because the QM35825 module forces the SPI MISO line to remain low at all times, which prevents the X-NUCLEO-NFC09A1 board from initializing properly.
-
-    **Workaround 1:** Use a different SPI bus to connect the X-NUCLEO-NFC09A1 board.
-
-    **Workaround 2:** For test purposes, use the ``uwb_qm35`` snippet to disable the NFC transport protocol.
-    This way, the X-NUCLEO-NFC09A1 board initialization is not required.
-
-  AL-333: The NFC transport lost error occurs in test cases for granting access to the door lock
-    When executing test cases that determine if access to the door lock is granted or denied, the ``NFC transport lost`` error occurs.
-    The expected outcome is ``ACCESS GRANTED`` or the ``Provided User Device public key not found in Access Manager database`` log in the serial output of the DUT.
-
-  AL-148: The RD-NFC-STDTXN-1.0 test case fails when the NFC module ST X-NUCLEO-NFC05A1 is in use
-    Testing RD-NFC-STDTXN-1.0 with the NFC module NFC05A1 results in failure.
-    The issue arises from an error indicated by the test harness, which detects the presence of an invalid TLV tag in the payload received from the Device Under Test (DUT).
-
-    **Workaround:** Switch to X-NUCLEO-NFC09A1, a newer, recommended revision of the NFC ST module.
-    Attach X-NUCLEO-NFC09A1 shield to the nRF54L15 DK, rebuild the firmware with the ``CONFIG_ST25R200_DRV`` Kconfig option enabled, and re-flash the nRF54L15 DK.
-
-  AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
-    During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
-
-The |REPO_NAME| v0.4.0
-**********************
-
-.. toggle::
-
-  AL-377: Error messages visible in the Reader's serial console during ranging session.
-    When the Reader is close to the Test Harness during a ranging session, the following error messages may appear in the Reader's serial console:
-
-    .. code-block::
-
-        uwb: Controlee report error status: 0x22 on slot id: 0
-        uwb: Controlee report error status: 0x21 on slot id: 0
-
-  The application crashes when the UWB module QM35825, used with Qorvo Arduino Interface Board, is connected to the nRF5340 DK and the X-NUCLEO-NFC09A1 board.
-    This issue arises because the QM35825 module forces the SPI MISO line to remain low at all times, which prevents the X-NUCLEO-NFC09A1 board from initializing properly.
-
-    **Workaround 1:** Use a different SPI bus to connect the X-NUCLEO-NFC09A1 board.
-
-    **Workaround 2:** For test purposes, use the ``uwb_qm35`` snippet to disable the NFC transport protocol.
-    This way, the X-NUCLEO-NFC09A1 board initialization is not required.
-
-  AL-333: The NFC transport lost error occurrs in test cases for granting access to the door lock
-    When executing test cases that determine if access to the door lock is granted or denied, the ``NFC transport lost`` error occurrs.
-    The expected outcome is ``ACCESS GRANTED`` or the ``Provided User Device public key not found in Access Manager database`` log in the serial output of the DUT.
-
-  AL-148: The RD-NFC-STDTXN-1.0 test case fails when the NFC module ST X-NUCLEO-NFC05A1 is in use
-    Testing RD-NFC-STDTXN-1.0 with the NFC module NFC05A1 results in failure.
-    The issue arises from an error indicated by the test harness, which detects the presence of an invalid TLV tag in the payload received from the Device Under Test (DUT).
-
-    **Workaround:** Switch to X-NUCLEO-NFC09A1, a newer, recommended revision of the NFC ST module.
-    Attach X-NUCLEO-NFC09A1 shield to the nRF54L15 DK, rebuild the firmware with the ``CONFIG_ST25R200_DRV`` Kconfig option enabled, and re-flash the nRF54L15 DK.
-
-  AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
-    During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
-
-The |REPO_NAME| v0.3.1
-**********************
-
-.. toggle::
-
-  AL-377: Error messages visible in the Reader's serial console during ranging session.
-    When the Reader is close to the Test Harness during a ranging session, the following error messages may appear in the Reader's serial console:
-
-    .. code-block::
-
-        uwb: Controlee report error status: 0x22 on slot id: 0
-        uwb: Controlee report error status: 0x21 on slot id: 0
-
-  The application crashes when the UWB module QM35825, used with Qorvo Arduino Interface Board, is connected to the nRF5340 DK and the X-NUCLEO-NFC09A1 board.
-    This issue arises because the QM35825 module forces the SPI MISO line to remain low at all times, which prevents the X-NUCLEO-NFC09A1 board from initializing properly.
-
-    **Workaround 1:** Use a different SPI bus to connect the X-NUCLEO-NFC09A1 board.
-
-    **Workaround 2:** For test purposes, use the ``uwb_qm35`` snippet to disable the NFC transport protocol.
-    This way, the X-NUCLEO-NFC09A1 board initialization is not required.
-
-  AL-333: The NFC transport lost error occurrs in test cases for granting access to the door lock
-    When executing test cases that determine if access to the door lock is granted or denied, the ``NFC transport lost`` error occurrs.
-    The expected outcome is ``ACCESS GRANTED`` or the ``Provided User Device public key not found in Access Manager database`` log in the serial output of the DUT.
-
-  AL-335: Watchdog expires for an NFC session upon test execution
-    When executing the RD-NFC-STDTXN-2.0 test, the ``Watchdog expired for NFC session`` event occasionally occurs.
-    This issue is caused by missing AUTH1 response from the test harness, despite logs indicating that the AUTH1 response was sent.
-
-  AL-239: Occasional timeout occurs in the Reader when executing the RD-NFC-STDTXN-2.0 test from the test harness
-    When executing the RD-NFC-STDTXN-2.0 test case, the Reader might report an RX timeout error code in the serial console.
-    For more details, see `Test Harness issue #191`_.
-
-  AL-282: An undefined access decision occurs when executing the RD-NFC-STDTXN-2.0 test harness case in a loop
-    When executing the RD-NFC-STDTXN-2.0 test case multiple times in a row (with valid credentials provisioned), the Reader might not report the access decision.
-    As a result, the ``ACCESS GRANTED`` or ``ACCESS DENIED`` logs are not displayed in the serial output of the Reader under test.
-
-  AL-148: The RD-NFC-STDTXN-1.0 test case fails when the NFC module ST X-NUCLEO-NFC05A1 is in use
-    Testing RD-NFC-STDTXN-1.0 with the NFC module NFC05A1 results in failure.
-    The issue arises from an error indicated by the test harness, which detects the presence of an invalid TLV tag in the payload received from the Device Under Test (DUT).
-
-    **Workaround:** Switch to X-NUCLEO-NFC09A1, a newer, recommended revision of the NFC ST module.
-    Attach X-NUCLEO-NFC09A1 shield to the nRF54L15 DK, rebuild the firmware with the ``CONFIG_ST25R200_DRV`` Kconfig option enabled, and re-flash the nRF54L15 DK.
-
-  AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
-    During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
-
-
-The |REPO_NAME| v0.3.0
-**********************
-
-.. toggle::
-
-  The application crashes when the UWB module QM35825, used with Qorvo Arduino Interface Board, is connected to the nRF5340 DK and the X-NUCLEO-NFC09A1 board.
-    This issue arises because the QM35825 module forces the SPI MISO line to remain low at all times, which prevents the X-NUCLEO-NFC09A1 board from initializing properly.
-
-    **Workaround 1:** Use a different SPI bus to connect the X-NUCLEO-NFC09A1 board.
-
-    **Workaround 2:** For test purposes, use the ``uwb_qm35`` snippet to disable the NFC transport protocol.
-    This way, the X-NUCLEO-NFC09A1 board initialization is not required.
-
-  The QM35825 ranging measurement is not working with the test harness.
-    Currently, there is no workaround for this issue.
-
-  The current implementation of the Access Manager does not support multiple Aliro sessions.
-    Even though, the Aliro stack supports multiple sessions, the Access Manager implementation is limited to one session at a time.
-
-  AL-333: The NFC transport lost error occurrs in test cases for granting access to the door lock
-    When executing test cases that determine if access to the door lock is granted or denied, the ``NFC transport lost`` error occurrs.
-    The expected outcome is ``ACCESS GRANTED`` or the ``Invalid Signature`` log in the serial output of the DUT.
-
-  AL-335: Watchdog expires for an NFC session upon test execution
-    When executing the RD-NFC-STDTXN-2.0 test, the ``Watchdog expired for NFC session`` event occasionally occurs.
-    This issue is caused by missing AUTH1 response from the test harness, despite logs indicating that the AUTH1 response was sent.
-
-  AL-239: Occasional timeout occurs in the Reader when executing the RD-NFC-STDTXN-2.0 test from the test harness
-    When executing the RD-NFC-STDTXN-2.0 test case, the Reader might report an RX timeout error code in the serial console.
-    For more details, see `Test Harness issue #191`_.
-
-  AL-282: An undefined access decision occurs when executing the RD-NFC-STDTXN-2.0 test harness case in a loop
-    When executing the RD-NFC-STDTXN-2.0 test case multiple times in a row (with valid credentials provisioned), the Reader might not report the access decision.
-    As a result, the ``ACCESS GRANTED`` or ``ACCESS DENIED`` logs are not displayed in the serial output of the Reader under test.
-
-  AL-148: The RD-NFC-STDTXN-1.0 test case fails when the NFC module ST X-NUCLEO-NFC05A1 is in use
-    Testing RD-NFC-STDTXN-1.0 with the NFC module NFC05A1 results in failure.
-    The issue arises from an error indicated by the test harness, which detects the presence of an invalid TLV tag in the payload received from the Device Under Test (DUT).
-
-    **Workaround:** Switch to X-NUCLEO-NFC09A1, a newer, recommended revision of the NFC ST module.
-    Attach X-NUCLEO-NFC09A1 shield to the nRF54L15 DK, rebuild the firmware with the ``CONFIG_ST25R200_DRV`` Kconfig option enabled, and re-flash the nRF54L15 DK.
-
-  AL-159: Cannot provision multiple User Devices
-    The system allows provisioning of only one User Device to the Reader device.
-
-  AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
-    During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
-
-The |REPO_NAME| v0.2.0
-**********************
-
-.. toggle::
-
-  AL-239: Occasional timeout occurs in the Reader when executing the RD-NFC-STDTXN-2.0 test from the test harness
-    When executing the RD-NFC-STDTXN-2.0 test case, the Reader might report an RX timeout error code in the serial console.
-    For more details, see `Test Harness issue #191`_.
-
-  AL-282: An undefined access decision occurs when executing the RD-NFC-STDTXN-2.0 test harness case in a loop
-    When executing the RD-NFC-STDTXN-2.0 test case multiple times in a row (with valid credentials provisioned), the Reader might not report the access decision.
-    As a result, the ``ACCESS GRANTED`` or ``ACCESS DENIED`` logs are not displayed in the serial output of the Reader under test.
-
-  AL-148: The RD-NFC-STDTXN-1.0 test case fails when the NFC module ST X-NUCLEO-NFC05A1 is in use
-    Testing RD-NFC-STDTXN-1.0 with the NFC module NFC05A1 results in failure.
-    The issue arises from an error indicated by the test harness, which detects the presence of an invalid TLV tag in the payload received from the Device Under Test (DUT).
-
-    **Workaround:** Switch to X-NUCLEO-NFC09A1, a newer, recommended revision of the NFC ST module.
-    Attach the X-NUCLEO-NFC09A1 shield to the supported Nordic development kit, rebuild the firmware with the ``CONFIG_ST25R200_DRV`` Kconfig option enabled, and reflash the DK.
-
-  AL-158: Access control is insufficient due to relying only on signature verification
-    The Reader device does not have the capability to configure additional access rules.
-    Access Manager is not implemented.
-
-  AL-159: Cannot provision multiple User Devices
-    The system allows provisioning of only one User Device to the Reader device.
-
-  AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
-    During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
-
-    **Workaround:** Switch to X-NUCLEO-NFC09A1, a newer, recommended revision of the NFC ST module.
-    Attach the X-NUCLEO-NFC09A1 shield to the supported Nordic development kit, rebuild the firmware with the ``CONFIG_ST25R200_DRV`` Kconfig option enabled, and reflash the DK.
-
-The |REPO_NAME| v0.1.0
-**********************
-
-.. toggle::
-
-  AL-148: The RD-NFC-STDTXN-1.0 test case fails when the NFC module ST X-NUCLEO-NFC05A1 is in use
-    Testing RD-NFC-STDTXN-1.0 with the NFC module NFC05A1 results in failure.
-    The issue arises from an error indicated by the test harness, which detects the presence of an invalid TLV tag in the payload received from the Device Under Test (DUT).
-
-    **Workaround:** Switch to X-NUCLEO-NFC09A1, a newer, recommended revision of the NFC ST module.
-    Attach X-NUCLEO-NFC09A1 shield to the nRF54L15 DK, rebuild the firmware with the ``CONFIG_ST25R200_DRV`` Kconfig option enabled, and re-flash the nRF54L15 DK.
-
-  AL-158: Access control is insufficient due to relying only on signature verification
-    The Reader device does not have the capability to configure additional access rules.
-    Access Manager is not implemented.
-
-  AL-159: Cannot provision multiple User Devices
-    The system allows provisioning of only one User Device to the Reader device.
-
-  AL-161: The RD-NFC-STDTXN-2.0 [X-NUCLEO-NFC08A1] test exhibits a delay in the transaction initiation step
-    During the RD-NFC-STDTXN-2.0 test execution, there is a noticeable delay of a few seconds after the transaction initiation step.
+AL-727: Credentials created during Step-up phase are not forwarded to Matter
+   User credentials provisioned in the Step-up phase (with Access Document) are not exported to Matter.
+   As a result, they are not synchronized from the Matter controller's perspective.

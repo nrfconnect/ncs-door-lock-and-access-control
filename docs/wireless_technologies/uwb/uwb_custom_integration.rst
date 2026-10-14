@@ -1,16 +1,16 @@
 .. _uwb_custom_integration:
 
-Integrating a UWB implementation
-################################
+Integrating a third-party UWB chip
+##################################
 
 .. contents::
    :local:
    :depth: 2
 
-This guide explains how to plug a UWB radio into the |REPO_NAME| and the Aliro stack through the stable external-provider contract.
+This guide explains how to plug a UWB chip into the |REPO_NAME| and the Aliro stack through the stable external-provider contract.
 The core repository ships the generic UWB abstraction (the ``UltraWideBand`` facade) and an in-tree stub implementation.
-Provide the concrete radio driver by either editing the in-tree stub or supplying an out-of-tree module.
-Select your implementation with the DOOR_LOCK_ALIRO_UWB_IMPL Kconfig option
+Provide the concrete UWB driver by either editing the in-tree stub or supplying an out-of-tree module.
+Select your implementation with the ``DOOR_LOCK_ALIRO_UWB_IMPL`` Kconfig option.
 
 For the layered architecture and stack interaction, see :ref:`uwb_integration`.
 

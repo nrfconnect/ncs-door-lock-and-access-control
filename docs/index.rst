@@ -10,7 +10,11 @@ This allows you to :ref:`choose the appropriate technology for your specific use
 The nRF Door Lock and Access Control Add-on is built on an open, vendor-agnostic architecture.
 Platform abstraction APIs let you integrate a UWB SoC and an NFC transceiver from any silicon vendor.
 Within this open framework, the Add-on provides a validated turnkey path through native integration of the NFC driver for STMicroelectronics’ ST25R300.
-Contact Nordic Sales for access to a native integration with a third-party UWB vendor's solution."
+Contact Nordic Sales for access to a native integration with a third-party UWB vendor's solution.
+For step-by-step instructions on connecting third-party NFC and UWB chips, see the following guides:
+
+* :ref:`nfc_custom_integration`
+* :ref:`uwb_custom_integration`
 
 The reference can support Aliro alone, Matter alone, or both protocols, depending on the specific use case and product requirements.
 
@@ -30,4 +34,3 @@ The reference can support Aliro alone, Matter alone, or both protocols, dependin
    other_addons.rst
    compatibility_matrix.rst
    release_notes.rst
-   known_issues_and_limitations.rst

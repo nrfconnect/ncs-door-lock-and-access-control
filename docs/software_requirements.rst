@@ -18,7 +18,7 @@ Before you start working with the application, you must install the |NCS| develo
 
 Prepare the environment:
 
-1. From the `Installing the nRF Connect SDK`_ page, complete the following steps:
+1. From the :doc:`Installing the nRF Connect SDK <nrf:installation/install_ncs>` page, complete the following steps:
 
    a. Updating operating system
    #. Installing prerequisites
@@ -58,7 +58,7 @@ Prepare the environment:
 
       west patch apply
 
-#. Export a `Zephyr CMake package`_.
+#. Export a :doc:`Zephyr CMake package <zephyr:build/zephyr_cmake_package>`.
    This enables CMake to automatically load the boilerplate code required for building |NCS| applications:
 
    .. code-block:: console
@@ -85,7 +85,7 @@ Prepare the environment:
 
    In this simplified structure preview, *<toolchain-installation>* corresponds to the toolchain version.
 
-#. Complete `setting up the command-line build environment`_.
+#. Complete :ref:`setting up the command-line build environment <nrf:build_environment_cli>`.
 
    Once you have completed all the steps, the development environment will be correctly configured.
 
@@ -102,4 +102,4 @@ If you are developing a door lock with Aliro support, and you want to execute th
 Matter development tools
 *************************
 
-If you are developing a door lock with Matter support, you need the `Matter tools`_.
+If you are developing a door lock with Matter support, you need the :doc:`Matter tools <nrf:protocols/matter/getting_started/tools>`.

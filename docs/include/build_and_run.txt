@@ -1,5 +1,5 @@
 This application can be found under |sample path| in your folder structure.
 
-To build it, follow the instructions in `Building an application`_ for your preferred building environment.
-See also `programming <Programming an application_>`_ for programming steps and `testing <Testing and optimization_>`_ for general information about testing and debugging in the |NCS|.
+To build it, follow the instructions in :doc:`Building an application <nrf:app_dev/config_and_build/building>` for your preferred building environment.
+See also :doc:`programming <nrf:app_dev/programming>` for programming steps and :doc:`testing <nrf:test_and_optimize>` for general information about testing and debugging in the |NCS|.
 

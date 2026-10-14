@@ -18,7 +18,7 @@ For build variants and flashing instructions, see :ref:`aliro_access_control_app
 DFU over Bluetooth LE SMP
 *************************
 
-The |ALIRO_APP_NAME| supports field firmware updates over Bluetooth LE using the `SMP protocol`_.
+The |ALIRO_APP_NAME| supports field firmware updates over Bluetooth LE using the :doc:`SMP protocol <zephyr:services/device_mgmt/smp_protocol>`.
 
 See :ref:`door_lock_app_ble_smp` for transport details and :ref:`door_lock_dfu_smp_service` for the reusable SMP DFU service.
 

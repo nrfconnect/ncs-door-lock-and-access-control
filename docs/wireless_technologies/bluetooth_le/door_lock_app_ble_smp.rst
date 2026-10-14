@@ -7,7 +7,7 @@ Device Firmware Update over SMP
    :local:
    :depth: 2
 
-Device Firmware Update (DFU) over SMP provides wireless firmware updates using the `Simple Management Protocol <SMP protocol_>`_ over a Bluetooth LE GATT connection.
+Device Firmware Update (DFU) over SMP provides wireless firmware updates using the :doc:`Simple Management Protocol <zephyr:services/device_mgmt/smp_protocol>` over a Bluetooth LE GATT connection.
 In the |APPS_NAME|, the Door Lock DFU SMP wrapper controls on-demand SMP advertising so a client can connect and upload a firmware image over Bluetooth LE without a wired connection.
 Advertising is not started automatically at boot; enable it with a development kit button or the ``dfu_smp on`` shell command before a client connects.
 SMP DFU works independently of Matter network connectivity, which is useful when a device is uncommissioned or the network is unavailable.
@@ -23,7 +23,7 @@ Module details
 **************
 
 See :ref:`door_lock_dfu_smp_service` for enabling, Kconfig options, and shell commands.
-For the underlying GATT service definition, refer to `GATT DFU SMP Service`_ in the |NCS| documentation.
+For the underlying GATT service definition, refer to :doc:`GATT DFU SMP Service <nrf:libraries/bluetooth/services/dfu_smp>` in the |NCS| documentation.
 
 Testing
 *******

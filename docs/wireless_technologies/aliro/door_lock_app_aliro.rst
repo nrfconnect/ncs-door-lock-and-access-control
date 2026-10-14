@@ -81,7 +81,7 @@ Supported transports in this |REPO_NAME|
        Supported on all :ref:`supported development kits <hw_requirements_development_kit>`.
    * - Bluetooth LE + UWB
      - Optional Aliro transport for hands-free unlock.
-       Supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_ with an external UWB module.
+       Supported on the :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>` and :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` with an external UWB module.
    * - Bluetooth LE only
      - Not supported in this reference.
 

@@ -210,7 +210,7 @@ Complete the following steps for the required tests:
 
 .. note::
    If the application is built with Matter support, you can control the door lock remotely.
-   For details on how to enable this feature, see the |NCS| door lock sample documentation in the `Matter door lock remote access`_ section.
+   For details on how to enable this feature, see the |NCS| door lock sample documentation in the :doc:`Matter door lock remote access <nrf:samples/matter/lock/README>` section.
 
 Execute the Aliro certification tests
 *************************************

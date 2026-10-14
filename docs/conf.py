@@ -14,7 +14,14 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent / "_extensions"))
+
+NCS_VERSION_NUMBER = "3.4.1"
+_NCS_DOCS_BASE = f"https://nrfconnectdocs.nordicsemi.com/ncs/{NCS_VERSION_NUMBER}"
+_NCS_DOCS_STORAGE = f"https://ncsdoc.z6.web.core.windows.net/ncs/{NCS_VERSION_NUMBER}"
 
 # -- Project information -----------------------------------------------------
 
@@ -32,11 +39,20 @@ release = ' '
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'known_issues_filter',
     'sphinx_tabs.tabs',
     'sphinx_copybutton',
     'sphinx_togglebutton',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
 ]
+
+intersphinx_mapping = {
+    "nrf": (f"{_NCS_DOCS_BASE}/nrf", f"{_NCS_DOCS_STORAGE}/nrf/objects.inv"),
+    "zephyr": (f"{_NCS_DOCS_BASE}/zephyr", f"{_NCS_DOCS_STORAGE}/zephyr/objects.inv"),
+    "matter": (f"{_NCS_DOCS_BASE}/matter", f"{_NCS_DOCS_STORAGE}/matter/objects.inv"),
+    "mcuboot": (f"{_NCS_DOCS_BASE}/mcuboot", f"{_NCS_DOCS_STORAGE}/mcuboot/objects.inv"),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

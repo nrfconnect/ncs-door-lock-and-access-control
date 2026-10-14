@@ -1,3 +1,3 @@
 * You have built the new application with a higher version number than the one currently running on the device.
   Set the version in the application :file:`VERSION` file before building.
-* You have the firmware update image from the build directory (see `Output build files`_ in the |NCS| documentation).
+* You have the firmware update image from the build directory (see :doc:`Output build files <nrf:app_dev/config_and_build/output_build_files>` in the |NCS| documentation).

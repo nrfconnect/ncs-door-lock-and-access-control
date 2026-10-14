@@ -7,7 +7,7 @@ Nordic UART Service (NUS)
    :local:
    :depth: 2
 
-The `Nordic UART Service (NUS)`_ is a Bluetooth LE GATT service that exposes RX and TX characteristics, acting as a UART-style command channel over Bluetooth LE.
+The :doc:`Nordic UART Service (NUS) <nrf:libraries/bluetooth/services/nus>` is a Bluetooth LE GATT service that exposes RX and TX characteristics, acting as a UART-style command channel over Bluetooth LE.
 In the |APPS_NAME|, the Door Lock NUS wrapper receives line-based commands from a paired peer and dispatches them to registered callbacks.
 The reference applications register ``Lock`` and ``Unlock`` commands for proprietary remote lock control, independent of Aliro and Matter.
 

@@ -295,12 +295,12 @@ Each Aliro-enabled application implements ``GetReaderDescriptor()`` in :file:`ap
 Both reference applications use the ``APP_VERSION_EXTENDED_STRING`` macro as the firmware version.
 The Vendor ID and Product ID differ between the applications:
 
-* **Aliro Access Control Application** — Uses the Nordic Semiconductor IEEE OUI ``F4:CE:36`` as the Vendor ID and the fixed sample value ``0x8007`` as the Product ID.
-* **Matter and Aliro Door Lock Application** — Reports the same identity as the Matter Basic Information cluster.
+* Aliro Access Control Application — Uses the Nordic Semiconductor IEEE OUI ``F4:CE:36`` as the Vendor ID and the fixed sample value ``0x8007`` as the Product ID.
+* Matter and Aliro Door Lock Application — Reports the same identity as the Matter Basic Information cluster.
   The Vendor ID and Product ID are derived from the ``CONFIG_CHIP_DEVICE_VENDOR_ID`` and ``CONFIG_CHIP_DEVICE_PRODUCT_ID`` Kconfig options.
   This allows ecosystems that read the Reader Descriptor, such as Apple Home, to match it against the Matter accessory information.
 
 .. note::
    Before releasing a product, replace the default Vendor ID and Product ID with values that identify your own Reader.
    In the |MATTER_ALIRO_APP_NAME|, set them through the ``CONFIG_CHIP_DEVICE_VENDOR_ID`` and ``CONFIG_CHIP_DEVICE_PRODUCT_ID`` Kconfig options.
-   Also make sure that the firmware version string matches the release version of the final product.
+   Ensure that the firmware version string matches the release version of the final product.
