@@ -16,7 +16,7 @@ The |REPO_NAME| functions as the |NCS| top-level add-on.
 The top-level add-on leverages `other add-ons <ncs app index_>`_, which are typically configured as Zephyr modules, to enhance functionality.
 All add-ons provide additional software deployed outside of the |NCS|.
 Each of them operates with its own release cycle but is designed to work with specific versions of the |NCS|.
-Dependencies between these modules and their specific revisions are managed through the :file:`west.yaml` file using `west, a Zephyr OS meta tool <west_>`_.
+Dependencies between these modules and their specific revisions are managed through the :file:`west.yaml` file using :ref:`west, a Zephyr OS meta tool <nrf:ncs_west_intro>`.
 
 Aliro add-ons
 *************

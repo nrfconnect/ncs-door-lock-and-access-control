@@ -17,7 +17,7 @@ Upload the new firmware image to the device using one of the following methods:
    .. tab:: PC command line
 
       Several command-line tools support SMP firmware updates, including ``mcumgr`` and ``nrfutil mcu-manager``.
-      See `mcumgr tools`_ in the |NCS| documentation for other available options and libraries.
+      See :ref:`mcumgr tools <zephyr:mcumgr_tools_libraries>` in the |NCS| documentation for other available options and libraries.
 
       #. Build the update image and locate :file:`build/<app>/zephyr/zephyr.signed.bin` in the build directory.
       #. Enable SMP advertising on the device (see above).

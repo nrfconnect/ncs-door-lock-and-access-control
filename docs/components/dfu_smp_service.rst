@@ -8,9 +8,9 @@ DFU SMP service
    :local:
    :depth: 2
 
-The Door Lock DFU Simple Management Protocol (SMP) service is a wrapper around the |NCS| `GATT DFU SMP Service`_.
+The Door Lock DFU Simple Management Protocol (SMP) service is a wrapper around the |NCS| :doc:`GATT DFU SMP Service <nrf:libraries/bluetooth/services/dfu_smp>`.
 It controls on-demand SMP advertising so a client can connect over Bluetooth LE and upload a firmware image.
-For details on the `SMP protocol`_, see the |NCS| documentation.
+For details on the :doc:`SMP protocol <zephyr:services/device_mgmt/smp_protocol>`, see the |NCS| documentation.
 
 For transport context and how SMP DFU fits alongside other Bluetooth LE services, see :ref:`door_lock_app_ble_smp`.
 For step-by-step update procedures, see :ref:`aliro_dfu_bluetooth_smp` (|ALIRO_APP_NAME|) and :ref:`dfu_ble_smp` (|MATTER_ALIRO_APP_NAME|).

@@ -26,26 +26,26 @@ The application supports the following development kits:
      - PCA
      - Board name
      - Build target
-   * - `nRF54LM20 DK`_
+   * - :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>`
      - PCA10184
-     - `nrf54lm20dk`_
+     - :doc:`nrf54lm20dk <nrf:app_dev/device_guides/nrf54l/index>`
      - | ``nrf54lm20dk/nrf54lm20b/cpuapp``
        | ``nrf54lm20dk/nrf54lm20a/cpuapp``
-   * - `nRF54L15 DK`_
+   * - :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>`
      - PCA10156
-     - `nrf54l15dk`_
+     - :doc:`nrf54l15dk <nrf:app_dev/device_guides/nrf54l/index>`
      - ``nrf54l15dk/nrf54l15/cpuapp``
-   * - `nRF5340 DK`_
+   * - :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>`
      - PCA10095
-     - `nrf5340dk`_
+     - :doc:`nrf5340dk <nrf:app_dev/device_guides/nrf53/index>`
      - ``nrf5340dk/nrf5340/cpuapp``
-   * - `nRF52840 DK`_
+   * - :doc:`nRF52840 DK <zephyr:boards/nordic/nrf52840dk/doc/index>`
      - PCA10056
-     - `nrf52840dk`_
+     - :doc:`nrf52840dk <nrf:app_dev/device_guides/nrf52/index>`
      - ``nrf52840dk/nrf52840``
 
 You also need an :ref:`NFC reader expansion board <hw_requirements_nfc_reader>` connected to the DK.
-For Aliro over Bluetooth LE and UWB, add an :ref:`external UWB module <hw_requirements_uwb_module>` on the `nRF5340 DK`_ or `nRF54LM20 DK`_.
+For Aliro over Bluetooth LE and UWB, add an :ref:`external UWB module <hw_requirements_uwb_module>` on the :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>` or :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>`.
 
 To commission the device and control it remotely with Matter over Thread, see :ref:`testing_door_lock_provisioning_with_matter`.
 
@@ -302,7 +302,7 @@ Verify that the application runs correctly:
 
       Connect to the DK with a terminal emulator that supports VT100/ANSI escape characters.
       The `Serial Terminal app`_ is recommended.
-      See `Testing and optimization`_ in the |NCS| documentation for serial settings.
+      See :doc:`Testing and optimization <nrf:test_and_optimize>` in the |NCS| documentation for serial settings.
 
       .. note::
          |app_hwfc_enabled|
@@ -342,10 +342,10 @@ This application uses the following |REPO_NAME| and |NCS| components:
 * :ref:`nfc_integration` — NFC transport and RFAL driver
 * PSA Crypto
 
-When DFU is enabled, the application also uses `MCUboot`_ for image management.
+When DFU is enabled, the application also uses :doc:`MCUboot <mcuboot:wrapper>` for image management.
 
 The application depends on the following Zephyr facilities:
 
-* `Logging`_
-* `Kernel Services`_
+* :doc:`Logging <zephyr:services/logging/index>`
+* :doc:`Kernel Services <zephyr:kernel/services/index>`
 * Bluetooth host stack (when Bluetooth LE features or UWB transport are enabled)

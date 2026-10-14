@@ -10,7 +10,7 @@ NFC current measurements
 This page describes how to measure NFC-related current consumption of an |APP_NAME| using `Power Profiler Kit II`_ (PPK).
 
 .. note::
-   The procedures, switch settings, and plots described on this page use an `nRF5340 DK`_, an `X-NUCLEO-NFC12A1`_ expansion board, and the Aliro standalone application in *release* configuration.
+   The procedures, switch settings, and plots described on this page use an :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>`, an `X-NUCLEO-NFC12A1`_ expansion board, and the Aliro standalone application in *release* configuration.
    Adapt the wiring and switch positions if you use different hardware.
 
 Overview
@@ -39,7 +39,7 @@ Prerequisites
 Ensure you have the following hardware:
 
 * `Power Profiler Kit II`_ (PPK)
-* Development kit (for example, `nRF5340 DK`_)
+* Development kit (for example, :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>`)
 * `X-NUCLEO-NFC12A1`_ NFC reader expansion board
 
 Ensure you have installed the following software:

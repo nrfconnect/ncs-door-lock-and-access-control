@@ -14,13 +14,13 @@ See :ref:`wireless_technologies_uwb` for how distance measurements drive unlock 
 
 .. note::
    This reference does not support the Aliro Bluetooth LE-only transport variant.
-   Aliro over Bluetooth LE with UWB is supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_ with an external UWB module.
+   Aliro over Bluetooth LE with UWB is supported on the :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>` and :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` with an external UWB module.
 
 Bluetooth identity and advertising
 **********************************
 
 Aliro uses a dedicated Bluetooth local identity (``CONFIG_DOOR_LOCK_ALIRO_BLE_SERVICE_BT_ID`` Kconfig option) for advertising and connections.
-This keeps Aliro sessions separate from other Bluetooth LE services on the default identity, such as Matter, `Nordic UART Service (NUS)`_ or Device Firmware Update over Simple Management Protocol (`SMP protocol`_).
+This keeps Aliro sessions separate from other Bluetooth LE services on the default identity, such as Matter, :doc:`Nordic UART Service (NUS) <nrf:libraries/bluetooth/services/nus>` or Device Firmware Update over Simple Management Protocol (:doc:`SMP protocol <zephyr:services/device_mgmt/smp_protocol>`).
 
 The advertising payload follows the Aliro specification and is built from the Reader group identifier and Reader group sub-identifier.
 The payload is updated automatically when either value changes.

@@ -24,16 +24,16 @@ Testing with Matter CHIP Tool
 *****************************
 
 This guide uses CHIP Tool as a Matter controller to commission the door lock and provision Aliro credentials through the command-line interface.
-For details, see the `Matter chip-tool guide`_.
+For details, see the :doc:`Matter chip-tool guide <matter:chip_tool_guide>`.
 
 .. note::
    This approach is recommended for development, testing, and debugging purposes.
 
-#. Set up the `Thread Border Router`_ with the Nordic Thread coprocessor.
+#. Set up the :doc:`Thread Border Router <nrf:protocols/thread/tools>` with the Nordic Thread coprocessor.
 
-   a. Configure the `Thread radio co-processor`_.
+   a. Configure the :doc:`Thread radio co-processor <nrf:protocols/thread/tools>`.
 
-   #. Run the OpenThread Border Router and `form a Thread network using Docker <Running OTBR using Docker_>`_.
+   #. Run the OpenThread Border Router and :doc:`form a Thread network using Docker <nrf:protocols/thread/tools>`.
 
    #. Obtain the Thread operational dataset for commissioning devices into the created Thread network by running the following Docker command:
 
@@ -203,7 +203,7 @@ Testing with Apple ecosystem
 ****************************
 
 .. note::
-   Support for testing with Apple ecosystem is `experimental <Software maturity_>`_ and is not optimized with respect to performance and power consumption.
+   Support for testing with Apple ecosystem is :ref:`experimental <nrf:software_maturity>` and is not optimized with respect to performance and power consumption.
    This feature is intended for development and testing purposes only.
 
 This guide demonstrates how to test the Aliro door lock with Matter support using Apple's Home App and Wallet on iPhone.

@@ -7,12 +7,12 @@ Matter Door Lock Application
    :local:
    :depth: 2
 
-The Matter |matter_name| Application demonstrates the usage of the `Matter`_ application layer to build a door lock device with one basic bolt.
+The Matter |matter_name| Application demonstrates the usage of the :doc:`Matter <nrf:protocols/matter/index>` application layer to build a door lock device with one basic bolt.
 You can use it as a reference for creating your application.
 
 This device works as a Matter accessory device, meaning it can be paired and controlled remotely over a Matter network built on top of a low-power 802.15.4 (Thread) protocol.
-This device works as a Thread `Sleepy End Device`_.
-See the `Adding clusters to Matter application`_ page for an overview of the process you need to follow.
+This device works as a Thread Sleepy End Device.
+See the :doc:`Adding clusters to Matter application <nrf:protocols/matter/getting_started/adding_clusters>` page for an overview of the process you need to follow.
 
 .. note::
 
@@ -34,32 +34,32 @@ The application supports the following development kits:
      - PCA
      - Board name
      - Board target
-   * - `nRF54LM20 DK`_
+   * - :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>`
      - PCA10184
-     - `nrf54lm20dk`_
+     - :doc:`nrf54lm20dk <nrf:app_dev/device_guides/nrf54l/index>`
      - | ``nrf54lm20dk/nrf54lm20b/cpuapp``
        | ``nrf54lm20dk/nrf54lm20a/cpuapp``
-   * - `nRF54L15 DK`_
+   * - :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>`
      - PCA10156
-     - `nrf54l15dk`_
+     - :doc:`nrf54l15dk <nrf:app_dev/device_guides/nrf54l/index>`
      - ``nrf54l15dk/nrf54l15/cpuapp``
-   * - `nRF5340 DK`_
+   * - :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>`
      - PCA10095
-     - `nrf5340dk`_
+     - :doc:`nrf5340dk <nrf:app_dev/device_guides/nrf53/index>`
      - ``nrf5340dk/nrf5340/cpuapp``
-   * - `nRF52840 DK`_
+   * - :doc:`nRF52840 DK <zephyr:boards/nordic/nrf52840dk/doc/index>`
      - PCA10056
-     - `nrf52840dk`_
+     - :doc:`nrf52840dk <nrf:app_dev/device_guides/nrf52/index>`
      - ``nrf52840dk/nrf52840``
 
-If you want to commission the |matter_name| device and control it remotely through a Thread network, you need to set-up the `Thread Border Router`_ and control it with the `chip-tool <Matter chip-tool guide_>`_, or use a commercial ecosystem controller.
-When this happens, you will also be able to control it through a Matter controller device `configured on PC or smartphone <Matter testing_>`_.
+If you want to commission the |matter_name| device and control it remotely through a Thread network, you need to set up the :doc:`Thread Border Router <nrf:protocols/thread/tools>` and control it with the :doc:`chip-tool <matter:chip_tool_guide>`, or use a commercial ecosystem controller.
+When this happens, you will also be able to control it through a Matter controller device :doc:`configured on PC or smartphone <nrf:protocols/matter/getting_started/testing/index>`.
 This requires additional hardware depending on the setup you choose.
 
 .. note::
 
-    Matter requires the GN tool. 
-    If you are updating from the |NCS| version earlier than v1.5.0, see the `GN installation instructions <GN tool_>`_.
+    Matter requires the GN tool.
+    If you are updating from the |NCS| version earlier than v1.5.0, see the :doc:`GN installation instructions <nrf:protocols/matter/getting_started/tools>`.
 
 IPv6 network support
 ====================
@@ -111,7 +111,7 @@ Matter Bluetooth LE with Nordic UART Service
 
 .. toggle::
 
-   The |REPO_NAME| lets you extend the |matter_name| with an additional Bluetooth LE service (`Nordic UART Service (NUS)`_) and use it, even when the device is not connected to a Matter network.
+   The |REPO_NAME| lets you extend the |matter_name| with an additional Bluetooth LE service (:doc:`Nordic UART Service (NUS) <nrf:libraries/bluetooth/services/nus>`) and use it, even when the device is not connected to a Matter network.
    See :ref:`door_lock_nus_service` for the reusable NUS wrapper, Kconfig options, and the ``bt_nus`` snippet.
    Using NUS, you can declare commands specific to a |matter_type| and use them to control the device remotely through Bluetooth LE.
    The connection between the device and the Bluetooth controller is secured and requires providing a passcode to pair the devices.
@@ -133,7 +133,7 @@ Scheduled timed access
    The scheduled timed access feature is an optional |matter_type| feature that can be applicable to all available lock users.
    You can use the scheduled timed access feature to allow guest users of the home to access the lock at the specific scheduled times.
    To use this feature, you need to create at least one user on the application device, and assign credentials to that user.
-   For more information about setting user credentials, see the *Saving users and credentials* on |matter_name| devices section of the `Matter chip-tool guide`_ in the `Matter documentation`_ set, and the :ref:`matter_door_lock_application_testing` section.
+   For more information about setting user credentials, see the *Saving users and credentials* on |matter_name| devices section of the :doc:`Matter chip-tool guide <matter:chip_tool_guide>` in the :doc:`Matter documentation <matter:index>` set, and the :ref:`matter_door_lock_application_testing` section.
    You can schedule the following types of timed access:
 
       * ``Week-day`` - Restricts access to a specified time window on certain days of the week for a specific user.
@@ -174,7 +174,7 @@ The application uses a :file:`prj.conf` configuration file located in the sample
 It also provides additional files for different custom configurations.
 When you build the sample, you can select one of these configurations using the ``FILE_SUFFIX`` variable.
 
-See `Custom configurations`_ and `Providing CMake options <CMake options_>`_ for more information.
+See :doc:`Custom configurations <nrf:app_dev/config_and_build/config_and_build_system>` and :doc:`Providing CMake options <nrf:app_dev/config_and_build/cmake/index>` for more information.
 
 .. note::
 
@@ -221,18 +221,18 @@ Device firmware upgrade support
 
    The |matter_type| supports device firmware upgrade (DFU) over-the-air (OTA) using the following protocols:
 
-   * `Matter OTA`_ update protocol that uses the Matter operational network for querying and downloading a new firmware image.
+   * :doc:`Matter OTA <nrf:protocols/matter/overview/dfu>` update protocol that uses the Matter operational network for querying and downloading a new firmware image.
    * Simple Management Protocol (SMP) over Bluetooth LE.
      In this case, the DFU can be done either using a smartphone application or a PC command-line tool.
      This protocol is not part of the Matter specification.
 
-   In both cases, the `MCUboot`_ secure bootloader is used to apply the new firmware image.
+   In both cases, the :doc:`MCUboot <mcuboot:wrapper>` secure bootloader is used to apply the new firmware image.
 
    The DFU over Matter is enabled by default.
    Additionally, you can enable the DFU over SMP by building with the ``dfu_smp`` snippet (for example, add ``-Dmatter-door-lock-app_SNIPPET=dfu_smp`` to your CMake arguments).
    See :ref:`door_lock_app_ble_smp` and :ref:`door_lock_dfu_smp_service` for transport details, shell commands, and Kconfig options.
 
-   See `CMake options`_ for instructions on how to add these options to your build.
+   See :doc:`CMake options <nrf:app_dev/config_and_build/cmake/index>` for instructions on how to add these options to your build.
 
    SMP advertising is not started automatically after boot.
    Press Button 3 to toggle it, or use the ``dfu_smp on`` / ``dfu_smp off`` shell commands when shell support is enabled.
@@ -243,7 +243,7 @@ Device firmware upgrade support
    * nRF5340 DK
    * nRF54L15 DK
 
-   You can run DFU without external flash memory on the nRF54LM20 DK using the `MCUboot image compression`_ feature.
+   You can run DFU without external flash memory on the nRF54LM20 DK using the :doc:`MCUboot image compression <nrf:protocols/matter/end_product/bootloader>` feature.
 
    .. tabs::
 
@@ -279,7 +279,7 @@ Factory data support
    * ``CONFIG_CHIP_FACTORY_DATA``
    * ``SB_CONFIG_MATTER_ADD_ON_FACTORY_DATA_GENERATE``
 
-   To learn more about factory data, read the `Factory provisioning`_ user guide.
+   To learn more about factory data, read the :doc:`Factory provisioning <nrf:protocols/matter/end_product/factory_provisioning>` user guide.
 
 Custom board with Nordic SoC
 ----------------------------
@@ -288,22 +288,22 @@ Custom board with Nordic SoC
 
    To prepare the |matter_type| to work with a custom board, complete the following steps:
 
-      1. Refer to the `Create your board directory`_ Zephyr guide and complete the instructions.
-      #. Modify the contents of the :file:`board.yaml` file according to the `Write your board YAML`_ user guide.
-      #. Update the `Write your devicetree`_ (all `.dts` and `.dtsi` files) to match your board's requirements.
+      1. Refer to the :doc:`Create your board directory <zephyr:hardware/porting/board_porting>` Zephyr guide and complete the instructions.
+      #. Modify the contents of the :file:`board.yaml` file according to the :doc:`Write your board YAML <zephyr:hardware/porting/board_porting>` user guide.
+      #. Update the :doc:`Write your devicetree <zephyr:hardware/porting/board_porting>` (all `.dts` and `.dtsi` files) to match your board's requirements.
       #. Write Kconfig files to enable all required Kconfig options for your board.
       #. If your device uses external flash, add its devicetree definition under the :file:`board/<board_name>_<soc_name>.overlay` file, and set ``nordic,pm-ext-flash`` in the devicetree's ``chosen`` configuration.
-      #. Refer to the `Advanced Matter Kconfig options`_ user guide, create your list of advanced configurations for your board, and apply the selected Kconfig options in the :file:`prj.conf` file.
-      #. See the `List of threads used in Matter application`_ and adjust stack sizes according to your board and project requirements.
+      #. Refer to the :doc:`Advanced Matter Kconfig options <nrf:protocols/matter/getting_started/advanced_kconfigs>` user guide, create your list of advanced configurations for your board, and apply the selected Kconfig options in the :file:`prj.conf` file.
+      #. See the :doc:`List of threads used in Matter application <nrf:protocols/matter/getting_started/memory_optimization>` and adjust stack sizes according to your board and project requirements.
       #. A custom board does not have support for LEDs and buttons by default.
          Therefore, you need to provide your own implementation of the :file:`ncs-matter/subsys/board/board.cpp` board file.
 
    For more information, see the following guides:
 
-      * `Board porting guide`_ and `Custom board definitions`_ to learn how to create a custom board directory.
-      * `Optimizing memory usage in Matter applications`_ to learn how to optimize memory on your board.
-      * `Advanced Matter Kconfig options`_ to learn about Matter configuration.
-      * `Matter hardware and memory requirements`_ to learn about hardware requirements for Nordic Development Kits and to use as a reference when planning your custom board.
+      * :doc:`Board porting guide <zephyr:hardware/porting/board_porting>` and :doc:`Application development <zephyr:develop/application/index>` to learn how to create a custom board directory.
+      * :doc:`Optimizing memory usage in Matter applications <nrf:protocols/matter/getting_started/memory_optimization>` to learn how to optimize memory on your board.
+      * :doc:`Advanced Matter Kconfig options <nrf:protocols/matter/getting_started/advanced_kconfigs>` to learn about Matter configuration.
+      * :doc:`Matter hardware and memory requirements <nrf:protocols/matter/getting_started/hw_requirements>` to learn about hardware requirements for Nordic Development Kits and to use as a reference when planning your custom board.
 
 Internal memory only
 --------------------
@@ -313,7 +313,7 @@ Internal memory only
     For the |matter_dks_internal|, you can configure the |matter_type| to use only the internal RRAM for storage.
     It applies to the DFU as well, which means that both the currently running firmware and the new firmware to be updated will be stored within the device's internal RRAM memory.
 
-    The DFU image fits in the internal flash memory if you use `MCUboot image compression <Bootloader configuration in Matter_>`_.
+    The DFU image fits in the internal flash memory if you use :doc:`MCUboot image compression <nrf:protocols/matter/end_product/bootloader>`.
 
     This configuration is disabled by default for the Matter |matter_name| |matter_type|.
     To enable it, set the ``FILE_SUFFIX`` CMake option to ``internal``.
@@ -353,7 +353,7 @@ Enabling Matter Bluetooth LE with Nordic UART Service
 
 .. toggle::
 
-    To enable the `Nordic UART Service (NUS)`_ feature, build with the ``bt_nus`` snippet (for example, add ``-Dmatter-door-lock-app_SNIPPET=bt_nus`` to your CMake arguments).
+    To enable the :doc:`Nordic UART Service (NUS) <nrf:libraries/bluetooth/services/nus>` feature, build with the ``bt_nus`` snippet (for example, add ``-Dmatter-door-lock-app_SNIPPET=bt_nus`` to your CMake arguments).
     See :ref:`door_lock_nus_service` for Kconfig options and usage.
 
     .. note::
@@ -463,7 +463,7 @@ Testing
 *******
 
 This section shows how to test the |matter_type|.
-You can test it using your PC and the `CHIP Tool for Linux or macOS <Matter network concepts_>`_ or commercial ecosystem that supports Matter.
+You can test it using your PC and the :doc:`CHIP Tool for Linux or macOS <matter:chip_tool_guide>` or a commercial ecosystem that supports Matter.
 
 .. _matter_lock_app_testing_start:
 
@@ -482,7 +482,7 @@ Prepare Matter network
 To set up the Matter over Thread, complete the following steps:
 
 1. Configure the Thread Border Router.
-   See the Running OTBR using Docker section on the `Thread Border Router`_ page.
+   See the Running OTBR using Docker section on the :doc:`Thread Border Router <nrf:protocols/thread/tools>` page.
 
 #. Download the prebuilt CHIP tool package from the `Matter nRF Connect releases`_ GitHub page.
    Make sure that the package is compatible with your |NCS| version.
@@ -584,7 +584,7 @@ See the ecosystem manual page for instructions on how to use it.
 When you start the commissioning procedure, the ecosystem controller must get the onboarding information from the Matter accessory device.
 The onboarding information representation depends on your commissioner setup.
 
-For this |matter_type|, you can use one of the following `Onboarding information formats`_ to provide the commissioner with the data payload that includes the device discriminator and the setup PIN code:
+For this |matter_type|, you can use one of the following :doc:`Onboarding information formats <nrf:protocols/matter/overview/commissioning>` to provide the commissioner with the data payload that includes the device discriminator and the setup PIN code:
 
   .. list-table:: |matter_name| |matter_type| onboarding information
      :header-rows: 1
@@ -626,7 +626,7 @@ Testing remote access with PIN code credential
    .. note::
       You can test the PIN code credential support with any Matter compatible controller.
       The following steps use the CHIP Tool controller as an example.
-      For more information about setting user credentials, see the *Saving users and credentials on Door Lock devices* section of the `Matter chip-tool guide`_ page.
+      For more information about setting user credentials, see the *Saving users and credentials on Door Lock devices* section of the :doc:`Matter chip-tool guide <matter:chip_tool_guide>` page.
 
    #. Prepare the development kit for testing.
    #. Make the |matter_name| require a PIN code for remote operations:
@@ -794,7 +794,7 @@ Testing Bluetooth LE with Nordic UART Service
 
 .. toggle::
 
-   To test the `Nordic UART Service (NUS)`_ feature, complete the following steps:
+   To test the :doc:`Nordic UART Service (NUS) <nrf:libraries/bluetooth/services/nus>` feature, complete the following steps:
 
    .. note::
       Some of the steps depend on which :ref:`configuration <matter_lock_app_configuration>` the application was built with.
@@ -853,15 +853,15 @@ Dependencies
 
 This |matter_type| uses the Matter library that includes the |NCS| platform integration layer:
 
-* `Matter`_
+* :doc:`Matter <nrf:protocols/matter/index>`
 
 In addition, the |matter_type| uses the following |NCS| components:
 
-* `DK Buttons and LEDs`_
-* `URI messages and records`_
-* `Type 2 Tag`_
+* :doc:`DK Buttons and LEDs <nrf:libraries/others/dk_buttons_and_leds>`
+* :doc:`URI messages and records <nrf:libraries/nfc/ndef/uri_msg>`
+* :doc:`Type 2 Tag <nrf:libraries/nfc/t2t/index>`
 
 The |matter_type| depends on the following Zephyr libraries:
 
-* `Logging`_
-* `Kernel Services`_
+* :doc:`Logging <zephyr:services/logging/index>`
+* :doc:`Kernel Services <zephyr:kernel/services/index>`

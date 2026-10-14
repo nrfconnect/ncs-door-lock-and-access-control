@@ -53,7 +53,7 @@ When NFC is used as the Aliro transport, the Reader and User Device follow the N
 * The User Device operates in Listen Mode with the same technology support.
 * Aliro Access Protocol commands are exchanged as APDUs after an application SELECT.
 
-For protocol-level details, refer to the `Aliro protocol`_ documentation in the |NCS| and the Aliro specification published by the CSA.
+For protocol-level details, refer to the :doc:`Aliro protocol <nrf:protocols/aliro/index>` documentation in the |NCS| and the Aliro specification published by the CSA.
 
 .. toctree::
    :maxdepth: 2

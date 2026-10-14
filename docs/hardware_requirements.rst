@@ -23,21 +23,21 @@ Depending on the transport technology you want to use, the |APPS_NAME| support t
      - PCA
      - Board name
      - Build target
-   * - `nRF52840 DK`_
+   * - :doc:`nRF52840 DK <zephyr:boards/nordic/nrf52840dk/doc/index>`
      - PCA10056
-     - `nrf52840dk`_
+     - :doc:`nrf52840dk <nrf:app_dev/device_guides/nrf52/index>`
      - ``nrf52840dk/nrf52840``
-   * - `nRF5340 DK`_
+   * - :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>`
      - PCA10095
-     - `nrf5340dk`_
+     - :doc:`nrf5340dk <nrf:app_dev/device_guides/nrf53/index>`
      - ``nrf5340dk/nrf5340/cpuapp``
-   * - `nRF54L15 DK`_
+   * - :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>`
      - PCA10156
-     - `nrf54l15dk`_
+     - :doc:`nrf54l15dk <nrf:app_dev/device_guides/nrf54l/index>`
      - ``nrf54l15dk/nrf54l15/cpuapp``
-   * - `nRF54LM20 DK`_
+   * - :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>`
      - PCA10184
-     - `nrf54lm20dk`_
+     - :doc:`nrf54lm20dk <nrf:app_dev/device_guides/nrf54l/index>`
      - ``nrf54lm20dk/nrf54lm20a/cpuapp``
        ``nrf54lm20dk/nrf54lm20b/cpuapp``
 
@@ -107,7 +107,7 @@ The |REPO_NAME| supports the following NFC readers and their corresponding devel
 .. note::
 
    The `X-NUCLEO-NFC09A1`_ board requires a minimum of 2.7V to operate.
-   Because of that, you must adjust the GPIO voltage for the `nRF54L15 DK`_ and the `nRF54LM20 DK`_ as outlined in the :ref:`hw_requirements_vddio_configuration` section.
+   Because of that, you must adjust the GPIO voltage for the :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>` and the :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` as outlined in the :ref:`hw_requirements_vddio_configuration` section.
 
 Connecting the NFC reader
 =========================
@@ -118,7 +118,7 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
 
    .. group-tab:: nRF54LM20 DK
 
-      The `nRF54LM20 DK`_ does not have Arduino-compatible header, therefore, you must connect your board using wires.
+      The :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` does not have Arduino-compatible header, therefore, you must connect your board using wires.
       To connect the NFC reader expansion board to the DK, refer to the following pin mapping.
       The pinout is applicable for each of the supported NFC reader expansion boards:
 
@@ -149,11 +149,11 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
          X-NUCLEO expansion board connection to the nRF54LM20 DK.
 
       .. note::
-         To make the hardware setup easier, you can request the PCB design files of the Arduino-compatible adapters for the `nRF54L15 DK`_  and the `nRF54LM20 DK`_ via `Nordic DevZone`_.
+         To make the hardware setup easier, you can request the PCB design files of the Arduino-compatible adapters for the :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>` and the :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` via `Nordic DevZone`_.
 
    .. group-tab:: nRF54L15 DK
 
-      The `nRF54L15 DK`_ does not have Arduino-compatible header, therefore, you must connect your board using wires.
+      The :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>` does not have Arduino-compatible header, therefore, you must connect your board using wires.
       To connect the NFC reader expansion board to the DK, refer to the following pin mapping.
       The pinout is applicable for each of the supported NFC reader expansion boards:
 
@@ -184,7 +184,7 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
          X-NUCLEO expansion board connection to the nRF54L15 DK.
 
       .. note::
-         To make the hardware setup easier, you can request the PCB design files of the Arduino-compatible adapters for the `nRF54L15 DK`_  and the `nRF54LM20 DK`_ via `Nordic DevZone`_.
+         To make the hardware setup easier, you can request the PCB design files of the Arduino-compatible adapters for the :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>` and the :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` via `Nordic DevZone`_.
 
    .. group-tab:: nRF5340 DK
 
@@ -204,7 +204,7 @@ Ultra-wideband (UWB) module
 ***************************
 
 Aliro over the Bluetooth LE and UWB transport requires an external UWB module connected to the development kit, typically over SPI.
-This transport is supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_.
+This transport is supported on the :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>` and :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>`.
 
 The core repository provides only the generic UWB abstraction.
 An external UWB provider module supplies the concrete radio driver, and that module determines which UWB module, expansion board, and wiring you need.

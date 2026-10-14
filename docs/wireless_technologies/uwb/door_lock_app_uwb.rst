@@ -18,7 +18,7 @@ For a general introduction to Aliro and how UWB fits alongside other transports,
 .. note::
 
    This reference does not support the Aliro Bluetooth LE-only transport variant.
-   Aliro over Bluetooth LE with UWB is supported on the `nRF5340 DK`_ and `nRF54LM20 DK`_ with an external UWB module.
+   Aliro over Bluetooth LE with UWB is supported on the :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>` and :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` with an external UWB module.
 
 Overview
 ********

@@ -20,7 +20,7 @@ The application allows you to update the firmware of the device using the Matter
 This allows you to remotely upgrade the door lock firmware without physical access to the device.
 
 This guide uses CHIP Tool as a Matter controller and assumes you have a commissioned Matter device.
-For details on CHIP Tool usage, see the `Matter chip-tool guide`_.
+For details on CHIP Tool usage, see the :doc:`Matter chip-tool guide <matter:chip_tool_guide>`.
 
 Prerequisites
 =============
@@ -31,7 +31,7 @@ Before starting the OTA update process, ensure that:
 * You have built the new Matter application with a higher version number than the one that is currently running on the device to be updated. The version is configured in the :file:`applications/matter-aliro-door-lock-app/VERSION` file.
   The :file:`matter.ota` file generated in the build directory will be used as the OTA firmware image file.
 * You have the Matter OTA provider application available on your PC.
-  You can download the precompiled OTA provider application from the `Matter fork release`_ page.
+  You can download the precompiled OTA provider application from the `Matter nRF Connect releases`_ page.
 
 OTA update process
 ==================
@@ -148,7 +148,7 @@ The following steps will guide you through the complete OTA update process:
 DFU over Bluetooth LE SMP
 *************************
 
-The |MATTER_ALIRO_APP_NAME| supports field firmware updates over Bluetooth LE using the Simple Management Protocol (`SMP protocol`_).
+The |MATTER_ALIRO_APP_NAME| supports field firmware updates over Bluetooth LE using the Simple Management Protocol (:doc:`SMP protocol <zephyr:services/device_mgmt/smp_protocol>`).
 
 See :ref:`door_lock_app_ble_smp` and :ref:`door_lock_dfu_smp_service`.
 

@@ -8,7 +8,7 @@ NUS service
    :local:
    :depth: 2
 
-The Door Lock Nordic UART Service (NUS) wrapper is built on the |NCS| `Nordic UART Service (NUS)`_ GATT service.
+The Door Lock Nordic UART Service (NUS) wrapper is built on the |NCS| :doc:`Nordic UART Service (NUS) <nrf:libraries/bluetooth/services/nus>` GATT service.
 It receives commands over Bluetooth LE and dispatches them to registered callbacks, providing a UART-style command channel for proprietary remote lock control.
 
 For transport context and how NUS fits alongside other Bluetooth LE services, see :ref:`door_lock_app_ble_nus`.
