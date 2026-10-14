@@ -28,8 +28,8 @@ Aliro::ReaderDescriptor GetReaderDescriptor()
 	return {
 		.mVendorOuCid = kVendorOuCid,
 		.mProductId = { kProductId.data(), kProductId.size() },
-		.mFirmwareVersion = { reinterpret_cast<const uint8_t *>(APP_VERSION_STRING),
-				      strlen(APP_VERSION_STRING) },
+		.mFirmwareVersion = { reinterpret_cast<const uint8_t *>(APP_VERSION_EXTENDED_STRING),
+				      strlen(APP_VERSION_EXTENDED_STRING) },
 	};
 }
 
