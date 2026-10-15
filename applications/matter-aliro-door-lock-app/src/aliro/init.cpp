@@ -8,8 +8,8 @@
 #include "aliro/features.h"
 #include "aliro/types.h"
 #include "aliro/utils.h"
-#include "nfc/nfc_transport_rfal.h"
 
+#include <nfc_transport/nfc_transport.h>
 #include <reader_storage/reader.h>
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
@@ -127,7 +127,7 @@ int AliroInit()
 	AliroError ec = AliroStack::Instance().Init(&readerDescriptor);
 	VerifyOrReturnValue(ec == ALIRO_NO_ERROR, EXIT_FAILURE, LOG_ERR("Aliro stack initialization failed"));
 
-	ec = Aliro::NfcTransportRfal::Instance().Init();
+	ec = Aliro::NfcTransport::Init();
 	if (ec != ALIRO_NO_ERROR) {
 		LOG_ERR("NFC transport initialization failed");
 	}
@@ -176,7 +176,7 @@ int AliroInit()
 
 int AliroStart()
 {
-	AliroError ec = NfcTransportRfal::Instance().Start();
+	AliroError ec = NfcTransport::Start();
 	if (ec != ALIRO_NO_ERROR) {
 		LOG_ERR("NFC transport start failed");
 		return EXIT_FAILURE;
@@ -206,7 +206,7 @@ int AliroStop()
 {
 	int rc = EXIT_SUCCESS;
 
-	AliroError ec = NfcTransportRfal::Instance().Stop();
+	AliroError ec = NfcTransport::Stop();
 	if (ec != ALIRO_NO_ERROR) {
 		LOG_ERR("NFC transport stop failed");
 	}
