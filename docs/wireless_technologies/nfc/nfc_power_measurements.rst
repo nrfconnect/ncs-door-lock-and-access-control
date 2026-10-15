@@ -255,10 +255,10 @@ ACTIVE mode
    :scale: 70%
    :alt: nRF5340 SoC average current in ACTIVE mode as a function of NFC worker interval.
 
-   nRF5340 SoC average current in ACTIVE mode depending on ``CONFIG_RFAL_NFC_WORKER_INTERVAL_MS``.
+   nRF5340 SoC average current in ACTIVE mode depending on ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_WORKER_INTERVAL_MS``.
 
-In ACTIVE mode, development kit current consumption depends on ``CONFIG_RFAL_NFC_WORKER_INTERVAL_MS`` (the time between consecutive NFC worker executions).
-Configure it in :file:`applications/*/src/aliro/platform/nfc/Kconfig`.
+In ACTIVE mode, development kit current consumption depends on ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_WORKER_INTERVAL_MS`` (the time between consecutive NFC worker executions).
+Configure it in :file:`subsys/aliro/nfc_transport/rfal_backend/Kconfig`.
 However, the largest source of total current in this mode is the NFC module itself.
 
 RFO tuning
@@ -283,7 +283,7 @@ The ``rfo`` parameter is a value from 0 (lowest output resistance) to 15 (highes
 For details, see the `ST25R300 datasheet`_.
 
 Other parameters also affect NFC current consumption.
-You can find them in :file:`applications/*/src/aliro/platform/nfc/Kconfig` and :file:`drivers/nfc/stm/nfc_configs/Kconfig`.
+You can find them in :file:`subsys/aliro/nfc_transport/rfal_backend/Kconfig` and :file:`drivers/nfc/stm/nfc_configs/Kconfig`.
 For example, ``RFAL_WAKEUP_NPOLLS`` controls how many polling cycles are performed before and after Wake-Up mode, which can impact average NFC module current in ACTIVE mode.
 See the `RFAL documentation`_ for more details.
 

@@ -4,13 +4,18 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#include "nfc_transport_rfal.h"
+#include <nfc_transport/nfc_transport_backend.h>
+
+extern "C" {
+#include <rfal_nfc.h>
+#include <rfal_platform.h>
+#include <rfal_utils.h>
+}
 #include <rfal_ncs_pal.h>
 #include <rfal_nfc_config.h>
 
 #include "ncs_pal_nfc_worker.h"
 
-#include <aliro/aliro.h>
 #include <aliro/utils.h>
 #include <aliro_workqueue/aliro_workqueue.h>
 
@@ -18,23 +23,90 @@
 #include <nfc_prop/nfc_prop.h>
 #endif // CONFIG_DOOR_LOCK_NFC_PROP
 
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/atomic.h>
 
-LOG_MODULE_REGISTER(nfc_st_rfal_impl, CONFIG_DOOR_LOCK_RFAL_LOG_LEVEL);
+#include <array>
 
-K_WORK_DELAYABLE_DEFINE(nfc_pal_nfc_work, [](k_work *) { Aliro::NfcTransportRfal::Instance().Execute(); });
+LOG_MODULE_REGISTER(aliro_nfc_transport, CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_LOG_LEVEL);
+
+namespace Aliro::NfcTransport::Backend {
+namespace {
+
+/**
+ * @class NfcTransportRfal
+ * @brief NFC transport backend using ST RFAL library.
+ */
+class NfcTransportRfal {
+public:
+	static NfcTransportRfal &Instance()
+	{
+		static NfcTransportRfal sInstance;
+		return sInstance;
+	}
+
+	AliroError Init(const Callbacks &callbacks);
+	AliroError Start();
+	AliroError Stop();
+	AliroError Send(Data data);
+	AliroError Terminate();
+
+	/**
+	 * @brief Execute a single RFAL NFC worker iteration.
+	 */
+	void Execute();
+
+private:
+	NfcTransportRfal() = default;
+	~NfcTransportRfal() = default;
+
+	NfcTransportRfal(const NfcTransportRfal &) = delete;
+	NfcTransportRfal &operator=(const NfcTransportRfal &) = delete;
+	NfcTransportRfal(NfcTransportRfal &&) = delete;
+	NfcTransportRfal &operator=(NfcTransportRfal &&) = delete;
+
+	ReturnCode RfalNfcInit();
+	void RfalNotifyCallback(rfalNfcState state);
+	void CaptureRxData();
+	void SelectTag();
+	void RecoverPolling();
+
+	Callbacks mCallbacks{};
+	rfalNfcDiscoverParam mNfcConfig{};
+	bool mMultiSel{ false };
+
+	std::array<uint8_t, CONFIG_RFAL_FEATURE_ISO_DEP_APDU_MAX_LEN> mRxBuffer{};
+	uint8_t *mRxData{};
+	uint16_t *mRcvLen{};
+
+	bool mRecoverPolling{ false };
+	bool mSendInProgress{ false };
+	bool mTagDetectedState{ false };
+	atomic_t mStarted{ false };
+};
+
+} // namespace
+} // namespace Aliro::NfcTransport::Backend
+
+using Aliro::NfcTransport::Backend::NfcTransportRfal;
+
+K_WORK_DELAYABLE_DEFINE(nfc_pal_nfc_work, [](k_work *) { NfcTransportRfal::Instance().Execute(); });
 
 extern "C" void ncs_pal_submit_nfc_work()
 {
 	(void)AliroWorkqueueReschedule(&nfc_pal_nfc_work, K_NO_WAIT);
 }
-namespace Aliro {
+
+namespace Aliro::NfcTransport::Backend {
+namespace {
 
 void NfcTransportRfal::Execute()
 {
 	// NFC shield generates IRQ on startup, triggering Execute() before RFAL is initialized.
 	// Without this check, rfalNfcGetState() returns garbage which accidentally satisfies the
-	// condition below, causing unnecessary periodic worker scheduling at CONFIG_RFAL_NFC_WORKER_INTERVAL_MS.
+	// condition below, causing unnecessary periodic worker scheduling at
+	// CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_WORKER_INTERVAL_MS.
 	if (!atomic_get(&mStarted)) {
 		return;
 	}
@@ -48,7 +120,8 @@ void NfcTransportRfal::Execute()
 	const rfalNfcState st = rfalNfcGetState();
 
 	if (st != RFAL_NFC_STATE_WAKEUP_MODE || mSendInProgress) {
-		(void)AliroWorkqueueReschedule(&nfc_pal_nfc_work, K_MSEC(CONFIG_RFAL_NFC_WORKER_INTERVAL_MS));
+		(void)AliroWorkqueueReschedule(&nfc_pal_nfc_work,
+					       K_MSEC(CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_WORKER_INTERVAL_MS));
 	}
 }
 
@@ -104,14 +177,14 @@ ReturnCode NfcTransportRfal::RfalNfcInit()
 
 	rfalNfcWakeupConfig(&mNfcConfig);
 
-	mNfcConfig.devLimit = CONFIG_RFAL_DISCOVERY_DEV_LIMIT;
-	mNfcConfig.totalDuration = CONFIG_RFAL_DISCOVERY_TOTAL_DURATION_MS;
-	mNfcConfig.GBLen = CONFIG_RFAL_DISCOVERY_GBLEN;
-	mNfcConfig.maxBR = static_cast<rfalBitRate>(CONFIG_RFAL_DISCOVERY_MAX_BR);
+	mNfcConfig.devLimit = CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_DEV_LIMIT;
+	mNfcConfig.totalDuration = CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_TOTAL_DURATION_MS;
+	mNfcConfig.GBLen = CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_GBLEN;
+	mNfcConfig.maxBR = static_cast<rfalBitRate>(CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_MAX_BR);
 
-#if defined(CONFIG_RFAL_DISCOVERY_COMP_MODE_EMV)
+#if defined(CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_COMP_MODE_EMV)
 	mNfcConfig.compMode = RFAL_COMPLIANCE_MODE_EMV;
-#elif defined(CONFIG_RFAL_DISCOVERY_COMP_MODE_ISO)
+#elif defined(CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_COMP_MODE_ISO)
 	mNfcConfig.compMode = RFAL_COMPLIANCE_MODE_ISO;
 #endif
 
@@ -151,7 +224,12 @@ void NfcTransportRfal::SelectTag()
 			LOG_HEXDUMP_DBG(nfcDevice->nfcid, nfcDevice->nfcidLen,
 					"RFAL: NFCA Passive ISO-DEP device found. UID: ");
 			mTagDetectedState = true;
-			AliroStack::Instance().CreateSession(ConnectionHandle::Nfc());
+			const AliroError err = mCallbacks.mOnDeviceDetected();
+			if (err != ALIRO_NO_ERROR) {
+				LOG_ERR("RFAL: Device rejected: %d", err.ToInt());
+				mTagDetectedState = false;
+				mRecoverPolling = true;
+			}
 		} else {
 			LOG_HEXDUMP_DBG(nfcDevice->nfcid, nfcDevice->nfcidLen,
 					"RFAL: Usupported NFC card found. UID: %s");
@@ -165,7 +243,7 @@ void NfcTransportRfal::CaptureRxData()
 	if (status != RFAL_ERR_NONE) {
 		LOG_ERR("RFAL: Data transaction failed [status: %d]", status);
 		mTagDetectedState = false;
-		AliroStack::Instance().DestroySession(ConnectionHandle::Nfc());
+		mCallbacks.mOnDeviceLost();
 		return;
 	}
 
@@ -178,11 +256,10 @@ void NfcTransportRfal::CaptureRxData()
 	LOG_HEXDUMP_DBG(mRxBuffer.data(), currentDataLen, "RFAL: RX data:");
 
 	if (currentDataLen > 0) {
-		AliroStack::Instance().HandleSessionData(ConnectionHandle::Nfc(),
-							 { .mData = mRxBuffer.data(), .mLength = currentDataLen });
+		mCallbacks.mOnDataReceived({ .mData = mRxBuffer.data(), .mLength = currentDataLen });
 	} else {
 		mTagDetectedState = false;
-		AliroStack::Instance().DestroySession(ConnectionHandle::Nfc());
+		mCallbacks.mOnDeviceLost();
 	}
 }
 
@@ -197,12 +274,16 @@ void NfcTransportRfal::RecoverPolling()
 
 /*
 ******************************************************************************
-* Public API
+* NfcTransportRfal API
 ******************************************************************************
 */
 
-AliroError NfcTransportRfal::Init()
+AliroError NfcTransportRfal::Init(const Callbacks &callbacks)
 {
+	VerifyOrReturnStatus(callbacks.mOnDeviceDetected && callbacks.mOnDataReceived && callbacks.mOnDeviceLost,
+			     ALIRO_INVALID_ARGUMENT);
+	mCallbacks = callbacks;
+
 	int err = rfal_ncs_pal_init();
 	VerifyOrReturnStatus(err == 0, ALIRO_ERROR_INTERNAL, LOG_ERR("RFAL: NFC PAL init failed %d", err));
 
@@ -259,4 +340,31 @@ AliroError NfcTransportRfal::Terminate()
 	return ALIRO_NO_ERROR;
 }
 
-} // namespace Aliro
+} // namespace
+
+AliroError Init(const Callbacks &callbacks)
+{
+	return NfcTransportRfal::Instance().Init(callbacks);
+}
+
+AliroError Start()
+{
+	return NfcTransportRfal::Instance().Start();
+}
+
+AliroError Stop()
+{
+	return NfcTransportRfal::Instance().Stop();
+}
+
+AliroError Send(Data data)
+{
+	return NfcTransportRfal::Instance().Send(data);
+}
+
+AliroError Terminate()
+{
+	return NfcTransportRfal::Instance().Terminate();
+}
+
+} // namespace Aliro::NfcTransport::Backend
