@@ -90,6 +90,16 @@ The application connects it to the Aliro stack in :file:`applications/*/src/alir
      - ``NfcTransport::Stop()``
      - Stops NFC polling.
 
+User Device removal detection
+-----------------------------
+
+After the Aliro stack terminates an NFC session, the reference RFAL backend does not restart discovery immediately.
+Otherwise, a User Device that stays in the field would be detected again and a new transaction would start right away.
+Instead, the backend deselects the User Device, keeps the RF field on, and periodically checks its presence with a WUPA command, putting it back to sleep with HLTA when it responds.
+Discovery resumes when the User Device misses ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_MISSED_POLLS`` consecutive presence checks, or when ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_TIMEOUT_MS`` elapses.
+This also applies to sessions that ended with an error, and to User Devices for which the Aliro stack could not create a session.
+Disable ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION`` to restart discovery immediately after each session.
+
 For application/stack layering and event processing over NFC, see :ref:`aliro_application_interactions`.
 
 Reference implementation (STMicroelectronics RFAL)
@@ -216,6 +226,14 @@ Option definitions and defaults are in :file:`drivers/nfc/stm/Kconfig.rfal` and 
      - Length of General Bytes for NFC-DEP P2P activation (range: 0-48 bytes).
    * - ``CONFIG_RFAL_WAKEUP_NPOLLS``
      - Number of polling cycles to perform before and after Wake-Up mode (range: 1-100).
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION``
+     - Wait for the User Device to be removed from the field before starting a new transaction (default: enabled).
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_CHECK_INTERVAL_MS``
+     - Interval between User Device presence checks after a transaction (range: 20-1000ms, default: 100ms).
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_MISSED_POLLS``
+     - Number of consecutive missed presence checks after which the User Device is considered removed (range: 1-20, default: 3).
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_TIMEOUT_MS``
+     - Maximum time to wait for User Device removal before resuming discovery, 0 to wait indefinitely (range: 0-600000ms, default: 30000ms).
    * - ``CONFIG_RFAL_FEATURE_ISO_DEP_IBLOCK_MAX_LEN``
      - ISO-DEP I-Block maximum length in bytes (range: 16-4096, default: 256).
    * - ``CONFIG_RFAL_FEATURE_ISO_DEP_APDU_MAX_LEN``

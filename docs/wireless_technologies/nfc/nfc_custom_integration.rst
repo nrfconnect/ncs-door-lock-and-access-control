@@ -191,7 +191,7 @@ The backend must define the following functions in the ``Aliro::NfcTransport::Ba
      - Transmit the provided data buffer as APDU to the active NFC device and report the response through ``mOnDataReceived``. Return ``ALIRO_INVALID_STATE`` if no device is active.
    * - ``Terminate()``
      - When the current NFC session should be ended, called via ``Interface::Session::HandleTermination()``.
-     - Deactivate the active device and resume polling for the next User Device. The operation can be asynchronous. Return ``ALIRO_NO_ERROR`` on success.
+     - Deactivate the active device and resume polling for the next User Device. The operation can be asynchronous. To avoid repeated transactions with a User Device that stays in the field, wait until it is removed before detecting it again. Return ``ALIRO_NO_ERROR`` on success.
 
 The RFAL backend contains the internal ``RfalNotifyCallback()`` method that is called when the NFC state changes.
 You can use it as a reference to implement the NFC state machine that invokes the backend callbacks.

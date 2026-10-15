@@ -51,4 +51,36 @@ config DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_GBLEN
 	help
 	  Length of General Bytes for NFC-DEP P2P activation.
 
+config DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+	bool "Wait for User Device removal before starting a new transaction"
+	default y
+	help
+	  After an NFC transaction ends, keep the User Device asleep in the field and
+	  periodically check its presence. Discovery of a new User Device is resumed only
+	  after the previous one has been removed, which prevents repeated transactions
+	  when the User Device stays near the reader.
+
+if DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+
+config DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_CHECK_INTERVAL_MS
+	int "Interval between User Device presence checks (ms)"
+	range 20 1000
+	default 100
+
+config DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_MISSED_POLLS
+	int "Number of missed presence checks to consider the User Device removed"
+	range 1 20
+	default 3
+
+config DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_TIMEOUT_MS
+	int "Maximum time to wait for User Device removal (ms)"
+	range 0 600000
+	default 30000
+	help
+	  When the User Device is not removed within this time, discovery is resumed and
+	  a new transaction can be started. Set to 0 to wait for removal indefinitely,
+	  which keeps the RF field on for as long as the User Device stays in the field.
+
+endif # DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+
 endmenu # ST RFAL backend
