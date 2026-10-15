@@ -209,6 +209,7 @@ The backend must define the following functions in the ``Aliro::NfcTransport::Ba
        It is called through ``Interface::Session::HandleTermination()``.
      - Deactivates the active device and resumes polling for the next User Device.
        The operation can be asynchronous.
+       To avoid repeated transactions with a User Device that stays in the field, wait until it is removed before detecting it again.
        The function returns ``ALIRO_NO_ERROR`` on success.
 
 The RFAL backend contains the internal ``RfalNotifyCallback()`` method that is called when the NFC state changes.
