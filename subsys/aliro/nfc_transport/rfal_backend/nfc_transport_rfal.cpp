@@ -71,6 +71,10 @@ private:
 	void CaptureRxData();
 	void SelectTag();
 	void RecoverPolling();
+#ifdef CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+	void CheckRemoval();
+	void ResumeDiscovery();
+#endif // CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
 
 	Callbacks mCallbacks{};
 	rfalNfcDiscoverParam mNfcConfig{};
@@ -83,6 +87,13 @@ private:
 	bool mRecoverPolling{ false };
 	bool mSendInProgress{ false };
 	bool mTagDetectedState{ false };
+	bool mAwaitingRemoval{ false };
+#ifdef CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+	bool mRemovalPollerReady{ false };
+	uint8_t mRemovalMisses{ 0 };
+	int64_t mRemovalStart{ 0 };
+	int64_t mLastRemovalCheck{ 0 };
+#endif // CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
 	atomic_t mStarted{ false };
 };
 
@@ -119,6 +130,18 @@ void NfcTransportRfal::Execute()
 
 	const rfalNfcState st = rfalNfcGetState();
 
+#ifdef CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+	if (mAwaitingRemoval && st == RFAL_NFC_STATE_POLL_SELECT) {
+		CheckRemoval();
+		if (mAwaitingRemoval) {
+			(void)AliroWorkqueueReschedule(
+				&nfc_pal_nfc_work,
+				K_MSEC(CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_CHECK_INTERVAL_MS));
+			return;
+		}
+	}
+#endif // CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+
 	if (st != RFAL_NFC_STATE_WAKEUP_MODE || mSendInProgress) {
 		(void)AliroWorkqueueReschedule(&nfc_pal_nfc_work,
 					       K_MSEC(CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_WORKER_INTERVAL_MS));
@@ -133,6 +156,11 @@ void NfcTransportRfal::RfalNotifyCallback(rfalNfcState state)
 	case RFAL_NFC_STATE_POLL_TECHDETECT:
 		break;
 	case RFAL_NFC_STATE_POLL_SELECT:
+		// The previous User Device was put to sleep after the transaction, wait for its removal
+		// instead of selecting it again.
+		if (mAwaitingRemoval) {
+			break;
+		}
 		// Check if in case of multiple devices, selection is already attempted
 		if (!mMultiSel) {
 			mMultiSel = true;
@@ -267,10 +295,76 @@ void NfcTransportRfal::RecoverPolling()
 {
 	mTagDetectedState = false;
 	if (rfalNfcIsDevActivated(rfalNfcGetState())) {
+#ifdef CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+		// Keep the field on and the User Device asleep, so that it is not detected again
+		// and a new transaction is started only after the device has been removed.
 		ReturnCode err = rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_SLEEP);
 		VerifyOrReturn(err == RFAL_ERR_NONE, LOG_ERR("RFAL: Deactivation failed, return code: %d", err));
+
+		mAwaitingRemoval = true;
+		mRemovalPollerReady = false;
+		mRemovalMisses = 0;
+		mRemovalStart = k_uptime_get();
+		mLastRemovalCheck = mRemovalStart;
+#else
+		ReturnCode err = rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_DISCOVERY);
+		VerifyOrReturn(err == RFAL_ERR_NONE, LOG_ERR("RFAL: Deactivation failed, return code: %d", err));
+#endif // CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
 	}
 }
+
+#ifdef CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
+void NfcTransportRfal::CheckRemoval()
+{
+	const int64_t now = k_uptime_get();
+
+	// Execute() can also be triggered by the NFC IRQ, keep the presence check rate constant.
+	VerifyOrReturn(now - mLastRemovalCheck >= CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_CHECK_INTERVAL_MS);
+	mLastRemovalCheck = now;
+
+	if (!mRemovalPollerReady) {
+		// The data exchange could use a higher bit rate, presence check must be done at 106 kbps.
+		ReturnCode err = rfalNfcaPollerInitialize();
+		if (err == RFAL_ERR_NONE) {
+			err = rfalFieldOnAndStartGT();
+		}
+		if (err != RFAL_ERR_NONE) {
+			LOG_ERR("RFAL: Removal detection init failed, return code: %d", err);
+			ResumeDiscovery();
+			return;
+		}
+		mRemovalPollerReady = true;
+	}
+
+	rfalNfcaSensRes sensRes{};
+	const ReturnCode err = rfalNfcaPollerCheckPresence(RFAL_14443A_SHORTFRAME_CMD_WUPA, &sensRes);
+
+	if (err == RFAL_ERR_NONE) {
+		// The User Device is still in the field, put it back to sleep.
+		mRemovalMisses = 0;
+		(void)rfalNfcaPollerSleep();
+	} else {
+		mRemovalMisses++;
+	}
+
+	if (mRemovalMisses >= CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_MISSED_POLLS) {
+		LOG_INF("RFAL: User Device removed");
+		ResumeDiscovery();
+	} else if (CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_TIMEOUT_MS > 0 &&
+		   now - mRemovalStart >= CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_TIMEOUT_MS) {
+		LOG_INF("RFAL: User Device not removed within timeout, resuming discovery");
+		ResumeDiscovery();
+	}
+}
+
+void NfcTransportRfal::ResumeDiscovery()
+{
+	mAwaitingRemoval = false;
+
+	ReturnCode err = rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_DISCOVERY);
+	VerifyOrReturn(err == RFAL_ERR_NONE, LOG_ERR("RFAL: Discovery restart failed, return code: %d", err));
+}
+#endif // CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_REMOVAL_DETECTION
 
 /*
 ******************************************************************************
@@ -295,6 +389,8 @@ AliroError NfcTransportRfal::Start()
 	VerifyOrReturnStatus(RfalNfcInit() == RFAL_ERR_NONE, ALIRO_ERROR_INTERNAL,
 			     LOG_ERR("RFAL: NFC initialization failed"));
 
+	mAwaitingRemoval = false;
+
 	ReturnCode err = rfalNfcDiscover(&mNfcConfig);
 	VerifyOrReturnStatus(err == RFAL_ERR_NONE, ALIRO_ERROR_INTERNAL,
 			     LOG_ERR("RFAL: NFC discovery failed, return code: %d", err));
@@ -309,6 +405,8 @@ AliroError NfcTransportRfal::Start()
 
 AliroError NfcTransportRfal::Stop()
 {
+	mAwaitingRemoval = false;
+
 	ReturnCode err = rfalNfcDeactivate(RFAL_NFC_DEACTIVATE_IDLE);
 	VerifyOrReturnStatus(err == RFAL_ERR_NONE || err == RFAL_ERR_WRONG_STATE, ALIRO_ERROR_INTERNAL,
 			     LOG_ERR("RFAL: NFC deactivation failed, return code: %d", err));
