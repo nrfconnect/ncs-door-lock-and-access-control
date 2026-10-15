@@ -15,7 +15,7 @@ Architecture overview
 *********************
 
 NFC integration separates Aliro protocol logic from hardware-specific driver code.
-The following diagram shows the reference path through ``NfcTransportRfal`` and the RFAL library; both layers can be replaced when porting to another NFC reader.
+The following diagram shows the reference path through ``NfcTransport`` and the RFAL library; both layers can be replaced when porting to another NFC reader.
 
 .. code-block:: none
 
@@ -26,8 +26,12 @@ The following diagram shows the reference path through ``NfcTransportRfal`` and 
    └─────────────┬───────────────────────┘
                  │  Aliro stack public API
    ┌─────────────▼───────────────────────┐
-   │    NFC transport implementation     │
-   │     (reference: NfcTransportRfal)   │ ← Replaceable with a custom class
+   │      NfcTransport (Aliro glue)      │
+   └─────────────┬───────────────────────┘
+                 │  Backend functions and callbacks
+   ┌─────────────▼───────────────────────┐
+   │       NFC transport backend         │
+   │  (reference: rfal_backend, ST RFAL) │ ← Replaceable with a custom backend
    └─────────────┬───────────────────────┘
                  │  vendor-specific API
    ┌─────────────▼───────────────────────┐
@@ -40,13 +44,18 @@ The following diagram shows the reference path through ``NfcTransportRfal`` and 
    │   (reference: ST25R200/ST25R300)    │ ← Any ISO14443-A poller
    └─────────────────────────────────────┘
 
-The Aliro stack calls the NFC transport directly — there is no separate facade layer.
-The reference ``NfcTransportRfal`` class routes operations through RFAL to ST25R-series transceivers.
+The application and the Aliro stack interface implementation call the ``NfcTransport`` functions.
+They forward each call to the NFC transport backend selected with the ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND`` Kconfig choice.
+The backend does not interact with the Aliro stack directly.
+It reports NFC reader events through callbacks, which ``NfcTransport`` translates into Aliro stack calls.
+The reference backend routes operations through RFAL to ST25R-series transceivers.
 
 Aliro stack interaction
 =======================
 
-The reference transport is located in :file:`applications/*/src/aliro/platform/nfc/nfc_transport_rfal.h` and :file:`nfc_transport_rfal.cpp`.
+The NFC transport is provided by the :file:`subsys/aliro/nfc_transport` module, enabled with the ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT`` Kconfig option.
+The ``NfcTransport`` functions are declared in :file:`include/nfc_transport/nfc_transport.h` and the backend contract in :file:`include/nfc_transport/nfc_transport_backend.h`.
+The reference RFAL backend is located in the :file:`rfal_backend/` directory and is selected with the ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND_RFAL`` Kconfig option (default).
 The application connects it to the Aliro stack in :file:`applications/*/src/aliro/interface_impl/session.cpp` and during startup in :file:`init.cpp`.
 
 .. list-table::
@@ -58,27 +67,27 @@ The application connects it to the Aliro stack in :file:`applications/*/src/alir
      - Action
    * - Outbound
      - ``Aliro::Interface::Session::Send()``
-     - Forwards NFC data to ``NfcTransportRfal::Instance().Send()``.
+     - Forwards NFC data to ``NfcTransport::Send()``.
    * - Outbound
      - ``Aliro::Interface::Session::HandleTermination()``
-     - Calls ``NfcTransportRfal::Instance().Terminate()``.
+     - Calls ``NfcTransport::Terminate()``.
    * - Inbound
-     - User Device detected
+     - User Device detected (``Callbacks::mOnDeviceDetected``)
      - ``AliroStack::Instance().CreateSession(ConnectionHandle::Nfc())``
    * - Inbound
-     - APDU received
+     - APDU received (``Callbacks::mOnDataReceived``)
      - ``AliroStack::Instance().HandleSessionData(ConnectionHandle::Nfc(), data)``
    * - Inbound
-     - Communication lost
+     - Communication lost (``Callbacks::mOnDeviceLost``)
      - ``AliroStack::Instance().DestroySession(ConnectionHandle::Nfc())``
    * - Lifecycle
-     - ``NfcTransportRfal::Init()``
+     - ``NfcTransport::Init()``
      - Initializes the RFAL platform abstraction layer.
    * - Lifecycle
-     - ``NfcTransportRfal::Start()``
+     - ``NfcTransport::Start()``
      - Starts NFC-A polling.
    * - Lifecycle
-     - ``NfcTransportRfal::Stop()``
+     - ``NfcTransport::Stop()``
      - Stops NFC polling.
 
 For application/stack layering and event processing over NFC, see :ref:`aliro_application_interactions`.
@@ -193,17 +202,17 @@ Option definitions and defaults are in :file:`drivers/nfc/stm/Kconfig.rfal` and 
      - Uses the default RFAL configuration, suitable for general use cases where no specific tuning is required.
    * - ``CONFIG_RFAL_WAKEUP_POLL_BEFORE``
      - Enable polling before entering Wake-Up mode for better device detection.
-   * - ``CONFIG_RFAL_DISCOVERY_DEV_LIMIT``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_DEV_LIMIT``
      - Maximum number of NFC devices to discover in a single polling cycle (range: 1-10).
-   * - ``CONFIG_RFAL_DISCOVERY_TOTAL_DURATION_MS``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_TOTAL_DURATION_MS``
      - Total duration of each polling cycle in milliseconds (range: 10-2000ms).
-   * - ``CONFIG_RFAL_DISCOVERY_COMP_MODE_EMV``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_COMP_MODE_EMV``
      - Enable EMVCo compliance mode for payment card compatibility.
-   * - ``CONFIG_RFAL_DISCOVERY_COMP_MODE_ISO``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_COMP_MODE_ISO``
      - Enable ISO/IEC 14443 compliance mode for general NFC compatibility.
-   * - ``CONFIG_RFAL_DISCOVERY_MAX_BR``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_MAX_BR``
      - Maximum bitrate for NFC communication (0=106kbps, 1=212kbps, 2=424kbps, 3=848kbps).
-   * - ``CONFIG_RFAL_DISCOVERY_GBLEN``
+   * - ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_RFAL_DISCOVERY_GBLEN``
      - Length of General Bytes for NFC-DEP P2P activation (range: 0-48 bytes).
    * - ``CONFIG_RFAL_WAKEUP_NPOLLS``
      - Number of polling cycles to perform before and after Wake-Up mode (range: 1-100).
@@ -255,5 +264,5 @@ The ``x-nucleo-nfc`` compatible string supports X-NUCLEO-NFC09A1 and X-NUCLEO-NF
 Integrating a third-party NFC chip
 **********************************
 
-Replace ``NfcTransportRfal`` with a class that implements the same transport methods and forwards received APDUs to ``AliroStack::HandleSessionData()``.
+Provide your own NFC transport backend that implements the functions declared in :file:`nfc_transport/nfc_transport_backend.h` and reports NFC reader events through the registered callbacks.
 For the porting guide — method reference, build changes, and bring-up sequence — see :ref:`nfc_custom_integration`.
