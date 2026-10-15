@@ -77,6 +77,8 @@ struct ReaderDescriptor {
 	ConstData mProductId{};
 	/** @brief Firmware version. */
 	ConstData mFirmwareVersion{};
+	/** @brief Enables sending the Reader Descriptor in an additional EXCHANGE command before the step-up phase. */
+	bool mSendBeforeStepUp{ false };
 };
 
 /**
