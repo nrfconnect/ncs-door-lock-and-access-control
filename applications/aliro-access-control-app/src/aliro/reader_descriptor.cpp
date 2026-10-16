@@ -7,6 +7,7 @@
 #include "aliro/reader_descriptor.h"
 
 #include <app_version.h>
+#include <zephyr/sys/util.h>
 
 #include <array>
 #include <cstring>
@@ -30,6 +31,7 @@ Aliro::ReaderDescriptor GetReaderDescriptor()
 		.mProductId = { kProductId.data(), kProductId.size() },
 		.mFirmwareVersion = { reinterpret_cast<const uint8_t *>(APP_VERSION_EXTENDED_STRING),
 				      strlen(APP_VERSION_EXTENDED_STRING) },
+		.mSendBeforeStepUp = IS_ENABLED(CONFIG_DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP),
 	};
 }
 
