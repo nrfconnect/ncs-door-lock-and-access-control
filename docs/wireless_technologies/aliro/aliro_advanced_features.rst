@@ -124,7 +124,7 @@ The applications differ in this respect:
 
 The applications also do not process Revocation Documents or support Aliro schedules.
 Products that require offline revocation or schedule-based access need an additional access policy implementation combined with a trusted time source.
-For the full list of out-of-scope Aliro features, see :ref:`known_issues_and_limitations`.
+For the full list of out-of-scope Aliro features, see the `known issues page on the main branch`_.
 
 Build, configuration, and provisioning
 ======================================

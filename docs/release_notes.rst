@@ -5,7 +5,7 @@ Release notes
 
 The release notes describe the changes introduced in each release of |REPO_NAME|.
 
-Known issues for each release are listed on the :ref:`known issues page on the main branch <known_issues_and_limitations>`.
+Known issues for each release are listed on the `known issues page on the main branch`_.
 
 .. toctree::
    :maxdepth: 1

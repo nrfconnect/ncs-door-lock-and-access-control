@@ -13,7 +13,7 @@
 .. _`ncs app index`: https://nrfconnect.github.io/ncs-app-index/
 .. _`Matter nRF Connect releases`: https://github.com/nrfconnect/sdk-connectedhomeip/releases
 
-.. _`known issues page on the main branch`: https://nrfconnectdocs.nordicsemi.com/addons/door_lock_and_access_control/latest/known_issues_and_limitations.html
+.. _`known issues page on the main branch`: https://nrfconnectdocs.nordicsemi.com/addons/door_lock_and_access_control/latest/known_issues_and_limitations.html#known-issues-and-limitations
 
 .. _`MCU Bluetooth LE programming`: https://docs.nordicsemi.com/r/bundle/nrfutil/page/nrfutil-mcu-manager/guides/mcu_ble_programming.html
 
