@@ -33,7 +33,6 @@ UWB is well suited for hands-free, proximity-based access for the following reas
 * Secure distance measurement that is resistant to relay attacks.
 * Configurable unlock and relock distances for stable hands-free behavior.
 * Stack and driver support for multiple UWB sessions. 
-  See :ref:`known_issues_and_limitations` for current Access Manager session limits.
 
 Role in the add-on
 ==================
