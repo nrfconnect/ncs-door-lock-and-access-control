@@ -270,6 +270,8 @@ For instructions on generating, provisioning, and testing Reader certificates, s
 Reader Descriptor
 *****************
 
+The following section describes the Reader Descriptor and how to configure it in the Aliro stack.
+
 Overview
 ========
 
@@ -277,9 +279,11 @@ The Reader Descriptor is optional metadata that the Reader sends to the User Dev
 It identifies the Reader product and firmware to the User Device.
 The fields are defined by ``Aliro::ReaderDescriptor`` in :file:`lib/aliro/include/aliro/types.h`:
 
-* **Vendor OUI/CID** — Three-byte organizationally unique identifier or company identifier.
-* **Product identifier** — Variable-length product ID chosen by the vendor.
-* **Firmware version** — Variable-length firmware version string.
+* Vendor OUI/CID — Three-byte organizationally unique identifier or company identifier.
+* Product identifier — Variable-length product ID chosen by the vendor.
+* Firmware version — Variable-length firmware version string.
+* Send before Step-up (``mSendBeforeStepUp``) — Enables sending the Reader Descriptor in an additional EXCHANGE command before the Step-up phase.
+  This field is not part of the encoded Reader Descriptor.
 
 Configuration
 =============
@@ -287,6 +291,13 @@ Configuration
 The application passes the descriptor to ``AliroStack::Init(const Aliro::ReaderDescriptor *readerDescriptor)``.
 The stack copies the descriptor and retains it for the lifetime of the stack instance.
 Pass ``nullptr`` to omit the Reader Descriptor from the protocol exchange.
+
+The stack sends the Reader Descriptor once per transaction, in the first EXCHANGE command.
+In a transaction with the Step-up phase, this command is sent during the Step-up phase.
+In that case, the User Device accepts the Reader Descriptor only if it indicates support for notifications.
+
+To send the Reader Descriptor in an additional EXCHANGE command before the Step-up phase instead, set the ``mSendBeforeStepUp`` field.
+Both reference applications set this field from the ``CONFIG_DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP`` Kconfig option, which is disabled by default.
 
 Application defaults
 ====================
