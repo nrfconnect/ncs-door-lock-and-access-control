@@ -48,6 +48,13 @@ config DOOR_LOCK_CREDENTIAL_ISSUER_CA
         If enabled, the Credential Issuer CA public key is supported.
         The Credential Issuer CA public key is used to verify the signature of the Credential Issuer certificate.
 
+config DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP
+    bool "Send Reader Descriptor in additional EXCHANGE before Step-up Phase"
+    depends on DOOR_LOCK_STEP_UP_PHASE
+    help
+        If enabled, the Reader Descriptor is sent in an additional EXCHANGE command before
+        the Step-up phase.
+
 config DOOR_LOCK_READER_CERTIFICATE
 	bool "Support for Reader certificates"
 	select DOOR_LOCK_ALIRO_READER_STORAGE_CERTIFICATE_SUPPORT
