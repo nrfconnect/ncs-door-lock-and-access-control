@@ -8,6 +8,7 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
+      - 'v*-branch'
     paths:
       - '.github/workflows/doc_build.yml'
       - '**.rst'
@@ -16,7 +17,8 @@ on:
     branches:
       - main
     tags:
-      - v*
+      - 'v*'
+      - '!v*-rc*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
