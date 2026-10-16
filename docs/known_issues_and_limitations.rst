@@ -65,6 +65,18 @@ A known issue can list one or both of the following entries:
 .. known-issues-filter::
    :default: 1.2.1
 
+.. rst-class:: v1-2-1
+
+AL-967: Step-up certification tests fail when the Reader Descriptor is sent before the Step-up phase
+   When the ``CONFIG_DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP`` Kconfig option is enabled, the Reader sends an additional EXCHANGE command with the Reader Descriptor before the Step-up phase.
+   The Aliro Test Harness does not accept this optional EXCHANGE command and mistakes it for the Step-up SELECT or ENVELOPE command.
+   As a result, all ``NFC_RDR_STEPUP_*`` and ``NFC_RDR_NEG_STEPUP_*`` certification tests fail.
+   See `Test Harness issue #437`_.
+
+   **Workaround:**
+   Do not enable the ``CONFIG_DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP`` Kconfig option when running the Step-up certification tests.
+   The option is disabled by default.
+
 .. rst-class:: v1-2-1 v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
 
 AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|

@@ -297,7 +297,7 @@ In a transaction with the Step-up phase, this command is sent during the Step-up
 In that case, the User Device accepts the Reader Descriptor only if it indicates support for notifications.
 
 To send the Reader Descriptor in an additional EXCHANGE command before the Step-up phase instead, set the ``mSendBeforeStepUp`` field.
-Both reference applications set this field from the ``CONFIG_DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP`` Kconfig option, which is disabled by default.
+Both Aliro reference applications set this field from the ``CONFIG_DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP`` Kconfig option, which is disabled by default.
 
 Application defaults
 ====================

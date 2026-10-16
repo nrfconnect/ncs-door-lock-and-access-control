@@ -10,6 +10,7 @@
 .. _`test harness hardware requirements`: https://github.com/aliro-access-control/aliro-certification-tool/tree/aliro-sve-v1.0#requirements
 .. _`test harness usage instructions`: https://github.com/aliro-access-control/aliro-certification-tool/tree/aliro-sve-v1.0#usage-instructions
 .. _`Test Harness issue #191`: https://github.com/aliro-access-control/aliro-certification-tool/issues/191
+.. _`Test Harness issue #437`: https://github.com/aliro-access-control/aliro-certification-tool/issues/437
 .. _`ncs app index`: https://nrfconnect.github.io/ncs-app-index/
 .. _`Matter nRF Connect releases`: https://github.com/nrfconnect/sdk-connectedhomeip/releases
 
