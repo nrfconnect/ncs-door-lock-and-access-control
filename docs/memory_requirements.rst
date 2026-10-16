@@ -51,42 +51,42 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
            - 28
-           - 689
+           - 687
            - 4
            - 32
-           - 753
+           - 751
            - 156
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 28
-           - 892
+           - 895
            - 4
            - 32
-           - 956
+           - 959
            - 207
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
            - 28
-           - 820
+           - 821
            - 4
            - 32
-           - 884
+           - 885
            - 188
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 28
-           - 400
+           - 404
            - 4
            - 32
-           - 464
+           - 468
            - 92
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 28
-           - 301
+           - 302
            - 4
            - 32
-           - 365
+           - 366
            - 80
 
    .. group-tab:: nRF5340 DK
@@ -114,18 +114,18 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
            - 32
-           - 622
+           - 620
            - 4
            - 32
-           - 690
+           - 688
            - 167
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 32
-           - 834
+           - 838
            - 4
            - 32
-           - 902
+           - 906
            - 223
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
@@ -138,18 +138,18 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 32
-           - 372
+           - 376
            - 4
            - 32
-           - 440
+           - 444
            - 89
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 32
-           - 265
+           - 266
            - 4
            - 32
-           - 333
+           - 334
            - 77
 
    .. group-tab:: nRF54L15 DK
@@ -177,42 +177,42 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
            - 52
-           - 689
+           - 687
            - 4
            - 40
-           - 785
+           - 783
            - 162
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 52
-           - 901
+           - 904
            - 4
            - 40
-           - 997
+           - 1000
            - 216
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
            - 52
-           - 824
+           - 825
            - 4
            - 40
-           - 920
+           - 921
            - 197
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 52
-           - 413
+           - 417
            - 4
            - 40
-           - 509
+           - 513
            - 93
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 52
-           - 307
+           - 308
            - 4
            - 40
-           - 403
+           - 404
            - 81
 
    .. group-tab:: nRF54LM20 DK
@@ -240,18 +240,18 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
            - 52
-           - 691
+           - 689
            - 4
            - 48
-           - 795
+           - 793
            - 162
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 52
-           - 901
+           - 904
            - 4
            - 48
-           - 1005
+           - 1008
            - 216
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
@@ -264,16 +264,16 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 52
-           - 412
+           - 415
            - 4
            - 48
-           - 516
+           - 519
            - 93
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 52
-           - 307
+           - 308
            - 4
            - 48
-           - 411
+           - 412
            - 81
