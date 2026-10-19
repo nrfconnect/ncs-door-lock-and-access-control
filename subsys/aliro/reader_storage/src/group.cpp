@@ -12,7 +12,9 @@
 #include <aliro/memory.h>
 #include <aliro/utils.h>
 #include <crypto_utils/crypto_utils.h>
+extern "C" {
 #include <psa/protected_storage.h>
+}
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_DECLARE(reader_storage, CONFIG_DOOR_LOCK_ALIRO_READER_STORAGE_LOG_LEVEL);

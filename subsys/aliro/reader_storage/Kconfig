@@ -6,8 +6,10 @@
 
 menuconfig DOOR_LOCK_ALIRO_READER_STORAGE
 	bool "Reader Storage"
-	depends on PSA_PROTECTED_STORAGE
+	depends on SECURE_STORAGE
 	select DOOR_LOCK_ALIRO_CRYPTO_UTILS
+	# The default Reader identifier UID does not fit in 30 bits
+	select SECURE_STORAGE_64_BIT_UID
 
 if DOOR_LOCK_ALIRO_READER_STORAGE
 

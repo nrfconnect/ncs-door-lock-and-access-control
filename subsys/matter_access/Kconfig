@@ -83,7 +83,8 @@ config DOOR_LOCK_MATTER_ACCESS_DEBUG
 config DOOR_LOCK_MATTER_ACCESS_PRINT_STORAGE_STATUS
 	bool "Print storage status after each store call"
 	# This feature assumes that items are eventually stored in Zephyr settings subsystem
-	depends on DOOR_LOCK_MATTER_ACCESS_STORAGE_PERSISTENT_STORAGE || TRUSTED_STORAGE_STORAGE_BACKEND_SETTINGS
+	depends on DOOR_LOCK_MATTER_ACCESS_STORAGE_PERSISTENT_STORAGE || \
+		   SECURE_STORAGE_ITS_STORE_IMPLEMENTATION_SETTINGS
 	help
 	  Debug feature to print the debug-level log that contains information of the entry being stored
 	  to persistent storage and how many bytes are left to store the new entry. It can be used to verify
@@ -101,11 +102,14 @@ config DOOR_LOCK_MATTER_ACCESS_STORAGE_PERSISTENT_STORAGE
 
 config DOOR_LOCK_MATTER_ACCESS_STORAGE_PROTECTED_STORAGE
 	bool "PSA Protected Storage"
-	# PSA SSF Crypto Client is not ready for PSA PS backend
-	depends on !CHIP_WIFI && !PSA_SSF_CRYPTO_CLIENT
+	# PSA SSF Crypto Client is not ready for PSA PS backend. It depends on
+	# HAS_IRONSIDE_SE_CALL, which avoids a Kconfig dependency loop through
+	# PSA_CRYPTO selected by SECURE_STORAGE.
+	depends on !CHIP_WIFI && !HAS_IRONSIDE_SE_CALL
 	# When building with TF-M, Protected Storage is enabled by default
-	select TRUSTED_STORAGE if !BUILD_WITH_TFM
-	select PSA_PROTECTED_STORAGE if !BUILD_WITH_TFM
+	select SECURE_STORAGE if !BUILD_WITH_TFM
+	# UIDs use the full 32-bit range plus the offset in the upper 32 bits
+	select SECURE_STORAGE_64_BIT_UID if SECURE_STORAGE
 
 endchoice
 
@@ -114,6 +118,10 @@ if DOOR_LOCK_MATTER_ACCESS_STORAGE_PROTECTED_STORAGE
 config DOOR_LOCK_MATTER_ACCESS_STORAGE_PROTECTED_STORAGE_UID_OFFSET
 	int "Access storage PSA Protected Storage UID range start"
 	default 0
+
+# Keep the maximum entry size of the deprecated Trusted Storage library
+configdefault SECURE_STORAGE_ITS_MAX_DATA_SIZE
+	default 256 if SECURE_STORAGE
 
 endif # DOOR_LOCK_MATTER_ACCESS_STORAGE_PROTECTED_STORAGE
 

@@ -11,7 +11,9 @@
 #include <access_manager.h>
 #include <doorlock/utils/utils.h>
 
+extern "C" {
 #include <psa/protected_storage.h>
+}
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(credential_issuer_keys, CONFIG_DOOR_LOCK_APP_LOG_LEVEL);

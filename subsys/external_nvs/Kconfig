@@ -35,8 +35,11 @@ config  DOOR_LOCK_EXTERNAL_NVS_MAX_DATA_SIZE
 config DOOR_LOCK_EXTERNAL_NVS_ROLLBACK_PROTECTION
 	bool "Enable rollback protection"
 	depends on SETTINGS
-	select TRUSTED_STORAGE if (!PSA_SSF_CRYPTO_CLIENT && !BUILD_WITH_TFM)
-	select PSA_PROTECTED_STORAGE if (TRUSTED_STORAGE && !PSA_SSF_CRYPTO_CLIENT && !BUILD_WITH_TFM)
+	# PSA_SSF_CRYPTO_CLIENT depends on HAS_IRONSIDE_SE_CALL, which avoids a Kconfig
+	# dependency loop through PSA_CRYPTO selected by SECURE_STORAGE
+	select SECURE_STORAGE if (!HAS_IRONSIDE_SE_CALL && !BUILD_WITH_TFM)
+	# The default Unique ID UID does not fit in 30 bits
+	select SECURE_STORAGE_64_BIT_UID if SECURE_STORAGE
 	default y
 	help
 	  Enable rollback protection for the external NVS storage.

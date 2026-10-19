@@ -32,7 +32,9 @@
 
 #include "access_storage_print.h"
 
+extern "C" {
 #include <psa/protected_storage.h>
+}
 #include <zephyr/sys/__assert.h>
 
 namespace DoorLock::MatterAccess {

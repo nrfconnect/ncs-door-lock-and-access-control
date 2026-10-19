@@ -62,6 +62,15 @@ config MAIN_STACK_SIZE
 
 endif
 
+# Keep entries stored by the deprecated Trusted Storage library readable
+configdefault SECURE_STORAGE_TRUSTED_STORAGE_COMPATIBILITY
+	default y
+
+# The ZMS store implementation supports only 30-bit UIDs
+choice SECURE_STORAGE_ITS_STORE_IMPLEMENTATION
+	default SECURE_STORAGE_ITS_STORE_IMPLEMENTATION_SETTINGS
+endchoice
+
 # Workaround for KRKNWK-20979.
 # We must use BT multirole for pairing to work after Matter commissioning.
 # TODO: Remove this once the issue is fixed.

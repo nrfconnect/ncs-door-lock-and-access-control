@@ -6,7 +6,9 @@
 
 #pragma once
 
+extern "C" {
 #include <psa/protected_storage.h>
+}
 #include <zephyr/sys/util.h>
 
 #include <cstdint>

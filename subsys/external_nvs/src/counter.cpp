@@ -10,7 +10,9 @@
 #include <tuple>
 
 #include <psa/crypto.h>
+extern "C" {
 #include <psa/protected_storage.h>
+}
 #include <zephyr/logging/log.h>
 #include <zephyr/settings/settings.h>
 

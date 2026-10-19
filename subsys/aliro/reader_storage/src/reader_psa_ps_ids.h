@@ -7,7 +7,9 @@
 #pragma once
 
 #include <psa/crypto.h>
+extern "C" {
 #include <psa/protected_storage.h>
+}
 
 namespace DoorLock::ReaderStorage {
 

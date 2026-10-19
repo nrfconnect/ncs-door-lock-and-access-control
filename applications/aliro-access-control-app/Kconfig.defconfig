@@ -10,14 +10,27 @@ config BT_DEVICE_NAME
 config NCS_ALIRO_LIB
 	default y
 
-config TRUSTED_STORAGE
+configdefault SECURE_STORAGE
+	default y
+
+# Aliro PSA Protected Storage UIDs do not fit in the default 30-bit range
+configdefault SECURE_STORAGE_64_BIT_UID
 	default y
 
 config MBEDTLS_PSA_CRYPTO_STORAGE_C
 	default y
 
-choice TRUSTED_STORAGE_BACKEND_AEAD_KEY
-	default TRUSTED_STORAGE_BACKEND_AEAD_KEY_DERIVE_FROM_HUK
+# The ZMS store implementation supports only 30-bit UIDs
+choice SECURE_STORAGE_ITS_STORE_IMPLEMENTATION
+	default SECURE_STORAGE_ITS_STORE_IMPLEMENTATION_SETTINGS
+endchoice
+
+# Keep entries stored by the deprecated Trusted Storage library readable
+configdefault SECURE_STORAGE_TRUSTED_STORAGE_COMPATIBILITY
+	default y
+
+choice SECURE_STORAGE_ITS_TRANSFORM_TSBC_KEY_PROVIDER
+	default SECURE_STORAGE_ITS_TRANSFORM_TSBC_KEY_PROVIDER_HUK_LIBRARY
 endchoice
 
 config HW_UNIQUE_KEY_WRITE_ON_CRYPTO_INIT

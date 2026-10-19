@@ -13,8 +13,5 @@ config MAX_NUMBER_OF_KPERSISTENT
       Specifies the maximum number of Kpersistent keys
       that can be supported in the Expedited-fast Phase.
 
-config TRUSTED_STORAGE
-    default y
-
-config PSA_PROTECTED_STORAGE
+configdefault SECURE_STORAGE
     default y
