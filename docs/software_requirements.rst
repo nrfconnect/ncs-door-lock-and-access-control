@@ -32,7 +32,7 @@ Prepare the environment:
 
    .. code-block:: console
 
-      nrfutil sdk-manager toolchain launch --ncs-version v3.4.1 --shell
+      nrfutil sdk-manager toolchain launch --ncs-version v3.5.0-preview4 --shell
 
 #. Initialize west:
 

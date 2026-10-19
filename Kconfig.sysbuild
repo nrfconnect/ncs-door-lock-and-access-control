@@ -3,6 +3,3 @@
 #
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
-
-configdefault MATTER_ADD_ON
-	default n
