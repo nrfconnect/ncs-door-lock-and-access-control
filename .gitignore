@@ -28,3 +28,6 @@ _pycache__/
 
 /doc/_build*
 twister-out*
+
+# Generated at build time or by west zap-generate
+/applications/**/zap-generated/
