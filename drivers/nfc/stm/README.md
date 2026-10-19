@@ -117,6 +117,6 @@ After integrating your ST NFC platform driver, you can test it by running the NF
 
 where CONFIG_ST25RXXXX_DRV is `Kconfig` which you have created in **step 1** of Integrating NFC platform section.
 
-For example, if you created a `Kconfig` for X-NUCLEO-NFC03A1, the build command for `nrf52840dk_nrf52840` board command would be:
+For example, if you created a `Kconfig` for X-NUCLEO-NFC03A1, the build command for `nrf54l15dk/nrf54l15/cpuapp` board command would be:
 
-    west build -b nrf52840dk_nrf52840 -p -- -DCONFIG_NFC_DRIVER_STM=y -DCONFIG_ST25R95_DRV=y
+    west build -b nrf54l15dk/nrf54l15/cpuapp -p -- -DCONFIG_NFC_DRIVER_STM=y -DCONFIG_ST25R95_DRV=y

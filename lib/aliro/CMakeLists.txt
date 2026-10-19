@@ -24,8 +24,6 @@ endif()
 
 if(CONFIG_CPU_CORTEX_M33)
   set(CPU_NAME "cortex-m33")
-elseif(CONFIG_CPU_CORTEX_M4)
-  set(CPU_NAME "cortex-m4")
 else()
   message(FATAL_ERROR "Unsupported CPU")
 endif()

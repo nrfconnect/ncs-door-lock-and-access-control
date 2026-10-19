@@ -47,10 +47,6 @@ The application supports the following development kits:
      - PCA10095
      - :doc:`nrf5340dk <nrf:app_dev/device_guides/nrf53/index>`
      - ``nrf5340dk/nrf5340/cpuapp``
-   * - :doc:`nRF52840 DK <zephyr:boards/nordic/nrf52840dk/doc/index>`
-     - PCA10056
-     - :doc:`nrf52840dk <nrf:app_dev/device_guides/nrf52/index>`
-     - ``nrf52840dk/nrf52840``
 
 If you want to commission the |matter_name| device and control it remotely through a Thread network, you need to set up the :doc:`Thread Border Router <nrf:protocols/thread/tools>` and control it with the :doc:`chip-tool <matter:chip_tool_guide>`, or use a commercial ecosystem controller.
 When this happens, you will also be able to control it through a Matter controller device :doc:`configured on PC or smartphone <nrf:protocols/matter/getting_started/testing/index>`.
@@ -239,7 +235,6 @@ Device firmware upgrade support
 
    The following platforms require external flash memory to perform the DFU:
 
-   * nRF52840 DK
    * nRF5340 DK
    * nRF54L15 DK
 
@@ -810,11 +805,11 @@ Testing Bluetooth LE with Nordic UART Service
 
          .. group-tab:: Command line
 
-            For example, for the ``nrf52840dk/nrf52840``:
+            For example, for the ``nrf54l15dk/nrf54l15/cpuapp``:
 
             .. code-block:: console
 
-               west build -b nrf52840dk/nrf52840 -- -Dmatter-door-lock-app_SNIPPET=bt_nus
+               west build -b nrf54l15dk/nrf54l15/cpuapp -- -Dmatter-door-lock-app_SNIPPET=bt_nus
 
    #. Prepare the development kit for testing.
    #. If you built the application with the debug configuration, connect the board to a UART console to see the log entries from the device.

@@ -21,7 +21,6 @@
 .. _`nRF5340 DK connector interface`: https://docs.nordicsemi.com/bundle/ug_nrf5340_dk/page/UG/dk/connector_if.html
 .. _`nRF5340 DK external memory`: https://docs.nordicsemi.com/bundle/ug_nrf5340_dk/page/UG/dk/hw_external_memory.html
 
-.. _`nRF52840 DK connector interface`: https://docs.nordicsemi.com/bundle/ug_nrf52840_dk/page/UG/dk/connector_if.html
 
 .. _`Power Profiler Kit II`: https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/PPK_user_guide_Intro.html
 

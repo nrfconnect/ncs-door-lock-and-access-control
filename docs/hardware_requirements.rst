@@ -23,10 +23,6 @@ Depending on the transport technology you want to use, the |APPS_NAME| support t
      - PCA
      - Board name
      - Build target
-   * - :doc:`nRF52840 DK <zephyr:boards/nordic/nrf52840dk/doc/index>`
-     - PCA10056
-     - :doc:`nrf52840dk <nrf:app_dev/device_guides/nrf52/index>`
-     - ``nrf52840dk/nrf52840``
    * - :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>`
      - PCA10095
      - :doc:`nrf5340dk <nrf:app_dev/device_guides/nrf53/index>`
@@ -189,12 +185,6 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
    .. group-tab:: nRF5340 DK
 
       The `nRF5340 DK <nRF5340 DK connector interface_>`_ has **P5** and **P20** connectors located between their Arduino headers.
-      These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
-      To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
-
-   .. group-tab:: nRF52840 DK
-
-      The `nRF52840 DK <nRF52840 DK connector interface_>`_ has **P5** and **P20** connectors located between their Arduino headers.
       These connectors might cause electrical shorts with the NFC reader expansion board, which can lead to NFC driver initialization failures and application crashes.
       To prevent shorts, ensure proper connection of the NFC reader expansion board and maintain adequate clearance between the connectors and the expansion board.
 

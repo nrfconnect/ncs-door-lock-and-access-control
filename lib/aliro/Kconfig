@@ -6,7 +6,7 @@
 
 menuconfig NCS_ALIRO
 	bool "NCS Aliro Stack"
-	depends on (SOC_SERIES_NRF54L || SOC_SERIES_NRF53 || SOC_SERIES_NRF52)
+	depends on (SOC_SERIES_NRF54L || SOC_SERIES_NRF53)
 	select NFC_T4T_APDU
 	select SMF
 	select SMF_ANCESTOR_SUPPORT

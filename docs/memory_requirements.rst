@@ -26,69 +26,6 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
 .. tabs::
 
-   .. group-tab:: nRF52840 DK
-
-      The following table lists memory requirements for the applications running on the nRF52840 DK.
-
-      .. list-table:: |mem_values_caption|
-         :header-rows: 1
-
-         * - Application
-           - MCUboot ROM
-           - Application ROM
-           - Factory data
-           - Settings
-           - Total ROM
-           - Total RAM (incl. static heap)
-
-         * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Debug)
-           - 28
-           - 776
-           - 4
-           - 32
-           - 840
-           - 160
-
-         * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
-           - 28
-           - 689
-           - 4
-           - 32
-           - 753
-           - 156
-
-         * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
-           - 28
-           - 892
-           - 4
-           - 32
-           - 956
-           - 207
-
-         * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
-           - 28
-           - 820
-           - 4
-           - 32
-           - 884
-           - 188
-
-         * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
-           - 28
-           - 400
-           - 4
-           - 32
-           - 464
-           - 92
-
-         * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
-           - 28
-           - 301
-           - 4
-           - 32
-           - 365
-           - 80
-
    .. group-tab:: nRF5340 DK
 
       The following table lists memory requirements for the applications running on the nRF5340 DK.

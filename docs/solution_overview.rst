@@ -29,8 +29,7 @@ Use it to choose the one that best fits your product's use case and requirements
      - * Phone or wearable unlock (NFC tap)
        * Hands-free proximity unlock with Ultra-Wideband (UWB)
      - Office buildings, hotels, co-working spaces, and enterprise campuses where employees and guests use phones or wearables as digital keys.
-     - * nRF52840 (NFC only; not recommended for new designs)
-       * nRF5340
+     - * nRF5340
        * nRF54L15 (NFC only)
        * nRF54LM20A
        * nRF54LM20B
@@ -42,8 +41,7 @@ Use it to choose the one that best fits your product's use case and requirements
        * Remote control and automation
        * PIN- and schedule-based access
      - Residential locks with full smart home ecosystem integration and keypad-based entry, at a competitive price point.
-     - * nRF52840 (not recommended for new designs)
-       * nRF5340
+     - * nRF5340
        * nRF54L15
        * nRF54LM20A
        * nRF54LM20B
@@ -58,8 +56,7 @@ Use it to choose the one that best fits your product's use case and requirements
        * Remote control and automation
        * PIN- and schedule-based access
      - Residential locks combining the modern phone-as-a-key experience with full smart home ecosystem support.
-     - * nRF52840 (NFC only; not recommended for new designs)
-       * nRF5340
+     - * nRF5340
        * nRF54L15 (NFC only)
        * nRF54LM20A
        * nRF54LM20B

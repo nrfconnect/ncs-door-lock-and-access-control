@@ -37,7 +37,7 @@ config DOOR_LOCK_STEP_UP_PHASE
     bool "Support for Aliro Step-up Phase"
     default y
     select DOOR_LOCK_ALIRO_ACCESS_DOCUMENT_PARSER
-    select DOOR_LOCK_EXTERNAL_NVS if !SOC_SERIES_NRF52
+    select DOOR_LOCK_EXTERNAL_NVS
     help
         If enabled, the Step-up phase is supported.
         The user authentication is based on the Access Document.

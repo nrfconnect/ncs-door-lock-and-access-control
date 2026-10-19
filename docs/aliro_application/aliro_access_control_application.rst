@@ -39,10 +39,6 @@ The application supports the following development kits:
      - PCA10095
      - :doc:`nrf5340dk <nrf:app_dev/device_guides/nrf53/index>`
      - ``nrf5340dk/nrf5340/cpuapp``
-   * - :doc:`nRF52840 DK <zephyr:boards/nordic/nrf52840dk/doc/index>`
-     - PCA10056
-     - :doc:`nrf52840dk <nrf:app_dev/device_guides/nrf52/index>`
-     - ``nrf52840dk/nrf52840``
 
 You also need an :ref:`NFC reader expansion board <hw_requirements_nfc_reader>` connected to the DK.
 For Aliro over Bluetooth LE and UWB, add an :ref:`external UWB module <hw_requirements_uwb_module>` on the :doc:`nRF5340 DK <zephyr:boards/nordic/nrf5340dk/doc/index>` or :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>`.
