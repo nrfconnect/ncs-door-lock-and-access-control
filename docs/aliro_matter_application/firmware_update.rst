@@ -20,7 +20,7 @@ The application allows you to update the firmware of the device using the Matter
 This allows you to remotely upgrade the door lock firmware without physical access to the device.
 
 This guide uses CHIP Tool as a Matter controller and assumes you have a commissioned Matter device.
-For details on CHIP Tool usage, see the :doc:`Matter chip-tool guide <matter:chip_tool_guide>`.
+For details on CHIP Tool usage, see the `Matter chip-tool guide <CHIP Tool guide_>`_.
 
 Prerequisites
 =============

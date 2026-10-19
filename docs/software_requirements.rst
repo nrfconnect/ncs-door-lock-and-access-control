@@ -102,4 +102,4 @@ If you are developing a door lock with Aliro support, and you want to execute th
 Matter development tools
 *************************
 
-If you are developing a door lock with Matter support, you need the :doc:`Matter tools <nrf:protocols/matter/getting_started/tools>`.
+If you are developing a door lock with Matter support, you need the :doc:`Matter tools <ncs-matter:matter/getting_started/tools>`.

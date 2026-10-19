@@ -7,12 +7,12 @@ Matter Door Lock Application
    :local:
    :depth: 2
 
-The Matter |matter_name| Application demonstrates the usage of the :doc:`Matter <nrf:protocols/matter/index>` application layer to build a door lock device with one basic bolt.
+The Matter |matter_name| Application demonstrates the usage of the :doc:`Matter <ncs-matter:matter/index>` application layer to build a door lock device with one basic bolt.
 You can use it as a reference for creating your application.
 
 This device works as a Matter accessory device, meaning it can be paired and controlled remotely over a Matter network built on top of a low-power 802.15.4 (Thread) protocol.
 This device works as a Thread Sleepy End Device.
-See the :doc:`Adding clusters to Matter application <nrf:protocols/matter/getting_started/adding_clusters>` page for an overview of the process you need to follow.
+See the :doc:`Adding clusters to Matter application <ncs-matter:matter/getting_started/adding_clusters>` page for an overview of the process you need to follow.
 
 .. note::
 
@@ -48,14 +48,14 @@ The application supports the following development kits:
      - :doc:`nrf5340dk <nrf:app_dev/device_guides/nrf53/index>`
      - ``nrf5340dk/nrf5340/cpuapp``
 
-If you want to commission the |matter_name| device and control it remotely through a Thread network, you need to set up the :doc:`Thread Border Router <nrf:protocols/thread/tools>` and control it with the :doc:`chip-tool <matter:chip_tool_guide>`, or use a commercial ecosystem controller.
-When this happens, you will also be able to control it through a Matter controller device :doc:`configured on PC or smartphone <nrf:protocols/matter/getting_started/testing/index>`.
+If you want to commission the |matter_name| device and control it remotely through a Thread network, you need to set up the :doc:`Thread Border Router <nrf:protocols/thread/tools>` and control it with the `chip-tool <CHIP Tool guide_>`_, or use a commercial ecosystem controller.
+When this happens, you will also be able to control it through a Matter controller device :doc:`configured on PC or smartphone <ncs-matter:matter/getting_started/testing/index>`.
 This requires additional hardware depending on the setup you choose.
 
 .. note::
 
     Matter requires the GN tool.
-    If you are updating from the |NCS| version earlier than v1.5.0, see the :doc:`GN installation instructions <nrf:protocols/matter/getting_started/tools>`.
+    If you are updating from the |NCS| version earlier than v1.5.0, see the :doc:`GN installation instructions <ncs-matter:matter/getting_started/tools>`.
 
 IPv6 network support
 ====================
@@ -129,7 +129,7 @@ Scheduled timed access
    The scheduled timed access feature is an optional |matter_type| feature that can be applicable to all available lock users.
    You can use the scheduled timed access feature to allow guest users of the home to access the lock at the specific scheduled times.
    To use this feature, you need to create at least one user on the application device, and assign credentials to that user.
-   For more information about setting user credentials, see the *Saving users and credentials* on |matter_name| devices section of the :doc:`Matter chip-tool guide <matter:chip_tool_guide>` in the :doc:`Matter documentation <matter:index>` set, and the :ref:`matter_door_lock_application_testing` section.
+   For more information about setting user credentials, see the *Saving users and credentials* on |matter_name| devices section of the `Matter chip-tool guide <CHIP Tool guide_>`_ in the `Matter documentation <Matter SDK documentation_>`_ set, and the :ref:`matter_door_lock_application_testing` section.
    You can schedule the following types of timed access:
 
       * ``Week-day`` - Restricts access to a specified time window on certain days of the week for a specific user.
@@ -217,7 +217,7 @@ Device firmware upgrade support
 
    The |matter_type| supports device firmware upgrade (DFU) over-the-air (OTA) using the following protocols:
 
-   * :doc:`Matter OTA <nrf:protocols/matter/overview/dfu>` update protocol that uses the Matter operational network for querying and downloading a new firmware image.
+   * :doc:`Matter OTA <ncs-matter:matter/overview/dfu>` update protocol that uses the Matter operational network for querying and downloading a new firmware image.
    * Simple Management Protocol (SMP) over Bluetooth LE.
      In this case, the DFU can be done either using a smartphone application or a PC command-line tool.
      This protocol is not part of the Matter specification.
@@ -238,7 +238,7 @@ Device firmware upgrade support
    * nRF5340 DK
    * nRF54L15 DK
 
-   You can run DFU without external flash memory on the nRF54LM20 DK using the :doc:`MCUboot image compression <nrf:protocols/matter/end_product/bootloader>` feature.
+   You can run DFU without external flash memory on the nRF54LM20 DK using the :doc:`MCUboot image compression <ncs-matter:matter/end_product/bootloader>` feature.
 
    .. tabs::
 
@@ -274,7 +274,7 @@ Factory data support
    * ``CONFIG_CHIP_FACTORY_DATA``
    * ``SB_CONFIG_MATTER_ADD_ON_FACTORY_DATA_GENERATE``
 
-   To learn more about factory data, read the :doc:`Factory provisioning <nrf:protocols/matter/end_product/factory_provisioning>` user guide.
+   To learn more about factory data, read the :doc:`Factory provisioning <ncs-matter:matter/end_product/factory_provisioning>` user guide.
 
 Custom board with Nordic SoC
 ----------------------------
@@ -288,17 +288,17 @@ Custom board with Nordic SoC
       #. Update the :doc:`Write your devicetree <zephyr:hardware/porting/board_porting>` (all `.dts` and `.dtsi` files) to match your board's requirements.
       #. Write Kconfig files to enable all required Kconfig options for your board.
       #. If your device uses external flash, add its devicetree definition under the :file:`board/<board_name>_<soc_name>.overlay` file, and set ``nordic,pm-ext-flash`` in the devicetree's ``chosen`` configuration.
-      #. Refer to the :doc:`Advanced Matter Kconfig options <nrf:protocols/matter/getting_started/advanced_kconfigs>` user guide, create your list of advanced configurations for your board, and apply the selected Kconfig options in the :file:`prj.conf` file.
-      #. See the :doc:`List of threads used in Matter application <nrf:protocols/matter/getting_started/memory_optimization>` and adjust stack sizes according to your board and project requirements.
+      #. Refer to the :doc:`Advanced Matter Kconfig options <ncs-matter:matter/getting_started/advanced_kconfigs>` user guide, create your list of advanced configurations for your board, and apply the selected Kconfig options in the :file:`prj.conf` file.
+      #. See the :doc:`List of threads used in Matter application <ncs-matter:matter/getting_started/memory_optimization>` and adjust stack sizes according to your board and project requirements.
       #. A custom board does not have support for LEDs and buttons by default.
          Therefore, you need to provide your own implementation of the :file:`ncs-matter/subsys/board/board.cpp` board file.
 
    For more information, see the following guides:
 
       * :doc:`Board porting guide <zephyr:hardware/porting/board_porting>` and :doc:`Application development <zephyr:develop/application/index>` to learn how to create a custom board directory.
-      * :doc:`Optimizing memory usage in Matter applications <nrf:protocols/matter/getting_started/memory_optimization>` to learn how to optimize memory on your board.
-      * :doc:`Advanced Matter Kconfig options <nrf:protocols/matter/getting_started/advanced_kconfigs>` to learn about Matter configuration.
-      * :doc:`Matter hardware and memory requirements <nrf:protocols/matter/getting_started/hw_requirements>` to learn about hardware requirements for Nordic Development Kits and to use as a reference when planning your custom board.
+      * :doc:`Optimizing memory usage in Matter applications <ncs-matter:matter/getting_started/memory_optimization>` to learn how to optimize memory on your board.
+      * :doc:`Advanced Matter Kconfig options <ncs-matter:matter/getting_started/advanced_kconfigs>` to learn about Matter configuration.
+      * :doc:`Matter hardware and memory requirements <ncs-matter:setup>` to learn about hardware requirements for Nordic Development Kits and to use as a reference when planning your custom board.
 
 Internal memory only
 --------------------
@@ -308,7 +308,7 @@ Internal memory only
     For the |matter_dks_internal|, you can configure the |matter_type| to use only the internal RRAM for storage.
     It applies to the DFU as well, which means that both the currently running firmware and the new firmware to be updated will be stored within the device's internal RRAM memory.
 
-    The DFU image fits in the internal flash memory if you use :doc:`MCUboot image compression <nrf:protocols/matter/end_product/bootloader>`.
+    The DFU image fits in the internal flash memory if you use :doc:`MCUboot image compression <ncs-matter:matter/end_product/bootloader>`.
 
     This configuration is disabled by default for the Matter |matter_name| |matter_type|.
     To enable it, set the ``FILE_SUFFIX`` CMake option to ``internal``.
@@ -458,7 +458,7 @@ Testing
 *******
 
 This section shows how to test the |matter_type|.
-You can test it using your PC and the :doc:`CHIP Tool for Linux or macOS <matter:chip_tool_guide>` or a commercial ecosystem that supports Matter.
+You can test it using your PC and the `CHIP Tool for Linux or macOS <CHIP Tool guide_>`_ or a commercial ecosystem that supports Matter.
 
 .. _matter_lock_app_testing_start:
 
@@ -579,7 +579,7 @@ See the ecosystem manual page for instructions on how to use it.
 When you start the commissioning procedure, the ecosystem controller must get the onboarding information from the Matter accessory device.
 The onboarding information representation depends on your commissioner setup.
 
-For this |matter_type|, you can use one of the following :doc:`Onboarding information formats <nrf:protocols/matter/overview/commissioning>` to provide the commissioner with the data payload that includes the device discriminator and the setup PIN code:
+For this |matter_type|, you can use one of the following :doc:`Onboarding information formats <ncs-matter:matter/overview/commissioning>` to provide the commissioner with the data payload that includes the device discriminator and the setup PIN code:
 
   .. list-table:: |matter_name| |matter_type| onboarding information
      :header-rows: 1
@@ -621,7 +621,7 @@ Testing remote access with PIN code credential
    .. note::
       You can test the PIN code credential support with any Matter compatible controller.
       The following steps use the CHIP Tool controller as an example.
-      For more information about setting user credentials, see the *Saving users and credentials on Door Lock devices* section of the :doc:`Matter chip-tool guide <matter:chip_tool_guide>` page.
+      For more information about setting user credentials, see the *Saving users and credentials on Door Lock devices* section of the `Matter chip-tool guide <CHIP Tool guide_>`_ page.
 
    #. Prepare the development kit for testing.
    #. Make the |matter_name| require a PIN code for remote operations:
@@ -848,7 +848,7 @@ Dependencies
 
 This |matter_type| uses the Matter library that includes the |NCS| platform integration layer:
 
-* :doc:`Matter <nrf:protocols/matter/index>`
+* :doc:`Matter <ncs-matter:matter/index>`
 
 In addition, the |matter_type| uses the following |NCS| components:
 

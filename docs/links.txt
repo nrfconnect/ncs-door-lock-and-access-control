@@ -13,6 +13,8 @@
 .. _`Test Harness issue #437`: https://github.com/aliro-access-control/aliro-certification-tool/issues/437
 .. _`ncs app index`: https://nrfconnect.github.io/ncs-app-index/
 .. _`Matter nRF Connect releases`: https://github.com/nrfconnect/sdk-connectedhomeip/releases
+.. _`Matter SDK documentation`: https://project-chip.github.io/connectedhomeip-doc/index.html
+.. _`CHIP Tool guide`: https://project-chip.github.io/connectedhomeip-doc/development_controllers/chip-tool/chip_tool_guide.html
 
 .. _`known issues page on the main branch`: https://nrfconnectdocs.nordicsemi.com/addons/door_lock_and_access_control/latest/known_issues_and_limitations.html
 

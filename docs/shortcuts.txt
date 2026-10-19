@@ -53,9 +53,9 @@
    See :doc:`Testing and optimization <nrf:test_and_optimize>` for the required settings and steps.
 
 .. |matter_cd_info_note_for_samples| replace:: This data payload also includes test Device Attestation, with test Certification Declaration, Product ID, and Vendor ID.
-   These are used for :doc:`Device Attestation within commissioning <nrf:protocols/matter/end_product/attestation>`, and you can generate your own test Certification Declaration by following the :ref:`Testing Device Attestation during development <nrf:ug_matter_device_attestation_testing_da>`.
+   These are used for :doc:`Device Attestation within commissioning <ncs-matter:matter/end_product/attestation>`, and you can generate your own test Certification Declaration by following the :ref:`Testing Device Attestation during development <ncs-matter:ug_matter_device_attestation_testing_da>`.
 
 .. |config| replace:: See :ref:`Configuring and building <nrf:configure_application>` for information about how to permanently or temporarily change the configuration.
 
 .. |matter_unique_discriminator_note| replace:: If you are working with multiple devices, set a unique discriminator for each one, or commission them one at a time.
-   See :doc:`Matter device identification <nrf:protocols/matter/getting_started/advanced_kconfigs>` page for more information.
+   See :doc:`Matter device identification <ncs-matter:matter/getting_started/advanced_kconfigs>` page for more information.

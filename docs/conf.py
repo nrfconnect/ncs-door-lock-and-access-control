@@ -22,6 +22,9 @@ sys.path.insert(0, str(Path(__file__).parent / "_extensions"))
 NCS_VERSION_NUMBER = "3.5.0-preview4"
 _NCS_DOCS_BASE = f"https://nrfconnectdocs.nordicsemi.com/ncs/{NCS_VERSION_NUMBER}"
 _NCS_DOCS_STORAGE = f"https://ncsdoc.z6.web.core.windows.net/ncs/{NCS_VERSION_NUMBER}"
+NCS_MATTER_VERSION = "latest"
+_NCS_MATTER_DOCS_BASE = f"https://nrfconnectdocs.nordicsemi.com/addons/ncs-matter/{NCS_MATTER_VERSION}"
+_NCS_MATTER_DOCS_STORAGE = f"https://ncsdoc.z6.web.core.windows.net/addons/ncs-matter/{NCS_MATTER_VERSION}"
 
 # -- Project information -----------------------------------------------------
 
@@ -50,7 +53,7 @@ extensions = [
 intersphinx_mapping = {
     "nrf": (f"{_NCS_DOCS_BASE}/nrf", f"{_NCS_DOCS_STORAGE}/nrf/objects.inv"),
     "zephyr": (f"{_NCS_DOCS_BASE}/zephyr", f"{_NCS_DOCS_STORAGE}/zephyr/objects.inv"),
-    "matter": (f"{_NCS_DOCS_BASE}/matter", f"{_NCS_DOCS_STORAGE}/matter/objects.inv"),
+    "ncs-matter": (_NCS_MATTER_DOCS_BASE, f"{_NCS_MATTER_DOCS_STORAGE}/objects.inv"),
     "mcuboot": (f"{_NCS_DOCS_BASE}/mcuboot", f"{_NCS_DOCS_STORAGE}/mcuboot/objects.inv"),
 }
 

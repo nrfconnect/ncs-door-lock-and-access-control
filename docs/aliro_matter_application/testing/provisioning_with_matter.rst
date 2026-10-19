@@ -24,7 +24,7 @@ Testing with Matter CHIP Tool
 *****************************
 
 This guide uses CHIP Tool as a Matter controller to commission the door lock and provision Aliro credentials through the command-line interface.
-For details, see the :doc:`Matter chip-tool guide <matter:chip_tool_guide>`.
+For details, see the `Matter chip-tool guide <CHIP Tool guide_>`_.
 
 .. note::
    This approach is recommended for development, testing, and debugging purposes.
