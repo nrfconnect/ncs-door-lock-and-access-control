@@ -24,3 +24,12 @@ target_sources_ifdef(CONFIG_DOOR_LOCK_MATTER_ACCESS_PRINT_STORAGE_STATUS ${lib_n
 if(CONFIG_DOOR_LOCK_MATTER_ACCESS_STORAGE_PERSISTENT_STORAGE)
   target_sources(${lib_name} INTERFACE src/access_storage.cpp)
 endif()
+
+# The Matter headers used here include the ZAP output of the application
+# data model, which is generated into the build directory at build time.
+if(CONFIG_MATTER_ZAP_GENERATION_BUILD_TIME)
+  target_include_directories(${lib_name} INTERFACE
+    $<TARGET_PROPERTY:matter-data-model,INCLUDE_DIRECTORIES>
+  )
+  add_dependencies(${lib_name} matter-data-model-zapgen matter-data-model-codegen)
+endif()
