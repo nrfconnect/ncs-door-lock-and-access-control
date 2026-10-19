@@ -6,7 +6,7 @@
 
 #include "aliro/reader_descriptor.h"
 
-#include <app_version.h>
+#include <zephyr/app_version.h>
 #include <zephyr/sys/util.h>
 
 #include <array>
