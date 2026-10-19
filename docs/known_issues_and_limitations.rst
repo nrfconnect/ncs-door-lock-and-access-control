@@ -1,5 +1,3 @@
-:orphan:
-
 .. _known_issues_and_limitations:
 
 Known issues and limitations
