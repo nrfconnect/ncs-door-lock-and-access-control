@@ -33,6 +33,22 @@ target_sources(app PRIVATE
 # variable may be uninitialized, but actually, it is wrongly interpreted by the Zephyr toolchain.
 target_compile_options(matter-data-model PRIVATE -Wno-error=maybe-uninitialized)
 
+# Without the OpenThread shell and logging, nothing references the OpenThread API objects before
+# libCHIP.a is scanned, so symbols used only by Matter's Thread platform stay unresolved. Link the
+# OpenThread library again after Matter, so that the linker can resolve them.
+if(CONFIG_OPENTHREAD_SOURCES)
+  if(CONFIG_OPENTHREAD_FTD)
+    set(ot_core_lib openthread-ftd)
+  else()
+    set(ot_core_lib openthread-mtd)
+  endif()
+  target_link_libraries(chip INTERFACE
+    -Wl,--start-group
+    $<TARGET_FILE:${ot_core_lib}>
+    -Wl,--end-group
+  )
+endif()
+
 ncs_configure_data_model()
 
 # NORDIC SDK APP END
