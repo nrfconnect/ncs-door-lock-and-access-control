@@ -30,6 +30,10 @@ choice OPENTHREAD_DEVICE_TYPE
 	default OPENTHREAD_MTD
 endchoice
 
+choice OPENTHREAD_IMPLEMENTATION
+	default OPENTHREAD_SOURCES
+endchoice
+
 config CHIP_ENABLE_ICD_SUPPORT
 	default y
 
