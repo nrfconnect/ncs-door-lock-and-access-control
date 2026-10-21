@@ -103,6 +103,13 @@ void AccessManager::HandleRangingSessionStateChanged(SessionContext sessionConte
 	return Impl()->_HandleRangingSessionStateChanged(sessionContext, state);
 }
 
+#ifdef CONFIG_DOOR_LOCK_ACCESS_MANAGER_SUSPEND_RANGING_WHEN_UNSECURED
+void AccessManager::SuspendActiveRangingSessions()
+{
+	return Impl()->_SuspendActiveRangingSessions();
+}
+#endif
+
 void AccessManager::HandleSessionTermination(SessionContext sessionContext)
 {
 	return Impl()->_HandleSessionTermination(sessionContext);
