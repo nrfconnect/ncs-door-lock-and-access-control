@@ -14,9 +14,10 @@ tests:
       - aliro-access-control-app_SNIPPET="bt_nus"
       - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n
   app.door_lock.nfc:
-    platform_allow: &platform_5340
+    platform_allow: &platform_5340_7120
       - nrf5340dk/nrf5340/cpuapp
-    integration_platforms: *platform_5340
+      - nrf7120dk/nrf7120/cpuapp
+    integration_platforms: *platform_5340_7120
     extra_args:
       - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n
   smoke.door_lock.nfc-uwb_stub:
