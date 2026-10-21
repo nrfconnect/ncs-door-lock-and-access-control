@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Wed, 21 Oct 2026 12:00:00 +0200
+Subject: [PATCH] drivers: mspi: dw: Skip SSIENR write when suspended
+
+With PM device runtime enabled by default, pm_device_driver_init() leaves
+the device suspended without calling the resume action. The controller
+core is then inaccessible and the unconditional SSIENR write in dev_init()
+causes a precise bus fault. A suspended controller is already disabled, so
+skip the write in that case.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+diff --git a/drivers/mspi/mspi_dw.c b/drivers/mspi/mspi_dw.c
+index 723b705801f..dfbebc1ddd4 100644
+--- a/drivers/mspi/mspi_dw.c
++++ b/drivers/mspi/mspi_dw.c
+@@ -2129,7 +2129,17 @@ static int dev_init(const struct device *dev)
+ 		return rc;
+ 	}
+ 
+-	/* Make sure controller is disabled. */
++	/* Make sure controller is disabled. A device left suspended (PM runtime
++	 * enabled by default) has its core powered down and thus inaccessible,
++	 * but it is already disabled, so there is nothing to do in that case.
++	 */
++	enum pm_device_state state;
++
++	if (pm_device_state_get(dev, &state) == 0 &&
++	    state == PM_DEVICE_STATE_SUSPENDED) {
++		return 0;
++	}
++
+ 	write_ssienr(dev, 0);
+ 
+ 	return 0;
+-- 
+2.43.0
