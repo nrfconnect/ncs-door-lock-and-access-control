@@ -11,6 +11,7 @@ on:
       - ".editorconfig"
     branches:
       - main
+      - "v*-branch"
   push:
     branches:
       - main
