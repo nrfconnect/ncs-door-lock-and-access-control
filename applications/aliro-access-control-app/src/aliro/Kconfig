@@ -67,7 +67,6 @@ config DOOR_LOCK_READER_CERTIFICATE
 
 endmenu # Aliro features
 
-rsource "platform/Kconfig"
 rsource "access_manager/Kconfig"
 rsource "kpersistent_manager/Kconfig"
 rsource "storage/Kconfig"

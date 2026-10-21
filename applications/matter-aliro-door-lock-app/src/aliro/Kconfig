@@ -71,7 +71,6 @@ config DOOR_LOCK_TIME_CONCEPT
 
 endmenu # Aliro features
 
-rsource "platform/Kconfig"
 rsource "access_manager/Kconfig"
 rsource "cli/Kconfig"
 rsource "kpersistent_manager/Kconfig"

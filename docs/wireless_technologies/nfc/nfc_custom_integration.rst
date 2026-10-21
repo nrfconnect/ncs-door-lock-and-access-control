@@ -24,8 +24,9 @@ This guide assumes familiarity with the following:
 * Aliro specification — In particular, the NFC transport protocol (ISO14443-A) and the Access Protocol message exchange flow.
   Your NFC implementation must handle the complete Aliro message exchange over NFC without requiring modifications to the protocol layer.
   See :ref:`aliro_application_interactions` for layering, stack event processing, and the NFC data path.
-* Direct integration pattern used in the add-on — The platform code uses direct class-to-class communication between ``AliroStack`` and the NFC transport implementation (``NfcTransportRfal``).
-  You replace the transport class but keep the same interface methods and calling patterns.
+* NFC transport backend contract used in the add-on — The application code calls the ``NfcTransport`` functions, which forward each call to the NFC transport backend.
+  The backend reports NFC reader events through callbacks and never calls the Aliro stack directly.
+  You provide your own backend and keep ``NfcTransport`` and its callers unchanged.
   See :ref:`nfc_custom_integration_door_lock_addon` for details.
 * nRF Connect SDK and Zephyr build system — You configure the port through Kconfig options and adapt CMake files.
 
@@ -68,21 +69,26 @@ If your SDK cannot satisfy one of the required capabilities, the corresponding A
 Starting point
 ==============
 
-Since NFC integration uses direct class replacement rather than a plugin architecture, you can replace the existing ``NfcTransportRfal`` implementation with your own class or implement a new one that matches your needs and satisfies the Aliro stack API.
+The :file:`subsys/aliro/nfc_transport` module ships the ``NfcTransport`` glue that connects a backend to the Aliro stack, and the reference RFAL backend.
+Select the backend with the ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND`` Kconfig choice:
 
-The reference implementation can be found in:
+* ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND_RFAL`` (default) — Builds the in-tree backend from :file:`subsys/aliro/nfc_transport/rfal_backend/`.
+* ``CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND_EXTERNAL`` — Builds no in-tree backend, so that an out-of-tree module can provide it.
 
-* Header file: :file:`applications/*/src/aliro/platform/nfc/nfc_transport_rfal.h`
-* Implementation file: :file:`applications/*/src/aliro/platform/nfc/nfc_transport_rfal.cpp`
+The relevant files are the following:
 
-When replacing the RFAL concrete implementation with your own, you can build, link, and run the reference application to verify your code is ready.
+* Backend contract: :file:`subsys/aliro/nfc_transport/include/nfc_transport/nfc_transport_backend.h`
+* Aliro glue: :file:`subsys/aliro/nfc_transport/src/nfc_transport.cpp`
+* Reference RFAL backend: :file:`subsys/aliro/nfc_transport/rfal_backend/nfc_transport_rfal.cpp`
+
+When replacing the RFAL backend with your own, you can build, link, and run the reference application to verify your code is ready.
 This allows you to test your integration incrementally as described in the :ref:`porting workflow <nfc_custom_integration_sequence>`.
 
 Solution architecture
 *********************
 
-NFC integration uses direct communication between the Aliro stack and the NFC transport implementation.
-Your code replaces the ``NfcTransportRfal`` class, which translates between the Aliro-facing API and your vendor driver or SDK.
+NFC integration uses the ``NfcTransport`` glue between the Aliro stack and the NFC transport backend.
+Your code sits in the backend, which translates between the backend contract and your vendor driver or SDK.
 
 The table below summarizes each layer, its location in the codebase, and its responsibility.
 The sections that follow divide the port into stack integration and application integration so you can implement and test each part independently.
@@ -98,16 +104,19 @@ The sections that follow divide the port into stack integration and application 
      - Processes Aliro Access Protocol messages, manages authentication state machine, creates/destroys NFC sessions via ``CreateSession()`` and ``DestroySession()``, implements APDU chaining, and sends data via ``Interface::Session::Send()``.
    * - ``Interface::Session``
      - :file:`applications/*/src/aliro/interface_impl/session.cpp`
-     - Routes ``Send()`` calls to appropriate transport based on ``ConnectionHandle`` type. For NFC handles, forwards to ``NfcTransportRfal::Instance().Send()``.
-   * - ``NfcTransportRfal`` (the reference implementation that can be replaced with your own)
-     - :file:`applications/*/src/aliro/platform/nfc/` (replace with your code)
-     - Vendor-specific NFC driver integration, session management, polling control, and data exchange. Calls ``AliroStack::CreateSession()`` and ``HandleSessionData()``.
+     - Routes ``Send()`` calls to appropriate transport based on ``ConnectionHandle`` type. For NFC handles, forwards to ``NfcTransport::Send()``.
+   * - ``NfcTransport`` glue
+     - :file:`subsys/aliro/nfc_transport/src/nfc_transport.cpp`
+     - Forwards application calls to the backend and translates backend callbacks into ``AliroStack::CreateSession()``, ``HandleSessionData()``, and ``DestroySession()`` calls.
+   * - NFC transport backend (the reference implementation that can be replaced with your own)
+     - :file:`subsys/aliro/nfc_transport/rfal_backend/` (in-tree) or an external NFC transport module (out-of-tree)
+     - Vendor-specific NFC driver integration, polling control, and data exchange. Reports device detection, received data, and device loss through callbacks.
    * - NFC Hardware Abstraction Layer
      - Your vendor SDK/driver (replaces RFAL)
      - Low-level NFC transceiver control, ISO14443-A protocol implementation, RF field management, and APDU handling.
    * - Application ``main``
      - :file:`applications/*/src/main.cpp`
-     - Initializes NFC transport via ``NfcTransportRfal::Instance().Init()`` and starts polling during application startup.
+     - Initializes NFC transport via ``NfcTransport::Init()`` and starts polling during application startup.
 
 Integration steps
 *****************
@@ -126,63 +135,51 @@ After completing both steps, follow the :ref:`recommended bring-up sequence <nfc
 Integration with the Aliro stack
 *********************************
 
-The Aliro stack uses direct method calls to communicate with your NFC transport implementation.
-It never includes specific NFC driver headers or vendor SDK dependencies.
+Your NFC transport backend never calls the Aliro stack directly.
+It implements the functions declared in :file:`nfc_transport/nfc_transport_backend.h` and reports NFC reader events through the callbacks registered with ``Backend::Init()``.
+The ``NfcTransport`` glue translates these callbacks into Aliro stack calls, so the backend does not depend on the Aliro stack.
 
-Aliro Stack interface contract
-==============================
+Backend callbacks
+=================
 
-Your NFC transport implementation must meet the Aliro stack API contract.
-The basic requirements are:
+The backend must invoke the following callbacks at the appropriate times:
 
-* A public function that allows sending the data delivered by the Aliro stack to the User Device over NFC.
-* A mechanism that allows informing the Aliro stack that the NFC data has been received from the User Device.
+.. list-table::
+   :header-rows: 1
+   :widths: 30 35 35
 
-Apart from that, your NFC transport implementation must call these Aliro stack methods at appropriate times:
+   * - Callback
+     - When to invoke it
+     - Resulting Aliro stack call
+   * - ``mOnDeviceDetected()``
+     - An ISO-DEP (ISO14443-4) device has been activated.
+       If the callback returns an error, deactivate the device and resume polling.
+     - ``AliroStack::CreateSession(ConnectionHandle::Nfc())``
+   * - ``mOnDataReceived(Data data)``
+     - A response has been received from the active device.
+       The buffer only needs to stay valid for the duration of the call.
+     - ``AliroStack::HandleSessionData(ConnectionHandle::Nfc(), data)``
+   * - ``mOnDeviceLost()``
+     - Communication with the active device has been lost, for example after a failed data exchange or an empty response.
+     - ``AliroStack::DestroySession(ConnectionHandle::Nfc())``
 
-.. code-block:: cpp
+The backend must invoke all callbacks from the Aliro workqueue context, and it can expect ``Send()`` and ``Terminate()`` to be called from the same context.
 
-   class AliroStack {
-   public:
-       // Session lifecycle - call when NFC device is detected
-       void CreateSession(ConnectionHandle handle);
+Backend functions
+=================
 
-       // Session lifecycle - call when NFC device is removed or session ends
-       void DestroySession(ConnectionHandle handle);
-
-       // Data handling - call when NFC data is received from User Device
-       void HandleSessionData(ConnectionHandle handle, Data data);
-   };
-
-Transport API
-=============
-
-Your NFC transport and the Aliro stack communicate in both directions.
-Your code calls stack methods when NFC events occur (device present, APDU received, session ended).
-The stack sends data back through ``Aliro::Interface::Session``, which application code routes to your transport in :file:`interface_impl/session.cpp`.
-
-Calls from the transport to the stack
---------------------------------------
-
-* When polling detects an ISO14443-A device, call ``AliroStack::Instance().CreateSession(ConnectionHandle::Nfc())``.
-* When APDU data arrives from the User Device, call ``AliroStack::Instance().HandleSessionData(ConnectionHandle::Nfc(), receivedData)``.
-* When the session ends (device removed, timeout, error), call ``AliroStack::Instance().DestroySession(ConnectionHandle::Nfc())``.
-
-Required transport methods
---------------------------
-
-The RFAL reference class defines the interface your transport should provide:
+The backend must define the following functions in the ``Aliro::NfcTransport::Backend`` namespace:
 
 .. list-table::
    :header-rows: 1
    :widths: 25 30 45
 
-   * - Method
+   * - Function
      - When it is called
      - Contract and behavior
-   * - ``Init()``
+   * - ``Init(const Callbacks &callbacks)``
      - During application startup, before NFC polling begins.
-     - Initialize NFC hardware, configure ISO14443-A parameters, set up interrupts and GPIO. Return ``ALIRO_NO_ERROR`` on success or appropriate error code on failure.
+     - Store the callbacks, initialize NFC hardware, configure ISO14443-A parameters, set up interrupts and GPIO. Return ``ALIRO_NO_ERROR`` on success or appropriate error code on failure.
    * - ``Start()``
      - When the application is ready to accept NFC transactions.
      - Begin NFC polling for ISO14443-A devices. Configure polling intervals and field parameters. Return ``ALIRO_NO_ERROR`` on success.
@@ -191,60 +188,26 @@ The RFAL reference class defines the interface your transport should provide:
      - Stop NFC polling, disable RF field, enter low-power state if supported. Return ``ALIRO_NO_ERROR`` on success.
    * - ``Send(Data data)``
      - When the Aliro stack needs to send data to the User Device, called via ``Interface::Session::Send()``.
-     - Transmit the provided data buffer as APDU to the currently connected NFC device. Handle APDU chaining if necessary. Return ``ALIRO_NO_ERROR`` on successful transmission.
+     - Transmit the provided data buffer as APDU to the active NFC device and report the response through ``mOnDataReceived``. Return ``ALIRO_INVALID_STATE`` if no device is active.
    * - ``Terminate()``
-     - When the current NFC session should be ended.
-     - Terminate the active NFC session, return to polling state, prepare for next User Device detection. Return ``ALIRO_NO_ERROR`` on success.
+     - When the current NFC session should be ended, called via ``Interface::Session::HandleTermination()``.
+     - Deactivate the active device and resume polling for the next User Device. The operation can be asynchronous. To avoid repeated transactions with a User Device that stays in the field, wait until it is removed before detecting it again. Return ``ALIRO_NO_ERROR`` on success.
 
-Apart from that, the RFAL implementation contains the internal ``RfalNotifyCallback()`` method that is called when the NFC state changes.
-You can use it as a reference to implement the NFC state machine that will call Aliro Stack public API methods required to drive the Aliro session.
-
-Stack-to-transport calls
-------------------------
-
-The Aliro stack calls back to the application through the ``Aliro::Interface`` namespace.
-The key callbacks your transport interacts with are as follows:
-
-.. code-block:: cpp
-
-   namespace Aliro::Interface::Session {
-       // Called by stack to send data - routes to appropriate transport
-       AliroError Send(ConnectionHandle handle, Data data);
-
-       // Called by stack when session ends
-       void HandleTermination(ConnectionHandle handle);
-   }
-
-The reference implementation in :file:`interface_impl/session.cpp` routes NFC calls to your transport:
-
-.. code-block:: cpp
-
-   AliroError Send(ConnectionHandle handle, Data data)
-   {
-       if (handle.IsNfc()) {
-           return NfcTransportRfal::Instance().Send(data);  // ← Your implementation
-       }
-       // ... other transports
-   }
-
-.. note::
-
-   In most ports you only need to replace the ``NfcTransportRfal`` class implementation.
-   You normally do not modify :file:`interface_impl/session.cpp`.
-   Keep that wiring as-is and implement NFC functionality in your transport class.
+The RFAL backend contains the internal ``RfalNotifyCallback()`` method that is called when the NFC state changes.
+You can use it as a reference to implement the NFC state machine that invokes the backend callbacks.
 
 Protocol flow
 =============
 
-The typical NFC transaction flow between the Aliro stack and your NFC transport implementation is as follows:
+The typical NFC transaction flow between the Aliro stack and your NFC transport backend is as follows:
 
-#. Application calls ``Init()`` to prepare the NFC reader.
-#. Application calls ``Start()`` and the NFC transport continuously polls for User Device presence.
-#. When a User Device is detected, the NFC transport calls ``AliroStack::CreateSession(ConnectionHandle::Nfc())``.
-#. Received NFC data is forwarded to the Aliro stack through ``AliroStack::HandleSessionData(ConnectionHandle::Nfc(), data)``.
-#. The stack sends responses through ``Interface::Session::Send()``, which routes to the NFC transport ``Send()``.
+#. Application calls ``NfcTransport::Init()``, which registers the callbacks with ``Backend::Init()``.
+#. Application calls ``NfcTransport::Start()`` and the backend continuously polls for User Device presence.
+#. When a User Device is detected, the backend invokes ``mOnDeviceDetected()`` and the Aliro stack creates an NFC session.
+#. Received NFC data is reported through ``mOnDataReceived()`` and forwarded to the Aliro stack.
+#. The stack sends responses through ``Interface::Session::Send()``, which routes to ``Backend::Send()``.
 #. Based on the authentication result, access is granted or denied through application interface callbacks.
-#. The session ends through ``AliroStack::DestroySession()`` and the NFC transport ``Terminate()``.
+#. The session ends through ``Interface::Session::HandleTermination()``, which calls ``Backend::Terminate()``, or when the backend invokes ``mOnDeviceLost()``.
 
 .. rst-class:: numbered-step
 
@@ -253,104 +216,59 @@ The typical NFC transaction flow between the Aliro stack and your NFC transport 
 Integration with the door lock add-on
 **************************************
 
-The door lock add-on provides the application framework that initializes your NFC transport and integrates it with the broader system.
-You need to modify the following components to integrate your NFC implementation (``YourNfcTransport`` is the name of your NFC transport implementation):
+The door lock add-on provides the application framework that initializes the NFC transport and integrates it with the broader system.
+The application code in :file:`applications/*/src/aliro/init.cpp` and :file:`applications/*/src/aliro/interface_impl/session.cpp` calls only the ``NfcTransport`` functions, so you do not need to modify it.
+Instead, you provide the backend and select it in the build configuration.
 
-Application initialization
-==========================
+Backend skeleton
+================
 
-Update the application's initialization code to use your NFC transport class.
-The :file:`applications/*/src/aliro/init.cpp` contains the application initialization code:
-
-.. code-block:: cpp
-
-   // Replace NfcTransportRfal with your implementation
-   #include "aliro/platform/nfc/your_nfc_transport.h"  // ← Your header
-
-   int AliroInit()
-   {
-       // ... other initialization code ...
-
-       AliroError ec = YourNfcTransport::Instance().Init();  // ← Your class
-       if (ec != ALIRO_NO_ERROR) {
-           LOG_ERR("NFC transport initialization failed");
-       }
-
-       // ... continue with other initialization ...
-       return EXIT_SUCCESS;
-   }
-
-   int AliroStart()
-   {
-       AliroError ec = YourNfcTransport::Instance().Start();  // ← Your class
-       if (ec != ALIRO_NO_ERROR) {
-           LOG_ERR("NFC transport start failed");
-           return EXIT_FAILURE;
-       }
-
-       // ... other start operations ...
-       return EXIT_SUCCESS;
-   }
-
-   int AliroStop()
-   {
-       int rc = EXIT_SUCCESS;
-
-       AliroError ec = YourNfcTransport::Instance().Stop();   // ← Your class
-       if (ec != ALIRO_NO_ERROR) {
-           LOG_ERR("NFC transport stop failed");
-       }
-
-       // ... other stop operations ...
-       return rc;
-   }
-
-Session routing
-===============
-
-The session interface routes NFC calls to your implementation.
-The :file:`applications/*/src/aliro/interface_impl/session.cpp` contains the session routing code:
+The backend is a source file that defines the functions declared in :file:`nfc_transport/nfc_transport_backend.h`, as in the following skeleton:
 
 .. code-block:: cpp
 
-   #include "aliro/platform/nfc/your_nfc_transport.h"  // ← Your header
+   #include <nfc_transport/nfc_transport_backend.h>
 
-   AliroError Send(ConnectionHandle handle, Data data)
+   namespace Aliro::NfcTransport::Backend {
+
+   namespace {
+   Callbacks sCallbacks;
+   } // namespace
+
+   AliroError Init(const Callbacks &callbacks)
    {
-       if (handle.IsNfc()) {
-           return YourNfcTransport::Instance().Send(data);  // ← Your class
-       }
-       // ... rest unchanged
+       sCallbacks = callbacks;
+       // Initialize the NFC reader
+       return ALIRO_NO_ERROR;
    }
 
-   void HandleTermination(ConnectionHandle handle)
-   {
-       if (handle.IsNfc()) {
-           YourNfcTransport::Instance().Terminate();  // ← Your class
-       }
-       // ... rest unchanged
-   }
+   AliroError Start() { return ALIRO_ERROR_NOT_IMPLEMENTED; }
+   AliroError Stop() { return ALIRO_ERROR_NOT_IMPLEMENTED; }
+   AliroError Send(Data data) { return ALIRO_ERROR_NOT_IMPLEMENTED; }
+   AliroError Terminate() { return ALIRO_ERROR_NOT_IMPLEMENTED; }
 
-.. _nfc_custom_integration_implementation_methods:
+   } // namespace Aliro::NfcTransport::Backend
+
+.. _nfc_custom_integration_build_system:
 
 Build system integration
 ========================
 
-The reference NFC implementation is compiled unconditionally whenever the application is built with Aliro support.
-To include your custom NFC implementation, you need to add your source files to the build system in the application platform folder and remove the RFAL-specific targets in :file:`applications/*/src/aliro/platform/nfc/`:
+You can add your backend in one of the following ways:
 
-.. code-block:: cmake
+* In-tree — Add a new directory next to :file:`subsys/aliro/nfc_transport/rfal_backend/`, add a new option to the ``DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND`` choice in :file:`subsys/aliro/nfc_transport/Kconfig`, and add the directory conditionally in :file:`subsys/aliro/nfc_transport/CMakeLists.txt`.
+* Out-of-tree — Select the external backend and build its sources from your own module:
 
-   # Add your NFC implementation
-   target_sources(app PRIVATE
-       src/aliro/platform/nfc/your_nfc_transport.cpp
-       # Add other source files as needed
-   )
+  .. code-block:: cfg
 
-   target_include_directories(app PRIVATE
-       src/aliro/platform/nfc/
-       # Add your vendor SDK include paths
-   )
+     CONFIG_DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND_EXTERNAL=y
+     CONFIG_NFC_DRIVER_STM=n
+
+  .. code-block:: cmake
+
+     # In your module
+     zephyr_library()
+     zephyr_library_sources(src/nfc_transport_backend.cpp)
 
 Performance considerations
 ==========================
@@ -386,8 +304,8 @@ To minimize integration risk and enable incremental testing, complete the follow
 Basic integration
 =================
 
-#. Create a skeleton NFC transport class with all required methods returning appropriate errors.
-#. Update the build system and application initialization to use your class.
+#. Create a skeleton backend with all required functions returning appropriate errors.
+#. Select your backend in the build system as described in :ref:`nfc_custom_integration_build_system`.
 #. Verify the application builds and links without runtime errors.
 
 .. rst-class:: numbered-step
@@ -405,7 +323,7 @@ Hardware initialization
 Basic polling
 =============
 
-#. Implement basic ISO14443-A polling; use ``NfcTransportRfal::Execute()`` as a reference.
+#. Implement basic ISO14443-A polling; use ``NfcTransportRfal::Execute()`` in :file:`rfal_backend/nfc_transport_rfal.cpp` as a reference.
 #. Add device detection logging without session creation.
 #. Test the polling loop and device detection events.
 #. Verify power consumption and polling intervals.
@@ -415,8 +333,8 @@ Basic polling
 Session management
 ==================
 
-#. Add session creation on device detection.
-#. Implement session destruction on device removal.
+#. Invoke ``mOnDeviceDetected()`` on device detection.
+#. Invoke ``mOnDeviceLost()`` on device removal.
 #. Test the session lifecycle without data exchange.
 #. Verify proper cleanup and state management.
 
