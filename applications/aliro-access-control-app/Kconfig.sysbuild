@@ -15,7 +15,7 @@ config NETCORE_IPC_RADIO_BT_HCI_IPC
 
 #### Bootloader
 choice BOOTLOADER
-    default BOOTLOADER_MCUBOOT
+    default BOOTLOADER_MCUBOOT if !SOC_SERIES_NRF71
 endchoice
 
 if BOOTLOADER_MCUBOOT

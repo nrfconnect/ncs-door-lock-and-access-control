@@ -34,7 +34,7 @@ choice SECURE_STORAGE_ITS_TRANSFORM_TSBC_KEY_PROVIDER
 endchoice
 
 config HW_UNIQUE_KEY_WRITE_ON_CRYPTO_INIT
-	default y if (SOC_NRF5340_CPUAPP || SOC_SERIES_NRF54L)
+	default y if (SOC_NRF5340_CPUAPP || SOC_SERIES_NRF54L || SOC_SERIES_NRF71)
 
 # required by Aliro persistent storage
 config FLASH
