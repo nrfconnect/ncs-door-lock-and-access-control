@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - "v*-branch"
+      - "*preview-*-branch"
     paths:
       - ".github/workflows/doc_build.yml"
       - "**.rst"
