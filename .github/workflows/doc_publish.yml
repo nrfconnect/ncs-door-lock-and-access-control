@@ -57,7 +57,7 @@ jobs:
         id: fc
         with:
           issue-number: ${{ env.PR }}
-          comment-author: 'github-actions[bot]'
+          comment-author: "github-actions[bot]"
           body-includes: documentation preview
 
       - name: Create or update comment

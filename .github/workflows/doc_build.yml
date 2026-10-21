@@ -8,17 +8,17 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
-      - 'v*-branch'
+      - "v*-branch"
     paths:
-      - '.github/workflows/doc_build.yml'
-      - '**.rst'
-      - 'docs/**'
+      - ".github/workflows/doc_build.yml"
+      - "**.rst"
+      - "docs/**"
   push:
     branches:
       - main
     tags:
-      - 'v*'
-      - '!v*-rc*'
+      - "v*"
+      - "!v*-rc*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

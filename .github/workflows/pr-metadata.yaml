@@ -8,7 +8,7 @@ on:
       - edited
     branches:
       - main
-      - v*-branch
+      - "v*-branch"
 
 permissions:
   contents: read

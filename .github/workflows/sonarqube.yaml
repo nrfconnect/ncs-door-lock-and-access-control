@@ -3,12 +3,12 @@ name: SonarQube
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**/README.md'
-      - 'LICENSE'
-      - 'CODEOWNERS'
-      - '.gitignore'
-      - '.editorconfig'
+      - "docs/**"
+      - "**/README.md"
+      - "LICENSE"
+      - "CODEOWNERS"
+      - ".gitignore"
+      - ".editorconfig"
     branches:
       - main
   push:
@@ -42,7 +42,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Install apt dependencies
         # The sdk-nrf-toolchain image doesn't ship curl/unzip (needed by install-build-wrapper to
