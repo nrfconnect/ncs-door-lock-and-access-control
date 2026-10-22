@@ -43,6 +43,10 @@ if DOOR_LOCK_DFU_SMP_SERVICE
 rsource "Kconfig.dfu.defconfig"
 endif # DOOR_LOCK_DFU_SMP_SERVICE
 
+if DOOR_LOCK_WIFI
+rsource "Kconfig.wifi.defconfig"
+endif # DOOR_LOCK_WIFI
+
 rsource "Kconfig.crypto.defconfig"
 
 source "Kconfig.zephyr"

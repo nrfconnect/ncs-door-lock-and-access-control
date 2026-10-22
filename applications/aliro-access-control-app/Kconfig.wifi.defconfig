@@ -1,0 +1,73 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config WIFI
+	default y
+
+config WIFI_NM_WPA_SUPPLICANT
+	default y
+
+config WIFI_CREDENTIALS
+	default y
+
+config NET_L2_WIFI_SHELL
+	default y if DOOR_LOCK_CLI
+
+config NET_SHELL
+	default y if DOOR_LOCK_CLI
+
+config NET_CONNECTION_MANAGER
+	default y
+
+config NET_CONNECTION_MANAGER_MONITOR_STACK_SIZE
+	default 5000
+
+config L2_WIFI_CONNECTIVITY
+	default y
+
+config L2_WIFI_CONNECTIVITY_AUTO_CONNECT
+	default y
+
+config L2_WIFI_CONNECTIVITY_AUTO_DOWN
+	default n
+
+config NETWORKING
+	default y
+
+config NET_L2_ETHERNET
+	default y
+
+config NET_IPV4
+	default y
+
+config NET_IPV6
+	default n
+
+config NET_DHCPV4
+	default y
+
+# Log the connection state and the DHCPv4 address from the network stack
+config NET_LOG
+	default y
+
+config WIFI_NM_WPA_SUPPLICANT_DEBUG_LEVEL
+	default 3
+
+config ZVFS_POLL_MAX
+	default 12
+
+config NET_MGMT_EVENT_QUEUE_TIMEOUT
+	default 5000
+
+if NET_BUF_VARIABLE_DATA_SIZE
+
+config NET_PKT_BUF_TX_DATA_POOL_SIZE
+	default 50000
+
+config NET_PKT_BUF_RX_DATA_POOL_SIZE
+	default 20000
+
+endif # NET_BUF_VARIABLE_DATA_SIZE

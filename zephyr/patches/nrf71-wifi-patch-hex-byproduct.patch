@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Wed, 21 Oct 2026 15:00:00 +0200
+Subject: [PATCH] nrf71_wifi: Expose merged Wi-Fi patch hex as byproduct
+
+Set BYPRODUCT_NRF71_WIFI_PATCH_HEX_NAME so sysbuild knows the
+application image produces zephyr.nrf7120.hex. Without it the merged
+hex fails with no rule to make zephyr/zephyr.nrf7120.hex when MCUboot
+is disabled.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+ nrf71_wifi/zephyr/CMakeLists.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/nrf71_wifi/zephyr/CMakeLists.txt b/nrf71_wifi/zephyr/CMakeLists.txt
+index d7243f879..f660f8d14 100644
+--- a/nrf71_wifi/zephyr/CMakeLists.txt
++++ b/nrf71_wifi/zephyr/CMakeLists.txt
+@@ -229,6 +229,10 @@ else()
+     VERBATIM
+   )
+   add_custom_target(nrf71_wifi_patch_merge ALL DEPENDS ${merge_byproducts})
++
++  # Expose the merged hex as a byproduct so that sysbuild targets depending on it directly,
++  # such as the merged hex, know it is produced by this image
++  set(BYPRODUCT_NRF71_WIFI_PATCH_HEX_NAME ${merged_hex} CACHE FILEPATH "nRF7120 merged hex file" FORCE)
+ endif()
+ 
+ # Flash runner override
+-- 
+2.43.0
+

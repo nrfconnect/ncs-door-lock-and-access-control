@@ -17,3 +17,9 @@ patches:
     author: Adrian Gielniewski
     email: adrian.gielniewski@nordicsemi.no
     date: 2026-10-21
+  - path: nrf71-wifi-patch-hex-byproduct.patch
+    sha256sum: ea6301614bf7d0fe77899308116de45d75cdc695361dffa7ca91de6697023434
+    module: nrfxlib
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-10-21
