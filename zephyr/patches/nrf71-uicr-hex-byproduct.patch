@@ -1,0 +1,32 @@
+From 23377adc9ed3fc1d266d6c5daeacc7ff917411e5 Mon Sep 17 00:00:00 2001
+From: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+Date: Tue, 20 Oct 2026 10:14:28 +0200
+Subject: [PATCH] soc: nordic: nrf71: uicr: Expose UICR hex as byproduct
+
+Set BYPRODUCT_UICR_HEX_NAME so sysbuild knows the uicr image produces
+zephyr.hex. Without it the merged hex fails with no rule to make
+uicr/zephyr/zephyr.hex.
+
+Signed-off-by: Adrian Gielniewski <adrian.gielniewski@nordicsemi.no>
+---
+ soc/nordic/nrf71/uicr/gen_uicr/CMakeLists.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/soc/nordic/nrf71/uicr/gen_uicr/CMakeLists.txt b/soc/nordic/nrf71/uicr/gen_uicr/CMakeLists.txt
+index 8d1204b7059..85e31f177e7 100644
+--- a/soc/nordic/nrf71/uicr/gen_uicr/CMakeLists.txt
++++ b/soc/nordic/nrf71/uicr/gen_uicr/CMakeLists.txt
+@@ -39,6 +39,10 @@ add_custom_command(
+ 
+ add_custom_target(gen_uicr ALL DEPENDS ${uicr_hex})
+ 
++# Expose the hex as a byproduct so that sysbuild targets depending on it directly,
++# such as the merged hex, know it is produced by this image
++set(BYPRODUCT_UICR_HEX_NAME ${uicr_hex} CACHE FILEPATH "UICR hex file" FORCE)
++
+ # Create the runners_yaml_props_target that flash system expects
+ add_custom_target(runners_yaml_props_target)
+ 
+-- 
+2.43.0
+

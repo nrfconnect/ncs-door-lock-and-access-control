@@ -5,3 +5,15 @@ patches:
     author: Adrian Gielniewski
     email: adrian.gielniewski@nordicsemi.no
     date: 2026-10-01
+  - path: nrf71-uicr-hex-byproduct.patch
+    sha256sum: a26fccd0ce9173e3e629917ed1b2717717d813a9dbae58574309d97b8ab81f63
+    module: zephyr
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-10-20
+  - path: mspi-dw-skip-ssienr-when-suspended.patch
+    sha256sum: 164a4d1e369da36c3e067c3dfac23c1bf216f244e66680a43eccd40117d3da42
+    module: zephyr
+    author: Adrian Gielniewski
+    email: adrian.gielniewski@nordicsemi.no
+    date: 2026-10-21
