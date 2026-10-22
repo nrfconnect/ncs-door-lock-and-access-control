@@ -6,3 +6,12 @@
 
 rsource "aliro/Kconfig"
 
+DT_CHOSEN_Z_WIFI := zephyr,wifi
+
+config DOOR_LOCK_WIFI
+	bool "Wi-Fi station support"
+	depends on $(dt_chosen_enabled,$(DT_CHOSEN_Z_WIFI))
+	help
+	  Enable Wi-Fi station mode. The device connects to the network
+	  whose credentials are stored using the Wi-Fi credentials library.
+
