@@ -6,6 +6,7 @@
 
 #include "aliro/init.h"
 #include "aliro/lock_sim_instance.h"
+#include "aliro/types.h"
 #include <crypto_utils/crypto_utils.h>
 #include <doorlock/utils/utils.h>
 #include <zephyr/logging/log.h>
@@ -23,6 +24,10 @@
 #include <nus_service/nus_service.h>
 #include <zephyr/bluetooth/gap.h>
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
+
+#ifdef CONFIG_DOOR_LOCK_COAP_SERVICE
+#include <coap_service/coap_service.h>
+#endif // CONFIG_DOOR_LOCK_COAP_SERVICE
 
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "access_manager.h"
@@ -166,6 +171,24 @@ int main()
 	VerifyOrDie(nusErr == 0, "Failed to start NUS service");
 
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
+
+#ifdef CONFIG_DOOR_LOCK_COAP_SERVICE
+	DoorLock::CoAPService::Init(
+		[]() {
+			return Aliro::LockSimInstance().GetState() == Aliro::ReaderStateByte::Unsecured ?
+				       DoorLock::CoAPService::State::Unlocked :
+				       DoorLock::CoAPService::State::Locked;
+		},
+		[](DoorLock::CoAPService::State newState) {
+			if (newState == DoorLock::CoAPService::State::Unlocked) {
+				Aliro::LockSimInstance().Unlock();
+			} else {
+				Aliro::LockSimInstance().Lock();
+			}
+		});
+
+	DoorLock::CoAPService::Start();
+#endif // CONFIG_DOOR_LOCK_COAP_SERVICE
 
 	LOG_INF("Application started");
 
