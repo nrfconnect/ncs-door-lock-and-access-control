@@ -1,0 +1,13 @@
+sample:
+  name: CoAP door lock service
+  description: Minimal Wi-Fi demo of the coap_service snippet
+common:
+  build_only: true
+  platform_allow:
+    - nrf7120dk/nrf7120/cpuapp
+  integration_platforms:
+    - nrf7120dk/nrf7120/cpuapp
+  extra_args:
+    - SNIPPET=coap_service
+tests:
+  sample.coap_service: {}

@@ -1,0 +1,26 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_COAP_SERVICE
+	bool "Door Lock CoAP service"
+	depends on NETWORKING && NET_IPV4 && NET_UDP
+	depends on ZEPHYR_ZCBOR_MODULE
+	select CPP
+	select ZCBOR
+	select COAP
+	select COAP_SERVER
+	help
+	  Enables the CoAP service. Using CoAP service you can control
+	  a door lock using pre-defined CoAP resources.
+
+if DOOR_LOCK_COAP_SERVICE
+
+module = DOOR_LOCK_COAP_SERVICE
+module-str = Door Lock CoAP service
+module-dep = LOG
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+endif # DOOR_LOCK_COAP_SERVICE
