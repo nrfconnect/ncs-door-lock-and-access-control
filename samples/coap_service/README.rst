@@ -19,6 +19,34 @@ The snippet enables the existing CoAP subsystem, which supplies its resource
 linker section. The sample enables C++ and zcbor.
 No credentials are compiled in or saved.
 
+Configuration
+*************
+
+The default endpoint is ``coap://<ip>:5683/door-lock``.
+To change it, set these options in your application configuration:
+
+.. code-block:: kconfig
+
+   CONFIG_DOOR_LOCK_COAP_SERVICE_PORT=56830
+   CONFIG_DOOR_LOCK_COAP_RESOURCE_PATH="front-door"
+
+The port must be between 1 and 65535; port 0 is not supported.
+The path is a single URI path segment, with no slashes.
+Empty paths and values containing slashes are rejected at build time.
+The value is unescaped: do not percent-encode it in Kconfig.
+Use the configured port and path instead of the defaults in the commands below.
+Changing the port does not enable DTLS or otherwise secure the service.
+
+By default, the path can contain at most 12 bytes.
+For longer values, enable ``CONFIG_COAP_EXTENDED_OPTIONS_LEN`` and increase
+``CONFIG_COAP_EXTENDED_OPTIONS_LEN_VALUE`` to fit the path.
+
+The subsystem's logging verbosity is controlled by
+``CONFIG_DOOR_LOCK_COAP_SERVICE_LOG_LEVEL``.
+Zephyr's existing ``CONFIG_COAP_SERVER_STACK_SIZE`` and
+``CONFIG_COAP_SERVER_MESSAGE_SIZE`` options control the shared server thread
+and message buffers.
+
 Connect and exercise
 ********************
 
@@ -57,6 +85,6 @@ Lock, then read the state again to see ``locked`` (CBOR boolean false):
 Press the DK's button 0 (``sw0``, ``DK_BTN1_MSK``) to toggle the same state,
 then GET again. State changes are printed on the shell and indicated by LED0.
 
-The service listens on UDP port 5683 without authentication or encryption.
+The service listens on the configured UDP port (5683 by default) without authentication or encryption.
 Use only on a trusted test network. There is no actuator, persistence, or
 automatic relocking.

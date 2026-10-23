@@ -11,3 +11,7 @@ common:
     - SNIPPET=coap_service
 tests:
   sample.coap_service: {}
+  sample.coap_service.configured:
+    extra_configs:
+      - CONFIG_DOOR_LOCK_COAP_SERVICE_PORT=65535
+      - CONFIG_DOOR_LOCK_COAP_RESOURCE_PATH="front-door"
