@@ -6,6 +6,7 @@
 
 #include "coap_service/coap_service.h"
 
+#include "aliro/types.h"
 #include "doorlock/utils/utils.h"
 #include <zcbor_decode.h>
 #include <zephyr/logging/log.h>
@@ -18,7 +19,8 @@ LOG_MODULE_REGISTER(CoapService, CONFIG_DOOR_LOCK_COAP_SERVICE_LOG_LEVEL);
 namespace DoorLock::CoAPService {
 
 static GetStateCallback sGetStateCb = nullptr;
-static SetStateCallback sSetStateCb = nullptr;
+static UnlockCallback sUnlockCb = nullptr;
+static LockCallback sLockCb = nullptr;
 
 static constexpr uint16_t kServicePort = CONFIG_DOOR_LOCK_COAP_SERVICE_PORT;
 
@@ -44,8 +46,28 @@ static int HandleGet(struct coap_resource *resource, struct coap_packet *request
 {
 	VerifyOrReturnValue(sGetStateCb != nullptr, COAP_RESPONSE_CODE_INTERNAL_ERROR);
 
-	State state = sGetStateCb();
-	const char *message = state == State::Unlocked ? "unlocked" : "locked";
+	Aliro::ReaderStateByte state = sGetStateCb();
+	const char *message = "";
+	switch (state) {
+	case Aliro::ReaderStateByte::Secured:
+		message = "secured";
+		break;
+	case Aliro::ReaderStateByte::Unsecured:
+		message = "unsecured";
+		break;
+	case Aliro::ReaderStateByte::Blocked:
+		message = "blocked";
+		break;
+	case Aliro::ReaderStateByte::EnteringSecured:
+		message = "enteringsecured";
+		break;
+	case Aliro::ReaderStateByte::EnteringUnsecured:
+		message = "enteringunsecured";
+		break;
+	case Aliro::ReaderStateByte::Unknown:
+		message = "unknown";
+		break;
+	}
 
 	uint8_t type = coap_header_get_type(request);
 	uint16_t id = coap_header_get_id(request);
@@ -69,7 +91,7 @@ static int HandleGet(struct coap_resource *resource, struct coap_packet *request
 static int HandlePut(struct coap_resource *resource, struct coap_packet *request, struct net_sockaddr *addr,
 		     socklen_t addrLen)
 {
-	VerifyOrReturnValue(sSetStateCb != nullptr, COAP_RESPONSE_CODE_INTERNAL_ERROR);
+	VerifyOrReturnValue(sUnlockCb != nullptr, COAP_RESPONSE_CODE_INTERNAL_ERROR);
 
 	struct coap_option contentFormats[2];
 	int formatCount = coap_find_options(request, COAP_OPTION_CONTENT_FORMAT, contentFormats, 2);
@@ -87,7 +109,11 @@ static int HandlePut(struct coap_resource *resource, struct coap_packet *request
 	bool state;
 	VerifyOrReturnValue(zcbor_bool_decode(cborState, &state), COAP_RESPONSE_CODE_BAD_REQUEST);
 
-	sSetStateCb(state ? State::Unlocked : State::Locked);
+	if (state) {
+		sUnlockCb();
+	} else {
+		sLockCb();
+	}
 
 	return COAP_RESPONSE_CODE_CHANGED;
 }
@@ -104,10 +130,11 @@ COAP_RESOURCE_DEFINE(door_lock, door_lock_service,
 			     .path = kDoorLockPath,
 		     });
 
-void Init(GetStateCallback getStateCb, SetStateCallback setStateCb)
+void Init(GetStateCallback getStateCb, UnlockCallback unlockCb, LockCallback lockCb)
 {
 	sGetStateCb = getStateCb;
-	sSetStateCb = setStateCb;
+	sUnlockCb = unlockCb;
+	sLockCb = lockCb;
 }
 
 int Start()

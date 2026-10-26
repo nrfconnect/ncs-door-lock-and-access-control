@@ -6,7 +6,6 @@
 
 #include "aliro/init.h"
 #include "aliro/lock_sim_instance.h"
-#include "aliro/types.h"
 #include <crypto_utils/crypto_utils.h>
 #include <doorlock/utils/utils.h>
 #include <zephyr/logging/log.h>
@@ -173,19 +172,9 @@ int main()
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
 
 #ifdef CONFIG_DOOR_LOCK_COAP_SERVICE
-	DoorLock::CoAPService::Init(
-		[]() {
-			return Aliro::LockSimInstance().GetState() == Aliro::ReaderStateByte::Unsecured ?
-				       DoorLock::CoAPService::State::Unlocked :
-				       DoorLock::CoAPService::State::Locked;
-		},
-		[](DoorLock::CoAPService::State newState) {
-			if (newState == DoorLock::CoAPService::State::Unlocked) {
-				Aliro::LockSimInstance().Unlock();
-			} else {
-				Aliro::LockSimInstance().Lock();
-			}
-		});
+	DoorLock::CoAPService::Init([]() { return Aliro::LockSimInstance().GetState(); },
+				    []() { Aliro::LockSimInstance().Unlock(); },
+				    []() { Aliro::LockSimInstance().Lock(); });
 
 	DoorLock::CoAPService::Start();
 #endif // CONFIG_DOOR_LOCK_COAP_SERVICE
