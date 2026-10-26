@@ -21,6 +21,7 @@ namespace DoorLock::CoAPService {
 static GetStateCallback sGetStateCb = nullptr;
 static UnlockCallback sUnlockCb = nullptr;
 static LockCallback sLockCb = nullptr;
+static Aliro::ReaderStateByte sNotifyState = Aliro::ReaderStateByte::Unknown;
 
 static constexpr uint16_t kServicePort = CONFIG_DOOR_LOCK_COAP_SERVICE_PORT;
 
@@ -41,57 +42,88 @@ static_assert(
 static_assert(CONFIG_COAP_SERVER_MESSAGE_OPTIONS >= 2,
 	      "COAP_SERVER_MESSAGE_OPTIONS must fit the URI-Path and Content-Format options");
 
+static const char *GetStateMessage(Aliro::ReaderStateByte state)
+{
+	switch (state) {
+	case Aliro::ReaderStateByte::Secured:
+		return "secured";
+	case Aliro::ReaderStateByte::Unsecured:
+		return "unsecured";
+	case Aliro::ReaderStateByte::Blocked:
+		return "blocked";
+	case Aliro::ReaderStateByte::EnteringSecured:
+		return "enteringsecured";
+	case Aliro::ReaderStateByte::EnteringUnsecured:
+		return "enteringunsecured";
+	case Aliro::ReaderStateByte::Unknown:
+		return "unknown";
+	}
+
+	return "unknown";
+}
+
+static int SendStateResponse(struct coap_resource *resource, const struct net_sockaddr *addr,
+			     socklen_t addrLen, Aliro::ReaderStateByte state, uint8_t type, uint16_t id,
+			     const uint8_t *token, uint8_t tokenLen, bool includeObserve)
+{
+	struct coap_packet response;
+	uint8_t data[CONFIG_COAP_SERVER_MESSAGE_SIZE];
+	int err;
+
+	err = coap_packet_init(&response, data, sizeof(data), COAP_VERSION_1, type, tokenLen, token,
+			       COAP_RESPONSE_CODE_CONTENT, id);
+	VerifyOrReturnValue(err >= 0, err);
+
+	if (includeObserve) {
+		err = coap_append_option_int(&response, COAP_OPTION_OBSERVE,
+					     static_cast<unsigned int>(resource->age));
+		VerifyOrReturnValue(err >= 0, err);
+	}
+
+	err = coap_append_option_int(&response, COAP_OPTION_CONTENT_FORMAT,
+				     COAP_CONTENT_FORMAT_TEXT_PLAIN);
+	VerifyOrReturnValue(err >= 0, err);
+
+	err = coap_packet_append_payload_marker(&response);
+	VerifyOrReturnValue(err >= 0, err);
+
+	const char *message = GetStateMessage(state);
+	err = coap_packet_append_payload(&response, (uint8_t *)message, strlen(message));
+	VerifyOrReturnValue(err >= 0, err);
+
+	return coap_resource_send(resource, &response, addr, addrLen, NULL);
+}
+
 static int HandleGet(struct coap_resource *resource, struct coap_packet *request, struct net_sockaddr *addr,
 		     socklen_t addrLen)
 {
 	VerifyOrReturnValue(sGetStateCb != nullptr, COAP_RESPONSE_CODE_INTERNAL_ERROR);
 
-	Aliro::ReaderStateByte state = sGetStateCb();
-	const char *message = "";
-	switch (state) {
-	case Aliro::ReaderStateByte::Secured:
-		message = "secured";
-		break;
-	case Aliro::ReaderStateByte::Unsecured:
-		message = "unsecured";
-		break;
-	case Aliro::ReaderStateByte::Blocked:
-		message = "blocked";
-		break;
-	case Aliro::ReaderStateByte::EnteringSecured:
-		message = "enteringsecured";
-		break;
-	case Aliro::ReaderStateByte::EnteringUnsecured:
-		message = "enteringunsecured";
-		break;
-	case Aliro::ReaderStateByte::Unknown:
-		message = "unknown";
-		break;
-	}
-
-	uint8_t type = coap_header_get_type(request);
-	uint16_t id = coap_header_get_id(request);
-
 	uint8_t token[COAP_TOKEN_MAX_LEN];
 	uint8_t tokenLen = coap_header_get_token(request, token);
+	const uint8_t type = coap_header_get_type(request);
+	const uint8_t responseType = (type == COAP_TYPE_CON) ? COAP_TYPE_ACK : COAP_TYPE_NON_CON;
+	const bool observing = coap_resource_parse_observe(resource, request, addr) == 0;
 
-	struct coap_packet response;
-	uint8_t data[32];
-	uint8_t responseType = (type == COAP_TYPE_CON) ? COAP_TYPE_ACK : COAP_TYPE_NON_CON;
+	return SendStateResponse(resource, addr, addrLen, sGetStateCb(), responseType,
+				 coap_header_get_id(request), token, tokenLen, observing);
+}
 
-	coap_packet_init(&response, data, sizeof(data), COAP_VERSION_1, responseType, tokenLen, token,
-			 COAP_RESPONSE_CODE_CONTENT, id);
-	coap_append_option_int(&response, COAP_OPTION_CONTENT_FORMAT, COAP_CONTENT_FORMAT_TEXT_PLAIN);
-	coap_packet_append_payload_marker(&response);
-	coap_packet_append_payload(&response, (uint8_t *)message, strlen(message));
-
-	return coap_resource_send(resource, &response, addr, addrLen, NULL);
+static void HandleNotify(struct coap_resource *resource, struct coap_observer *observer)
+{
+	const int err = SendStateResponse(resource, net_sad(&observer->addr),
+					  net_family2size(observer->addr.ss_family), sNotifyState,
+					  COAP_TYPE_CON, coap_next_id(), observer->token, observer->tkl, true);
+	if (err < 0) {
+		LOG_ERR("Failed to send CoAP notification: %d", err);
+	}
 }
 
 static int HandlePut(struct coap_resource *resource, struct coap_packet *request, struct net_sockaddr *addr,
 		     socklen_t addrLen)
 {
 	VerifyOrReturnValue(sUnlockCb != nullptr, COAP_RESPONSE_CODE_INTERNAL_ERROR);
+	VerifyOrReturnValue(sLockCb != nullptr, COAP_RESPONSE_CODE_INTERNAL_ERROR);
 
 	struct coap_option contentFormats[2];
 	int formatCount = coap_find_options(request, COAP_OPTION_CONTENT_FORMAT, contentFormats, 2);
@@ -127,6 +159,7 @@ COAP_RESOURCE_DEFINE(door_lock, door_lock_service,
 		     {
 			     .get = HandleGet,
 			     .put = HandlePut,
+			     .notify = HandleNotify,
 			     .path = kDoorLockPath,
 		     });
 
@@ -153,6 +186,15 @@ int Stop()
 
 	LOG_INF("CoAP service stopped");
 	return 0;
+}
+
+void Notify(Aliro::ReaderStateByte state)
+{
+	sNotifyState = state;
+	const int err = coap_resource_notify(&door_lock);
+	if (err < 0) {
+		LOG_ERR("Failed to notify CoAP observers: %d", err);
+	}
 }
 
 } // namespace DoorLock::CoAPService

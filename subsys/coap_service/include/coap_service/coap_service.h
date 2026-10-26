@@ -67,4 +67,11 @@ int Start();
  */
 int Stop();
 
+/**
+ * @brief Notify observers of reader state change
+ *
+ * @param state the new state
+ */
+void Notify(Aliro::ReaderStateByte state);
+
 } // namespace DoorLock::CoAPService
