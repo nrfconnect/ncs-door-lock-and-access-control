@@ -66,16 +66,16 @@ Read the state:
 .. code-block:: console
 
    coap-client-openssl -m get coap://<ip>:5683/door-lock
-   locked
+   secured
 
-Unlock, then read the state again to see ``unlocked`` (CBOR boolean true):
+Unlock, then read the state again to see ``unsecured`` (CBOR boolean true):
 
 .. code-block:: console
 
    coap-client-openssl -m put -t application/cbor -e "%f5" coap://<ip>:5683/door-lock
    coap-client-openssl -m get coap://<ip>:5683/door-lock
 
-Lock, then read the state again to see ``locked`` (CBOR boolean false):
+Lock, then read the state again to see ``secured`` (CBOR boolean false):
 
 .. code-block:: console
 

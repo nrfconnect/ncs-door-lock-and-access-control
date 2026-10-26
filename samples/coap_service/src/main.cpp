@@ -4,45 +4,50 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include "aliro/types.h"
 #include <atomic>
 #include <coap_service/coap_service.h>
 #include <dk_buttons_and_leds.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 
-using State = DoorLock::CoAPService::State;
+static std::atomic<Aliro::ReaderStateByte> sState{ Aliro::ReaderStateByte::Unknown };
 
-static std::atomic<State> sState{ State::Locked };
-
-static void ToggleState()
-{
-	sState = sState == State::Locked ? State::Unlocked : State::Locked;
-	printk("Door %s\n", sState == State::Unlocked ? "unlocked" : "locked");
-	dk_set_led(DK_LED1, (sState == State::Locked));
-}
-
-static State GetState()
+static Aliro::ReaderStateByte GetState()
 {
 	return sState;
 }
 
-static void SetState(State newState)
+static void Unlock()
 {
-	sState = newState;
-	printk("Door %s\n", sState == State::Unlocked ? "unlocked" : "locked");
-	dk_set_led(DK_LED1, (sState == State::Locked));
+	sState = Aliro::ReaderStateByte::Unsecured;
+	DoorLock::CoAPService::Notify(sState);
+	printk("Door unlocked\n");
+	dk_set_led(DK_LED1, false);
+}
+
+static void Lock()
+{
+	sState = Aliro::ReaderStateByte::Secured;
+	DoorLock::CoAPService::Notify(sState);
+	printk("Door locked\n");
+	dk_set_led(DK_LED1, true);
 }
 
 static void ButtonChanged(uint32_t buttonState, uint32_t changedButtons)
 {
 	if (buttonState & changedButtons & DK_BTN1_MSK) {
-		ToggleState();
+		if (sState == Aliro::ReaderStateByte::Secured) {
+			Unlock();
+		} else {
+			Lock();
+		}
 	}
 }
 
 int main()
 {
-	DoorLock::CoAPService::Init(GetState, SetState);
+	DoorLock::CoAPService::Init(GetState, Unlock, Lock);
 
 	int err = dk_buttons_init(ButtonChanged);
 	if (err) {
@@ -62,7 +67,7 @@ int main()
 		return err;
 	}
 
-	SetState(State::Locked);
+	Lock();
 
 	printk("Button 0 toggles the lock.\n"
 	       "Connect with: wifi connect -s \"SSID\" -k 1 -p \"PASSWORD\"\n"
