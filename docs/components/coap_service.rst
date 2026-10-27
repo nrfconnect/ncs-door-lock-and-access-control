@@ -72,9 +72,17 @@ Build the application for the nRF7120 DK with the ``coap_service`` snippet:
    west build -p -b nrf7120dk/nrf7120/cpuapp applications/aliro-access-control-app -- \
        -Daliro-access-control-app_SNIPPET=coap_service
 
-After flashing, connect the device to Wi-Fi and send requests from a host on the same network, for example using libcoap:
+After flashing, connect the device to Wi-Fi and send requests from a host on the same network.
+The :file:`scripts/coap_test.py` script is a dependency-free CoAP client that requires only Python 3:
 
 .. code-block:: console
 
-   coap-client-openssl -m get -v6 coap://<ip>:5683/door-lock
-   coap-client-openssl -m put -t application/cbor -e "%f5" -v6 coap://<ip>:5683/door-lock
+   python3 scripts/coap_test.py <ip> get
+   python3 scripts/coap_test.py <ip> unlock
+   python3 scripts/coap_test.py <ip> lock
+   python3 scripts/coap_test.py <ip> observe
+
+The ``observe`` command prints every notification until you press :kbd:`Ctrl+C`, or until ``--count`` messages are received.
+
+If you changed ``CONFIG_DOOR_LOCK_COAP_SERVICE_PORT`` or ``CONFIG_DOOR_LOCK_COAP_RESOURCE_PATH``, pass the ``--port`` and ``--path`` options.
+Run ``python3 scripts/coap_test.py --help`` for all options.
