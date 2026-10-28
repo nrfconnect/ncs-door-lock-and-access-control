@@ -1,0 +1,37 @@
+/*
+ * Copyright (c) 2026 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+#include <door_lock/common/nrf7120_cpuapp_partitions.dtsi>
+#include <vendor/nordic/wifi/nrf7120_wifi_patch_0_1_0.dtsi>
+
+/ {
+	chosen {
+		zephyr,flash-controller = &mram_controller;
+	};
+
+	buttons {
+		/delete-node/ button_0;
+	};
+
+	leds {
+		/delete-node/ led_0;
+	};
+
+	aliases {
+		/delete-property/ sw0;
+		/delete-property/ led0;
+		/delete-property/ mcuboot-led0;
+		mcuboot-button0 = &button1;
+	};
+};
+
+&wdt31 {
+	status = "okay";
+};
+
+&wifi {
+	status = "okay";
+};
