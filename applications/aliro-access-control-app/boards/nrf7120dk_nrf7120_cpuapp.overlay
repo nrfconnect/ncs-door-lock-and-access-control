@@ -85,9 +85,9 @@
 
 &mx25u25645g {
 	partitions {
-		external_nvs_partition: partition@3de000 {
+		external_nvs_partition: partition@0 {
 			label = "external-nvs";
-			reg = <0x003de000 DT_SIZE_K(128)>;
+			reg = <0x00000000 DT_SIZE_K(128)>;
 		};
 	};
 };
