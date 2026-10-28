@@ -62,9 +62,9 @@ static const char *GetStateMessage(Aliro::ReaderStateByte state)
 	return "unknown";
 }
 
-static int SendStateResponse(struct coap_resource *resource, const struct net_sockaddr *addr,
-			     socklen_t addrLen, Aliro::ReaderStateByte state, uint8_t type, uint16_t id,
-			     const uint8_t *token, uint8_t tokenLen, bool includeObserve)
+static int SendStateResponse(struct coap_resource *resource, const struct net_sockaddr *addr, socklen_t addrLen,
+			     Aliro::ReaderStateByte state, uint8_t type, uint16_t id, const uint8_t *token,
+			     uint8_t tokenLen, bool includeObserve)
 {
 	struct coap_packet response;
 	uint8_t data[CONFIG_COAP_SERVER_MESSAGE_SIZE];
@@ -75,13 +75,11 @@ static int SendStateResponse(struct coap_resource *resource, const struct net_so
 	VerifyOrReturnValue(err >= 0, err);
 
 	if (includeObserve) {
-		err = coap_append_option_int(&response, COAP_OPTION_OBSERVE,
-					     static_cast<unsigned int>(resource->age));
+		err = coap_append_option_int(&response, COAP_OPTION_OBSERVE, static_cast<unsigned int>(resource->age));
 		VerifyOrReturnValue(err >= 0, err);
 	}
 
-	err = coap_append_option_int(&response, COAP_OPTION_CONTENT_FORMAT,
-				     COAP_CONTENT_FORMAT_TEXT_PLAIN);
+	err = coap_append_option_int(&response, COAP_OPTION_CONTENT_FORMAT, COAP_CONTENT_FORMAT_TEXT_PLAIN);
 	VerifyOrReturnValue(err >= 0, err);
 
 	err = coap_packet_append_payload_marker(&response);
@@ -105,8 +103,8 @@ static int SendPutResponse(struct coap_resource *resource, struct coap_packet *r
 	const uint8_t tokenLen = coap_header_get_token(request, token);
 	struct coap_packet response;
 	uint8_t data[CONFIG_COAP_SERVER_MESSAGE_SIZE];
-	const int err = coap_packet_init(&response, data, sizeof(data), COAP_VERSION_1, COAP_TYPE_NON_CON,
-					 tokenLen, token, responseCode, coap_header_get_id(request));
+	const int err = coap_packet_init(&response, data, sizeof(data), COAP_VERSION_1, COAP_TYPE_NON_CON, tokenLen,
+					 token, responseCode, coap_header_get_id(request));
 	VerifyOrReturnValue(err >= 0, err);
 
 	return coap_resource_send(resource, &response, addr, addrLen, NULL);
@@ -123,15 +121,15 @@ static int HandleGet(struct coap_resource *resource, struct coap_packet *request
 	const uint8_t responseType = (type == COAP_TYPE_CON) ? COAP_TYPE_ACK : COAP_TYPE_NON_CON;
 	const bool observing = coap_resource_parse_observe(resource, request, addr) == 0;
 
-	return SendStateResponse(resource, addr, addrLen, sGetStateCb(), responseType,
-				 coap_header_get_id(request), token, tokenLen, observing);
+	return SendStateResponse(resource, addr, addrLen, sGetStateCb(), responseType, coap_header_get_id(request),
+				 token, tokenLen, observing);
 }
 
 static void HandleNotify(struct coap_resource *resource, struct coap_observer *observer)
 {
-	const int err = SendStateResponse(resource, net_sad(&observer->addr),
-					  net_family2size(observer->addr.ss_family), sNotifyState,
-					  COAP_TYPE_CON, coap_next_id(), observer->token, observer->tkl, true);
+	const int err =
+		SendStateResponse(resource, net_sad(&observer->addr), net_family2size(observer->addr.ss_family),
+				  sNotifyState, COAP_TYPE_CON, coap_next_id(), observer->token, observer->tkl, true);
 	if (err < 0) {
 		LOG_ERR("Failed to send CoAP notification: %d", err);
 	}
