@@ -1,0 +1,50 @@
+diff --git a/include/zephyr/net/coap_service.h b/include/zephyr/net/coap_service.h
+index 8beb211f3f9..5e5ba3a86e9 100644
+--- a/include/zephyr/net/coap_service.h
++++ b/include/zephyr/net/coap_service.h
+@@ -452,6 +452,20 @@ int coap_resource_remove_observer_by_addr(struct coap_resource *resource,
+ int coap_resource_remove_observer_by_token(struct coap_resource *resource,
+ 					   const uint8_t *token, uint8_t token_len);
+ 
++/**
++ * @brief Utility function for calling a resource update function and indicating that this resource
++ * was updated, and the @a notify callback should be called for every registered observer. Takes
++ * the server mutex to avoid data races.
++ *
++ * @param resource Resource that is updated
++ * @param update_cb Resource update callback function (can be NULL)
++ * @param update_arg Argument passed to the resource update callback
++ *
++ * @return 0 in case of success or negative in case of error.
++ */
++int coap_resource_update_notify(struct coap_resource *resource, void (*update_cb)(void *),
++				void *update_arg);
++
+ /**
+  * @}
+  */
+diff --git a/subsys/net/lib/coap/coap_server.c b/subsys/net/lib/coap/coap_server.c
+index fa845d0cd80..3589755b4b8 100644
+--- a/subsys/net/lib/coap/coap_server.c
++++ b/subsys/net/lib/coap/coap_server.c
+@@ -1519,6 +1519,20 @@ int coap_resource_remove_observer_by_token(struct coap_resource *resource,
+ 	return coap_resource_remove_observer(resource, NULL, token, token_len);
+ }
+ 
++int coap_resource_update_notify(struct coap_resource *resource, void (*update_cb)(void *),
++				void *update_arg)
++{
++	int ret;
++
++	(void)k_mutex_lock(&lock, K_FOREVER);
++	if (update_cb != NULL) {
++		update_cb(update_arg);
++	}
++	ret = coap_resource_notify(resource);
++	(void)k_mutex_unlock(&lock);
++	return ret;
++}
++
+ static void coap_server_thread(void *p1, void *p2, void *p3)
+ {
+ 	struct zsock_pollfd sock_fds[MAX_POLL_FD];

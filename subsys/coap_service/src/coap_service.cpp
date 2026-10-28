@@ -188,10 +188,15 @@ int Stop()
 	return 0;
 }
 
+static void NotifyUpdateCb(void *arg)
+{
+	VerifyOrReturn(arg);
+	sNotifyState = *static_cast<const Aliro::ReaderStateByte *>(arg);
+}
+
 void Notify(Aliro::ReaderStateByte state)
 {
-	sNotifyState = state;
-	const int err = coap_resource_notify(&door_lock);
+	const int err = coap_resource_update_notify(&door_lock, NotifyUpdateCb, &state);
 	if (err < 0) {
 		LOG_ERR("Failed to notify CoAP observers: %d", err);
 	}

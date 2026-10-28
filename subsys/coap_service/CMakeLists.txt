@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-zephyr_include_directories(include)
+zephyr_include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/aliro/include)
 
 zephyr_library()
 
