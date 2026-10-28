@@ -105,7 +105,7 @@ config DOOR_LOCK_MATTER_ACCESS_STORAGE_PROTECTED_STORAGE
 	# PSA SSF Crypto Client is not ready for PSA PS backend. It depends on
 	# HAS_IRONSIDE_SE_CALL, which avoids a Kconfig dependency loop through
 	# PSA_CRYPTO selected by SECURE_STORAGE.
-	depends on !CHIP_WIFI && !HAS_IRONSIDE_SE_CALL
+	depends on !HAS_IRONSIDE_SE_CALL
 	# When building with TF-M, Protected Storage is enabled by default
 	select SECURE_STORAGE if !BUILD_WITH_TFM
 	# UIDs use the full 32-bit range plus the offset in the upper 32 bits
