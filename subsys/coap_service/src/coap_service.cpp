@@ -94,6 +94,24 @@ static int SendStateResponse(struct coap_resource *resource, const struct net_so
 	return coap_resource_send(resource, &response, addr, addrLen, NULL);
 }
 
+static int SendPutResponse(struct coap_resource *resource, struct coap_packet *request, struct net_sockaddr *addr,
+			   socklen_t addrLen, uint8_t responseCode)
+{
+	if (coap_header_get_type(request) != COAP_TYPE_NON_CON) {
+		return responseCode;
+	}
+
+	uint8_t token[COAP_TOKEN_MAX_LEN];
+	const uint8_t tokenLen = coap_header_get_token(request, token);
+	struct coap_packet response;
+	uint8_t data[CONFIG_COAP_SERVER_MESSAGE_SIZE];
+	const int err = coap_packet_init(&response, data, sizeof(data), COAP_VERSION_1, COAP_TYPE_NON_CON,
+					 tokenLen, token, responseCode, coap_header_get_id(request));
+	VerifyOrReturnValue(err >= 0, err);
+
+	return coap_resource_send(resource, &response, addr, addrLen, NULL);
+}
+
 static int HandleGet(struct coap_resource *resource, struct coap_packet *request, struct net_sockaddr *addr,
 		     socklen_t addrLen)
 {
@@ -122,24 +140,28 @@ static void HandleNotify(struct coap_resource *resource, struct coap_observer *o
 static int HandlePut(struct coap_resource *resource, struct coap_packet *request, struct net_sockaddr *addr,
 		     socklen_t addrLen)
 {
-	VerifyOrReturnValue(sUnlockCb != nullptr, COAP_RESPONSE_CODE_INTERNAL_ERROR);
-	VerifyOrReturnValue(sLockCb != nullptr, COAP_RESPONSE_CODE_INTERNAL_ERROR);
+	VerifyOrReturnValue(sUnlockCb != nullptr,
+			    SendPutResponse(resource, request, addr, addrLen, COAP_RESPONSE_CODE_INTERNAL_ERROR));
+	VerifyOrReturnValue(sLockCb != nullptr,
+			    SendPutResponse(resource, request, addr, addrLen, COAP_RESPONSE_CODE_INTERNAL_ERROR));
 
 	struct coap_option contentFormats[2];
 	int formatCount = coap_find_options(request, COAP_OPTION_CONTENT_FORMAT, contentFormats, 2);
 
 	VerifyOrReturnValue(formatCount == 1 &&
 				    coap_option_value_to_int(&contentFormats[0]) == COAP_CONTENT_FORMAT_APP_CBOR,
-			    COAP_RESPONSE_CODE_BAD_REQUEST);
+			    SendPutResponse(resource, request, addr, addrLen, COAP_RESPONSE_CODE_BAD_REQUEST));
 
 	uint16_t payloadLen;
 	const uint8_t *payload = coap_packet_get_payload(request, &payloadLen);
 
-	VerifyOrReturnValue(payload != nullptr && payloadLen == 1, COAP_RESPONSE_CODE_BAD_REQUEST);
+	VerifyOrReturnValue(payload != nullptr && payloadLen == 1,
+			    SendPutResponse(resource, request, addr, addrLen, COAP_RESPONSE_CODE_BAD_REQUEST));
 
 	ZCBOR_STATE_D(cborState, 0, payload, payloadLen, 1, 0);
 	bool state;
-	VerifyOrReturnValue(zcbor_bool_decode(cborState, &state), COAP_RESPONSE_CODE_BAD_REQUEST);
+	VerifyOrReturnValue(zcbor_bool_decode(cborState, &state),
+			    SendPutResponse(resource, request, addr, addrLen, COAP_RESPONSE_CODE_BAD_REQUEST));
 
 	if (state) {
 		sUnlockCb();
@@ -147,7 +169,7 @@ static int HandlePut(struct coap_resource *resource, struct coap_packet *request
 		sLockCb();
 	}
 
-	return COAP_RESPONSE_CODE_CHANGED;
+	return SendPutResponse(resource, request, addr, addrLen, COAP_RESPONSE_CODE_CHANGED);
 }
 
 extern "C" {
