@@ -65,4 +65,9 @@ endif # BOOTLOADER_MCUBOOT
 config MATTER_ADD_ON_FACTORY_DATA_GENERATE
 	default y
 
+# TODO: workaround for nRF71
+config MERGED_HEX_FILES
+	default n if SOC_SERIES_NRF71
+	default y
+
 source "share/sysbuild/Kconfig"
