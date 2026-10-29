@@ -5,7 +5,6 @@
  */
 
 #include <door_lock/common/nrf7120_cpuapp_partitions.dtsi>
-#include <vendor/nordic/wifi/nrf7120_wifi_patch_0_1_0.dtsi>
 
 / {
 	chosen {
