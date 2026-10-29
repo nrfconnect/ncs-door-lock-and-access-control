@@ -16,6 +16,13 @@ The following table shows tested and verified combinations of |REPO_NAME| releas
      - ncs-matter Add-on version
      - Qorvo UWB SDK and QM35825 FW version
      - STM NFC RFAL library version
+   * - 1.2.99-preview-nrf7120
+     - 3.5.0-preview4
+     - 1.0.0
+     - 1.6.0
+     - 1.0.99-preview-nrf7120
+     - —
+     - 4.0.2
    * - 1.2.1
      - 3.4.1 (LTS)
      - 1.0.0
