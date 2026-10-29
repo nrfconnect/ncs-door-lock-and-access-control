@@ -10,6 +10,7 @@ Known issues for each release are listed on the :ref:`known issues page on the m
 .. toctree::
    :maxdepth: 1
 
+   release_notes/release_notes_v1299_preview_nrf7120.rst
    release_notes/release_notes_v121.rst
    release_notes/release_notes_v120.rst
    release_notes/release_notes_v111.rst
