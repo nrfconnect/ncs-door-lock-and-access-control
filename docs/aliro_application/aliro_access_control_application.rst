@@ -74,6 +74,8 @@ The |ALIRO_APP_NAME| supports the following capabilities:
   See :ref:`door_lock_nus_service`.
 * Advanced Aliro phases — Optional expedited-fast and step-up authentication.
   See :ref:`aliro_advanced_features`.
+* Wi-Fi station — Connects to a Wi-Fi network on the nRF7120 DK.
+  See :ref:`aliro_wifi`.
 
 This application does not integrate with Matter.
 For a Matter-enabled variant, see :ref:`doc_aliro_matter_door_lock_application`.
@@ -104,6 +106,10 @@ They are not required for the default NFC-only build.
    * - ``CONFIG_DOOR_LOCK_DFU_SMP_SERVICE``
      - Enables Device Firmware Update over Bluetooth LE SMP.
        Enabled by default.
+   * - ``CONFIG_DOOR_LOCK_WIFI``
+     - Enables Wi-Fi station mode with credentials stored using the :ref:`Wi-Fi credentials <zephyr:lib_wifi_credentials>` library.
+       Available on boards with a ``zephyr,wifi`` chosen node, and enabled by default on the nRF7120 DK.
+       See :ref:`aliro_wifi`.
 
 For Bluetooth LE transport and session-limit details, see :ref:`aliro_ble_transport`.
 
@@ -298,6 +304,62 @@ Verify that the application runs correctly:
       Boot logs are reduced compared with debug builds.
       Connect to the serial console and verify that the ``dl`` shell command is available (see :ref:`Provisioning with CLI <aliro_testing_provisioning_cli>`).
 
+.. _aliro_wifi:
+
+Wi-Fi station
+*************
+
+On the nRF7120 DK, the application runs as a Wi-Fi station.
+The ``CONFIG_DOOR_LOCK_WIFI`` Kconfig option is enabled by default for the ``nrf7120dk/nrf7120/cpuapp`` build target, so no extra build arguments are needed:
+
+.. code-block:: bash
+
+   west build -p -b nrf7120dk/nrf7120/cpuapp applications/aliro-access-control-app
+
+The application stores network credentials using the :ref:`Wi-Fi credentials <zephyr:lib_wifi_credentials>` library, and the connection manager connects to a stored network when the Wi-Fi interface comes up.
+The credentials persist across reboots, so you need to provision them only once.
+
+Provisioning Wi-Fi credentials
+==============================
+
+Provision the credentials through the UART shell using the ``wifi cred`` commands:
+
+#. Add the network credentials:
+
+   .. code-block:: console
+
+      uart:~$ wifi cred add -s "<SSID>" -k 1 -p "<passphrase>"
+
+   The ``-k`` argument selects the key management type, for example, ``0`` for an open network, ``1`` for WPA2-PSK, or ``5`` for WPA3 SAE.
+   For an open network, omit the ``-p`` argument.
+   Run ``wifi cred add -h`` to list all options.
+
+#. Connect to the stored network:
+
+   .. code-block:: console
+
+      uart:~$ wifi cred auto_connect
+
+   .. note::
+      After a reboot, the device connects to the stored network automatically.
+      To disable this behavior, set the ``CONFIG_L2_WIFI_CONNECTIVITY_AUTO_CONNECT`` Kconfig option to ``n``, for example, by adding ``-DCONFIG_L2_WIFI_CONNECTIVITY_AUTO_CONNECT=n`` to the build command.
+      You can then connect manually using the ``wifi cred auto_connect`` command.
+
+#. Verify the connection:
+
+   .. code-block:: console
+
+      uart:~$ wifi status
+
+   In debug builds, the logs also show the connection state and the IPv4 address obtained from DHCP.
+
+To manage the stored credentials, use the following commands:
+
+* ``wifi cred list`` — Lists the stored networks.
+* ``wifi cred delete "<SSID>"`` — Removes the network from storage.
+
+For more Wi-Fi shell commands, see :ref:`zephyr:wifi_mgmt`.
+
 Dependencies
 ************
 
@@ -316,3 +378,4 @@ The application depends on the following Zephyr facilities:
 * :doc:`Logging <zephyr:services/logging/index>`
 * :doc:`Kernel Services <zephyr:kernel/services/index>`
 * Bluetooth host stack (when Bluetooth LE features or UWB transport are enabled)
+* Networking stack and Wi-Fi management (when ``CONFIG_DOOR_LOCK_WIFI`` is enabled)
