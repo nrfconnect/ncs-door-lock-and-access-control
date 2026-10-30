@@ -93,6 +93,73 @@ The recommended VDD setting depends on the development kit.
 
          VDD board configuration.
 
+.. _hw_requirements_nrf7120dk_preparation:
+
+Preparing the nRF7120 DK
+========================
+
+Before you start working with the nRF7120 DK, complete the following steps.
+
+Updating nRF Util
+-----------------
+
+Programming the nRF7120 DK requires the ``nrfutil device`` command in version 2.23.0 or newer.
+The nRF Util bundled with the |NCS| v3.5.0-preview4 toolchain contains an older version of the ``nrfutil device`` command and cannot program the nRF7120 DK.
+
+To check the version of the ``nrfutil device`` command, run the following command:
+
+.. code-block:: console
+
+   nrfutil device --version
+
+If the version is older than 2.23.0, use a standalone nRF Util installation and update the ``nrfutil device`` command:
+
+.. code-block:: console
+
+   nrfutil upgrade device
+
+.. _hw_requirements_nrf7120dk_vcom1:
+
+Disabling VCOM1
+---------------
+
+On the nRF7120 DK, the pins routed to the VCOM1 virtual serial port conflict with the pins used by the NFC reader expansion board.
+You must disable VCOM1 using the board controller of the DK.
+
+#. Create the :file:`vcom1_off.json` file with the following content:
+
+   .. code-block:: json
+
+      {
+          "operations": [
+              {
+                  "operation": {
+                      "type": "smp",
+                      "operation": 2,
+                      "group_id": 64,
+                      "command_id": 0,
+                      "sequence_number": 0,
+                      "data": [
+                          [
+                              6, true, 7, false, 8, true, 9, true, 14, true, 15, true,
+                              20, true, 22, false, 23, false, 42, true, 47, true
+                          ],
+                          [1, 1800, 3, 3300]
+                      ]
+                  },
+                  "operationId": "1"
+              }
+          ]
+      }
+
+#. Run the following command to apply the configuration to the board controller:
+
+   .. code-block:: console
+
+      nrfutil device x-execute-batch --traits boardController --batch-path vcom1_off.json
+
+   This command also requires the ``nrfutil device`` command in version 2.23.0 or newer.
+
 .. _hw_requirements_nfc_reader:
 
 Near Field Communication reader
@@ -113,6 +180,10 @@ The |REPO_NAME| supports the following NFC readers and their corresponding devel
 
    The `X-NUCLEO-NFC09A1`_ board requires a minimum of 2.7V to operate.
    Because of that, you must adjust the GPIO voltage for the :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>` and the :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` as outlined in the :ref:`hw_requirements_vddio_configuration` section.
+
+.. note::
+
+   The :doc:`nRF7120 DK <zephyr:boards/nordic/nrf7120dk/doc/index>` supports only the `X-NUCLEO-NFC12A1`_ board.
 
 Connecting the NFC reader
 =========================
@@ -194,11 +265,11 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
    .. group-tab:: nRF7120 DK
 
       The :doc:`nRF7120 DK <zephyr:boards/nordic/nrf7120dk/doc/index>` does not have Arduino-compatible header, therefore, you must connect your board using wires.
-      To connect the NFC reader expansion board to the DK, refer to the following pin mapping.
-      The pinout is applicable for each of the supported NFC reader expansion boards:
+      The nRF7120 DK supports only the `X-NUCLEO-NFC12A1`_ board.
+      To connect the NFC reader expansion board to the DK, refer to the following pin mapping:
 
       +-------------------+-----------------------+
-      | nRF7120 DK        | X-NUCLEO board        |
+      | nRF7120 DK        | X-NUCLEO-NFC12A1      |
       +===================+=======================+
       | P1.13             | SCK MCU (D13)         |
       +-------------------+-----------------------+
@@ -219,7 +290,10 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
 
       .. note::
          The VDDIO voltage level on the nRF7120 DK is 1.8 V.
-         This voltage level is sufficient to drive the X-NUCLEO expansion board.
+         This voltage level is sufficient to drive the `X-NUCLEO-NFC12A1`_ board.
+
+      .. note::
+         Before connecting the NFC reader expansion board, disable VCOM1 as described in the :ref:`hw_requirements_nrf7120dk_vcom1` section.
 
    .. group-tab:: nRF5340 DK
 
