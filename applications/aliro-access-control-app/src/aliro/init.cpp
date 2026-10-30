@@ -16,6 +16,10 @@
 #include <nus_service/nus_service.h>
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
 
+#ifdef CONFIG_DOOR_LOCK_COAP_SERVICE
+#include <coap_service/coap_service.h>
+#endif // CONFIG_DOOR_LOCK_COAP_SERVICE
+
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "aliro/ble_types.h"
 #include <aliro_service/aliro_service.h>
@@ -259,6 +263,10 @@ int AliroInit()
 #endif // CONFIG_DOOR_LOCK_EXPEDITED_FAST_PHASE
 
 	LockSimInstance().Init([](ReaderStateByte state) {
+#ifdef CONFIG_DOOR_LOCK_COAP_SERVICE
+		DoorLock::CoAPService::Notify(state);
+#endif // CONFIG_DOOR_LOCK_COAP_SERVICE
+
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 		SendReaderStatusChangedMessage(state);
 #ifdef CONFIG_DOOR_LOCK_NUS_SERVICE

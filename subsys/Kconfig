@@ -15,5 +15,6 @@ rsource "matter_access/Kconfig"
 rsource "nfc_prop/Kconfig"
 rsource "nus_service/Kconfig"
 rsource "settings_utils/Kconfig"
+rsource "coap_service/Kconfig"
 
 endmenu

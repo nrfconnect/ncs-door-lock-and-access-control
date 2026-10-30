@@ -14,5 +14,6 @@ For modules not covered here, see the corresponding Kconfig and public header fi
    :caption: Subpages:
 
    components/aliro_lock_sim.rst
+   components/coap_service.rst
    components/dfu_smp_service.rst
    components/nus_service.rst

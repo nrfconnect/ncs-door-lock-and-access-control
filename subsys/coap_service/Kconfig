@@ -1,0 +1,47 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_COAP_SERVICE
+	bool "Door Lock CoAP service"
+	depends on NETWORKING && NET_IPV4 && NET_UDP
+	depends on NCS_ALIRO
+	select CPP
+	select ZCBOR
+	select COAP
+	select COAP_SERVER
+	help
+	  Enables an IPv4 CoAP service for reading and changing the door lock
+	  state. The service uses plain UDP without authentication or encryption.
+	  Use only on a trusted test network.
+
+if DOOR_LOCK_COAP_SERVICE
+
+module = DOOR_LOCK_COAP_SERVICE
+module-str = Door Lock CoAP service
+module-dep = LOG
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+config DOOR_LOCK_COAP_SERVICE_PORT
+	int "Door Lock CoAP service UDP port"
+	default 5683
+	range 1 65535
+	help
+	  Sets the UDP port used by the door lock CoAP service.
+	  Port 5683 is the standard port for unsecured CoAP. Port 0
+	  (automatic ephemeral port assignment) is not supported.
+
+config DOOR_LOCK_COAP_RESOURCE_PATH
+	string "Door Lock CoAP service resource path"
+	default "door-lock"
+	help
+	  Sets the single URI path segment of the door lock resource, for
+	  example "door-lock". The value must not be empty or contain slashes.
+	  Specify an unescaped value, not percent-encoded text.
+	  The path must fit in a CoAP option value (12 bytes by default).
+	  Longer values require COAP_EXTENDED_OPTIONS_LEN and an appropriate
+	  COAP_EXTENDED_OPTIONS_LEN_VALUE.
+
+endif # DOOR_LOCK_COAP_SERVICE
