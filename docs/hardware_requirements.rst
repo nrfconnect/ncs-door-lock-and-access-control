@@ -36,6 +36,15 @@ Depending on the transport technology you want to use, the |APPS_NAME| support t
      - :doc:`nrf54lm20dk <nrf:app_dev/device_guides/nrf54l/index>`
      - ``nrf54lm20dk/nrf54lm20a/cpuapp``
        ``nrf54lm20dk/nrf54lm20b/cpuapp``
+   * - :doc:`nRF7120 DK <zephyr:boards/nordic/nrf7120dk/doc/index>`
+     - PCA10217
+     - :doc:`nrf7120dk <nrf:app_dev/device_guides/nrf71/index>`
+     - ``nrf7120dk/nrf7120/cpuapp``
+
+.. note::
+
+   The nRF7120 DK support is experimental and provided for evaluation purposes only.
+   It is not intended for production use.
 
 .. _hw_requirements_vddio_configuration:
 
@@ -181,6 +190,36 @@ Follow the guidelines to connect the NFC reader expansion board based on your de
 
       .. note::
          To make the hardware setup easier, you can request the PCB design files of the Arduino-compatible adapters for the :doc:`nRF54L15 DK <zephyr:boards/nordic/nrf54l15dk/doc/index>` and the :doc:`nRF54LM20 DK <zephyr:boards/nordic/nrf54lm20dk/doc/index>` via `Nordic DevZone`_.
+
+   .. group-tab:: nRF7120 DK
+
+      The :doc:`nRF7120 DK <zephyr:boards/nordic/nrf7120dk/doc/index>` does not have Arduino-compatible header, therefore, you must connect your board using wires.
+      To connect the NFC reader expansion board to the DK, refer to the following pin mapping.
+      The pinout is applicable for each of the supported NFC reader expansion boards:
+
+      +-------------------+-----------------------+
+      | nRF7120 DK        | X-NUCLEO board        |
+      +===================+=======================+
+      | P1.13             | SCK MCU (D13)         |
+      +-------------------+-----------------------+
+      | P1.12             | MISO MCU (D12)        |
+      +-------------------+-----------------------+
+      | P1.11             | MOSI MCU (D11)        |
+      +-------------------+-----------------------+
+      | P1.10             | /SS MCU (D10)         |
+      +-------------------+-----------------------+
+      | P1.14             | IRQ MCU (A0)          |
+      +-------------------+-----------------------+
+      | VBUS              | +5V                   |
+      +-------------------+-----------------------+
+      | VDDIO             | +3V3                  |
+      +-------------------+-----------------------+
+      | GND               | GND                   |
+      +-------------------+-----------------------+
+
+      .. note::
+         The VDDIO voltage level on the nRF7120 DK is 1.8 V.
+         This voltage level is sufficient to drive the X-NUCLEO expansion board.
 
    .. group-tab:: nRF5340 DK
 
