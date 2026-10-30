@@ -24,6 +24,10 @@
 #include <zephyr/bluetooth/gap.h>
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
 
+#ifdef CONFIG_DOOR_LOCK_COAP_SERVICE
+#include <coap_service/coap_service.h>
+#endif // CONFIG_DOOR_LOCK_COAP_SERVICE
+
 #ifdef CONFIG_DOOR_LOCK_BLE_UWB
 #include "access_manager.h"
 #include "aliro/last_operation.h"
@@ -166,6 +170,14 @@ int main()
 	VerifyOrDie(nusErr == 0, "Failed to start NUS service");
 
 #endif // CONFIG_DOOR_LOCK_NUS_SERVICE
+
+#ifdef CONFIG_DOOR_LOCK_COAP_SERVICE
+	DoorLock::CoAPService::Init([]() { return Aliro::LockSimInstance().GetState(); },
+				    []() { Aliro::LockSimInstance().Unlock(); },
+				    []() { Aliro::LockSimInstance().Lock(); });
+
+	DoorLock::CoAPService::Start();
+#endif // CONFIG_DOOR_LOCK_COAP_SERVICE
 
 	LOG_INF("Application started");
 

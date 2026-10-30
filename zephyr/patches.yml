@@ -23,3 +23,9 @@ patches:
     author: Adrian Gielniewski
     email: adrian.gielniewski@nordicsemi.no
     date: 2026-10-21
+  - path: coap-resource-update-notify.patch
+    sha256sum: d49bd72b04f1cb0d280b291b8a771d15833c2bac4d1367b224b5d1190c7b83a1
+    module: zephyr
+    author: Franciszek Urbański
+    email: franciszek.urbanski@nordicsemi.no
+    date: 2026-10-28
