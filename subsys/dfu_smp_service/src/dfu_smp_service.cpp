@@ -53,8 +53,10 @@ void Init(uint8_t priority, uint16_t minInterval, uint16_t maxInterval)
 
 	k_work_init(&sWork, []([[maybe_unused]] k_work *) {
 		if (Advertising::IsActive()) {
+			LOG_INF("DFU BLE SMP stopped");
 			Advertising::CancelRequest();
 		} else {
+			LOG_INF("DFU BLE SMP started");
 			const int err = Advertising::InsertRequest(sPriority, sMinInterval, sMaxInterval);
 			VerifyOrReturn(err == 0, LOG_ERR("DFU SMP advertising request failed (rc %d)", err));
 		}
