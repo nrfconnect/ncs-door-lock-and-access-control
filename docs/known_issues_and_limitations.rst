@@ -40,8 +40,6 @@ The following optional Aliro features are out-of-scope for the |APP_NAME|:
      - --
    * - Expedited-Fast Phase authentication based on Credential Issuer CA Public Key
      - --
-   * - When the application is built with Matter support, only one Aliro Bluetooth LE session is supported at a time
-     - --
 
 Known issues
 ************
