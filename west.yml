@@ -18,7 +18,7 @@ manifest:
     - name: ncs-matter
       remote: ncs
       repo-path: ncs-matter
-      revision: v1.0.0
+      revision: v1.0.1
       import: true
     - name: ncs-door-lock-app-extensions
       remote: ncs
