@@ -1,2 +1,2 @@
-.. |mem_values_commit| replace:: ``c230d1debdfb349576d00307007847aab2b634ab``
+.. |mem_values_commit| replace:: ``6d8504c9152fc01c687d4bfda11a650964b38f33``
 .. |mem_values_caption| replace:: Values measured on commit |mem_values_commit|
