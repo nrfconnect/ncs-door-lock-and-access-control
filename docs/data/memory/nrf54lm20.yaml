@@ -1,0 +1,142 @@
+# Memory requirement data for nRF54LM20 DK.
+# Partition sizes and reference_regions come from dts/door_lock/common/*_partitions.dtsi
+# and the Zephyr SoC devicetree files.
+# Usage values were measured on the commit listed in docs/include/memory_values_commit.txt.
+# MCUboot usage is intentionally omitted; the partition is shown as fully reserved.
+
+board:
+  name: nRF54LM20 DK
+  nvm_total_kb: 2036
+  ram_total_kb: 511
+legend_threshold_kb: 8
+layouts:
+  debug:
+    partitions:
+    - id: boot
+      label: MCUboot
+      size_kb: 52
+      order: 1
+    - id: slot0
+      label: Application
+      size_kb: 1932
+      order: 2
+    - id: factory_data
+      label: Factory data
+      size_kb: 4
+      order: 3
+    - id: storage
+      label: Settings
+      size_kb: 48
+      order: 4
+  release:
+    partitions:
+    - id: boot
+      label: MCUboot
+      size_kb: 52
+      order: 1
+    - id: slot0
+      label: Application
+      size_kb: 1932
+      order: 2
+    - id: factory_data
+      label: Factory data
+      size_kb: 4
+      order: 3
+    - id: storage
+      label: Settings
+      size_kb: 48
+      order: 4
+samples:
+- label: :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Debug)
+  layout: debug
+  usage:
+    nvm:
+      slot0: 783
+      factory_data: 4
+      storage: 48
+    ram_used_kb: 168
+- label: :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
+  layout: release
+  usage:
+    nvm:
+      slot0: 691
+      factory_data: 4
+      storage: 48
+    ram_used_kb: 162
+- label: :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
+  layout: debug
+  usage:
+    nvm:
+      slot0: 901
+      factory_data: 4
+      storage: 48
+    ram_used_kb: 216
+- label: :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
+  layout: release
+  usage:
+    nvm:
+      slot0: 825
+      factory_data: 4
+      storage: 48
+    ram_used_kb: 197
+- label: :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
+  layout: debug
+  usage:
+    nvm:
+      slot0: 412
+      factory_data: 4
+      storage: 48
+    ram_used_kb: 93
+- label: :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
+  layout: release
+  usage:
+    nvm:
+      slot0: 307
+      factory_data: 4
+      storage: 48
+    ram_used_kb: 81
+reference_regions:
+- id: rram
+  title: Internal RRAM
+  total_bytes: 2084864
+  base_address: 0
+  partitions:
+  - id: boot_partition
+    label: MCUboot
+    size_bytes: 53248
+    offset_bytes: 0
+  - id: slot0_partition
+    label: Application
+    size_bytes: 1978368
+    offset_bytes: 53248
+  - id: factory_data_partition
+    label: Factory data
+    size_bytes: 4096
+    offset_bytes: 2031616
+  - id: storage_partition
+    label: Settings
+    size_bytes: 49152
+    offset_bytes: 2035712
+- id: sram
+  title: Static RAM
+  total_bytes: 523264
+  base_address: 536870912
+  address_note_rst: SRAM is located at the address 0x20000000 in the memory address space of the application core.
+  partitions:
+  - id: sram
+    label: Static RAM
+    size_bytes: 523264
+    offset_bytes: 0
+- id: external_flash
+  title: External flash (MX25R64)
+  total_bytes: 8388608
+  base_address: 0
+  partitions:
+  - id: slot1_partition
+    label: Application DFU
+    size_bytes: 1978368
+    offset_bytes: 0
+  - id: padding
+    label: Free space
+    size_bytes: 6410240
+    offset_bytes: 1978368
