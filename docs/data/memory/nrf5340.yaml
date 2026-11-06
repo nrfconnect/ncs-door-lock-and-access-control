@@ -1,12 +1,13 @@
 # Memory requirement data for nRF5340 DK.
-# Partition sizes come from dts/door_lock/common/*_partitions.dtsi.
+# Partition sizes and reference_regions come from dts/door_lock/common/*_partitions.dtsi
+# and the Zephyr SoC devicetree files.
 # Usage values were measured on the commit listed in docs/include/memory_values_commit.txt.
 # MCUboot usage is intentionally omitted; the partition is shown as fully reserved.
 
 board:
   name: nRF5340 DK
   nvm_total_kb: 1024
-  ram_total_kb: 512
+  ram_total_kb: 448
 legend_threshold_kb: 8
 layouts:
   debug:
@@ -94,3 +95,88 @@ samples:
       factory_data: 4
       storage: 32
     ram_used_kb: 77
+reference_regions:
+- id: flash_primary
+  title: Application core internal flash
+  total_bytes: 1048576
+  base_address: 0
+  partitions:
+  - id: boot_partition
+    label: MCUboot
+    size_bytes: 32768
+    offset_bytes: 0
+  - id: slot0_partition
+    label: Application
+    size_bytes: 978944
+    offset_bytes: 32768
+  - id: factory_data_partition
+    label: Factory data
+    size_bytes: 4096
+    offset_bytes: 1011712
+  - id: storage_partition
+    label: Settings
+    size_bytes: 32768
+    offset_bytes: 1015808
+- id: sram
+  title: Static RAM
+  total_bytes: 524288
+  base_address: 536870912
+  address_note_rst: SRAM is located at the address 0x20000000 in the memory address space of the application core.
+  partitions:
+  - id: sram0_image
+    label: Application RAM
+    size_bytes: 458752
+    offset_bytes: 0
+  - id: sram0_shared
+    label: IPC shared memory
+    size_bytes: 65536
+    offset_bytes: 458752
+- id: external_flash
+  title: External flash (MX25R64)
+  total_bytes: 8388608
+  base_address: 0
+  partitions:
+  - id: slot1_partition
+    label: Application DFU
+    size_bytes: 978944
+    offset_bytes: 0
+  - id: slot3_partition
+    label: Network core DFU
+    size_bytes: 262144
+    offset_bytes: 978944
+  - id: external_nvs_partition
+    label: External NVS (Aliro applications only)
+    size_bytes: 131072
+    offset_bytes: 1241088
+  - id: padding
+    label: Free space
+    size_bytes: 7016448
+    offset_bytes: 1372160
+- id: flash_primary_cpunet
+  title: Network core flash
+  total_bytes: 262144
+  base_address: 16777216
+  address_note_rst: The network core flash is located at the address 0x01000000 in the memory address space of the network core.
+  partitions:
+  - id: b0n_partition
+    label: b0n bootloader
+    size_bytes: 34176
+    offset_bytes: 0
+  - id: provision_partition
+    label: Provision data
+    size_bytes: 640
+    offset_bytes: 34176
+  - id: s0_partition
+    label: Network core application
+    size_bytes: 227328
+    offset_bytes: 34816
+- id: sram_cpunet
+  title: Network core static RAM
+  total_bytes: 65536
+  base_address: 553648128
+  address_note_rst: The network core SRAM is located at the address 0x21000000 in the memory address space of the network core.
+  partitions:
+  - id: sram1
+    label: Static RAM
+    size_bytes: 65536
+    offset_bytes: 0

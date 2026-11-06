@@ -1,0 +1,43 @@
+# Reference memory layout for nRF54LM20 DK with internal memory only.
+# Partition sizes come from dts/door_lock/common/nrf54lm20_cpuapp_internal_partitions.dtsi.
+
+board:
+  name: nRF54LM20 DK (internal memory only)
+  nvm_total_kb: 2036
+  ram_total_kb: 511
+reference_regions:
+- id: rram
+  title: Internal RRAM
+  total_bytes: 2084864
+  base_address: 0
+  partitions:
+  - id: boot_partition
+    label: MCUboot
+    size_bytes: 40960
+    offset_bytes: 0
+  - id: slot0_partition
+    label: Application
+    size_bytes: 1204224
+    offset_bytes: 40960
+  - id: slot1_partition
+    label: Application DFU
+    size_bytes: 786432
+    offset_bytes: 1245184
+  - id: factory_data_partition
+    label: Factory data
+    size_bytes: 4096
+    offset_bytes: 2031616
+  - id: storage_partition
+    label: Settings
+    size_bytes: 49152
+    offset_bytes: 2035712
+- id: sram
+  title: Static RAM
+  total_bytes: 523264
+  base_address: 536870912
+  address_note_rst: SRAM is located at the address 0x20000000 in the memory address space of the application core.
+  partitions:
+  - id: sram
+    label: Static RAM
+    size_bytes: 523264
+    offset_bytes: 0
