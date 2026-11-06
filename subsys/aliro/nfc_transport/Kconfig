@@ -1,0 +1,55 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig DOOR_LOCK_ALIRO_NFC_TRANSPORT
+	bool "Aliro NFC transport"
+	depends on NCS_ALIRO
+	help
+	  NFC transport used by the Aliro stack to exchange APDUs with
+	  User Devices.
+
+if DOOR_LOCK_ALIRO_NFC_TRANSPORT
+
+choice DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND
+	prompt "Aliro NFC transport backend"
+	default DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND_RFAL
+	help
+	  Select which backend is built for the Aliro NFC transport.
+	  The NfcTransport glue that connects the backend to the Aliro stack
+	  is always built; this choice only controls which backend implements
+	  the functions declared in nfc_transport/nfc_transport_backend.h.
+
+config DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND_RFAL
+	bool "ST RFAL backend"
+	depends on NFC_DRIVER_STM
+	depends on DOOR_LOCK_ALIRO_WORKQUEUE
+	select RFAL_FEATURE_NFCA
+	select RFAL_FEATURE_LOWPOWER_MODE
+	select RFAL_FEATURE_WAKEUP_MODE
+	select RFAL_FEATURE_T4T
+	select RFAL_FEATURE_ISO_DEP
+	select RFAL_FEATURE_ISO_DEP_POLL
+	help
+	  Build the in-tree backend from the rfal_backend directory, based on
+	  the ST RFAL library and ST25R-series transceivers.
+
+config DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND_EXTERNAL
+	bool "Out-of-tree backend"
+	help
+	  Do not build any in-tree NFC transport backend. An external module
+	  defines the functions declared in nfc_transport/nfc_transport_backend.h.
+
+endchoice # DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND
+
+module = DOOR_LOCK_ALIRO_NFC_TRANSPORT
+module-str = Door Lock Aliro NFC transport
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+if DOOR_LOCK_ALIRO_NFC_TRANSPORT_BACKEND_RFAL
+rsource "rfal_backend/Kconfig"
+endif
+
+endif # DOOR_LOCK_ALIRO_NFC_TRANSPORT
