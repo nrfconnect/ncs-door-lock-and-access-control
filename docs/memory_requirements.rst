@@ -9,6 +9,8 @@ Memory requirements
 
 This page details the memory requirements for the |REPO_NAME| :ref:`applications <doc_applications>`.
 
+.. _hw_requirements_memory_ram_flash:
+
 RAM and flash memory requirements
 *********************************
 
@@ -99,3 +101,100 @@ Other NVM columns list the reserved partition size for that region.
 
             .. memory-table::
                :board: nrf54lm20
+
+Reference memory layouts
+************************
+
+The following bar charts and tables show the memory maps for each of the supported DKs.
+All the |APPS_NAME| use the same internal flash and RAM layout on a given DK.
+The partition sizes match the :ref:`RAM and flash memory requirements <hw_requirements_memory_ram_flash>` listed above and are defined in the :file:`dts/door_lock/common` devicetree files.
+
+The external flash holds the secondary MCUboot slot, which stores the application update image during DFU.
+On the nRF5340 DK, it also holds the network core update image.
+On the nRF5340 DK, nRF54L15 DK, and nRF54LM20 DK, the Aliro applications also reserve the External NVS partition in the external flash for encrypted Access Document storage.
+The :ref:`Matter Door Lock <doc_matter_door_lock_application>` application does not use this partition.
+
+.. tabs::
+
+   .. group-tab:: Charts
+
+      .. tabs::
+
+         .. group-tab:: nRF52840 DK
+
+            The following memory map is valid for the applications running on the nRF52840 DK.
+
+            .. memory-layout-board::
+               :board: nrf52840
+
+         .. group-tab:: nRF5340 DK
+
+            The following memory map is valid for the applications running on the nRF5340 DK.
+
+            .. memory-layout-board::
+               :board: nrf5340
+
+         .. group-tab:: nRF54L15 DK
+
+            The following memory map is valid for the applications running on the nRF54L15 DK.
+
+            .. memory-layout-board::
+               :board: nrf54l15
+
+         .. group-tab:: nRF54LM20 DK
+
+            The following memory map is valid for the applications running on the nRF54LM20 DK.
+
+            .. memory-layout-board::
+               :board: nrf54lm20
+
+         .. group-tab:: nRF54LM20 DK with internal memory only
+
+            The following memory map is valid for the applications running on the nRF54LM20 DK with internal memory only.
+
+            .. note::
+               Only the :ref:`Matter Door Lock <doc_matter_door_lock_application>` application supports this memory layout, using the ``internal`` file suffix.
+
+            .. memory-layout-board::
+               :board: nrf54lm20_internal
+
+   .. group-tab:: Tables
+
+      .. tabs::
+
+         .. group-tab:: nRF52840 DK
+
+            The following table lists memory partitions for the applications running on the nRF52840 DK.
+
+            .. memory-layout-table::
+               :board: nrf52840
+
+         .. group-tab:: nRF5340 DK
+
+            The following table lists memory partitions for the applications running on the nRF5340 DK.
+
+            .. memory-layout-table::
+               :board: nrf5340
+
+         .. group-tab:: nRF54L15 DK
+
+            The following table lists memory partitions for the applications running on the nRF54L15 DK.
+
+            .. memory-layout-table::
+               :board: nrf54l15
+
+         .. group-tab:: nRF54LM20 DK
+
+            The following table lists memory partitions for the applications running on the nRF54LM20 DK.
+
+            .. memory-layout-table::
+               :board: nrf54lm20
+
+         .. group-tab:: nRF54LM20 DK with internal memory only
+
+            The following table lists memory partitions for the applications running on the nRF54LM20 DK with internal memory only.
+
+            Only the :ref:`Matter Door Lock <doc_matter_door_lock_application>` application supports this memory layout, using the ``internal`` file suffix.
+
+            .. memory-layout-table::
+               :board: nrf54lm20_internal

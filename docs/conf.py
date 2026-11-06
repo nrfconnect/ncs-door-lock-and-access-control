@@ -42,6 +42,7 @@ extensions = [
     'known_issues_filter',
     'memory_data',
     'memory_viz',
+    'memory_layout_viz',
     'sphinx_tabs.tabs',
     'sphinx_copybutton',
     'sphinx_togglebutton',
