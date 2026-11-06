@@ -1,5 +1,6 @@
 # Memory requirement data for nRF54L15 DK.
-# Partition sizes come from dts/door_lock/common/*_partitions.dtsi.
+# Partition sizes and reference_regions come from dts/door_lock/common/*_partitions.dtsi
+# and the Zephyr SoC devicetree files.
 # Usage values were measured on the commit listed in docs/include/memory_values_commit.txt.
 # MCUboot usage is intentionally omitted; the partition is shown as fully reserved.
 
@@ -94,3 +95,52 @@ samples:
       factory_data: 4
       storage: 40
     ram_used_kb: 81
+reference_regions:
+- id: rram
+  title: Internal RRAM
+  total_bytes: 1560576
+  base_address: 0
+  partitions:
+  - id: boot_partition
+    label: MCUboot
+    size_bytes: 53248
+    offset_bytes: 0
+  - id: slot0_partition
+    label: Application
+    size_bytes: 1462272
+    offset_bytes: 53248
+  - id: factory_data_partition
+    label: Factory data
+    size_bytes: 4096
+    offset_bytes: 1515520
+  - id: storage_partition
+    label: Settings
+    size_bytes: 40960
+    offset_bytes: 1519616
+- id: sram
+  title: Static RAM
+  total_bytes: 262144
+  base_address: 536870912
+  address_note_rst: SRAM is located at the address 0x20000000 in the memory address space of the application core.
+  partitions:
+  - id: sram
+    label: Static RAM
+    size_bytes: 262144
+    offset_bytes: 0
+- id: external_flash
+  title: External flash (MX25R64)
+  total_bytes: 8388608
+  base_address: 0
+  partitions:
+  - id: slot1_partition
+    label: Application DFU
+    size_bytes: 1462272
+    offset_bytes: 0
+  - id: external_nvs_partition
+    label: External NVS (Aliro applications only)
+    size_bytes: 131072
+    offset_bytes: 1462272
+  - id: padding
+    label: Free space
+    size_bytes: 6795264
+    offset_bytes: 1593344
