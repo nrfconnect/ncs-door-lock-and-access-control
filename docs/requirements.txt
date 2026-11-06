@@ -1,3 +1,4 @@
+pyyaml
 setuptools>=70,<81
 sphinx>=7.2,<8
 sphinx-copybutton

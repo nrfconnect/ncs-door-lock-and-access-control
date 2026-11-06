@@ -1,0 +1,96 @@
+# Memory requirement data for nRF5340 DK.
+# Partition sizes come from dts/door_lock/common/*_partitions.dtsi.
+# Usage values were measured on the commit listed in docs/include/memory_values_commit.txt.
+# MCUboot usage is intentionally omitted; the partition is shown as fully reserved.
+
+board:
+  name: nRF5340 DK
+  nvm_total_kb: 1024
+  ram_total_kb: 512
+legend_threshold_kb: 8
+layouts:
+  debug:
+    partitions:
+    - id: boot
+      label: MCUboot
+      size_kb: 32
+      order: 1
+    - id: slot0
+      label: Application
+      size_kb: 956
+      order: 2
+    - id: factory_data
+      label: Factory data
+      size_kb: 4
+      order: 3
+    - id: storage
+      label: Settings
+      size_kb: 32
+      order: 4
+  release:
+    partitions:
+    - id: boot
+      label: MCUboot
+      size_kb: 32
+      order: 1
+    - id: slot0
+      label: Application
+      size_kb: 956
+      order: 2
+    - id: factory_data
+      label: Factory data
+      size_kb: 4
+      order: 3
+    - id: storage
+      label: Settings
+      size_kb: 32
+      order: 4
+samples:
+- label: :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Debug)
+  layout: debug
+  usage:
+    nvm:
+      slot0: 711
+      factory_data: 4
+      storage: 32
+    ram_used_kb: 172
+- label: :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
+  layout: release
+  usage:
+    nvm:
+      slot0: 622
+      factory_data: 4
+      storage: 32
+    ram_used_kb: 167
+- label: :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
+  layout: debug
+  usage:
+    nvm:
+      slot0: 834
+      factory_data: 4
+      storage: 32
+    ram_used_kb: 223
+- label: :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
+  layout: release
+  usage:
+    nvm:
+      slot0: 758
+      factory_data: 4
+      storage: 32
+    ram_used_kb: 204
+- label: :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
+  layout: debug
+  usage:
+    nvm:
+      slot0: 372
+      factory_data: 4
+      storage: 32
+    ram_used_kb: 89
+- label: :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
+  layout: release
+  usage:
+    nvm:
+      slot0: 265
+      factory_data: 4
+      storage: 32
+    ram_used_kb: 77
