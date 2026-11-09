@@ -43,10 +43,10 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Debug)
            - 28
-           - 776
+           - 777
            - 4
            - 32
-           - 840
+           - 841
            - 160
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
@@ -59,10 +59,10 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 28
-           - 895
+           - 896
            - 4
            - 32
-           - 959
+           - 960
            - 207
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
@@ -83,10 +83,10 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 28
-           - 302
+           - 303
            - 4
            - 32
-           - 366
+           - 367
            - 80
 
    .. group-tab:: nRF5340 DK
@@ -114,10 +114,10 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
            - 32
-           - 620
+           - 621
            - 4
            - 32
-           - 688
+           - 689
            - 167
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
@@ -130,10 +130,10 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
            - 32
-           - 758
+           - 759
            - 4
            - 32
-           - 826
+           - 827
            - 204
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
@@ -169,42 +169,42 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Debug)
            - 52
-           - 780
+           - 781
            - 4
            - 40
-           - 876
+           - 877
            - 167
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
            - 52
-           - 687
+           - 688
            - 4
            - 40
-           - 783
+           - 784
            - 162
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 52
-           - 904
+           - 905
            - 4
            - 40
-           - 1000
+           - 1001
            - 216
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
            - 52
-           - 825
+           - 826
            - 4
            - 40
-           - 921
+           - 922
            - 197
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 52
-           - 417
+           - 418
            - 4
            - 40
-           - 513
+           - 514
            - 93
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
@@ -232,48 +232,48 @@ The MCUboot ROM, Factory data, and Settings values correspond to the fixed parti
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Debug)
            - 52
-           - 783
+           - 784
            - 4
            - 48
-           - 887
+           - 888
            - 168
 
          * - :ref:`Matter Door Lock <doc_matter_door_lock_application>` (Release)
            - 52
-           - 689
+           - 690
            - 4
            - 48
-           - 793
+           - 794
            - 162
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Debug)
            - 52
-           - 904
+           - 906
            - 4
            - 48
-           - 1008
+           - 1010
            - 216
 
          * - :ref:`Matter and Aliro Door Lock <doc_aliro_matter_door_lock_application>` (Release)
            - 52
-           - 825
+           - 827
            - 4
            - 48
-           - 929
+           - 931
            - 197
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Debug)
            - 52
-           - 415
+           - 417
            - 4
            - 48
-           - 519
+           - 521
            - 93
 
          * - :ref:`Aliro Access Control <doc_aliro_access_control_application>` (Release)
            - 52
-           - 308
+           - 309
            - 4
            - 48
-           - 412
+           - 413
            - 81
