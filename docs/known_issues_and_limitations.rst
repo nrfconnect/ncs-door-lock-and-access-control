@@ -59,9 +59,36 @@ A known issue can list one or both of the following entries:
   Sometimes, they are discovered later and added over time.
 
 .. known-issues-filter::
-   :default: 1.2.1
+   :default: 1.2.2
 
-.. rst-class:: v1-2-1
+.. rst-class:: v1-2-1 v1-2-0
+
+KRKNWK-22680: Matter DAC private key is stored in PSA ITS instead of CRACEN KMU on the nRF54L Series SoCs
+   The :ref:`doc_matter_door_lock_application` and :ref:`doc_aliro_matter_door_lock_application` use the `ncs-matter Add-on`_ v1.0.0, which stores the Matter Device Attestation Certificate (DAC) private key in PSA Internal Trusted Storage (ITS) instead of the CRACEN Key Management Unit (KMU).
+   This causes the following issues:
+
+   * Devices that were originally programmed with firmware that stores the DAC private key in KMU fail device attestation after updating to v1.2.0 or v1.2.1.
+     This includes |REPO_NAME| v1.1.x or earlier, and firmware based on the |NCS| :doc:`Matter door lock <nrf:samples/matter/lock/README>` sample.
+     Existing Matter fabrics keep working, but commissioning after a factory reset and adding another administrator both fail.
+   * Devices that were originally programmed with v1.2.0 or v1.2.1 store the DAC private key in ITS.
+     If such a device is factory reset and then updated to firmware that uses KMU, the DAC private key is permanently lost and the device can no longer pass device attestation.
+
+   For details, see the `ncs-matter known issue KRKNWK-22680`_.
+
+   **Workaround:**
+      Before performing a factory reset, update the devices to |REPO_NAME| v1.2.2 or later and follow the `ncs-matter Add-on v1.0.1 migration guide`_.
+
+   **Affected platforms:** nRF54L15 DK, nRF54LM20 DK
+
+.. rst-class:: v1-2-1 v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
+
+AL-971: The Reader certificate is not sent when the Expedited-fast transaction fails
+   When a Reader certificate is provisioned and the Expedited-fast transaction fails, the Aliro stack falls back to the Expedited-standard transaction without sending the ``LOAD_CERT`` command.
+   This happens over both NFC and Bluetooth LE.
+   As a result, the User Device cannot verify the Reader certificate during this transaction.
+   The issue does not occur when the Expedited-standard transaction is performed directly, without a preceding Expedited-fast attempt.
+
+.. rst-class:: v1-2-2 v1-2-1
 
 AL-967: Step-up certification tests fail when the Reader Descriptor is sent before the Step-up phase
    When the ``CONFIG_DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP`` Kconfig option is enabled, the Reader sends an additional EXCHANGE command with the Reader Descriptor before the Step-up phase.
@@ -73,7 +100,7 @@ AL-967: Step-up certification tests fail when the Reader Descriptor is sent befo
    Do not enable the ``CONFIG_DOOR_LOCK_READER_DESCRIPTOR_BEFORE_STEP_UP`` Kconfig option when running the Step-up certification tests.
    The option is disabled by default.
 
-.. rst-class:: v1-2-1 v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
+.. rst-class:: v1-2-2 v1-2-1 v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
 
 AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAME|
    Matter onboarding using NFC does not work in the |MATTER_ALIRO_APP_NAME|.
@@ -81,7 +108,7 @@ AL-717: Matter onboarding with NFC is not supported in the |MATTER_ALIRO_APP_NAM
    **Workaround:**
    Use the QR code scanning mechanism for Matter device commissioning.
 
-.. rst-class:: v1-2-1 v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
+.. rst-class:: v1-2-2 v1-2-1 v1-2-0 v1-1-1 v1-1-0 v1-0-1 v1-0-0
 
 AL-718: Access Document is not stored on the nRF52840 platform
    Access Document (AD) is not stored persistently on the nRF52840 platform when using the ``CONFIG_DOOR_LOCK_STEP_UP_PHASE`` Kconfig build option.
@@ -107,7 +134,7 @@ AL-856: Lock does not unlock via NFC after manual lock while the User Device rem
    After UWB unlock and manual lock while the User Device remains in UWB range, NFC authentication may complete (ACCESS GRANTED) without actuating the lock.
    On the device, Aliro NFC authentication completes successfully (``ACCESS GRANTED``), but no physical unlock is triggered.
 
-.. rst-class:: v1-2-1 v1-2-0
+.. rst-class:: v1-2-2 v1-2-1 v1-2-0
 
 AL-931: Access Manager is not aware of the final unlock decision
    In the |MATTER_ALIRO_APP_NAME|, the Aliro Access Manager makes its access decision based only on the Access Credential public key, before the Matter user data is evaluated.
