@@ -15,6 +15,14 @@
 
 .. _`known issues page on the main branch`: https://nrfconnectdocs.nordicsemi.com/addons/door_lock_and_access_control/latest/known_issues_and_limitations.html#known-issues-and-limitations
 
+.. ### Source: nrfconnectdocs.nordicsemi.com (ncs-matter Add-on)
+
+.. _`ncs-matter Add-on v1.0.1 release notes`: https://nrfconnectdocs.nordicsemi.com/addons/ncs-matter/1.0.1/release_notes/release_notes_v101.html
+.. _`ncs-matter Add-on v1.0.1 migration guide`: https://nrfconnectdocs.nordicsemi.com/addons/ncs-matter/1.0.1/migration/migration_guide_v1.0.1.html
+.. _`ncs-matter Add-on v1.0.1 migration paths`: https://nrfconnectdocs.nordicsemi.com/addons/ncs-matter/1.0.1/migration/migration_guide_v1.0.1.html#choose-a-migration-path
+.. _`ncs-matter Add-on v1.0.1 recommended validation`: https://nrfconnectdocs.nordicsemi.com/addons/ncs-matter/1.0.1/migration/migration_guide_v1.0.1.html#recommended-validation
+.. _`ncs-matter known issue KRKNWK-22680`: https://nrfconnectdocs.nordicsemi.com/addons/ncs-matter/1.0.1/known_issues.html#ncs-matter-known-issue-dac-priv-key-its-kmu
+
 .. _`MCU Bluetooth LE programming`: https://docs.nordicsemi.com/r/bundle/nrfutil/page/nrfutil-mcu-manager/guides/mcu_ble_programming.html
 
 .. _`nRF5340 DK connector interface`: https://docs.nordicsemi.com/bundle/ug_nrf5340_dk/page/UG/dk/connector_if.html
