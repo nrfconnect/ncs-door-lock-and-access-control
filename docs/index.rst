@@ -33,4 +33,4 @@ The reference can support Aliro alone, Matter alone, or both protocols, dependin
    aliro_application_interactions.rst
    other_addons.rst
    compatibility_matrix.rst
-   release_notes.rst
+   release_notes_and_migration.rst
