@@ -10,6 +10,7 @@ Known issues for each release are listed on the `known issues page on the main b
 .. toctree::
    :maxdepth: 1
 
+   release_notes/release_notes_v122.rst
    release_notes/release_notes_v121.rst
    release_notes/release_notes_v120.rst
    release_notes/release_notes_v111.rst
