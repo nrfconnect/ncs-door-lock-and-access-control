@@ -7,7 +7,8 @@
 #include "aliro/interface.h"
 
 #include "aliro/access_manager/access_manager.h"
-#include "aliro/platform/nfc/nfc_transport_rfal.h"
+
+#include <nfc_transport/nfc_transport.h>
 
 #ifdef CONFIG_NCS_ALIRO_BLE_UWB
 #include <aliro_service/aliro_service.h>
@@ -18,7 +19,7 @@ namespace Aliro::Interface::Session {
 AliroError Send(ConnectionHandle handle, Data data)
 {
 	if (handle.IsNfc()) {
-		return NfcTransportRfal::Instance().Send(data);
+		return NfcTransport::Send(data);
 	}
 #ifdef CONFIG_NCS_ALIRO_BLE_UWB
 	else if (handle.IsBle()) {
@@ -32,7 +33,7 @@ AliroError Send(ConnectionHandle handle, Data data)
 void HandleTermination(ConnectionHandle handle)
 {
 	if (handle.IsNfc()) {
-		NfcTransportRfal::Instance().Terminate();
+		NfcTransport::Terminate();
 	}
 #ifdef CONFIG_NCS_ALIRO_BLE_UWB
 	else if (handle.IsBle()) {

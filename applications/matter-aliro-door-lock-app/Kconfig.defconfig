@@ -87,6 +87,12 @@ config DOOR_LOCK_SETTINGS_UTILS
 config DOOR_LOCK_ALIRO_WORKQUEUE
 	default y
 
+config NFC_DRIVER_STM
+	default y
+
+configdefault DOOR_LOCK_ALIRO_NFC_TRANSPORT
+	default y
+
 configdefault DOOR_LOCK_ALIRO_INTERFACE_IMPL_OS
 	default y
 
