@@ -399,6 +399,8 @@ void Release(Handle handle);
 /**
  * @brief Start or restart timer with timeout.
  *
+ * May be called from the timer callback.
+ *
  * @param handle Timer handle returned by Acquire().
  * @param timeoutMs Timeout in milliseconds.
  */
