@@ -13,11 +13,11 @@ tests:
     extra_args:
       - aliro-access-control-app_SNIPPET="bt_nus"
       - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n
-  app.door_lock.nfc:
-    platform_allow: &platform_5340_7120
-      - nrf5340dk/nrf5340/cpuapp
+  app.door_lock.nfc.wifi:
+    platform_allow:
       - nrf7120dk/nrf7120/cpuapp
-    integration_platforms: *platform_5340_7120
+    integration_platforms:
+      - nrf7120dk/nrf7120/cpuapp
     extra_args:
       - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n
   smoke.door_lock.nfc-uwb_stub:
@@ -37,6 +37,14 @@ tests:
       - CONFIG_DOOR_LOCK_STEP_UP_PHASE=n
       - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=n
       - CONFIG_DOOR_LOCK_READER_CERTIFICATE=n
+      - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n
+  app.door_lock.nfc.wifi-coap:
+    platform_allow:
+      - nrf7120dk/nrf7120/cpuapp
+    integration_platforms:
+      - nrf7120dk/nrf7120/cpuapp
+    extra_args:
+      - aliro-access-control-app_SNIPPET="coap_service"
       - CONFIG_DOOR_LOCK_DFU_SMP_SERVICE=n
   app.door_lock.nfc.smp_dfu-bt_nus:
     tags:

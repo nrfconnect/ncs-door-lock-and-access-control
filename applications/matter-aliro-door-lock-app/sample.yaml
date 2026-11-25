@@ -33,6 +33,10 @@ tests:
     extra_args:
       - CONFIG_DOOR_LOCK_CREDENTIAL_ISSUER_CA=y
       - CONFIG_DOOR_LOCK_READER_CERTIFICATE=y
+  app.door_lock.nfc.matter-wifi:
+    platform_allow: &platform_7120
+      - nrf7120dk/nrf7120/cpuapp
+    integration_platforms: *platform_7120
   app.door_lock.nfc.matter-aliro_minimal:
     tags:
       - dfu_supported
@@ -55,10 +59,6 @@ tests:
     extra_args:
       - matter-aliro-door-lock-app_SNIPPET="bt_nus"
       - FILE_SUFFIX=release
-  do_not_test.door_lock.nfc.matter-wifi:
-    platform_allow: &platform_7120
-      - nrf7120dk/nrf7120/cpuapp
-    integration_platforms: *platform_7120
   do_not_test.door_lock.nfc.matter-nfc_prop-matter_ext:
     platform_allow: *platform_54lm20
     integration_platforms: *platform_54lm20
